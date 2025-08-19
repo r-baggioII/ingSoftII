@@ -1,8 +1,9 @@
-Requisitos funcionales
-Poder realizar compras a proveedores
-Poder realizar ventas a clientes
-Poder registrar correctamente el stock ingresado por las compras a proveedores
-Poder descontar correctamente el stock vendido a clientes
-Requisitos no funcionales
-Que los botones de compra respondan en menos de 0.2 segundos
-Que sea seguro y se puedan realizar compras sin compromisos de seguridad
+**Requisitos funcionales**
+- Poder realizar compras a proveedores
+- Poder realizar ventas a clientes
+- Poder registrar correctamente el stock ingresado por las compras a proveedores
+- Poder descontar correctamente el stock vendido a clientes
+
+**Requisitos no funcionales**
+- Que los botones de compra respondan en menos de 0.2 segundos
+- Que sea seguro y se puedan realizar compras sin compromisos de seguridad

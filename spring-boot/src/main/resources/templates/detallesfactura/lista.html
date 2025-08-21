@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalles de Factura</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">MiniMarket</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/articulos">Artículos</a></li>
+                <li class="nav-item"><a class="nav-link" href="/categorias">Categorías</a></li>
+                <li class="nav-item"><a class="nav-link" href="/clientes">Clientes</a></li>
+                <li class="nav-item"><a class="nav-link" href="/domicilios">Domicilios</a></li>
+                <li class="nav-item"><a class="nav-link" href="/facturas">Facturas</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h2>Detalles de Factura</h2>
+    <a th:href="@{'/facturas'}" class="btn btn-secondary mb-3">Volver a facturas</a>
+
+    <a th:href="@{'/detallesfactura/nuevo/' + ${facturaId}}" class="btn btn-primary mb-3">Nuevo Detalle</a>
+
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Cantidad</th>
+            <th>Subtotal</th>
+            <th>Artículo</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="detalle : ${detalles}">
+            <td th:text="${detalle.id}"></td>
+            <td th:text="${detalle.cantidad}"></td>
+            <td th:text="${detalle.subtotal}"></td>
+            <td th:text="${detalle.articulo.denominacion}"></td>
+            <td>
+                <a th:href="@{'/detallesfactura/editar/' + ${detalle.id}}" class="btn btn-sm btn-warning">Editar</a>
+                <a th:href="@{'/detallesfactura/eliminar/' + ${detalle.id}}" class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que deseas eliminar este detalle?');">Eliminar</a>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(detalles)}">
+            <td colspan="5" class="text-center">No se encontraron detalles.</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

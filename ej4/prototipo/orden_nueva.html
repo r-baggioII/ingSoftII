@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tienda Tech - Nueva Orden de Compra</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="index.html">Tienda Tech</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+        <li class="nav-item"><a class="nav-link" href="productos.html">Productos</a></li>
+        <li class="nav-item"><a class="nav-link" href="producto_nuevo.html">Nuevo Producto</a></li>
+        <li class="nav-item"><a class="nav-link" href="proveedores.html">Proveedores</a></li>
+        <li class="nav-item"><a class="nav-link" href="proveedor_nuevo.html">Nuevo Proveedor</a></li>
+        <li class="nav-item"><a class="nav-link" href="ordenes.html">Órdenes de Compra</a></li>
+        <li class="nav-item"><a class="nav-link active" href="orden_nueva.html">Nueva Orden</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-4">
+  <h2>Nueva Orden de Compra</h2>
+  <form>
+    <div class="row mb-3">
+      <div class="col-md-4">
+        <label class="form-label">Nº Orden</label>
+        <input type="text" class="form-control" placeholder="1">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Fecha</label>
+        <input type="date" class="form-control">
+      </div>
+    </div>
+
+    <h5>Enviar a</h5>
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label class="form-label">Proveedor</label>
+        <input type="text" class="form-control" placeholder="La Real S.A.">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Contacto</label>
+        <input type="text" class="form-control" placeholder="Juan">
+      </div>
+    </div>
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label class="form-label">Domicilio</label>
+        <input type="text" class="form-control" placeholder="Rioja 398 - Palo Bajo">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Ciudad</label>
+        <input type="text" class="form-control" placeholder="La Real S.A.">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Teléfono</label>
+        <input type="text" class="form-control" placeholder="333-5212">
+      </div>
+    </div>
+
+    <h5>Condiciones</h5>
+    <div class="row mb-3">
+      <div class="col-md-4">
+        <label class="form-label">Entrega</label>
+        <input type="text" class="form-control" placeholder="Envío a domicilio">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Plazo</label>
+        <input type="text" class="form-control" placeholder="15 días">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Pago</label>
+        <input type="text" class="form-control" placeholder="Transferencia bancaria">
+      </div>
+    </div>
+
+    <h5>Detalle</h5>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Nº</th>
+          <th>Artículo</th>
+          <th>Cantidad</th>
+          <th>Precio Unitario</th>
+          <th>Precio Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><input type="text" class="form-control" placeholder="Cable de red"></td>
+          <td><input type="number" class="form-control" placeholder="12"></td>
+          <td><input type="number" class="form-control" placeholder="24.00"></td>
+          <td><input type="number" class="form-control" placeholder="24.00"></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><input type="text" class="form-control" placeholder="Extensión"></td>
+          <td><input type="number" class="form-control" placeholder="5"></td>
+          <td><input type="number" class="form-control" placeholder="3.00"></td>
+          <td><input type="number" class="form-control" placeholder="15.00"></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><input type="text" class="form-control" placeholder="Triple"></td>
+          <td><input type="number" class="form-control" placeholder="1"></td>
+          <td><input type="number" class="form-control" placeholder="9.00"></td>
+          <td><input type="number" class="form-control" placeholder="9.00"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="row mb-3">
+      <div class="col-md-4 ms-auto">
+        <label class="form-label">IVA</label>
+        <input type="text" class="form-control" placeholder="21%">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Sub-total</label>
+        <input type="text" class="form-control" placeholder="$33.00">
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    <a class="btn btn-secondary" href="ordenes.html">Cancelar</a>
+  </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

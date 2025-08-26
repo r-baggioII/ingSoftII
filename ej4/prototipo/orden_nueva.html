@@ -44,26 +44,28 @@
     <h5>Enviar a</h5>
     <div class="row mb-3">
       <div class="col-md-6">
-        <label class="form-label">Proveedor</label>
-        <input type="text" class="form-control" placeholder="La Real S.A.">
+        <label class="form-label" for="proveedorSelect">Proveedor</label>
+        <select id="proveedorSelect" class="form-select">
+          <option value="" selected>Seleccione un proveedor</option>
+        </select>
       </div>
       <div class="col-md-6">
-        <label class="form-label">Contacto</label>
-        <input type="text" class="form-control" placeholder="Juan">
+        <label class="form-label" for="contacto">Contacto</label>
+        <input id="contacto" type="text" class="form-control" placeholder="Contacto" readonly>
       </div>
     </div>
     <div class="row mb-3">
       <div class="col-md-6">
-        <label class="form-label">Domicilio</label>
-        <input type="text" class="form-control" placeholder="Rioja 398 - Palo Bajo">
+        <label class="form-label" for="domicilio">Domicilio</label>
+        <input id="domicilio" type="text" class="form-control" placeholder="Domicilio" readonly>
       </div>
       <div class="col-md-3">
-        <label class="form-label">Ciudad</label>
-        <input type="text" class="form-control" placeholder="La Real S.A.">
+        <label class="form-label" for="ciudad">Ciudad</label>
+        <input id="ciudad" type="text" class="form-control" placeholder="Ciudad" readonly>
       </div>
       <div class="col-md-3">
-        <label class="form-label">Teléfono</label>
-        <input type="text" class="form-control" placeholder="333-5212">
+        <label class="form-label" for="telefono">Teléfono</label>
+        <input id="telefono" type="text" class="form-control" placeholder="Teléfono" readonly>
       </div>
     </div>
 
@@ -136,5 +138,56 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Datos de ejemplo de proveedores (coinciden con la lista de proveedores.html)
+  const PROVEEDORES = [
+    {
+      id: 1,
+      nombre: 'Proveedor Mayorista',
+      contacto: 'Juan Pérez',
+      domicilio: 'Av. Siempre Viva 123',
+      ciudad: 'Buenos Aires',
+      telefono: '123-4567'
+    },
+    {
+      id: 2,
+      nombre: 'Importadora Tech',
+      contacto: 'Ana García',
+      domicilio: 'Calle Principal 456',
+      ciudad: 'Córdoba',
+      telefono: '987-6543'
+    }
+  ];
+
+  const sel = document.getElementById('proveedorSelect');
+  const contacto = document.getElementById('contacto');
+  const domicilio = document.getElementById('domicilio');
+  const ciudad = document.getElementById('ciudad');
+  const telefono = document.getElementById('telefono');
+
+  // Cargar opciones del dropdown al iniciar
+  PROVEEDORES.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = String(p.id);
+    opt.textContent = p.nombre;
+    sel.appendChild(opt);
+  });
+
+  // Al seleccionar un proveedor, completar los campos en solo lectura
+  sel.addEventListener('change', () => {
+    const seleccionado = PROVEEDORES.find(p => String(p.id) === sel.value);
+    if (!seleccionado) {
+      contacto.value = '';
+      domicilio.value = '';
+      ciudad.value = '';
+      telefono.value = '';
+      return;
+    }
+    contacto.value = seleccionado.contacto;
+    domicilio.value = seleccionado.domicilio;
+    ciudad.value = seleccionado.ciudad;
+    telefono.value = seleccionado.telefono;
+  });
+</script>
 </body>
 </html>

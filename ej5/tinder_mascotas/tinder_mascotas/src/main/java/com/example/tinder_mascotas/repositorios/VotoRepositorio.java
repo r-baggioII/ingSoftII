@@ -9,12 +9,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface VotoRepositorio extends JpaRepository<Voto, String>{
+public interface VotoRepositorio extends JpaRepository<Voto, String> {
 
     @Query("SELECT v FROM Voto v WHERE v.mascota1.id = ?1 ORDER BY v.fecha DESC")
-    public List<Voto> buscarVotosPropios(String id);
+    List<Voto> buscarVotosPropios(String idMascota1);
 
-    @Query("SELECT v FROM Voto v WHERE v.mascota2 = ?1 ORDER BY v.fecha DESC")
-    public List<Voto> buscarVotosRecibidos(String id);
-
+    // FIX: comparar por id
+    @Query("SELECT v FROM Voto v WHERE v.mascota2.id = ?1 ORDER BY v.fecha DESC")
+    List<Voto> buscarVotosRecibidos(String idMascota2);
 }

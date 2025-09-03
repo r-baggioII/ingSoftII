@@ -5,6 +5,7 @@ import com.example.tinder_mascotas.repositorios.VotoRepositorio;
 import com.example.tinder_mascotas.servicios.VotoServicio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -12,8 +13,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@RestController
-@RequestMapping("/api")
+@Controller
 public class VotoControlador {
 
     @Autowired
@@ -25,7 +25,7 @@ public class VotoControlador {
     /* ======================
        CREAR VOTO
        ====================== */
-    @PostMapping("/usuarios/{idUsuario}/mascotas/{idMascota1}/votos")
+    @PostMapping("/api/usuarios/{idUsuario}/mascotas/{idMascota1}/votos")
     public ResponseEntity<VotoDTO> crearVoto(
             @PathVariable String idUsuario,
             @PathVariable String idMascota1,
@@ -52,7 +52,7 @@ public class VotoControlador {
     /* ======================
        RESPONDER VOTO (MATCH)
        ====================== */
-    @PostMapping("/usuarios/{idUsuario}/votos/{idVoto}/responder")
+    @PostMapping("/api/usuarios/{idUsuario}/votos/{idVoto}/responder")
     public ResponseEntity<VotoDTO> responder(
             @PathVariable String idUsuario,
             @PathVariable String idVoto
@@ -72,7 +72,7 @@ public class VotoControlador {
     /* ======================
        LISTAR VOTOS PROPIOS (DE UNA MASCOTA)
        ====================== */
-    @GetMapping("/mascotas/{idMascota}/votos/propios")
+    @GetMapping("/api/mascotas/{idMascota}/votos/propios")
     public ResponseEntity<List<VotoDTO>> listarPropios(@PathVariable String idMascota) {
         List<VotoDTO> dtos = votoRepositorio.buscarVotosPropios(idMascota)
                 .stream().map(VotoDTO::from).collect(Collectors.toList());
@@ -82,7 +82,7 @@ public class VotoControlador {
     /* ======================
        LISTAR VOTOS RECIBIDOS (DE UNA MASCOTA)
        ====================== */
-    @GetMapping("/mascotas/{idMascota}/votos/recibidos")
+    @GetMapping("/api/mascotas/{idMascota}/votos/recibidos")
     public ResponseEntity<List<VotoDTO>> listarRecibidos(@PathVariable String idMascota) {
         List<VotoDTO> dtos = votoRepositorio.buscarVotosRecibidos(idMascota)
                 .stream().map(VotoDTO::from).collect(Collectors.toList());
@@ -92,7 +92,7 @@ public class VotoControlador {
     /* ======================
        DETALLE
        ====================== */
-    @GetMapping("/votos/{idVoto}")
+    @GetMapping("/api/votos/{idVoto}")
     public ResponseEntity<VotoDTO> detalle(@PathVariable String idVoto) {
         Voto v = votoRepositorio.findById(idVoto)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Voto no encontrado"));

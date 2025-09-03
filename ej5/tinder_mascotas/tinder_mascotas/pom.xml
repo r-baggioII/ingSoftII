@@ -29,6 +29,8 @@
 	<properties>
 		<java.version>17</java.version>
 	</properties>
+    
+    <packaging>war</packaging>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -47,9 +49,10 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
+		<!-- Use MariaDB driver to match mascota -->
 		<dependency>
-			<groupId>com.mysql</groupId>
-			<artifactId>mysql-connector-j</artifactId>
+			<groupId>org.mariadb.jdbc</groupId>
+			<artifactId>mariadb-java-client</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -64,9 +67,18 @@
 		</dependency>
 
 
+
+		<!-- Tomcat provided by the external container (WAR deployment) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>
+		<finalName>tinder_mascotas</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

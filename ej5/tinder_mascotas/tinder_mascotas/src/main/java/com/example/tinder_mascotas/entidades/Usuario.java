@@ -6,6 +6,7 @@ import java.util.Date;
 
 import jakarta.annotation.Generated;
 import jakarta.persistence.GeneratedValue;
+import org.hibernate.annotations.GenericGenerator;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -17,7 +18,7 @@ public class Usuario {
 
     @Id
     @GeneratedValue(generator = "uuid")
-    //@GenericGenerator(name = "uuid", strategy = "uuid2")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
     private String id;
     private String nombre;
     private String apellido;

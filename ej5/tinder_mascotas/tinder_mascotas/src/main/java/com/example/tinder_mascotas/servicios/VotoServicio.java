@@ -1,6 +1,7 @@
 package com.example.tinder_mascotas.servicios;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.example.tinder_mascotas.repositorios.MascotaRepositorio;
 import com.example.tinder_mascotas.repositorios.VotoRepositorio;
@@ -10,6 +11,7 @@ import java.util.Date;
 import java.util.Optional;
 
 
+@Service
 public class VotoServicio {
 
     @Autowired

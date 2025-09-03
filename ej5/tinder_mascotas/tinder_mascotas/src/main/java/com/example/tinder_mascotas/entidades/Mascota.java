@@ -12,11 +12,15 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.GeneratedValue;
+import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 public class Mascota {
 
     @Id
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
     private String id;
     private String nombre;
 

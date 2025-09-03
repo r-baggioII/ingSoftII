@@ -1,11 +1,14 @@
 package com.example.tinder_mascotas.controladores;
 
+import com.example.tinder_mascotas.entidades.Foto;
 import com.example.tinder_mascotas.entidades.Mascota;
 import com.example.tinder_mascotas.repositorios.MascotaRepositorio;
 import com.example.tinder_mascotas.servicios.MascotaServicio;
 import com.enumeraciones.Sexo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -14,10 +17,13 @@ import java.net.URI;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@RestController
-@RequestMapping("/api")
+@Controller
 public class MascotaControlador {
+    private static final Logger log = LoggerFactory.getLogger(MascotaControlador.class);
 
     @Autowired
     private MascotaServicio mascotaServicio;
@@ -25,11 +31,17 @@ public class MascotaControlador {
     @Autowired
     private MascotaRepositorio mascotaRepositorio;
 
+    /** Valores disponibles del enum Sexo para selects en vistas */
+    @ModelAttribute("sexos")
+    public Sexo[] sexos() {
+        return Sexo.values();
+    }
+
     /* ======================
        CREAR
        ====================== */
     @PostMapping(
-            value = "/usuarios/{idUsuario}/mascotas",
+            value = "/api/usuarios/{idUsuario}/mascotas",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     public ResponseEntity<MascotaDTO> crearMascota(
@@ -69,7 +81,7 @@ public class MascotaControlador {
        MODIFICAR
        ====================== */
     @PutMapping(
-            value = "/usuarios/{idUsuario}/mascotas/{idMascota}",
+            value = "/api/usuarios/{idUsuario}/mascotas/{idMascota}",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     public ResponseEntity<MascotaDTO> modificarMascota(
@@ -96,7 +108,7 @@ public class MascotaControlador {
     /* ======================
        BAJA LÓGICA
        ====================== */
-    @DeleteMapping("/usuarios/{idUsuario}/mascotas/{idMascota}")
+    @DeleteMapping("/api/usuarios/{idUsuario}/mascotas/{idMascota}")
     public ResponseEntity<Void> eliminarMascota(
             @PathVariable String idUsuario,
             @PathVariable String idMascota
@@ -114,7 +126,7 @@ public class MascotaControlador {
     /* ======================
        LISTAR POR USUARIO
        ====================== */
-    @GetMapping("/usuarios/{idUsuario}/mascotas")
+    @GetMapping("/api/usuarios/{idUsuario}/mascotas")
     public ResponseEntity<List<MascotaDTO>> listarPorUsuario(
             @PathVariable String idUsuario,
             @RequestParam(name = "incluir_inactivas", defaultValue = "false") boolean incluirInactivas
@@ -129,11 +141,165 @@ public class MascotaControlador {
     /* ======================
        DETALLE POR ID
        ====================== */
-    @GetMapping("/mascotas/{idMascota}")
+    @GetMapping("/api/mascotas/{idMascota}")
     public ResponseEntity<MascotaDTO> obtenerPorId(@PathVariable String idMascota) {
         Mascota m = mascotaRepositorio.findById(idMascota)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Mascota no encontrada"));
         return ResponseEntity.ok(MascotaDTO.from(m));
+    }
+
+    /* ======================
+       VISTAS (MVC)
+       ====================== */
+    @GetMapping("/mascota/mis-mascotas")
+    public String misMascotas(Model model, HttpSession session) {
+        try {
+            com.example.tinder_mascotas.entidades.Usuario u = (com.example.tinder_mascotas.entidades.Usuario) session.getAttribute("usuariosession");
+            if (u == null) {
+                return "redirect:/login";
+            }
+            List<Mascota> lista = mascotaRepositorio.buscarPorUsuario(u.getId()).stream()
+                    .filter(m -> m.getBaja() == null)
+                    .collect(Collectors.toList());
+            model.addAttribute("mascotas", lista);
+        } catch (Exception e) {
+            log.error("[MVC] Error cargando mis mascotas", e);
+            model.addAttribute("error", "No se pudieron cargar tus mascotas");
+        }
+        return "mascotas";
+    }
+
+    @GetMapping("/mascota/editar-perfil")
+    public String editarMascota(@RequestParam(name = "id", required = false) String id,
+                                @RequestParam(name = "accion", required = false) String accion,
+                                Model model,
+                                HttpSession session) {
+        com.example.tinder_mascotas.entidades.Usuario u = (com.example.tinder_mascotas.entidades.Usuario) session.getAttribute("usuariosession");
+        if (u == null) { return "redirect:/login"; }
+
+        Mascota perfil;
+        String resolvedAccion = (accion != null && !accion.isBlank()) ? accion : (id != null ? "Actualizar" : "Crear");
+        if (id != null && !id.isBlank()) {
+            perfil = mascotaRepositorio.findById(id).orElseGet(Mascota::new);
+        } else {
+            perfil = new Mascota();
+        }
+        model.addAttribute("perfil", perfil);
+        model.addAttribute("accion", resolvedAccion);
+        return "mascota";
+    }
+
+    @GetMapping("/mascota/debaja-mascotas")
+    public String mascotasDeBaja(Model model, HttpSession session) {
+        try {
+            com.example.tinder_mascotas.entidades.Usuario u = (com.example.tinder_mascotas.entidades.Usuario) session.getAttribute("usuariosession");
+            if (u == null) { return "redirect:/login"; }
+            List<Mascota> lista = mascotaRepositorio.buscarPorUsuario(u.getId()).stream()
+                    .filter(m -> m.getBaja() != null)
+                    .collect(Collectors.toList());
+            model.addAttribute("mascotas", lista);
+        } catch (Exception e) {
+            log.error("[MVC] Error cargando mascotas de baja", e);
+            model.addAttribute("error", "No se pudieron cargar las mascotas dadas de baja");
+        }
+        return "mascotasdebaja";
+    }
+
+    /* ======================
+       VISTAS (MVC) - Acciones
+       ====================== */
+    @PostMapping(value = "/mascota/actualizar-perfil", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String actualizarPerfil(
+            @RequestParam(name = "id", required = false) String idMascota,
+            @RequestParam("nombre") String nombre,
+            @RequestParam("sexo") Sexo sexo,
+            @RequestParam(value = "archivo", required = false) MultipartFile archivo,
+            HttpSession session,
+            Model model
+    ) {
+        com.example.tinder_mascotas.entidades.Usuario u = (com.example.tinder_mascotas.entidades.Usuario) session.getAttribute("usuariosession");
+        if (u == null) { return "redirect:/login"; }
+        try {
+            if (idMascota == null || idMascota.isBlank()) {
+                mascotaServicio.agregarMascota(archivo, u.getId(), nombre, sexo);
+            } else {
+                mascotaServicio.modificar(archivo, u.getId(), idMascota, nombre, sexo);
+            }
+            return "redirect:/mascota/mis-mascotas";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            // Repintar el formulario con lo ingresado
+            Mascota perfil = new Mascota();
+            perfil.setId(idMascota);
+            perfil.setNombre(nombre);
+            perfil.setSexo(sexo);
+            model.addAttribute("perfil", perfil);
+            model.addAttribute("accion", (idMascota == null || idMascota.isBlank()) ? "Crear" : "Actualizar");
+            return "mascota";
+        } catch (Exception e) {
+            log.error("[MVC] Error actualizando/creando mascota", e);
+            model.addAttribute("error", "Ocurrió un error al guardar la mascota");
+            Mascota perfil = new Mascota();
+            perfil.setId(idMascota);
+            perfil.setNombre(nombre);
+            perfil.setSexo(sexo);
+            model.addAttribute("perfil", perfil);
+            model.addAttribute("accion", (idMascota == null || idMascota.isBlank()) ? "Crear" : "Actualizar");
+            return "mascota";
+        }
+    }
+
+    @PostMapping("/mascota/eliminar-perfil")
+    public String eliminarPerfil(@RequestParam("id") String idMascota, HttpSession session, Model model) {
+        com.example.tinder_mascotas.entidades.Usuario u = (com.example.tinder_mascotas.entidades.Usuario) session.getAttribute("usuariosession");
+        if (u == null) { return "redirect:/login"; }
+        try {
+            mascotaServicio.eliminar(u.getId(), idMascota);
+            return "redirect:/mascota/mis-mascotas";
+        } catch (Exception e) {
+            log.error("[MVC] Error eliminando mascota {}", idMascota, e);
+            model.addAttribute("error", "No se pudo eliminar la mascota");
+            return "redirect:/mascota/mis-mascotas";
+        }
+    }
+
+    @PostMapping("/mascota/alta-perfil")
+    public String altaPerfil(@RequestParam("id") String idMascota, HttpSession session, Model model) {
+        com.example.tinder_mascotas.entidades.Usuario u = (com.example.tinder_mascotas.entidades.Usuario) session.getAttribute("usuariosession");
+        if (u == null) { return "redirect:/login"; }
+        try {
+            // restaurar la mascota (baja = null)
+            Mascota m = mascotaRepositorio.findById(idMascota)
+                    .orElseThrow(() -> new IllegalArgumentException("La mascota no existe"));
+            if (!m.getUsuario().getId().equals(u.getId())) {
+                throw new IllegalArgumentException("No tienes permiso para dar de alta esta mascota");
+            }
+            m.setBaja(null);
+            mascotaRepositorio.save(m);
+            return "redirect:/mascota/mis-mascotas";
+        } catch (Exception e) {
+            log.error("[MVC] Error dando de alta mascota {}", idMascota, e);
+            model.addAttribute("error", "No se pudo dar de alta la mascota");
+            return "redirect:/mascota/mis-mascotas";
+        }
+    }
+
+    /** Foto de mascota por ID de mascota (para las vistas) */
+    @GetMapping("/foto/mascota/{id}")
+    public ResponseEntity<byte[]> fotoMascota(@PathVariable String id) {
+        Mascota m = mascotaRepositorio.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Mascota no encontrada"));
+        Foto f = m.getFoto();
+        if (f == null || f.getContenido() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La mascota no tiene foto");
+        }
+        MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
+        try {
+            if (f.getMime() != null && !f.getMime().isBlank()) {
+                mediaType = MediaType.parseMediaType(f.getMime());
+            }
+        } catch (Exception ignored) { }
+        return ResponseEntity.ok().contentType(mediaType).body(f.getContenido());
     }
 
     /* ======================

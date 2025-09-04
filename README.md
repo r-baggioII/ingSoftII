@@ -11,7 +11,7 @@ Este repositorio contiene los trabajos, prácticas y proyectos desarrollados dur
 ## 🛠️ Tecnologías y herramientas  
 
 - Lenguaje principal: **Java / HTML / CSS / SpringBoot / Bootstrap**    
-- Metodología: **Ágil (Scrum / RUP)**    
+- Metodología: **Scrum / RUP**    
 
 ## 🚀 Objetivos de la materia  
 

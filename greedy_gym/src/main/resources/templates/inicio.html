@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Greedy Gym, plataforma de gestión de gimnasios">
+    <meta name="author" content="Greedy Gym">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i&display=swap" rel="stylesheet">
+
+    <title>Greedy Gym | Plataforma Integral</title>
+
+    <!-- Archivos CSS -->
+    <link rel="stylesheet" type="text/css" th:href="@{/assets/css/bootstrap.min.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/assets/css/font-awesome.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/templatemo-training-studio.css}">
+
+  </head>
+  
+  <body>
+  
+  <!-- ***** Preloader Start ***** -->
+  <div id="js-preloader" class="js-preloader">
+    <div class="preloader-inner">
+      <span class="dot"></span>
+      <div class="dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </div>
+  <!-- ***** Preloader End ***** -->
+  
+  
+  <!-- ***** Header Area Start ***** -->
+  <header class="header-area header-sticky">
+      <div class="container">
+          <div class="row">
+              <div class="col-12">
+                  <nav class="main-nav">
+                      <!-- ***** Logo Start ***** -->
+                      <a th:href="@{/}" class="logo">Greedy<em> Gym</em></a>
+                      <!-- ***** Logo End ***** -->
+                      <!-- ***** Menu Start ***** -->
+                      <ul class="nav">
+                          <li class="scroll-to-section"><a href="#top" class="active">Inicio</a></li>
+                          <li class="scroll-to-section"><a href="#features">Plataforma</a></li>
+                          <li class="scroll-to-section"><a href="#our-classes">Módulos</a></li>
+                          <li class="scroll-to-section"><a href="#schedule">Integraciones</a></li>
+                          <li><a th:href="@{/panel/entidades}">Panel de datos</a></li>
+                      </ul>        
+                      <a class='menu-trigger'>
+                          <span>Menú</span>
+                      </a>
+                      <!-- ***** Menu End ***** -->
+                  </nav>
+              </div>
+          </div>
+      </div>
+  </header>
+  <!-- ***** Header Area End ***** -->
+
+  <!-- ***** Main Banner Area Start ***** -->
+  <div class="main-banner" id="top">
+      <video autoplay muted loop id="bg-video">
+          <source th:src="@{/assets/images/gym-video.mp4}" type="video/mp4" />
+      </video>
+
+      <div class="video-overlay header-text">
+          <div class="caption">
+              <h6>Gestiona con inteligencia, crece sin límites</h6>
+              <h2>Optimiza tu <em>gimnasio</em> con Greedy Gym</h2>
+              <div class="main-button">
+                  <a th:href="@{/panel/entidades}">Explorar panel</a>
+              </div>
+          </div>
+      </div>
+  </div>
+  <!-- ***** Main Banner Area End ***** -->
+
+  <!-- ***** Features Item Start ***** -->
+  <section class="section" id="features">
+      <div class="container">
+          <div class="row">
+              <div class="col-lg-6 offset-lg-3">
+                  <div class="section-heading">
+                      <h2>Todo tu <em>negocio</em> en una sola vista</h2>
+                      <img th:src="@{/assets/images/line-dec.png}" alt="waves">
+                      <p>Centraliza la información clave de tu empresa, sucursales, colaboradores y suscripciones en una plataforma pensada para equipos de trabajo.</p>
+                  </div>
+              </div>
+              <div class="col-lg-6">
+                  <ul class="features-items">
+                      <li class="feature-item">
+                          <div class="left-icon">
+                              <img th:src="@{/assets/images/features-first-icon.png}" alt="Empresas">
+                          </div>
+                          <div class="right-content">
+                              <h4>Gestión Empresarial</h4>
+                              <p>Administra datos corporativos, contactos y sucursales de manera ágil y coherente.</p>
+                              <a th:href="@{/panel/entidades#empresas}" class="text-button">Ver empresas</a>
+                          </div>
+                      </li>
+                      <li class="feature-item">
+                          <div class="left-icon">
+                              <img th:src="@{/assets/images/features-first-icon.png}" alt="Colaboradores">
+                          </div>
+                          <div class="right-content">
+                              <h4>Colaboradores felices</h4>
+                              <p>Controla perfiles, roles y comunicación interna desde un solo lugar.</p>
+                              <a th:href="@{/panel/entidades#empleados}" class="text-button">Ver colaboradores</a>
+                          </div>
+                      </li>
+                      <li class="feature-item">
+                          <div class="left-icon">
+                              <img th:src="@{/assets/images/features-first-icon.png}" alt="Finanzas">
+                          </div>
+                          <div class="right-content">
+                              <h4>Cuotas al día</h4>
+                              <p>Consulta estados de pago y valores vigentes en minutos.</p>
+                              <a th:href="@{/panel/entidades#cuotas}" class="text-button">Ver cuotas</a>
+                          </div>
+                      </li>
+                  </ul>
+              </div>
+              <div class="col-lg-6">
+                  <ul class="features-items">
+                      <li class="feature-item">
+                          <div class="left-icon">
+                              <img th:src="@{/assets/images/features-first-icon.png}" alt="Mensajería">
+                          </div>
+                          <div class="right-content">
+                              <h4>Comunicaciones efectivas</h4>
+                              <p>Envía mensajes y promociones en el momento oportuno para fidelizar socios.</p>
+                              <a th:href="@{/panel/entidades#mensajes}" class="text-button">Ver mensajes</a>
+                          </div>
+                      </li>
+                      <li class="feature-item">
+                          <div class="left-icon">
+                              <img th:src="@{/assets/images/features-first-icon.png}" alt="Reportes">
+                          </div>
+                          <div class="right-content">
+                              <h4>Reportes claros</h4>
+                              <p>Visualiza métricas clave por sucursal y toma decisiones informadas.</p>
+                              <a th:href="@{/panel/entidades#sucursales}" class="text-button">Ver sucursales</a>
+                          </div>
+                      </li>
+                      <li class="feature-item">
+                          <div class="left-icon">
+                              <img th:src="@{/assets/images/features-first-icon.png}" alt="Seguridad">
+                          </div>
+                          <div class="right-content">
+                              <h4>Listo para roles</h4>
+                              <p>Diseñado para habilitar accesos segmentados por tipo de usuario cuando lo necesites.</p>
+                              <a href="#contact-us" class="text-button">Solicitar demo</a>
+                          </div>
+                      </li>
+                  </ul>
+              </div>
+          </div>
+      </div>
+  </section>
+  <!-- ***** Features Item End ***** -->
+
+  <!-- ***** Call to Action Start ***** -->
+  <section class="section" id="call-to-action">
+      <div class="container">
+          <div class="row">
+              <div class="col-lg-10 offset-lg-1">
+                  <div class="cta-content">
+                      <h2>No esperes más, <em>digitaliza</em> tu estudio <em>hoy</em></h2>
+                      <p>Simplificamos la administración diaria y liberamos tiempo para que te enfoques en tus socios.</p>
+                      <div class="main-button">
+                          <a th:href="@{/panel/entidades}">Ir al panel</a>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </section>
+  <!-- ***** Call to Action End ***** -->
+
+  <!-- ***** Our Classes Start ***** -->
+  <section class="section" id="our-classes">
+      <div class="container">
+          <div class="row">
+              <div class="col-lg-6 offset-lg-3">
+                  <div class="section-heading">
+                      <h2>Módulos <em>Principales</em></h2>
+                      <img th:src="@{/assets/images/line-dec.png}" alt="waves">
+                      <p>Una solución integral para cubrir la operación diaria del gimnasio y las experiencias de tus clientes.</p>
+                  </div>
+              </div>
+          </div>
+          <div class="row">
+              <div class="col-lg-3">
+                  <div class="class-item">
+                      <div class="thumb">
+                          <img th:src="@{/assets/images/training-image-01.jpg}" alt="Empresas">
+                      </div>
+                      <div class="down-content">
+                          <h4>Empresas y Sucursales</h4>
+                          <p>Organiza la estructura corporativa, ubicaciones y datos de contacto.</p>
+                      </div>
+                  </div>
+              </div>
+              <div class="col-lg-3">
+                  <div class="class-item">
+                      <div class="thumb">
+                          <img th:src="@{/assets/images/training-image-02.jpg}" alt="Empleados">
+                      </div>
+                      <div class="down-content">
+                          <h4>Talento interno</h4>
+                          <p>Gestiona perfiles, roles y registro de usuarios.</p>
+                      </div>
+                  </div>
+              </div>
+              <div class="col-lg-3">
+                  <div class="class-item">
+                      <div class="thumb">
+                          <img th:src="@{/assets/images/training-image-03.jpg}" alt="Finanzas">
+                      </div>
+                      <div class="down-content">
+                          <h4>Cuotas y cobranzas</h4>
+                          <p>Monitorea los planes, vencimientos y montos vigentes.</p>
+                      </div>
+                  </div>
+              </div>
+              <div class="col-lg-3">
+                  <div class="class-item">
+                      <div class="thumb">
+                          <img th:src="@{/assets/images/training-image-04.jpg}" alt="Comunicaciones">
+                      </div>
+                      <div class="down-content">
+                          <h4>Comunicaciones</h4>
+                          <p>Automatiza campañas, avisos y mensajes clave para tus socios.</p>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </section>
+  <!-- ***** Our Classes End ***** -->
+
+  <!-- ***** Schedule Start ***** -->
+  <section class="section" id="schedule">
+      <div class="container">
+          <div class="row">
+              <div class="col-lg-6 offset-lg-3">
+                  <div class="section-heading dark-bg">
+                      <h2>Integrado con <em>tu operación</em></h2>
+                      <img th:src="@{/assets/images/line-dec.png}" alt="waves">
+                      <p>Diseñado para conectarse con los procesos actuales y evolucionar con roles y permisos personalizados.</p>
+                  </div>
+              </div>
+          </div>
+          <div class="row">
+              <div class="col-lg-12">
+                  <div class="filters">
+                      <ul class="schedule-filter">
+                          <li class="active" data-tsfilter="empresas">Empresas</li>
+                          <li data-tsfilter="sucursales">Sucursales</li>
+                          <li data-tsfilter="empleados">Empleados</li>
+                          <li data-tsfilter="cuotas">Cuotas</li>
+                          <li data-tsfilter="mensajes">Mensajería</li>
+                      </ul>
+                  </div>
+              </div>
+              <div class="col-lg-12">
+                  <div class="schedule-table filtering">
+                      <table>
+                          <tbody>
+                              <tr>
+                                  <td class="day-time">Empresas</td>
+                                  <td class="monday ts-item" data-tsmeta="empresas">Registra datos clave y contactos corporativos.</td>
+                                  <td class="tuesday ts-item" data-tsmeta="sucursales">Conecta sucursales y direcciones asociadas.</td>
+                                  <td class="wednesday ts-item" data-tsmeta="empleados">Define responsables y equipos.</td>
+                                  <td class="thursday ts-item" data-tsmeta="cuotas">Configura valores vigentes.</td>
+                                  <td class="friday ts-item" data-tsmeta="mensajes">Centraliza comunicaciones.</td>
+                              </tr>
+                              <tr>
+                                  <td class="day-time">Cuotas</td>
+                                  <td class="monday ts-item" data-tsmeta="empresas">Visualiza resumen financiero.</td>
+                                  <td class="tuesday ts-item" data-tsmeta="sucursales">Filtra por sede y estado.</td>
+                                  <td class="wednesday ts-item" data-tsmeta="empleados">Asigna responsables de cobranza.</td>
+                                  <td class="thursday ts-item" data-tsmeta="cuotas">Monitorea vencimientos críticos.</td>
+                                  <td class="friday ts-item" data-tsmeta="mensajes">Envía recordatorios automáticos.</td>
+                              </tr>
+                          </tbody>
+                      </table>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </section>
+  <!-- ***** Schedule End ***** -->
+
+  <!-- ***** Contact Us Area Starts ***** -->
+  <section class="section" id="contact-us">
+      <div class="container-fluid">
+          <div class="row">
+              <div class="col-lg-6 col-md-6 col-xs-12">
+                  <div class="trainer-item">
+                      <div class="image-thumb">
+                          <img th:src="@{/assets/images/training-image-04.jpg}" alt="Equipo Greedy Gym">
+                      </div>
+                      <div class="down-content">
+                          <span>Equipo Greedy Gym</span>
+                          <h4>Acompañamiento continuo</h4>
+                          <p>Estamos listos para ayudarte a configurar roles y permisos a medida de tu organización.</p>
+                          <ul class="social-icons">
+                              <li><a href="#"><i class="fa fa-facebook"></i></a></li>
+                              <li><a href="#"><i class="fa fa-twitter"></i></a></li>
+                              <li><a href="#"><i class="fa fa-linkedin"></i></a></li>
+                              <li><a href="#"><i class="fa fa-instagram"></i></a></li>
+                          </ul>
+                      </div>
+                  </div>
+              </div>
+              <div class="col-lg-6 col-md-6 col-xs-12">
+                  <div class="contact-form">
+                      <form id="contacto" action="#" method="post">
+                        <div class="row">
+                          <div class="col-md-6 col-sm-12">
+                            <fieldset>
+                              <input name="nombre" type="text" id="nombre" placeholder="Nombre completo*" required>
+                            </fieldset>
+                          </div>
+                          <div class="col-md-6 col-sm-12">
+                            <fieldset>
+                              <input name="email" type="email" id="email" placeholder="Correo electrónico*" required>
+                            </fieldset>
+                          </div>
+                          <div class="col-md-12 col-sm-12">
+                            <fieldset>
+                              <input name="empresa" type="text" id="empresa" placeholder="Nombre de la empresa">
+                            </fieldset>
+                          </div>
+                          <div class="col-lg-12">
+                            <fieldset>
+                              <textarea name="mensaje" rows="6" id="mensaje" placeholder="Cuéntanos cómo podemos ayudarte" required></textarea>
+                            </fieldset>
+                          </div>
+                          <div class="col-lg-12">
+                            <fieldset>
+                              <button type="submit" id="form-submit" class="main-button">Solicitar contacto</button>
+                            </fieldset>
+                          </div>
+                        </div>
+                      </form>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </section>
+  <!-- ***** Contact Us Area Ends ***** -->
+  
+  <!-- ***** Footer Start ***** -->
+  <footer>
+      <div class="container">
+          <div class="row">
+              <div class="col-lg-12">
+                  <p>&copy; 2024 Greedy Gym
+                  <br>
+                  Construido sobre la plantilla <a rel="nofollow" href="https://templatemo.com" class="tm-text-link" target="_blank">Training Studio</a>
+                  </p>
+              </div>
+          </div>
+      </div>
+  </footer>
+
+  <!-- jQuery -->
+  <script th:src="@{/assets/js/jquery-2.1.0.min.js}"></script>
+
+  <!-- Bootstrap -->
+  <script th:src="@{/assets/js/popper.js}"></script>
+  <script th:src="@{/assets/js/bootstrap.min.js}"></script>
+
+  <!-- Plugins -->
+  <script th:src="@{/assets/js/scrollreveal.min.js}"></script>
+  <script th:src="@{/assets/js/waypoints.min.js}"></script>
+  <script th:src="@{/assets/js/jquery.counterup.min.js}"></script>
+  <script th:src="@{/assets/js/imgfix.min.js}"></script>
+  <script th:src="@{/assets/js/mixitup.js}"></script>
+  <script th:src="@{/assets/js/accordions.js}"></script>
+  
+  <!-- Global Init -->
+  <script th:src="@{/assets/js/custom.js}"></script>
+
+  </body>
+</html>

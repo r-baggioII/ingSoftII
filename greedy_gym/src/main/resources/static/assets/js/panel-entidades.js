@@ -1,7 +1,9 @@
 (function () {
+  console.log('[Panel entidades] Script loading...');
   const $ = window.jQuery;
   const rawContextPath = document.body ? (document.body.dataset.contextPath || '') : '';
   const contextPath = normaliseContextPath(rawContextPath);
+  console.log('[Panel entidades] Context path:', contextPath);
 
   const dom = {
     switcher: document.getElementById('entity-switcher'),
@@ -437,14 +439,67 @@
           item?.id
         ].filter(Boolean).join(' ').toLowerCase();
       }
+    },
+    paises: {
+      label: 'Países',
+      description: 'Gestión de países para direcciones.',
+      singular: 'país',
+      createLabel: 'Nuevo país',
+      searchPlaceholder: 'Buscar por nombre del país',
+      allowCreate: true,
+      allowUpdate: true,
+      allowDelete: true,
+      columns: [
+        { header: 'Nombre', value: item => item?.nombre || '—' },
+        { header: 'Estado', value: item => item?.eliminado ? 'Dado de baja' : 'Activo' }
+      ],
+      formFields: [
+        { name: 'nombre', label: 'Nombre del país', type: 'text', required: true, fullWidth: true }
+      ],
+      async list() {
+        return requestJson(buildUrl('/api/paises'));
+      },
+      async create(payload) {
+        invalidateOptions('paises');
+        return sendJson(buildUrl('/api/paises'), 'POST', payload);
+      },
+      async update(item, payload) {
+        const params = new URLSearchParams();
+        params.set('nombre', payload.nombre || '');
+        invalidateOptions('paises');
+        return requestJson(`${buildUrl('/api/paises/' + item.id)}?${params.toString()}`, { method: 'PUT' });
+      },
+      async remove(item) {
+        invalidateOptions('paises');
+        return requestJson(buildUrl('/api/paises/' + item.id), { method: 'DELETE' });
+      },
+      prepareFormValues(item) {
+        return {
+          nombre: item?.nombre || ''
+        };
+      },
+      toPayload(mode, values) {
+        return { nombre: values.nombre.trim() };
+      },
+      isInactive(item) {
+        return !!item?.eliminado;
+      },
+      searchText(item) {
+        return [item?.nombre].filter(Boolean).join(' ').toLowerCase();
+      }
     }
   };
 
   if (!dom.switcher || !dom.tableHead || !dom.tableBody) {
-    console.warn('[Panel entidades] Elementos básicos no disponibles.');
+    console.warn('[Panel entidades] Elementos básicos no disponibles.', {
+      switcher: !!dom.switcher,
+      tableHead: !!dom.tableHead,
+      tableBody: !!dom.tableBody
+    });
     return;
   }
 
+  console.log('[Panel entidades] DOM elements found, initializing...');
   initialise();
 
   function initialise() {
@@ -482,19 +537,25 @@
   }
 
   function onEntitySwitch(event) {
+    console.log('[Panel entidades] Entity switch clicked', event.target);
     const listItem = event.target.closest('li[data-entity]');
     if (!listItem) {
+      console.log('[Panel entidades] No list item found');
       return;
     }
     const entity = listItem.dataset.entity;
+    console.log('[Panel entidades] Entity selected:', entity);
     if (!entity || entity === state.entity) {
+      console.log('[Panel entidades] Entity same as current or empty:', entity, state.entity);
       return;
     }
     loadEntity(entity);
   }
 
   function loadEntity(entityKey) {
+    console.log('[Panel entidades] Loading entity:', entityKey);
     if (!ENTITIES[entityKey]) {
+      console.error('[Panel entidades] Entity not found in ENTITIES:', entityKey, Object.keys(ENTITIES));
       return;
     }
     state.entity = entityKey;
@@ -1008,6 +1069,18 @@
         label: `${item.fechaDesde || 'Sin inicio'} · ${item.fechaHasta || 'Abierto'} · $ ${Number(item.valorCuota).toFixed(2)}`
       }));
     optionCache.valorCuotas = list;
+    return list;
+  }
+
+  async function loadPaisesOptions() {
+    if (optionCache.paises) {
+      return optionCache.paises;
+    }
+    const data = await requestJson(buildUrl('/api/paises'));
+    const list = normalizeList(data)
+      .filter(item => !item.eliminado)
+      .map(item => ({ value: item.id, label: item.nombre }));
+    optionCache.paises = list;
     return list;
   }
 

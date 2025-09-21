@@ -21,16 +21,30 @@ public class PaisServicio {
     }
 
     @Transactional
-    public void crearPais(@NotBlank String nombre) {
-        validar(nombre);
+    public Pais crearPais(@NotBlank String nombre) {
+        // Buscar si ya existe un país con este nombre (activo o eliminado)
+        Pais paisExistente = repository.findByNombreIgnoreCase(nombre).orElse(null);
+        
+        if (paisExistente != null) {
+            if (paisExistente.isEliminado()) {
+                // Si existe pero está eliminado, lo reactivamos
+                paisExistente.setEliminado(false);
+                return repository.save(paisExistente);
+            } else {
+                // Si existe y está activo, lanzamos error
+                throw new ValidationException("El pais ya existe: " + nombre);
+            }
+        }
+        
+        // Si no existe, creamos uno nuevo
         Pais pais = new Pais();
         pais.setNombre(nombre);
         pais.setEliminado(false);
-        repository.save(pais);
+        return repository.save(pais);
     }
 
     public void validar(@NotBlank String nombre) {
-        if (repository.existsByNombreIgnoreCase(nombre)) {
+        if (repository.existsByNombreIgnoreCaseAndEliminadoFalse(nombre)) {
             throw new ValidationException("El pais ya existe: " + nombre);
         }
     }
@@ -47,10 +61,19 @@ public class PaisServicio {
                 .orElseThrow(() -> new IllegalArgumentException("Pais no encontrado: " + nombre));
     }
 
+    @Transactional(readOnly = true)
+    public Pais buscarPorNombre(String nombre) {
+        return repository.findByNombreIgnoreCase(nombre).orElse(null);
+    }
+
     public void modificarPais(String id, String nombre) {
         Pais actual = buscarPais(id);
         if (!actual.getNombre().equalsIgnoreCase(nombre)) {
-            validar(nombre);
+            // Verificar que no exista otro país activo con el mismo nombre
+            Pais paisConMismoNombre = repository.findByNombreIgnoreCase(nombre).orElse(null);
+            if (paisConMismoNombre != null && !paisConMismoNombre.getId().equals(id) && !paisConMismoNombre.isEliminado()) {
+                throw new ValidationException("El pais ya existe: " + nombre);
+            }
             actual.setNombre(nombre);
             repository.save(actual);
         }

@@ -9,6 +9,8 @@ public interface PaisRepositorio extends JpaRepository<Pais, String> {
     Optional<Pais> findByNombreIgnoreCase(String nombre);
 
     boolean existsByNombreIgnoreCase(String nombre);
+    
+    boolean existsByNombreIgnoreCaseAndEliminadoFalse(String nombre);
 
     Optional<Pais> findByIdAndEliminadoFalse(String id);
 }

@@ -17,6 +17,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "paises")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Pais {
 
     @Id

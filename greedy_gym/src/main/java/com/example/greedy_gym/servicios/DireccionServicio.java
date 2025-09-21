@@ -2,6 +2,9 @@ package com.example.greedy_gym.servicios;
 
 import com.example.greedy_gym.entidades.Direccion;
 import com.example.greedy_gym.entidades.Localidad;
+import com.example.greedy_gym.entidades.Departamento;
+import com.example.greedy_gym.entidades.Provincia;
+import com.example.greedy_gym.entidades.Pais;
 import com.example.greedy_gym.repositorios.DireccionRepositorio;
 import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.NotBlank;
@@ -15,11 +18,21 @@ public class DireccionServicio {
 
     private final DireccionRepositorio direccionRepositorio;
     private final LocalidadServicio localidadServicio;
+    private final DepartamentoServicio departamentoServicio;
+    private final ProvinciaServicio provinciaServicio;
+    private final PaisServicio paisServicio;
 
     @Autowired
-    public DireccionServicio(DireccionRepositorio direccionRepositorio, LocalidadServicio localidadServicio) {
+    public DireccionServicio(DireccionRepositorio direccionRepositorio, 
+                           LocalidadServicio localidadServicio,
+                           DepartamentoServicio departamentoServicio,
+                           ProvinciaServicio provinciaServicio,
+                           PaisServicio paisServicio) {
         this.direccionRepositorio = direccionRepositorio;
         this.localidadServicio = localidadServicio;
+        this.departamentoServicio = departamentoServicio;
+        this.provinciaServicio = provinciaServicio;
+        this.paisServicio = paisServicio;
     }
 
     @Transactional
@@ -35,6 +48,70 @@ public class DireccionServicio {
 
         // Buscar la localidad
         Localidad localidad = localidadServicio.buscarLocalidad(idLocalidad);
+
+        // Crear nueva dirección
+        Direccion direccion = new Direccion();
+        direccion.setCalle(calle);
+        direccion.setNumero(numeracion);
+        direccion.setBarrio(barrio);
+        direccion.setManzanaPiso(manzanaPiso);
+        direccion.setCasaDepartamento(casaDepartamento);
+        direccion.setReferencia(referencia);
+        direccion.setLocalidad(localidad);
+        direccion.setEliminado(false);
+
+        return direccionRepositorio.save(direccion);
+    }
+
+    @Transactional
+    public Direccion crearDireccionConNombres(@NotBlank String calle,
+                                             @NotBlank String numeracion,
+                                             String barrio,
+                                             String manzanaPiso,
+                                             String casaDepartamento,
+                                             String referencia,
+                                             @NotBlank String nombrePais,
+                                             @NotBlank String nombreProvincia,
+                                             @NotBlank String nombreDepartamento,
+                                             @NotBlank String nombreLocalidad,
+                                             String codigoPostal) {
+
+        // Validar campos básicos
+        if (calle == null || calle.trim().isEmpty()) {
+            throw new ValidationException("La calle es obligatoria");
+        }
+        if (numeracion == null || numeracion.trim().isEmpty()) {
+            throw new ValidationException("La numeración es obligatoria");
+        }
+
+        // Validar que no exista una dirección con la misma calle y numeración
+        if (direccionRepositorio.existsByCalleAndNumeroAndEliminadoFalse(calle, numeracion)) {
+            throw new ValidationException("Ya existe una dirección con la calle '" + calle + "' y numeración '" + numeracion + "'");
+        }
+
+        // Buscar o crear país
+        Pais pais = paisServicio.buscarPorNombre(nombrePais);
+        if (pais == null) {
+            pais = paisServicio.crearPais(nombrePais);
+        }
+
+        // Buscar o crear provincia
+        Provincia provincia = provinciaServicio.buscarPorNombreYPais(nombreProvincia, pais.getId());
+        if (provincia == null) {
+            provincia = provinciaServicio.crearProvincia(nombreProvincia, pais.getId());
+        }
+
+        // Buscar o crear departamento
+        Departamento departamento = departamentoServicio.buscarPorNombreYProvincia(nombreDepartamento, provincia.getId());
+        if (departamento == null) {
+            departamento = departamentoServicio.crearDepartamento(nombreDepartamento, provincia.getId());
+        }
+
+        // Buscar o crear localidad
+        Localidad localidad = localidadServicio.buscarPorNombreYDepartamento(nombreLocalidad, departamento.getId());
+        if (localidad == null) {
+            localidad = localidadServicio.crearLocalidad(nombreLocalidad, codigoPostal, departamento.getId());
+        }
 
         // Crear nueva dirección
         Direccion direccion = new Direccion();
@@ -70,6 +147,9 @@ public class DireccionServicio {
         if (idLocalidad == null || idLocalidad.trim().isEmpty()) {
             throw new ValidationException("La localidad es obligatoria");
         }
+
+        // Los campos barrio, manzanaPiso, casaDepartamento y referencia son opcionales
+        // No se requiere validación adicional para estos campos
 
         // Validar que no exista una dirección con la misma calle y numeración
         if (direccionRepositorio.existsByCalleAndNumeroAndEliminadoFalse(calle, numeracion)) {

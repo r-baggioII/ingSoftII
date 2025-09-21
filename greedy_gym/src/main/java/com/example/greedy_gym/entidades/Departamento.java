@@ -1,5 +1,6 @@
 package com.example.greedy_gym.entidades;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.util.UUID;
 import lombok.Getter;
@@ -11,6 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "departamentos")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Departamento {
 
     @Id
@@ -24,6 +26,7 @@ public class Departamento {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "provincia_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Provincia provincia;
 
     @PrePersist

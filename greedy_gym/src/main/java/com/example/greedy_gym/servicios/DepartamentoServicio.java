@@ -24,7 +24,7 @@ public class DepartamentoServicio {
     }
 
     @Transactional
-    public void crearDepartamento(@NotBlank String nombre, @NotBlank String idProvincia) {
+    public Departamento crearDepartamento(@NotBlank String nombre, @NotBlank String idProvincia) {
         Provincia provincia = provinciaServicio.buscarProvincia(idProvincia);
         validar(nombre, provincia);
         
@@ -33,7 +33,7 @@ public class DepartamentoServicio {
         departamento.setProvincia(provincia);
         departamento.setEliminado(false);
         
-        repository.save(departamento);
+        return repository.save(departamento);
     }
 
     public void validar(@NotBlank String nombre, Provincia provincia) {
@@ -46,6 +46,11 @@ public class DepartamentoServicio {
     public Departamento buscarDepartamento(String id) {
         return repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Departamento no encontrado: " + id));
+    }
+
+    @Transactional(readOnly = true)
+    public Departamento buscarPorNombreYProvincia(String nombre, String idProvincia) {
+        return repository.findByNombreIgnoreCaseAndProvinciaId(nombre, idProvincia).orElse(null);
     }
 
     @Transactional(readOnly = true)
@@ -86,6 +91,6 @@ public class DepartamentoServicio {
 
     @Transactional(readOnly = true)
     public List<Departamento> listarTodosLosDepartamentos() {
-        return repository.findAll();
+        return repository.findAllWithProvinciasAndPaises();
     }
 }

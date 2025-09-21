@@ -24,20 +24,35 @@ public class ProvinciaServicio {
     }
 
     @Transactional
-    public void crearProvincia(@NotBlank String nombre, @NotBlank String idPais) {
+    public Provincia crearProvincia(@NotBlank String nombre, @NotBlank String idPais) {
         Pais pais = paisServicio.buscarPais(idPais);
-        validar(nombre, pais);
         
+        // Buscar si ya existe una provincia con este nombre en este país
+        Provincia provinciaExistente = repository.findByNombreIgnoreCaseAndPaisId(nombre, idPais).orElse(null);
+        
+        if (provinciaExistente != null) {
+            if (provinciaExistente.isEliminado()) {
+                // Si existe pero está eliminada, la reactivamos
+                provinciaExistente.setEliminado(false);
+                provinciaExistente.setPais(pais); // Asegurar que el país esté actualizado
+                return repository.save(provinciaExistente);
+            } else {
+                // Si existe y está activa, lanzamos error
+                throw new ValidationException("La provincia ya existe: " + nombre);
+            }
+        }
+        
+        // Si no existe, creamos una nueva
         Provincia provincia = new Provincia();
         provincia.setNombre(nombre);
         provincia.setPais(pais);
         provincia.setEliminado(false);
         
-        repository.save(provincia);
+        return repository.save(provincia);
     }
 
     public void validar(@NotBlank String nombre, Pais pais) {
-        if (repository.existsByNombreIgnoreCase(nombre)) {
+        if (repository.existsByNombreIgnoreCaseAndPaisIdAndEliminadoFalse(nombre, pais.getId())) {
             throw new ValidationException("La provincia ya existe: " + nombre);
         }
     }
@@ -46,6 +61,11 @@ public class ProvinciaServicio {
     public Provincia buscarProvincia(String id) {
         return repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Provincia no encontrada: " + id));
+    }
+
+    @Transactional(readOnly = true)
+    public Provincia buscarPorNombreYPais(String nombre, String idPais) {
+        return repository.findByNombreIgnoreCaseAndPaisId(nombre, idPais).orElse(null);
     }
 
     @Transactional(readOnly = true)
@@ -58,8 +78,12 @@ public class ProvinciaServicio {
         Provincia actual = buscarProvincia(id);
         Pais pais = paisServicio.buscarPais(idPais);
         
-        if (!actual.getNombre().equalsIgnoreCase(nombre)) {
-            validar(nombre, pais);
+        if (!actual.getNombre().equalsIgnoreCase(nombre) || !actual.getPais().getId().equals(idPais)) {
+            // Verificar que no exista otra provincia activa con el mismo nombre en el mismo país
+            Provincia provinciaConMismoNombre = repository.findByNombreIgnoreCaseAndPaisId(nombre, idPais).orElse(null);
+            if (provinciaConMismoNombre != null && !provinciaConMismoNombre.getId().equals(id) && !provinciaConMismoNombre.isEliminado()) {
+                throw new ValidationException("La provincia ya existe: " + nombre);
+            }
             actual.setNombre(nombre);
         }
         actual.setPais(pais);
@@ -86,6 +110,6 @@ public class ProvinciaServicio {
 
     @Transactional(readOnly = true)
     public List<Provincia> listarTodasLasProvincias() {
-        return repository.findAll();
+        return repository.findAllWithPais();
     }
 }

@@ -24,27 +24,43 @@ public class LocalidadServicio {
     }
 
     @Transactional
-    public void crearLocalidad(@NotBlank String nombre,
+    public Localidad crearLocalidad(@NotBlank String nombre,
                                 @NotBlank String codigoPostal,
                                 @NotBlank String idDepartamento) {
 
         Departamento departamento = departamentoServicio.buscarDepartamento(idDepartamento);
-        validar(nombre, codigoPostal, departamento);
-
+        
+        // Buscar si ya existe una localidad con este nombre en este departamento
+        Localidad localidadExistente = repository.findByNombreIgnoreCaseAndDepartamentoId(nombre, idDepartamento).orElse(null);
+        
+        if (localidadExistente != null) {
+            if (localidadExistente.isEliminado()) {
+                // Si existe pero está eliminada, la reactivamos
+                localidadExistente.setEliminado(false);
+                localidadExistente.setCodigoPostal(codigoPostal); // Actualizar código postal
+                localidadExistente.setDepartamento(departamento); // Asegurar que el departamento esté actualizado
+                return repository.save(localidadExistente);
+            } else {
+                // Si existe y está activa, lanzamos error
+                throw new ValidationException("La localidad ya existe: " + nombre);
+            }
+        }
+        
+        // Si no existe, creamos una nueva
         Localidad localidad = new Localidad();
         localidad.setNombre(nombre);
         localidad.setCodigoPostal(codigoPostal);
         localidad.setDepartamento(departamento);
         localidad.setEliminado(false);
 
-        repository.save(localidad);
+        return repository.save(localidad);
     }
 
     public void validar(@NotBlank String nombre, String codigoPostal, Departamento departamento) {
         if (nombre == null || nombre.trim().isEmpty()) {
             throw new ValidationException("El nombre es obligatorio");
         }
-        if (repository.existsByNombreIgnoreCase(nombre)) {
+        if (repository.existsByNombreIgnoreCaseAndDepartamentoIdAndEliminadoFalse(nombre, departamento.getId())) {
             throw new ValidationException("La localidad ya existe: " + nombre);
         }
     }
@@ -67,12 +83,21 @@ public class LocalidadServicio {
                 .orElseThrow(() -> new IllegalArgumentException("Localidad no encontrada con código postal: " + codigoPostal));
     }
 
+    @Transactional(readOnly = true)
+    public Localidad buscarPorNombreYDepartamento(String nombre, String idDepartamento) {
+        return repository.findByNombreIgnoreCaseAndDepartamentoId(nombre, idDepartamento).orElse(null);
+    }
+
     public void modificarLocalidad(String id, String nombre, String codigoPostal, String idDepartamento) {
         Localidad actual = buscarLocalidad(id);
         Departamento departamento = departamentoServicio.buscarDepartamento(idDepartamento);
         
-        if (!actual.getNombre().equalsIgnoreCase(nombre)) {
-            validar(nombre, codigoPostal, departamento);
+        if (!actual.getNombre().equalsIgnoreCase(nombre) || !actual.getDepartamento().getId().equals(idDepartamento)) {
+            // Verificar que no exista otra localidad activa con el mismo nombre en el mismo departamento
+            Localidad localidadConMismoNombre = repository.findByNombreIgnoreCaseAndDepartamentoId(nombre, idDepartamento).orElse(null);
+            if (localidadConMismoNombre != null && !localidadConMismoNombre.getId().equals(id) && !localidadConMismoNombre.isEliminado()) {
+                throw new ValidationException("La localidad ya existe: " + nombre);
+            }
         }
         
         actual.setNombre(nombre);
@@ -101,6 +126,6 @@ public class LocalidadServicio {
 
     @Transactional(readOnly = true)
     public List<Localidad> listarTodasLasLocalidades() {
-        return repository.findAll();
+        return repository.findAllWithFullHierarchy();
     }
 }

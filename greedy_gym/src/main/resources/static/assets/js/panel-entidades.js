@@ -9,6 +9,8 @@
     switcher: document.getElementById('entity-switcher'),
     search: document.getElementById('entity-search'),
     status: document.getElementById('entity-status'),
+    subtype: document.getElementById('entity-subtype'),
+    subtypeContainer: document.getElementById('entity-subtype-container'),
     create: document.getElementById('entity-create'),
     createLabel: document.getElementById('entity-create-label'),
     tableHead: document.querySelector('#entity-table thead'),
@@ -440,12 +442,239 @@
         ].filter(Boolean).join(' ').toLowerCase();
       }
     },
+    direcciones: {
+      label: 'Gestión Geográfica',
+      description: 'Gestión completa de direcciones, países, provincias, departamentos y localidades.',
+      singular: 'elemento geográfico',
+      createLabel: 'Nuevo elemento',
+      searchPlaceholder: 'Buscar en cualquier categoría',
+      allowCreate: true,
+      allowUpdate: true,
+      allowDelete: true,
+      
+      // Configuración dinámica que cambia según el subtipo seleccionado
+      currentSubType: 'direccionesData',
+      
+      get columns() {
+        return this.getSubConfig().columns;
+      },
+      
+      get formFields() {
+        return this.getSubConfig().formFields;
+      },
+      
+      get createLabel() {
+        return this.getSubConfig().createLabel;
+      },
+      
+      get singular() {
+        return this.getSubConfig().singular;
+      },
+
+      // Método para obtener la configuración de la sub-entidad actual
+      getSubConfig() {
+        return this.subTypes[this.currentSubType] || this.subTypes.direccionesData;
+      },
+
+      // Definición de los diferentes tipos de entidades
+      subTypes: {
+        direccionesData: {
+          label: 'Direcciones',
+          singular: 'dirección',
+          createLabel: 'Nueva dirección',
+          columns: [
+            { header: 'Calle', value: item => item?.calle || '—' },
+            { header: 'Número', value: item => item?.numero || '—' },
+            { header: 'Barrio', value: item => item?.barrio || '—' },
+            { header: 'Localidad', value: item => item?.localidad?.nombre || '—' },
+            { header: 'Departamento', value: item => item?.localidad?.departamento?.nombre || '—' },
+            { header: 'Provincia', value: item => item?.localidad?.departamento?.provincia?.nombre || '—' },
+            { header: 'País', value: item => item?.localidad?.departamento?.provincia?.pais?.nombre || '—' },
+            { header: 'Estado', value: item => item?.eliminado ? 'Dada de baja' : 'Activa' }
+          ],
+          formFields: [
+            { name: 'calle', label: 'Calle', type: 'text', required: true, width: 'col-md-8' },
+            { name: 'numeracion', label: 'Número', type: 'text', required: true, width: 'col-md-4' },
+            { name: 'nombrePais', label: 'País', type: 'autocomplete', required: true, width: 'col-md-6', apiEndpoint: '/api/direcciones/paises', displayField: 'nombre' },
+            { name: 'nombreProvincia', label: 'Provincia', type: 'autocomplete', required: true, width: 'col-md-6', apiEndpoint: '/api/direcciones/provincias', displayField: 'nombre' },
+            { name: 'nombreDepartamento', label: 'Departamento', type: 'autocomplete', required: true, width: 'col-md-6', apiEndpoint: '/api/direcciones/departamentos', displayField: 'nombre' },
+            { name: 'nombreLocalidad', label: 'Localidad', type: 'autocomplete', required: true, width: 'col-md-6', apiEndpoint: '/api/direcciones/localidades', displayField: 'nombre' },
+            { name: 'codigoPostal', label: 'Código Postal', type: 'text' },
+            { name: 'barrio', label: 'Barrio', type: 'text' },
+            { name: 'manzanaPiso', label: 'Manzana/Piso', type: 'text' },
+            { name: 'casaDepartamento', label: 'Casa/Departamento', type: 'text' },
+            { name: 'referencia', label: 'Referencia', type: 'textarea' }
+          ],
+          apiPath: '/api/direcciones',
+          submitHandler: (mode, values) => {
+            const payload = {
+              calle: values.calle ? values.calle.trim() : null,
+              numeracion: values.numeracion ? values.numeracion.trim() : null,
+              barrio: values.barrio ? values.barrio.trim() : null,
+              manzanaPiso: values.manzanaPiso ? values.manzanaPiso.trim() : null,
+              casaDepartamento: values.casaDepartamento ? values.casaDepartamento.trim() : null,
+              referencia: values.referencia ? values.referencia.trim() : null,
+              nombrePais: values.nombrePais ? values.nombrePais.trim() : null,
+              nombreProvincia: values.nombreProvincia ? values.nombreProvincia.trim() : null,
+              nombreDepartamento: values.nombreDepartamento ? values.nombreDepartamento.trim() : null,
+              nombreLocalidad: values.nombreLocalidad ? values.nombreLocalidad.trim() : null,
+              codigoPostal: values.codigoPostal ? values.codigoPostal.trim() : null
+            };
+            
+            if (mode === 'create') {
+              return sendJson(buildUrl('/api/direcciones/con-nombres'), 'POST', payload);
+            } else {
+              return sendJson(buildUrl(`/api/direcciones/${values.id}`), 'PUT', payload);
+            }
+          }
+        },
+        localidades: {
+          label: 'Localidades',
+          singular: 'localidad',
+          createLabel: 'Nueva localidad',
+          columns: [
+            { header: 'Nombre', value: item => item?.nombre || '—' },
+            { header: 'Código Postal', value: item => item?.codigoPostal || '—' },
+            { header: 'Departamento', value: item => item?.departamento?.nombre || '—' },
+            { header: 'Estado', value: item => item?.eliminado ? 'Dada de baja' : 'Activa' }
+          ],
+          formFields: [
+            { name: 'nombre', label: 'Nombre de la localidad', type: 'text', required: true, width: 'col-md-8' },
+            { name: 'codigoPostal', label: 'Código Postal', type: 'text' },
+            { name: 'idDepartamento', label: 'Departamento', type: 'select', required: true, fullWidth: true, loadOptions: loadDepartamentosOptions }
+          ],
+          apiPath: '/api/direcciones/localidades'
+        },
+        departamentos: {
+          label: 'Departamentos',
+          singular: 'departamento',
+          createLabel: 'Nuevo departamento',
+          columns: [
+            { header: 'Nombre', value: item => item?.nombre || '—' },
+            { header: 'Provincia', value: item => item?.provincia?.nombre || '—' },
+            { header: 'Estado', value: item => item?.eliminado ? 'Dado de baja' : 'Activo' }
+          ],
+          formFields: [
+            { name: 'nombre', label: 'Nombre del departamento', type: 'text', required: true, width: 'col-md-8' },
+            { name: 'idProvincia', label: 'Provincia', type: 'select', required: true, width: 'col-md-4', loadOptions: loadProvinciasOptions }
+          ],
+          apiPath: '/api/direcciones/departamentos'
+        },
+        provincias: {
+          label: 'Provincias',
+          singular: 'provincia',
+          createLabel: 'Nueva provincia',
+          columns: [
+            { header: 'Nombre', value: item => item?.nombre || '—' },
+            { header: 'País', value: item => item?.pais?.nombre || '—' },
+            { header: 'Estado', value: item => item?.eliminado ? 'Dada de baja' : 'Activa' }
+          ],
+          formFields: [
+            { name: 'nombre', label: 'Nombre de la provincia', type: 'text', required: true, width: 'col-md-8' },
+            { name: 'idPais', label: 'País', type: 'select', required: true, width: 'col-md-4', loadOptions: loadPaisesOptions }
+          ],
+          apiPath: '/api/direcciones/provincias'
+        },
+        paises: {
+          label: 'Países',
+          singular: 'país',
+          createLabel: 'Nuevo país',
+          columns: [
+            { header: 'Nombre', value: item => item?.nombre || '—' },
+            { header: 'Estado', value: item => item?.eliminado ? 'Dado de baja' : 'Activo' }
+          ],
+          formFields: [
+            { name: 'nombre', label: 'Nombre del país', type: 'text', required: true, fullWidth: true }
+          ],
+          apiPath: '/api/direcciones/paises'
+        }
+      },
+
+      async list() {
+        const config = this.getSubConfig();
+        return requestJson(buildUrl(config.apiPath));
+      },
+      
+      async create(payload) {
+        const config = this.getSubConfig();
+        return sendJson(buildUrl(config.apiPath), 'POST', payload);
+      },
+      
+      async update(item, payload) {
+        const config = this.getSubConfig();
+        if (config.apiPath === '/api/direcciones/paises') {
+          // Para países usamos query params
+          const params = new URLSearchParams();
+          params.set('nombre', payload.nombre || '');
+          return requestJson(`${buildUrl(config.apiPath + '/' + item.id)}?${params.toString()}`, { method: 'PUT' });
+        } else {
+          return sendJson(buildUrl(config.apiPath + '/' + item.id), 'PUT', payload);
+        }
+      },
+      
+      async remove(item) {
+        const config = this.getSubConfig();
+        return requestJson(buildUrl(config.apiPath + '/' + item.id), { method: 'DELETE' });
+      },
+      
+      prepareFormValues(item) {
+        const subType = this.currentSubType;
+        
+        switch(subType) {
+          case 'direccionesData':
+            return {
+              calle: item?.calle || '',
+              numeracion: item?.numero || '',
+              nombrePais: item?.localidad?.departamento?.provincia?.pais?.nombre || '',
+              nombreProvincia: item?.localidad?.departamento?.provincia?.nombre || '',
+              nombreDepartamento: item?.localidad?.departamento?.nombre || '',
+              nombreLocalidad: item?.localidad?.nombre || '',
+              codigoPostal: item?.localidad?.codigoPostal || '',
+              barrio: item?.barrio || '',
+              manzanaPiso: item?.manzanaPiso || '',
+              casaDepartamento: item?.casaDepartamento || '',
+              referencia: item?.referencia || ''
+            };
+          case 'localidades':
+            return {
+              nombre: item?.nombre || '',
+              codigoPostal: item?.codigoPostal || '',
+              idDepartamento: item?.departamento?.id || ''
+            };
+          case 'departamentos':
+            return {
+              nombre: item?.nombre || '',
+              idProvincia: item?.provincia?.id || ''
+            };
+          case 'provincias':
+            return {
+              nombre: item?.nombre || '',
+              idPais: item?.pais?.id || ''
+            };
+          case 'paises':
+            return {
+              nombre: item?.nombre || ''
+            };
+          default:
+            return {};
+        }
+      },
+      toPayload(mode, values) {
+        return { nombre: values.nombre.trim() };
+      },
+      isInactive(item) {
+        return !!item?.eliminado;
+      },
+      searchText(item) {
+        return [item?.nombre].filter(Boolean).join(' ').toLowerCase();
+      }
+    },
     paises: {
       label: 'Países',
-      description: 'Gestión de países para direcciones.',
+      description: 'Gestión de países para organizar direcciones.',
       singular: 'país',
       createLabel: 'Nuevo país',
-      searchPlaceholder: 'Buscar por nombre del país',
+      searchPlaceholder: 'Buscar por nombre de país',
       allowCreate: true,
       allowUpdate: true,
       allowDelete: true,
@@ -457,21 +686,24 @@
         { name: 'nombre', label: 'Nombre del país', type: 'text', required: true, fullWidth: true }
       ],
       async list() {
-        return requestJson(buildUrl('/api/paises'));
+        return requestJson(buildUrl('/api/v1/paises'));
       },
       async create(payload) {
         invalidateOptions('paises');
-        return sendJson(buildUrl('/api/paises'), 'POST', payload);
+        invalidateOptions('paisesV1');
+        return sendJson(buildUrl('/api/v1/paises'), 'POST', payload);
       },
       async update(item, payload) {
-        const params = new URLSearchParams();
-        params.set('nombre', payload.nombre || '');
         invalidateOptions('paises');
-        return requestJson(`${buildUrl('/api/paises/' + item.id)}?${params.toString()}`, { method: 'PUT' });
+        invalidateOptions('paisesV1');
+        return sendJson(buildUrl('/api/v1/paises/' + item.id), 'PUT', payload);
       },
       async remove(item) {
         invalidateOptions('paises');
-        return requestJson(buildUrl('/api/paises/' + item.id), { method: 'DELETE' });
+        invalidateOptions('paisesV1');
+        invalidateOptions('provincias');
+        invalidateOptions('provinciasV1');
+        return requestJson(buildUrl('/api/v1/paises/' + item.id), { method: 'DELETE' });
       },
       prepareFormValues(item) {
         return {
@@ -486,6 +718,227 @@
       },
       searchText(item) {
         return [item?.nombre].filter(Boolean).join(' ').toLowerCase();
+      }
+    },
+    provincias: {
+      label: 'Provincias',
+      description: 'Gestión de provincias organizadas por país.',
+      singular: 'provincia',
+      createLabel: 'Nueva provincia',
+      searchPlaceholder: 'Buscar por nombre de provincia o país',
+      allowCreate: true,
+      allowUpdate: true,
+      allowDelete: true,
+      columns: [
+        { header: 'Nombre', value: item => item?.nombre || '—' },
+        { header: 'País', value: item => item?.pais?.nombre || '—' },
+        { header: 'Estado', value: item => item?.eliminado ? 'Dada de baja' : 'Activa' }
+      ],
+      formFields: [
+        { name: 'nombre', label: 'Nombre de la provincia', type: 'text', required: true, width: 'col-md-8' },
+        { name: 'idPais', label: 'País', type: 'select', required: true, width: 'col-md-4', loadOptions: loadPaisesOptionsV1 }
+      ],
+      async list() {
+        return requestJson(buildUrl('/api/v1/provincias'));
+      },
+      async create(payload) {
+        invalidateOptions('provincias');
+        invalidateOptions('provinciasV1');
+        return sendJson(buildUrl('/api/v1/provincias'), 'POST', payload);
+      },
+      async update(item, payload) {
+        invalidateOptions('provincias');
+        invalidateOptions('provinciasV1');
+        return sendJson(buildUrl('/api/v1/provincias/' + item.id), 'PUT', payload);
+      },
+      async remove(item) {
+        invalidateOptions('provincias');
+        invalidateOptions('provinciasV1');
+        invalidateOptions('departamentos');
+        invalidateOptions('departamentosV1');
+        return requestJson(buildUrl('/api/v1/provincias/' + item.id), { method: 'DELETE' });
+      },
+      prepareFormValues(item) {
+        return {
+          nombre: item?.nombre || '',
+          idPais: item?.pais?.id || ''
+        };
+      },
+      toPayload(mode, values) {
+        return { 
+          nombre: values.nombre.trim(),
+          idPais: values.idPais
+        };
+      },
+      isInactive(item) {
+        return !!item?.eliminado;
+      },
+      searchText(item) {
+        return [item?.nombre, item?.pais?.nombre].filter(Boolean).join(' ').toLowerCase();
+      }
+    },
+    departamentos: {
+      label: 'Departamentos',
+      description: 'Gestión de departamentos organizados por provincia.',
+      singular: 'departamento',
+      createLabel: 'Nuevo departamento',
+      searchPlaceholder: 'Buscar por nombre de departamento o provincia',
+      allowCreate: true,
+      allowUpdate: true,
+      allowDelete: true,
+      columns: [
+        { header: 'Nombre', value: item => item?.nombre || '—' },
+        { header: 'Provincia', value: item => item?.provincia?.nombre || '—' },
+        { header: 'País', value: item => item?.provincia?.pais?.nombre || '—' },
+        { header: 'Estado', value: item => item?.eliminado ? 'Dado de baja' : 'Activo' }
+      ],
+      formFields: [
+        { name: 'nombre', label: 'Nombre del departamento', type: 'text', required: true, width: 'col-md-8' },
+        { name: 'idProvincia', label: 'Provincia', type: 'select', required: true, width: 'col-md-4', loadOptions: loadProvinciasOptionsV1 }
+      ],
+      async list() {
+        return requestJson(buildUrl('/api/v1/departamentos'));
+      },
+      async create(payload) {
+        invalidateOptions('departamentos');
+        invalidateOptions('departamentosV1');
+        return sendJson(buildUrl('/api/v1/departamentos'), 'POST', payload);
+      },
+      async update(item, payload) {
+        invalidateOptions('departamentos');
+        invalidateOptions('departamentosV1');
+        return sendJson(buildUrl('/api/v1/departamentos/' + item.id), 'PUT', payload);
+      },
+      async remove(item) {
+        invalidateOptions('departamentos');
+        invalidateOptions('departamentosV1');
+        invalidateOptions('localidades');
+        invalidateOptions('localidadesV1');
+        return requestJson(buildUrl('/api/v1/departamentos/' + item.id), { method: 'DELETE' });
+      },
+      prepareFormValues(item) {
+        return {
+          nombre: item?.nombre || '',
+          idProvincia: item?.provincia?.id || ''
+        };
+      },
+      toPayload(mode, values) {
+        return { 
+          nombre: values.nombre.trim(),
+          idProvincia: values.idProvincia
+        };
+      },
+      isInactive(item) {
+        return !!item?.eliminado;
+      },
+      searchText(item) {
+        return [item?.nombre, item?.provincia?.nombre, item?.provincia?.pais?.nombre].filter(Boolean).join(' ').toLowerCase();
+      }
+    },
+    localidades: {
+      label: 'Localidades',
+      description: 'Gestión de localidades organizadas por departamento.',
+      singular: 'localidad',
+      createLabel: 'Nueva localidad',
+      searchPlaceholder: 'Buscar por nombre de localidad, código postal o departamento',
+      allowCreate: true,
+      allowUpdate: true,
+      allowDelete: true,
+      columns: [
+        { header: 'Nombre', value: item => item?.nombre || '—' },
+        { header: 'Código Postal', value: item => item?.codigoPostal || '—' },
+        { header: 'Departamento', value: item => item?.departamento?.nombre || '—' },
+        { header: 'Provincia', value: item => item?.departamento?.provincia?.nombre || '—' },
+        { header: 'Estado', value: item => item?.eliminado ? 'Dada de baja' : 'Activa' }
+      ],
+      formFields: [
+        { name: 'nombre', label: 'Nombre de la localidad', type: 'text', required: true, width: 'col-md-6' },
+        { name: 'codigoPostal', label: 'Código Postal', type: 'text' },
+        { name: 'idDepartamento', label: 'Departamento', type: 'select', required: true, fullWidth: true, loadOptions: loadDepartamentosOptionsV1 }
+      ],
+      async list() {
+        return requestJson(buildUrl('/api/v1/localidades'));
+      },
+      async create(payload) {
+        invalidateOptions('localidades');
+        invalidateOptions('localidadesV1');
+        return sendJson(buildUrl('/api/v1/localidades'), 'POST', payload);
+      },
+      async update(item, payload) {
+        invalidateOptions('localidades');
+        invalidateOptions('localidadesV1');
+        return sendJson(buildUrl('/api/v1/localidades/' + item.id), 'PUT', payload);
+      },
+      async remove(item) {
+        invalidateOptions('localidades');
+        invalidateOptions('localidadesV1');
+        return requestJson(buildUrl('/api/v1/localidades/' + item.id), { method: 'DELETE' });
+      },
+      prepareFormValues(item) {
+        return {
+          nombre: item?.nombre || '',
+          codigoPostal: item?.codigoPostal || '',
+          idDepartamento: item?.departamento?.id || ''
+        };
+      },
+      toPayload(mode, values) {
+        return { 
+          nombre: values.nombre.trim(),
+          codigoPostal: values.codigoPostal ? values.codigoPostal.trim() : '',
+          idDepartamento: values.idDepartamento
+        };
+      },
+      isInactive(item) {
+        return !!item?.eliminado;
+      },
+      searchText(item) {
+        return [item?.nombre, item?.codigoPostal, item?.departamento?.nombre, item?.departamento?.provincia?.nombre].filter(Boolean).join(' ').toLowerCase();
+      }
+    },
+    usuarios: {
+      label: 'Usuarios',
+      description: 'Gestión de usuarios del sistema.',
+      singular: 'usuario',
+      createLabel: 'Nuevo usuario',
+      searchPlaceholder: 'Buscar por nombre de usuario o correo electrónico',
+      allowCreate: true,
+      allowUpdate: true,
+      allowDelete: true,
+      columns: [
+        { header: 'Nombre de Usuario', value: item => item?.nombreUsuario || '—' },
+        { header: 'Correo', value: item => item?.correoElectronico || '—' },
+        { header: 'Estado', value: item => item?.eliminado ? 'Inactivo' : 'Activo' }
+      ],
+      formFields: [
+        { name: 'nombreUsuario', label: 'Nombre de Usuario', type: 'text', required: true },
+        { name: 'clave', label: 'Clave', type: 'password', required: true },
+        { name: 'correoElectronico', label: 'Correo Electrónico', type: 'email', required: true }
+      ],
+      async list() {
+        return requestJson(buildUrl('/api/usuarios'));
+      },
+      async create(payload) {
+        return sendJson(buildUrl('/api/usuarios'), 'POST', payload);
+      },
+      async update(item, payload) {
+        return sendJson(buildUrl('/api/usuarios/' + item.id), 'PUT', payload);
+      },
+      async remove(item) {
+        return requestJson(buildUrl('/api/usuarios/' + item.id), { method: 'DELETE' });
+      },
+      prepareFormValues(item) {
+        return {
+          nombreUsuario: item?.nombreUsuario || '',
+          clave: '',
+          correoElectronico: item?.correoElectronico || ''
+        };
+      },
+      toPayload(mode, values) {
+        return {
+          nombreUsuario: values.nombreUsuario.trim(),
+          clave: values.clave.trim(),
+          correoElectronico: values.correoElectronico.trim()
+        };
       }
     }
   };
@@ -506,6 +959,9 @@
     dom.switcher.addEventListener('click', onEntitySwitch);
     dom.search.addEventListener('input', onSearchChange);
     dom.status.addEventListener('change', onStatusChange);
+    if (dom.subtype) {
+      dom.subtype.addEventListener('change', onSubtypeChange);
+    }
     dom.create.addEventListener('click', () => openForm('create'));
     dom.emptyCreate.addEventListener('click', () => openForm('create'));
     dom.form.addEventListener('submit', onFormSubmit);
@@ -564,6 +1020,21 @@
     state.status = 'activos';
     dom.search.value = '';
     dom.status.value = 'activos';
+    
+    // Mostrar/ocultar el selector de subtipo solo para direcciones
+    if (dom.subtypeContainer) {
+      if (entityKey === 'direcciones') {
+        dom.subtypeContainer.style.display = 'block';
+        // Establecer el valor por defecto si no está seleccionado
+        if (dom.subtype && !dom.subtype.value) {
+          dom.subtype.value = 'direccionesData';
+          ENTITIES.direcciones.currentSubType = 'direccionesData';
+        }
+      } else {
+        dom.subtypeContainer.style.display = 'none';
+      }
+    }
+    
     setActiveSwitcher();
     renderTable();
     loadRecords();
@@ -716,6 +1187,19 @@
     };
   }
 
+  function onSubtypeChange() {
+    if (state.entity === 'direcciones' && dom.subtype) {
+      const newSubtype = dom.subtype.value;
+      console.log('[Panel entidades] Subtype changed to:', newSubtype);
+      
+      // Actualizar el estado de la entidad direcciones
+      ENTITIES.direcciones.currentSubType = newSubtype;
+      
+      // Recargar los datos con la nueva configuración
+      refresh();
+    }
+  }
+
   function onSearchChange(event) {
     state.search = event.target.value.trim().toLowerCase();
     renderTable();
@@ -817,6 +1301,9 @@
 
     dom.formFields.innerHTML = fieldBlocks.join('');
     dom.formSubmit.disabled = false;
+    
+    // Inicializar autocomplete para campos que lo requieran
+    initializeAutocompleteFields();
   }
 
   function renderField(field, value, mode) {
@@ -844,6 +1331,21 @@
       const placeholderDisabled = field.required ? ' disabled' : '';
       const placeholderOption = `<option value=""${placeholderSelected}${placeholderDisabled}>${placeholderText}</option>`;
       control = `<select class="form-control" name="${escapeAttr(field.name)}" ${requiredAttr} ${disabledAttr}>${placeholderOption}${options}</select>`;
+    } else if (field.type === 'autocomplete') {
+      const currentValue = value == null ? '' : String(value);
+      const placeholderText = field.placeholder ? escapeHtml(field.placeholder) : `Buscar ${field.label}...`;
+      const apiEndpoint = field.apiEndpoint || '';
+      control = `
+        <div class="position-relative">
+          <input class="form-control autocomplete-input" 
+                 type="text" 
+                 name="${escapeAttr(field.name)}" 
+                 value="${escapeAttr(currentValue)}" 
+                 placeholder="${escapeAttr(placeholderText)}"
+                 data-api-endpoint="${escapeAttr(apiEndpoint)}"
+                 ${requiredAttr} ${disabledAttr}>
+          <ul class="autocomplete-suggestions list-group position-absolute w-100" style="z-index: 1050; display: none;"></ul>
+        </div>`;
     } else if (field.type === 'textarea') {
       const rows = field.rows || 3;
       control = `<textarea class="form-control" rows="${escapeAttr(rows)}" name="${escapeAttr(field.name)}" ${requiredAttr} ${disabledAttr}>${escapeHtml(value || '')}</textarea>`;
@@ -1076,11 +1578,96 @@
     if (optionCache.paises) {
       return optionCache.paises;
     }
-    const data = await requestJson(buildUrl('/api/paises'));
+    const data = await requestJson(buildUrl('/api/direcciones/paises'));
     const list = normalizeList(data)
       .filter(item => !item.eliminado)
       .map(item => ({ value: item.id, label: item.nombre }));
     optionCache.paises = list;
+    return list;
+  }
+
+  async function loadProvinciasOptions() {
+    if (optionCache.provincias) {
+      return optionCache.provincias;
+    }
+    const data = await requestJson(buildUrl('/api/direcciones/provincias'));
+    const list = normalizeList(data)
+      .filter(item => !item.eliminado)
+      .map(item => ({ value: item.id, label: item.nombre }));
+    optionCache.provincias = list;
+    return list;
+  }
+
+  async function loadDepartamentosOptions() {
+    if (optionCache.departamentos) {
+      return optionCache.departamentos;
+    }
+    const data = await requestJson(buildUrl('/api/direcciones/departamentos'));
+    const list = normalizeList(data)
+      .filter(item => !item.eliminado)
+      .map(item => ({ value: item.id, label: item.nombre }));
+    optionCache.departamentos = list;
+    return list;
+  }
+
+  async function loadLocalidadesOptions() {
+    if (optionCache.localidades) {
+      return optionCache.localidades;
+    }
+    const data = await requestJson(buildUrl('/api/direcciones/localidades'));
+    const list = normalizeList(data)
+      .filter(item => !item.eliminado)
+      .map(item => ({ value: item.id, label: item.nombre }));
+    optionCache.localidades = list;
+    return list;
+  }
+
+  // Funciones para los nuevos endpoints v1
+  async function loadPaisesOptionsV1() {
+    if (optionCache.paisesV1) {
+      return optionCache.paisesV1;
+    }
+    const data = await requestJson(buildUrl('/api/v1/paises/activos'));
+    const list = normalizeList(data)
+      .filter(item => !item.eliminado)
+      .map(item => ({ value: item.id, label: item.nombre }));
+    optionCache.paisesV1 = list;
+    return list;
+  }
+
+  async function loadProvinciasOptionsV1() {
+    if (optionCache.provinciasV1) {
+      return optionCache.provinciasV1;
+    }
+    const data = await requestJson(buildUrl('/api/v1/provincias/activos'));
+    const list = normalizeList(data)
+      .filter(item => !item.eliminado)
+      .map(item => ({ value: item.id, label: `${item.nombre} (${item.pais?.nombre || 'Sin país'})` }));
+    optionCache.provinciasV1 = list;
+    return list;
+  }
+
+  async function loadDepartamentosOptionsV1() {
+    if (optionCache.departamentosV1) {
+      return optionCache.departamentosV1;
+    }
+    const data = await requestJson(buildUrl('/api/v1/departamentos/activos'));
+    const list = normalizeList(data)
+      .filter(item => !item.eliminado)
+      .map(item => ({ value: item.id, label: `${item.nombre} (${item.provincia?.nombre || 'Sin provincia'})` }));
+    optionCache.departamentosV1 = list;
+    return list;
+  }
+
+  async function loadLocalidadesOptionsV1() {
+    if (optionCache.localidadesV1) {
+      return optionCache.localidadesV1;
+    }
+    const data = await requestJson(buildUrl('/api/v1/localidades/activos'));
+    const list = normalizeList(data)
+      .filter(item => !item.eliminado)
+      .map(item => ({ value: item.id, label: `${item.nombre} ${item.codigoPostal ? '(' + item.codigoPostal + ')' : ''} - ${item.departamento?.nombre || 'Sin depto'}` }));
+    optionCache.localidadesV1 = list;
     return list;
   }
 
@@ -1124,5 +1711,66 @@
     } catch (error) {
       return response.statusText || 'Error desconocido';
     }
+  }
+
+  function initializeAutocompleteFields() {
+    const autocompleteInputs = dom.formFields.querySelectorAll('.autocomplete-input');
+    
+    autocompleteInputs.forEach(input => {
+      const suggestionsList = input.parentElement.querySelector('.autocomplete-suggestions');
+      const apiEndpoint = input.dataset.apiEndpoint;
+      
+      if (!apiEndpoint) return;
+      
+      let searchTimeout;
+      
+      input.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+        
+        if (query.length >= 2) {
+          searchTimeout = setTimeout(() => {
+            fetch(`${apiEndpoint}?search=${encodeURIComponent(query)}`)
+              .then(response => response.json())
+              .then(data => {
+                suggestionsList.innerHTML = '';
+                
+                if (data.length > 0) {
+                  suggestionsList.style.display = 'block';
+                  
+                  data.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item list-group-item-action';
+                    li.textContent = item.nombre;
+                    li.style.cursor = 'pointer';
+                    
+                    li.addEventListener('click', () => {
+                      input.value = item.nombre;
+                      suggestionsList.style.display = 'none';
+                    });
+                    
+                    suggestionsList.appendChild(li);
+                  });
+                } else {
+                  suggestionsList.style.display = 'none';
+                }
+              })
+              .catch(error => {
+                console.error('Error fetching autocomplete data:', error);
+                suggestionsList.style.display = 'none';
+              });
+          }, 300);
+        } else {
+          suggestionsList.style.display = 'none';
+        }
+      });
+      
+      // Ocultar sugerencias cuando se hace clic fuera
+      document.addEventListener('click', function(e) {
+        if (!input.parentElement.contains(e.target)) {
+          suggestionsList.style.display = 'none';
+        }
+      });
+    });
   }
 })();

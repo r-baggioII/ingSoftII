@@ -290,6 +290,20 @@
       }
     }
 
+    @media (min-width: 992px) {
+      .entity-switcher ul {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+      }
+
+      .entity-switcher ul li {
+        flex: 1 1 calc(20% - 15px); /* Adjust width to fit 5 buttons per row */
+        max-width: 200px; /* Optional: Limit the maximum width of each button */
+      }
+    }
+
     /* Animation enhancements */
     .entity-switcher button,
     .main-button-panel,
@@ -441,8 +455,23 @@
               <li data-entity="valorCuotas">
                 <i class="fa fa-dollar"></i>Valores de cuota
               </li>
+              <li data-entity="direcciones">
+                <i class="fa fa-map-marker"></i>Direcciones
+              </li>
               <li data-entity="paises">
                 <i class="fa fa-globe"></i>Países
+              </li>
+              <li data-entity="provincias">
+                <i class="fa fa-map"></i>Provincias
+              </li>
+              <li data-entity="departamentos">
+                <i class="fa fa-building-o"></i>Departamentos
+              </li>
+              <li data-entity="localidades">
+                <i class="fa fa-location-arrow"></i>Localidades
+              </li>
+              <li data-entity="usuarios">
+                <i class="fa fa-user"></i>Usuarios
               </li>
             </ul>
           </div>
@@ -453,16 +482,26 @@
           <!-- Controls Section -->
           <div class="panel-controls">
             <div class="row align-items-end">
-              <div class="col-lg-4 col-md-6 mb-3 mb-md-0">
+              <div class="col-lg-3 col-md-6 mb-3 mb-md-0">
                 <label class="panel-label" for="entity-search">Buscar</label>
                 <input type="search" id="entity-search" class="form-control panel-control" placeholder="Nombre, correo o referencia">
               </div>
-              <div class="col-lg-3 col-md-6 mb-3 mb-md-0">
+              <div class="col-lg-2 col-md-6 mb-3 mb-md-0">
                 <label class="panel-label" for="entity-status">Estado</label>
                 <select id="entity-status" class="form-control panel-control">
                   <option value="activos">Activos</option>
                   <option value="inactivos">Dados de baja</option>
                   <option value="todos">Todos</option>
+                </select>
+              </div>
+              <div class="col-lg-3 col-md-6 mb-3 mb-md-0" id="entity-subtype-container" style="display: none;">
+                <label class="panel-label" for="entity-subtype">Gestionar</label>
+                <select id="entity-subtype" class="form-control panel-control">
+                  <option value="direccionesData">Direcciones</option>
+                  <option value="localidades">Localidades</option>
+                  <option value="departamentos">Departamentos</option>
+                  <option value="provincias">Provincias</option>
+                  <option value="paises">Países</option>
                 </select>
               </div>
               <div class="col-lg-3 col-md-6 mt-3 mt-lg-0 ml-lg-auto text-md-right">

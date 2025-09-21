@@ -53,8 +53,10 @@
 
   const DOCUMENT_OPTIONS = ['DNI', 'PASAPORTE', 'CEDULA', 'LIBRETA_CIVICA', 'LIBRETA_ENROLAMIENTO']
     .map(value => ({ value, label: formatLabel(value) }));
-
   const EMPLOYEE_TYPE_OPTIONS = ['ADMINISTRATIVO', 'ENTRENADOR', 'RECEPCION', 'SERVICIOS_GENERALES']
+    .map(value => ({ value, label: formatLabel(value) }));
+
+  const ROL_OPTIONS = ['ADMINISTRATIVO', 'PROFESOR', 'SOCIO']
     .map(value => ({ value, label: formatLabel(value) }));
 
   const state = {
@@ -587,34 +589,33 @@
           formFields: [
             { name: 'calle', label: 'Calle', type: 'text', required: true, width: 'col-md-8' },
             { name: 'numeracion', label: 'Número', type: 'text', required: true, width: 'col-md-4' },
-            { name: 'nombrePais', label: 'País', type: 'autocomplete', required: true, width: 'col-md-6', apiEndpoint: '/api/direcciones/paises', displayField: 'nombre' },
-            { name: 'nombreProvincia', label: 'Provincia', type: 'autocomplete', required: true, width: 'col-md-6', apiEndpoint: '/api/direcciones/provincias', displayField: 'nombre' },
-            { name: 'nombreDepartamento', label: 'Departamento', type: 'autocomplete', required: true, width: 'col-md-6', apiEndpoint: '/api/direcciones/departamentos', displayField: 'nombre' },
-            { name: 'nombreLocalidad', label: 'Localidad', type: 'autocomplete', required: true, width: 'col-md-6', apiEndpoint: '/api/direcciones/localidades', displayField: 'nombre' },
-            { name: 'codigoPostal', label: 'Código Postal', type: 'text' },
-            { name: 'barrio', label: 'Barrio', type: 'text' },
-            { name: 'manzanaPiso', label: 'Manzana/Piso', type: 'text' },
-            { name: 'casaDepartamento', label: 'Casa/Departamento', type: 'text' },
-            { name: 'referencia', label: 'Referencia', type: 'textarea' }
+            { name: 'idPais', label: 'País', type: 'select', required: true, width: 'col-md-6', loadOptions: loadPaisesOptionsForDirection },
+            { name: 'idProvincia', label: 'Provincia', type: 'select', required: true, width: 'col-md-6', loadOptions: loadProvinciasOptionsForDirection, dependsOn: 'idPais' },
+            { name: 'idDepartamento', label: 'Departamento', type: 'select', required: true, width: 'col-md-6', loadOptions: loadDepartamentosOptionsForDirection, dependsOn: 'idProvincia' },
+            { name: 'idLocalidad', label: 'Localidad', type: 'select', required: true, width: 'col-md-6', loadOptions: loadLocalidadesOptionsForDirection, dependsOn: 'idDepartamento' },
+            { name: 'barrio', label: 'Barrio', type: 'text', required: false },
+            { name: 'manzanaPiso', label: 'Manzana/Piso', type: 'text', required: false },
+            { name: 'casaDepartamento', label: 'Casa/Departamento', type: 'text', required: false },
+            { name: 'referencia', label: 'Referencia', type: 'textarea', required: false }
           ],
           apiPath: '/api/direcciones',
           submitHandler: (mode, values) => {
+            console.log('[Direcciones] submitHandler called with mode:', mode, 'values:', values);
+            
             const payload = {
-              calle: values.calle ? values.calle.trim() : null,
-              numeracion: values.numeracion ? values.numeracion.trim() : null,
-              barrio: values.barrio ? values.barrio.trim() : null,
-              manzanaPiso: values.manzanaPiso ? values.manzanaPiso.trim() : null,
-              casaDepartamento: values.casaDepartamento ? values.casaDepartamento.trim() : null,
-              referencia: values.referencia ? values.referencia.trim() : null,
-              nombrePais: values.nombrePais ? values.nombrePais.trim() : null,
-              nombreProvincia: values.nombreProvincia ? values.nombreProvincia.trim() : null,
-              nombreDepartamento: values.nombreDepartamento ? values.nombreDepartamento.trim() : null,
-              nombreLocalidad: values.nombreLocalidad ? values.nombreLocalidad.trim() : null,
-              codigoPostal: values.codigoPostal ? values.codigoPostal.trim() : null
+              calle: values.calle ? values.calle.trim() : '',
+              numeracion: values.numeracion ? values.numeracion.trim() : '',
+              barrio: values.barrio ? values.barrio.trim() : '',
+              manzanaPiso: values.manzanaPiso ? values.manzanaPiso.trim() : '',
+              casaDepartamento: values.casaDepartamento ? values.casaDepartamento.trim() : '',
+              referencia: values.referencia ? values.referencia.trim() : '',
+              idLocalidad: values.idLocalidad
             };
             
+            console.log('[Direcciones] payload constructed:', payload);
+            
             if (mode === 'create') {
-              return sendJson(buildUrl('/api/direcciones/con-nombres'), 'POST', payload);
+              return sendJson(buildUrl('/api/direcciones'), 'POST', payload);
             } else {
               return sendJson(buildUrl(`/api/direcciones/${values.id}`), 'PUT', payload);
             }
@@ -717,10 +718,10 @@
             return {
               calle: item?.calle || '',
               numeracion: item?.numero || '',
-              nombrePais: item?.localidad?.departamento?.provincia?.pais?.nombre || '',
-              nombreProvincia: item?.localidad?.departamento?.provincia?.nombre || '',
-              nombreDepartamento: item?.localidad?.departamento?.nombre || '',
-              nombreLocalidad: item?.localidad?.nombre || '',
+              idPais: item?.localidad?.departamento?.provincia?.pais?.id || '',
+              idProvincia: item?.localidad?.departamento?.provincia?.id || '',
+              idDepartamento: item?.localidad?.departamento?.id || '',
+              idLocalidad: item?.localidad?.id || '',
               codigoPostal: item?.localidad?.codigoPostal || '',
               barrio: item?.barrio || '',
               manzanaPiso: item?.manzanaPiso || '',
@@ -992,19 +993,19 @@
       description: 'Gestión de usuarios del sistema.',
       singular: 'usuario',
       createLabel: 'Nuevo usuario',
-      searchPlaceholder: 'Buscar por nombre de usuario o correo electrónico',
+      searchPlaceholder: 'Buscar por nombre de usuario',
       allowCreate: true,
       allowUpdate: true,
       allowDelete: true,
       columns: [
         { header: 'Nombre de Usuario', value: item => item?.nombreUsuario || '—' },
-        { header: 'Correo', value: item => item?.correoElectronico || '—' },
+        { header: 'Rol', value: item => formatLabel(item?.rol) || '—' },
         { header: 'Estado', value: item => item?.eliminado ? 'Inactivo' : 'Activo' }
       ],
       formFields: [
         { name: 'nombreUsuario', label: 'Nombre de Usuario', type: 'text', required: true },
         { name: 'clave', label: 'Clave', type: 'password', required: true },
-        { name: 'correoElectronico', label: 'Correo Electrónico', type: 'email', required: true }
+        { name: 'rol', label: 'Rol', type: 'select', required: true, options: ROL_OPTIONS }
       ],
       async list() {
         return requestJson(buildUrl('/api/usuarios'));
@@ -1022,14 +1023,14 @@
         return {
           nombreUsuario: item?.nombreUsuario || '',
           clave: '',
-          correoElectronico: item?.correoElectronico || ''
+          rol: item?.rol || ROL_OPTIONS[0].value
         };
       },
       toPayload(mode, values) {
         return {
           nombreUsuario: values.nombreUsuario.trim(),
           clave: values.clave.trim(),
-          correoElectronico: values.correoElectronico.trim()
+          rol: values.rol
         };
       }
     }
@@ -1396,6 +1397,12 @@
     
     // Inicializar autocomplete para campos que lo requieran
     initializeAutocompleteFields();
+    
+    // Inicializar campos select con dependencias
+    initializeSelectWithDependencies();
+    
+    // Inicializar campos select-with-create
+    initializeSelectWithCreateFields();
   }
 
   function renderField(field, value, mode) {
@@ -1422,7 +1429,33 @@
       const placeholderSelected = hasValue ? '' : ' selected';
       const placeholderDisabled = field.required ? ' disabled' : '';
       const placeholderOption = `<option value=""${placeholderSelected}${placeholderDisabled}>${placeholderText}</option>`;
-      control = `<select class="form-control" name="${escapeAttr(field.name)}" ${requiredAttr} ${disabledAttr}>${placeholderOption}${options}</select>`;
+      const dependsOnAttr = field.dependsOn ? ` data-depends-on="${escapeAttr(field.dependsOn)}"` : '';
+      control = `<select class="form-control" name="${escapeAttr(field.name)}"${dependsOnAttr} ${requiredAttr} ${disabledAttr}>${placeholderOption}${options}</select>`;
+    } else if (field.type === 'select-with-create') {
+      const currentValue = value == null ? '' : String(value);
+      const options = (field.options || []).map(opt => {
+        const optionValue = opt.value != null ? String(opt.value) : '';
+        const selected = optionValue === currentValue ? ' selected' : '';
+        return `<option value="${escapeAttr(opt.value)}"${selected}>${escapeHtml(opt.label)}</option>`;
+      }).join('');
+      const hasValue = currentValue.length > 0;
+      const placeholderText = field.placeholder ? escapeHtml(field.placeholder) : 'Seleccioná una opción';
+      const placeholderSelected = hasValue ? '' : ' selected';
+      const placeholderDisabled = field.required ? ' disabled' : '';
+      const placeholderOption = `<option value=""${placeholderSelected}${placeholderDisabled}>${placeholderText}</option>`;
+      const createOption = `<option value="__create_new__">➕ Crear nuevo ${field.label.toLowerCase()}</option>`;
+      
+      control = `
+        <div class="select-with-create-container">
+          <select class="form-control select-with-create" 
+                  name="${escapeAttr(field.name)}" 
+                  data-create-endpoint="${escapeAttr(field.createEndpoint || '')}"
+                  data-create-field="${escapeAttr(field.createField || 'nombre')}"
+                  data-depends-on="${escapeAttr(field.dependsOn || '')}"
+                  ${requiredAttr} ${disabledAttr}>
+            ${placeholderOption}${options}${createOption}
+          </select>
+        </div>`;
     } else if (field.type === 'autocomplete') {
       const currentValue = value == null ? '' : String(value);
       const placeholderText = field.placeholder ? escapeHtml(field.placeholder) : `Buscar ${field.label}...`;
@@ -1763,6 +1796,52 @@
     return list;
   }
 
+  // Funciones específicas para el formulario de direcciones
+  async function loadPaisesOptionsForDirection() {
+    if (optionCache.paisesDirection) {
+      return optionCache.paisesDirection;
+    }
+    const data = await requestJson(buildUrl('/api/direcciones/paises'));
+    const list = normalizeList(data)
+      .filter(item => !item.eliminado)
+      .map(item => ({ value: item.id, label: item.nombre }));
+    optionCache.paisesDirection = list;
+    return list;
+  }
+
+  async function loadProvinciasOptionsForDirection() {
+    // Cargar siempre dinámicamente según el país seleccionado
+    const data = await requestJson(buildUrl('/api/direcciones/provincias'));
+    const list = normalizeList(data)
+      .filter(item => !item.eliminado)
+      .map(item => ({ value: item.id, label: item.nombre, paisId: item.pais?.id }));
+    return list;
+  }
+
+  async function loadDepartamentosOptionsForDirection() {
+    // Cargar siempre dinámicamente según la provincia seleccionada
+    const data = await requestJson(buildUrl('/api/direcciones/departamentos'));
+    const list = normalizeList(data)
+      .filter(item => !item.eliminado)
+      .map(item => ({ value: item.id, label: item.nombre, provinciaId: item.provincia?.id }));
+    return list;
+  }
+
+  async function loadLocalidadesOptionsForDirection() {
+    // Cargar siempre dinámicamente según el departamento seleccionado
+    const data = await requestJson(buildUrl('/api/direcciones/localidades'));
+    const list = normalizeList(data)
+      .filter(item => !item.eliminado)
+      .map(item => ({ value: item.id, label: `${item.nombre} ${item.codigoPostal ? '(' + item.codigoPostal + ')' : ''}`, departamentoId: item.departamento?.id }));
+    return list;
+  }
+
+  // Hacer las funciones disponibles globalmente para los event handlers
+  window.loadPaisesOptionsForDirection = loadPaisesOptionsForDirection;
+  window.loadProvinciasOptionsForDirection = loadProvinciasOptionsForDirection;
+  window.loadDepartamentosOptionsForDirection = loadDepartamentosOptionsForDirection;
+  window.loadLocalidadesOptionsForDirection = loadLocalidadesOptionsForDirection;
+
   async function sendJson(url, method, payload) {
     return requestJson(url, {
       method,
@@ -1864,5 +1943,506 @@
         }
       });
     });
+  }
+
+  function initializeSelectWithCreateFields() {
+    console.log('[Select with create] Inicializando campos select-with-create...');
+    const selectWithCreateElements = dom.formFields.querySelectorAll('.select-with-create');
+    console.log('[Select with create] Elementos encontrados:', selectWithCreateElements.length);
+    
+    selectWithCreateElements.forEach(select => {
+      const fieldName = select.name;
+      console.log('[Select with create] Procesando campo:', fieldName);
+      
+      // Determinar la función de carga según el nombre del campo
+      let loadFunction = null;
+      if (fieldName === 'idPais') {
+        loadFunction = loadPaisesOptionsForDirection;
+      } else if (fieldName === 'idProvincia') {
+        loadFunction = loadProvinciasOptionsForDirection;
+      } else if (fieldName === 'idDepartamento') {
+        loadFunction = loadDepartamentosOptionsForDirection;
+      } else if (fieldName === 'idLocalidad') {
+        loadFunction = loadLocalidadesOptionsForDirection;
+      }
+      
+      console.log('[Select with create] Función de carga para', fieldName, ':', loadFunction ? 'encontrada' : 'no encontrada');
+      
+      // Cargar opciones iniciales
+      if (loadFunction) {
+        loadSelectOptions(select, loadFunction);
+      }
+      
+      // Manejar cambio de selección
+      select.addEventListener('change', async function() {
+        const selectedValue = this.value;
+        
+        if (selectedValue === '__create_new__') {
+          await handleCreateNewOption(this);
+        } else {
+          // Si este campo es una dependencia de otros, actualizar campos dependientes
+          updateDependentSelects(this);
+        }
+      });
+      
+      // Si depende de otro campo, escuchar cambios en el campo padre
+      const dependsOn = select.dataset.dependsOn;
+      if (dependsOn) {
+        const parentField = dom.formFields.querySelector(`[name="${dependsOn}"]`);
+        if (parentField) {
+          parentField.addEventListener('change', () => {
+            updateSelectBasedOnParent(select, parentField);
+          });
+        }
+      }
+    });
+  }
+
+  async function loadSelectOptions(selectElement, loadFunction) {
+    console.log('[Select with create] Cargando opciones para:', selectElement.name);
+    try {
+      const options = await loadFunction();
+      console.log('[Select with create] Opciones cargadas:', options.length);
+      const currentValue = selectElement.value;
+      
+      // Limpiar opciones existentes (mantener placeholder y create option)
+      selectElement.innerHTML = '';
+      
+      // Agregar placeholder
+      const placeholderOption = document.createElement('option');
+      placeholderOption.value = '';
+      placeholderOption.textContent = 'Seleccioná una opción';
+      placeholderOption.disabled = selectElement.required;
+      selectElement.appendChild(placeholderOption);
+      
+      // Agregar opciones cargadas
+      options.forEach(option => {
+        const optionElement = document.createElement('option');
+        optionElement.value = option.value;
+        optionElement.textContent = option.label;
+        if (option.paisId) optionElement.dataset.paisId = option.paisId;
+        if (option.provinciaId) optionElement.dataset.provinciaId = option.provinciaId;
+        if (option.departamentoId) optionElement.dataset.departamentoId = option.departamentoId;
+        selectElement.appendChild(optionElement);
+      });
+      
+      // Agregar opción de crear nuevo
+      const createOption = document.createElement('option');
+      createOption.value = '__create_new__';
+      createOption.textContent = `➕ Crear nuevo ${selectElement.dataset.createField || 'elemento'}`;
+      selectElement.appendChild(createOption);
+      
+      // Restaurar valor seleccionado si existe
+      if (currentValue && currentValue !== '__create_new__') {
+        selectElement.value = currentValue;
+      }
+      
+      console.log('[Select with create] Opciones cargadas exitosamente para:', selectElement.name);
+    } catch (error) {
+      console.error('[Select with create] Error al cargar opciones para', selectElement.name, ':', error);
+    }
+  }
+
+  function initializeSelectWithDependencies() {
+    console.log('[Select dependencies] Inicializando campos select con dependencias...');
+    
+    // Buscar campos select de direcciones con dependencias
+    const selectFields = dom.formFields.querySelectorAll('select[data-depends-on], select[name="idPais"], select[name="idProvincia"], select[name="idDepartamento"], select[name="idLocalidad"]');
+    
+    selectFields.forEach(select => {
+      const fieldName = select.name;
+      console.log('[Select dependencies] Procesando campo:', fieldName);
+      
+      // Limpiar flags de estado
+      select._updating = false;
+      select._listenersAttached = false;
+      
+      // Determinar la función de carga según el nombre del campo
+      let loadFunction = null;
+      if (fieldName === 'idPais') {
+        loadFunction = loadPaisesOptionsForDirection;
+      } else if (fieldName === 'idProvincia') {
+        loadFunction = loadProvinciasOptionsForDirection;
+      } else if (fieldName === 'idDepartamento') {
+        loadFunction = loadDepartamentosOptionsForDirection;
+      } else if (fieldName === 'idLocalidad') {
+        loadFunction = loadLocalidadesOptionsForDirection;
+      }
+      
+      // Cargar opciones iniciales solo para el país (el resto depende de selecciones)
+      if (loadFunction && fieldName === 'idPais') {
+        loadSelectOptionsWithoutCreate(select, loadFunction);
+      } else {
+        // Para otros campos, solo agregar los event listeners
+        reattachEventListenersToSelect(select);
+      }
+    });
+  }
+
+  async function loadSelectOptionsWithoutCreate(selectElement, loadFunction) {
+    console.log('[Select dependencies] Cargando opciones para:', selectElement.name);
+    try {
+      const options = await loadFunction();
+      console.log('[Select dependencies] Opciones cargadas:', options.length);
+      const currentValue = selectElement.value;
+      
+      // Limpiar opciones existentes
+      selectElement.innerHTML = '';
+      
+      // Agregar placeholder
+      const placeholderOption = document.createElement('option');
+      placeholderOption.value = '';
+      placeholderOption.textContent = 'Seleccioná una opción';
+      placeholderOption.disabled = selectElement.required;
+      selectElement.appendChild(placeholderOption);
+      
+      // Agregar opciones cargadas
+      options.forEach(option => {
+        const optionElement = document.createElement('option');
+        optionElement.value = option.value;
+        optionElement.textContent = option.label;
+        if (option.paisId) optionElement.dataset.paisId = option.paisId;
+        if (option.provinciaId) optionElement.dataset.provinciaId = option.provinciaId;
+        if (option.departamentoId) optionElement.dataset.departamentoId = option.departamentoId;
+        selectElement.appendChild(optionElement);
+      });
+      
+      // Restaurar valor seleccionado si existe
+      if (currentValue) {
+        selectElement.value = currentValue;
+      }
+      
+      // Re-agregar event listeners después de cargar las opciones
+      reattachEventListenersToSelect(selectElement);
+      
+      console.log('[Select dependencies] Opciones cargadas exitosamente para:', selectElement.name);
+    } catch (error) {
+      console.error('[Select dependencies] Error al cargar opciones para', selectElement.name, ':', error);
+    }
+  }
+
+  function updateDependentSelectsWithoutCreate(changedSelect) {
+    const fieldName = changedSelect.name;
+    const selectedValue = changedSelect.value;
+    
+    console.log('[Select dependencies] updateDependentSelectsWithoutCreate called for:', fieldName, '=', selectedValue);
+    
+    // Limpiar y actualizar campos dependientes
+    if (fieldName === 'idPais') {
+      const provinciaSelect = dom.formFields.querySelector('[name="idProvincia"]');
+      const departamentoSelect = dom.formFields.querySelector('[name="idDepartamento"]');
+      const localidadSelect = dom.formFields.querySelector('[name="idLocalidad"]');
+      
+      clearSelectOptions(provinciaSelect);
+      clearSelectOptions(departamentoSelect);
+      clearSelectOptions(localidadSelect);
+      
+      if (selectedValue && provinciaSelect) {
+        updateSelectBasedOnParentWithoutCreate(provinciaSelect, changedSelect);
+      }
+    } else if (fieldName === 'idProvincia') {
+      const departamentoSelect = dom.formFields.querySelector('[name="idDepartamento"]');
+      const localidadSelect = dom.formFields.querySelector('[name="idLocalidad"]');
+      
+      clearSelectOptions(departamentoSelect);
+      clearSelectOptions(localidadSelect);
+      
+      if (selectedValue && departamentoSelect) {
+        updateSelectBasedOnParentWithoutCreate(departamentoSelect, changedSelect);
+      }
+    } else if (fieldName === 'idDepartamento') {
+      console.log('[Select dependencies] Actualizando localidades porque cambió departamento');
+      const localidadSelect = dom.formFields.querySelector('[name="idLocalidad"]');
+      
+      clearSelectOptions(localidadSelect);
+      
+      if (selectedValue && localidadSelect) {
+        console.log('[Select dependencies] Llamando updateSelectBasedOnParentWithoutCreate para localidades');
+        updateSelectBasedOnParentWithoutCreate(localidadSelect, changedSelect);
+      }
+    }
+  }
+
+  async function updateSelectBasedOnParentWithoutCreate(childSelect, parentSelect) {
+    const parentValue = parentSelect.value;
+    const childName = childSelect.name;
+    
+    console.log('[Select dependencies] Actualizando', childName, 'basado en', parentSelect.name, '=', parentValue);
+    
+    // Evitar actualizaciones múltiples simultáneas
+    if (childSelect._updating) {
+      console.log('[Select dependencies] Ya se está actualizando', childName, ', ignorando');
+      return;
+    }
+    childSelect._updating = true;
+    
+    if (!parentValue) {
+      clearSelectOptions(childSelect);
+      childSelect._updating = false;
+      return;
+    }
+    
+    // Determinar la función de carga según el nombre del campo hijo
+    let loadFunction = null;
+    if (childName === 'idProvincia') {
+      loadFunction = loadProvinciasOptionsForDirection;
+    } else if (childName === 'idDepartamento') {
+      loadFunction = loadDepartamentosOptionsForDirection;
+    } else if (childName === 'idLocalidad') {
+      loadFunction = loadLocalidadesOptionsForDirection;
+    }
+    
+    if (loadFunction) {
+      const allOptions = await loadFunction();
+      console.log('[Select dependencies] Opciones cargadas para', childName, ':', allOptions.length);
+      
+      // Filtrar opciones según dependencia
+      let filteredOptions = allOptions;
+      if (childName === 'idProvincia') {
+        filteredOptions = allOptions.filter(opt => opt.paisId == parentValue);
+      } else if (childName === 'idDepartamento') {
+        filteredOptions = allOptions.filter(opt => opt.provinciaId == parentValue);
+      } else if (childName === 'idLocalidad') {
+        filteredOptions = allOptions.filter(opt => {
+          console.log('[Select dependencies] Comparando localidad:', opt.label, 'departamentoId:', opt.departamentoId, 'vs parentValue:', parentValue);
+          return opt.departamentoId == parentValue;
+        });
+      }
+      
+      console.log('[Select dependencies] Opciones filtradas para', childName, ':', filteredOptions.length);
+      
+      // Actualizar el select con las opciones filtradas
+      childSelect.innerHTML = '';
+      
+      const placeholderOption = document.createElement('option');
+      placeholderOption.value = '';
+      placeholderOption.textContent = 'Seleccioná una opción';
+      placeholderOption.disabled = childSelect.required;
+      childSelect.appendChild(placeholderOption);
+      
+      filteredOptions.forEach(option => {
+        const optionElement = document.createElement('option');
+        optionElement.value = option.value;
+        optionElement.textContent = option.label;
+        if (option.paisId) optionElement.dataset.paisId = option.paisId;
+        if (option.provinciaId) optionElement.dataset.provinciaId = option.provinciaId;
+        if (option.departamentoId) optionElement.dataset.departamentoId = option.departamentoId;
+        childSelect.appendChild(optionElement);
+      });
+      
+      // Re-agregar event listeners después de actualizar las opciones
+      reattachEventListenersToSelect(childSelect);
+    }
+    
+    // Marcar como terminada la actualización
+    childSelect._updating = false;
+  }
+
+  function reattachEventListenersToSelect(selectElement) {
+    // Solo agregar si no existe ya
+    if (selectElement._listenersAttached) {
+      return;
+    }
+    
+    // Crear handler y guardarlo
+    selectElement._changeHandler = function() {
+      console.log('[Select dependencies] Change event fired for:', this.name, '=', this.value);
+      updateDependentSelectsWithoutCreate(this);
+    };
+    
+    // Agregar el listener
+    selectElement.addEventListener('change', selectElement._changeHandler);
+    
+    // Si depende de otro campo, asegurar que tiene el listener para actualizaciones
+    const dependsOn = selectElement.dataset.dependsOn;
+    if (dependsOn) {
+      const parentField = dom.formFields.querySelector(`[name="${dependsOn}"]`);
+      if (parentField && !parentField._childListeners) {
+        parentField._childListeners = new Set();
+      }
+      
+      if (parentField && !parentField._childListeners.has(selectElement.name)) {
+        const childListener = () => {
+          updateSelectBasedOnParentWithoutCreate(selectElement, parentField);
+        };
+        parentField.addEventListener('change', childListener);
+        parentField._childListeners.add(selectElement.name);
+      }
+    }
+    
+    // Marcar como que ya tiene listeners
+    selectElement._listenersAttached = true;
+  }
+
+  function clearSelectOptions(selectElement) {
+    if (selectElement) {
+      selectElement.innerHTML = '';
+      const placeholderOption = document.createElement('option');
+      placeholderOption.value = '';
+      placeholderOption.textContent = 'Selecciona primero un elemento padre';
+      placeholderOption.disabled = true;
+      selectElement.appendChild(placeholderOption);
+    }
+  }
+
+  async function handleCreateNewOption(selectElement) {
+    const createEndpoint = selectElement.dataset.createEndpoint;
+    const createField = selectElement.dataset.createField || 'nombre';
+    const fieldName = selectElement.name;
+    
+    const inputValue = prompt(`Ingrese el nombre del nuevo ${createField}:`);
+    if (!inputValue || !inputValue.trim()) {
+      selectElement.value = ''; // Reset to placeholder
+      return;
+    }
+    
+    try {
+      // Preparar payload para creación
+      const payload = {};
+      payload[createField] = inputValue.trim();
+      
+      // Agregar campos de dependencia según el tipo
+      if (fieldName === 'idProvincia') {
+        const paisSelect = dom.formFields.querySelector('[name="idPais"]');
+        if (paisSelect && paisSelect.value) {
+          payload.idPais = paisSelect.value;
+        }
+      } else if (fieldName === 'idDepartamento') {
+        const provinciaSelect = dom.formFields.querySelector('[name="idProvincia"]');
+        if (provinciaSelect && provinciaSelect.value) {
+          payload.idProvincia = provinciaSelect.value;
+        }
+      } else if (fieldName === 'idLocalidad') {
+        const departamentoSelect = dom.formFields.querySelector('[name="idDepartamento"]');
+        const codigoPostalInput = dom.formFields.querySelector('[name="codigoPostal"]');
+        if (departamentoSelect && departamentoSelect.value) {
+          payload.idDepartamento = departamentoSelect.value;
+        }
+        if (codigoPostalInput && codigoPostalInput.value) {
+          payload.codigoPostal = codigoPostalInput.value;
+        }
+      }
+      
+      // Crear el nuevo elemento
+      const response = await sendJson(buildUrl(createEndpoint), 'POST', payload);
+      
+      // Invalidar caché de opciones para este tipo
+      const cacheKey = getCacheKeyForEndpoint(createEndpoint);
+      if (cacheKey) {
+        delete optionCache[cacheKey];
+      }
+      
+      // Recargar opciones del select
+      const loadFunctionName = selectElement.dataset.loadFunction;
+      if (loadFunctionName && window[loadFunctionName]) {
+        await loadSelectOptions(selectElement, window[loadFunctionName]);
+      }
+      
+      // Seleccionar el elemento recién creado
+      if (response && response.id) {
+        selectElement.value = response.id;
+      }
+      
+      showMessage('success', `${createField} creado correctamente.`);
+      
+      // Actualizar campos dependientes
+      updateDependentSelects(selectElement);
+      
+    } catch (error) {
+      console.error('Error creating new option:', error);
+      showMessage('error', error.message || 'Error al crear el nuevo elemento.');
+      selectElement.value = ''; // Reset to placeholder
+    }
+  }
+
+  function updateDependentSelects(parentSelect) {
+    const parentValue = parentSelect.value;
+    const parentName = parentSelect.name;
+    
+    // Determinar qué campos dependen de este
+    let dependentSelectors = [];
+    if (parentName === 'idPais') {
+      dependentSelectors = ['[name="idProvincia"]', '[name="idDepartamento"]', '[name="idLocalidad"]'];
+    } else if (parentName === 'idProvincia') {
+      dependentSelectors = ['[name="idDepartamento"]', '[name="idLocalidad"]'];
+    } else if (parentName === 'idDepartamento') {
+      dependentSelectors = ['[name="idLocalidad"]'];
+    }
+    
+    // Limpiar y actualizar campos dependientes
+    dependentSelectors.forEach(selector => {
+      const dependentSelect = dom.formFields.querySelector(selector);
+      if (dependentSelect) {
+        dependentSelect.value = '';
+        updateSelectBasedOnParent(dependentSelect, parentSelect);
+      }
+    });
+  }
+
+  async function updateSelectBasedOnParent(childSelect, parentSelect) {
+    const parentValue = parentSelect.value;
+    const childName = childSelect.name;
+    
+    if (!parentValue) {
+      // Si no hay valor padre, limpiar las opciones del hijo
+      childSelect.innerHTML = '<option value="" disabled>Selecciona primero un elemento padre</option>';
+      return;
+    }
+    
+    // Determinar la función de carga según el nombre del campo hijo
+    let loadFunction = null;
+    if (childName === 'idProvincia') {
+      loadFunction = loadProvinciasOptionsForDirection;
+    } else if (childName === 'idDepartamento') {
+      loadFunction = loadDepartamentosOptionsForDirection;
+    } else if (childName === 'idLocalidad') {
+      loadFunction = loadLocalidadesOptionsForDirection;
+    }
+    
+    if (loadFunction) {
+      const allOptions = await loadFunction();
+      
+      // Filtrar opciones según dependencia
+      let filteredOptions = allOptions;
+      if (childName === 'idProvincia') {
+        filteredOptions = allOptions.filter(opt => opt.paisId === parentValue);
+      } else if (childName === 'idDepartamento') {
+        filteredOptions = allOptions.filter(opt => opt.provinciaId === parentValue);
+      } else if (childName === 'idLocalidad') {
+        filteredOptions = allOptions.filter(opt => opt.departamentoId === parentValue);
+      }
+      
+      // Actualizar el select con las opciones filtradas
+      childSelect.innerHTML = '';
+      
+      const placeholderOption = document.createElement('option');
+      placeholderOption.value = '';
+      placeholderOption.textContent = 'Seleccioná una opción';
+      placeholderOption.disabled = childSelect.required;
+      childSelect.appendChild(placeholderOption);
+      
+      filteredOptions.forEach(option => {
+        const optionElement = document.createElement('option');
+        optionElement.value = option.value;
+        optionElement.textContent = option.label;
+        if (option.paisId) optionElement.dataset.paisId = option.paisId;
+        if (option.provinciaId) optionElement.dataset.provinciaId = option.provinciaId;
+        if (option.departamentoId) optionElement.dataset.departamentoId = option.departamentoId;
+        childSelect.appendChild(optionElement);
+      });
+      
+      const createOption = document.createElement('option');
+      createOption.value = '__create_new__';
+      createOption.textContent = `➕ Crear nuevo ${childSelect.dataset.createField || 'elemento'}`;
+      childSelect.appendChild(createOption);
+    }
+  }
+
+  function getCacheKeyForEndpoint(endpoint) {
+    if (endpoint.includes('/paises')) return 'paisesDirection';
+    if (endpoint.includes('/provincias')) return 'provinciasDirection';
+    if (endpoint.includes('/departamentos')) return 'departamentosDirection';
+    if (endpoint.includes('/localidades')) return 'localidadesDirection';
+    return null;
   }
 })();

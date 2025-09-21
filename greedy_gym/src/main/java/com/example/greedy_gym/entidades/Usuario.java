@@ -2,9 +2,10 @@ package com.example.greedy_gym.entidades;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.util.Objects;
 import java.util.UUID;
 
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -22,28 +23,33 @@ public class Usuario {
     private String nombreUsuario;
 
     @NotBlank
-    @Size(min = 8, max = 100)
+    @Size(min = 1, max = 100)
     @Column(nullable = false, length = 100)
     private String clave;
 
-    @NotBlank
-    @Email
-    @Size(max = 150)
-    @Column(nullable = false, length = 150, unique = true)
-    private String correoElectronico;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @NotNull
+    private RolUsuario rol;
 
     @Column(nullable = false)
     private boolean eliminado = false;
 
-    public Usuario() {
-        this.id = UUID.randomUUID().toString();
+    @PrePersist
+    protected void prePersist() {
+        if (this.id == null) {
+            this.id = UUID.randomUUID().toString();
+        }
     }
 
-    public Usuario(String nombreUsuario, String clave, String correoElectronico) {
+    public Usuario() {
+    }
+
+    public Usuario(String nombreUsuario, String clave, RolUsuario rol) {
         this();
         this.nombreUsuario = nombreUsuario;
         this.clave = clave;
-        this.correoElectronico = correoElectronico;
+        this.rol = rol;
     }
 
     public String getId() {
@@ -70,12 +76,12 @@ public class Usuario {
         this.clave = clave;
     }
 
-    public String getCorreoElectronico() {
-        return correoElectronico;
+    public RolUsuario getRol() {
+        return rol;
     }
 
-    public void setCorreoElectronico(String correoElectronico) {
-        this.correoElectronico = correoElectronico;
+    public void setRol(RolUsuario rol) {
+        this.rol = rol;
     }
 
     public boolean isEliminado() {
@@ -84,5 +90,18 @@ public class Usuario {
 
     public void setEliminado(boolean eliminado) {
         this.eliminado = eliminado;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Usuario usuario = (Usuario) o;
+        return Objects.equals(id, usuario.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

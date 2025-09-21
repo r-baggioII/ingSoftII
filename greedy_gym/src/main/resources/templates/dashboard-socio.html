@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Dashboard Socio - Greedy Gym">
+    <meta name="author" content="Greedy Gym">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i&display=swap" rel="stylesheet">
+
+    <title>Panel Socio - Greedy Gym</title>
+
+    <!-- Archivos CSS -->
+    <link rel="stylesheet" type="text/css" th:href="@{/assets/css/bootstrap.min.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/assets/css/font-awesome.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/templatemo-training-studio.css}">
+    
+    <style>
+    /* Panel-specific styling to complement template styles */
+    .panel-management {
+      padding: 80px 0;
+      background-color: #fff;
+    }
+
+    .module-switcher {
+      margin-bottom: 50px;
+    }
+
+    .module-switcher ul {
+      padding: 0;
+      text-align: center;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .module-switcher ul li {
+      list-style: none;
+      cursor: pointer;
+      position: relative;
+      font-size: 14px;
+      font-weight: 600;
+      color: #232d39;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 20px 25px;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0px 8px 25px rgba(0,0,0,0.1);
+      transition: all 0.3s ease-in-out;
+      margin-bottom: 15px;
+      flex: 1 1 calc(50% - 15px);
+      max-width: 400px;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .module-switcher ul li:hover {
+      color: #fff;
+      background: linear-gradient(105deg, #ed563b 0%, #ff6b47 100%);
+      transform: translateY(-5px);
+      box-shadow: 0px 15px 35px rgba(237, 86, 59, 0.3);
+    }
+
+    .module-switcher ul li.restricted {
+      opacity: 0.4;
+      cursor: not-allowed;
+      background: #e9ecef;
+      color: #6c757d;
+    }
+
+    .module-switcher ul li.restricted:hover {
+      background: #e9ecef;
+      color: #6c757d;
+      transform: none;
+      box-shadow: 0px 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .module-switcher ul li i {
+      font-size: 32px;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .module-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .module-description {
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 1.4;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .user-info {
+      background: linear-gradient(105deg, #232a34 0%, #2a3441 100%);
+      color: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .user-info h3 {
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .user-info p {
+      margin: 0;
+      opacity: 0.8;
+    }
+
+    .alert-panel {
+      border-radius: 15px;
+      border: none;
+      padding: 20px;
+      margin-bottom: 30px;
+      background: rgba(40, 167, 69, 0.15);
+      color: #2d7738;
+      border: 1px solid rgba(40, 167, 69, 0.3);
+    }
+
+    .estado-cuenta {
+      background: #f8f9fa;
+      padding: 40px;
+      border-radius: 15px;
+      margin: 40px 0;
+    }
+
+    .estado-item {
+      background: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .estado-valor {
+      font-size: 24px;
+      font-weight: 700;
+      color: #ed563b;
+      margin-bottom: 5px;
+    }
+
+    .estado-label {
+      font-size: 14px;
+      color: #6c757d;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .instructions-info {
+      background: #f8f9fa;
+      padding: 30px;
+      border-radius: 15px;
+      margin-top: 40px;
+    }
+
+    .instructions-info h4 {
+      color: #232d39;
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .instruction-item {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+    }
+
+    .instruction-item h5 {
+      color: #232d39;
+      margin-bottom: 10px;
+    }
+
+    .instruction-item i {
+      margin-right: 10px;
+      color: #ed563b;
+    }
+
+    @media (max-width: 991px) {
+      .module-switcher ul li {
+        flex: 1 1 100%;
+      }
+    }
+
+    @media (max-width: 575px) {
+      .module-switcher ul li {
+        flex: 1 1 100%;
+        margin: 0 0 15px 0;
+      }
+    }
+    </style>
+</head>
+
+<body>
+
+<!-- ***** Preloader Start ***** -->
+<div id="js-preloader" class="js-preloader">
+    <div class="preloader-inner">
+        <span class="dot"></span>
+        <div class="dots">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+</div>
+<!-- ***** Preloader End ***** -->
+
+<!-- ***** Header Area Start ***** -->
+<header class="header-area header-sticky">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <nav class="main-nav">
+                    <!-- ***** Logo Start ***** -->
+                    <a th:href="@{/}" class="logo">Greedy<em> Gym</em></a>
+                    <!-- ***** Logo End ***** -->
+                    <!-- ***** Menu Start ***** -->
+                    <ul class="nav">
+                        <li><a th:href="@{/dashboard/socio}" class="active">Mi Panel</a></li>
+                        <li><a th:href="@{/logout}">Cerrar Sesión</a></li>
+                    </ul>
+                    <a class='menu-trigger'>
+                        <span>Menú</span>
+                    </a>
+                    <!-- ***** Menu End ***** -->
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+<!-- ***** Header Area End ***** -->
+
+<!-- ***** Main Banner Area Start ***** -->
+<div class="main-banner" id="top">
+    <video autoplay muted loop id="bg-video">
+        <source th:src="@{/assets/images/gym-video.mp4}" type="video/mp4" />
+    </video>
+
+    <div class="video-overlay header-text">
+        <div class="caption">
+            <h6>Mi Espacio Personal</h6>
+            <h2>Panel <em>Socio</em></h2>
+            <p>Gestiona tus rutinas y pagos de forma fácil y segura</p>
+            <div class="main-button scroll-to-section">
+                <a href="#dashboard-panel">Ver mis servicios</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ***** Main Banner Area End ***** -->
+
+<!-- ***** Dashboard Section Start ***** -->
+<section class="section panel-management" id="dashboard-panel">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 offset-lg-3">
+                <div class="section-heading">
+                    <h2>Mi <em>Perfil</em></h2>
+                    <img th:src="@{/assets/images/line-dec.png}" alt="waves">
+                    <p>Aquí puedes gestionar tus rutinas y pagos personales.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- User Info -->
+        <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+                <div class="user-info">
+                    <h3>Bienvenido, <span th:text="${usuario.nombreUsuario}"></span></h3>
+                    <p>Rol: <strong th:text="${usuario.rol}"></strong> | Acceso: Personal</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Información del socio -->
+        <div class="row">
+            <div class="col-lg-10 offset-lg-1">
+                <div class="alert-panel">
+                    <strong>¡Bienvenido!</strong> Como socio tienes acceso a tus rutinas personalizadas y puedes gestionar tus pagos con Mercado Pago.
+                </div>
+            </div>
+        </div>
+        
+        <!-- Módulos disponibles para socios -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="module-switcher">
+                    <ul>
+                        <li onclick="mostrarNoImplementado('Gestión de Rutinas Personales')">
+                            <i class="fa fa-dumbbell"></i>
+                            <div class="module-title">Mis Rutinas</div>
+                            <div class="module-description">Consulta y gestiona tus rutinas de entrenamiento personalizadas</div>
+                        </li>
+                        
+                        <li onclick="mostrarNoImplementado('Pago con Mercado Pago')">
+                            <i class="fa fa-credit-card"></i>
+                            <div class="module-title">Pago de Cuotas</div>
+                            <div class="module-description">Realiza el pago de tu cuota mensual con Mercado Pago</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Estado de cuenta -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="estado-cuenta">
+                    <div class="section-heading">
+                        <h4>Estado de Cuenta</h4>
+                        <p>Consulta el detalle de tu deuda, total adeudado y meses pendientes de pago</p>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <div class="estado-item">
+                                <div class="estado-valor">No implementado</div>
+                                <div class="estado-label">Total Adeudado</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="estado-item">
+                                <div class="estado-valor">No implementado</div>
+                                <div class="estado-label">Meses Pendientes</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="estado-item">
+                                <div class="estado-valor">No implementado</div>
+                                <div class="estado-label">Último Pago</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button onclick="mostrarNoImplementado('Informe de Deuda Detallado')" class="btn" style="background: linear-gradient(105deg, #ed563b 0%, #ff6b47 100%); color: #fff; border: none; border-radius: 23px; padding: 12px 25px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+                            <i class="fa fa-file-invoice-dollar"></i> Ver Informe Completo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Accesos restringidos -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="instructions-info">
+                    <h4>Funcionalidades Limitadas</h4>
+                    <div class="module-switcher">
+                        <ul>
+                            <li class="restricted">
+                                <i class="fa fa-users"></i>
+                                <div class="module-title">Gestión Administrativa</div>
+                                <div class="module-description">Acceso restringido para socios</div>
+                            </li>
+                            <li class="restricted">
+                                <i class="fa fa-building"></i>
+                                <div class="module-title">Gestión de Empresas</div>
+                                <div class="module-description">Acceso restringido para socios</div>
+                            </li>
+                            <li class="restricted">
+                                <i class="fa fa-envelope"></i>
+                                <div class="module-title">Envío de Mensajes</div>
+                                <div class="module-description">Acceso restringido para socios</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Instrucciones de uso -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="instructions-info">
+                    <h4>Instrucciones de Uso</h4>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="instruction-item">
+                                <h5><i class="fa fa-dumbbell"></i> Rutinas</h5>
+                                <p>En la sección "Mis Rutinas" podrás ver las rutinas asignadas por tu entrenador, marcar ejercicios como completados y ver tu progreso.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="instruction-item">
+                                <h5><i class="fa fa-credit-card"></i> Pagos</h5>
+                                <p>Utiliza "Pago de Cuotas" para realizar tus pagos mensuales de forma segura con Mercado Pago. Recibirás confirmación por email.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- ***** Dashboard Section End ***** -->
+
+<!-- ***** Footer Start ***** -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <p>&copy; 2024 Greedy Gym - Panel Socio
+                <br>
+                Usuario: <span th:text="${usuario.nombreUsuario}"></span> | Rol: <span th:text="${usuario.rol}"></span>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script th:src="@{/assets/js/jquery-2.1.0.min.js}"></script>
+
+<!-- Bootstrap -->
+<script th:src="@{/assets/js/popper.js}"></script>
+<script th:src="@{/assets/js/bootstrap.min.js}"></script>
+
+<!-- Plugins -->
+<script th:src="@{/assets/js/scrollreveal.min.js}"></script>
+<script th:src="@{/assets/js/waypoints.min.js}"></script>
+<script th:src="@{/assets/js/jquery.counterup.min.js}"></script>
+<script th:src="@{/assets/js/imgfix.min.js}"></script>
+
+<!-- Global Init -->
+<script th:src="@{/assets/js/custom.js}"></script>
+
+<script>
+function mostrarNoImplementado(modulo) {
+    alert('Módulo "' + modulo + '" no implementado aún.\n\nEsta funcionalidad estará disponible en una próxima versión del sistema.\n\nPor favor, contacta al administrador para más información.');
+}
+</script>
+
+</body>
+</html>

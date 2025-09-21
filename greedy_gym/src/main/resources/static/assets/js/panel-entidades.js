@@ -117,12 +117,12 @@
       toPayload(mode, values) {
         if (mode === 'create') {
           return {
-            nombre: values.nombre.trim(),
-            telefono: values.telefono.trim(),
-            correoElectronico: values.correoElectronico.trim()
+            nombre: values.nombre ? values.nombre.trim() : '',
+            telefono: values.telefono ? values.telefono.trim() : '',
+            correoElectronico: values.correoElectronico ? values.correoElectronico.trim() : ''
           };
         }
-        return { nombre: values.nombre.trim() };
+        return { nombre: values.nombre ? values.nombre.trim() : '' };
       },
       isInactive(item) {
         return !!item?.eliminado;
@@ -186,14 +186,14 @@
       },
       toPayload(mode, values, item) {
         return {
-          nombre: values.nombre.trim(),
+          nombre: values.nombre ? values.nombre.trim() : '',
           idEmpresa: values.empresaId || item?.empresa?.id || '',
           direccion: {
-            calle: values.calle.trim(),
-            numero: values.numero.trim(),
-            ciudad: values.ciudad.trim(),
-            provincia: values.provincia.trim(),
-            pais: values.pais.trim(),
+            calle: values.calle ? values.calle.trim() : '',
+            numero: values.numero ? values.numero.trim() : '',
+            ciudad: values.ciudad ? values.ciudad.trim() : '',
+            provincia: values.provincia ? values.provincia.trim() : '',
+            pais: values.pais ? values.pais.trim() : '',
             codigoPostal: values.codigoPostal ? values.codigoPostal.trim() : null
           }
         };
@@ -262,13 +262,13 @@
       },
       toPayload(mode, values) {
         return {
-          nombre: values.nombre.trim(),
-          apellido: values.apellido.trim(),
+          nombre: values.nombre ? values.nombre.trim() : '',
+          apellido: values.apellido ? values.apellido.trim() : '',
           fechaNacimiento: values.fechaNacimiento,
           tipoDocumento: values.tipoDocumento,
-          numeroDocumento: values.numeroDocumento.trim(),
-          telefono: values.telefono.trim(),
-          correoElectronico: values.correoElectronico.trim(),
+          numeroDocumento: values.numeroDocumento ? values.numeroDocumento.trim() : '',
+          telefono: values.telefono ? values.telefono.trim() : '',
+          correoElectronico: values.correoElectronico ? values.correoElectronico.trim() : '',
           tipoEmpleado: values.tipoEmpleado
         };
       },
@@ -338,13 +338,13 @@
       },
       toPayload(mode, values) {
         return {
-          nombre: values.nombre.trim(),
-          apellido: values.apellido.trim(),
+          nombre: values.nombre ? values.nombre.trim() : '',
+          apellido: values.apellido ? values.apellido.trim() : '',
           fechaNacimiento: values.fechaNacimiento,
           tipoDocumento: values.tipoDocumento,
-          numeroDocumento: values.numeroDocumento.trim(),
-          telefono: values.telefono.trim(),
-          correoElectronico: values.correoElectronico.trim(),
+          numeroDocumento: values.numeroDocumento ? values.numeroDocumento.trim() : '',
+          telefono: values.telefono ? values.telefono.trim() : '',
+          correoElectronico: values.correoElectronico ? values.correoElectronico.trim() : '',
           numeroSocio: parseInt(values.numeroSocio, 10)
         };
       },
@@ -431,7 +431,7 @@
       toPayload(mode, values, item) {
         if (mode === 'create') {
           return {
-            idSocio: values.idSocio.trim(),
+            idSocio: values.idSocio ? values.idSocio.trim() : '',
             mes: values.mes,
             anio: Number(values.anio),
             idValorCuota: values.valorCuotaId
@@ -598,28 +598,7 @@
             { name: 'casaDepartamento', label: 'Casa/Departamento', type: 'text', required: false },
             { name: 'referencia', label: 'Referencia', type: 'textarea', required: false }
           ],
-          apiPath: '/api/direcciones',
-          submitHandler: (mode, values) => {
-            console.log('[Direcciones] submitHandler called with mode:', mode, 'values:', values);
-            
-            const payload = {
-              calle: values.calle ? values.calle.trim() : '',
-              numeracion: values.numeracion ? values.numeracion.trim() : '',
-              barrio: values.barrio ? values.barrio.trim() : '',
-              manzanaPiso: values.manzanaPiso ? values.manzanaPiso.trim() : '',
-              casaDepartamento: values.casaDepartamento ? values.casaDepartamento.trim() : '',
-              referencia: values.referencia ? values.referencia.trim() : '',
-              idLocalidad: values.idLocalidad
-            };
-            
-            console.log('[Direcciones] payload constructed:', payload);
-            
-            if (mode === 'create') {
-              return sendJson(buildUrl('/api/direcciones'), 'POST', payload);
-            } else {
-              return sendJson(buildUrl(`/api/direcciones/${values.id}`), 'PUT', payload);
-            }
-          }
+          apiPath: '/api/direcciones'
         },
         localidades: {
           label: 'Localidades',
@@ -752,8 +731,62 @@
             return {};
         }
       },
-      toPayload(mode, values) {
-        return { nombre: values.nombre.trim() };
+      toPayload(mode, values, item) {
+        const subType = this.currentSubType;
+        
+        if (subType === 'direccionesData') {
+          // Validación de datos de entrada
+          console.log('[Direcciones] toPayload called with mode:', mode, 'values:', values);
+          
+          // Debug detallado de cada campo antes del procesamiento
+          console.log('[Direcciones] DEBUG - Campo por campo:');
+          console.log('  - calle:', typeof values.calle, '|', values.calle, '|', JSON.stringify(values.calle));
+          console.log('  - numeracion:', typeof values.numeracion, '|', values.numeracion, '|', JSON.stringify(values.numeracion));
+          console.log('  - barrio:', typeof values.barrio, '|', values.barrio, '|', JSON.stringify(values.barrio));
+          console.log('  - manzanaPiso:', typeof values.manzanaPiso, '|', values.manzanaPiso, '|', JSON.stringify(values.manzanaPiso));
+          console.log('  - casaDepartamento:', typeof values.casaDepartamento, '|', values.casaDepartamento, '|', JSON.stringify(values.casaDepartamento));
+          console.log('  - referencia:', typeof values.referencia, '|', values.referencia, '|', JSON.stringify(values.referencia));
+          console.log('  - idLocalidad:', typeof values.idLocalidad, '|', values.idLocalidad, '|', JSON.stringify(values.idLocalidad));
+          
+          const payload = {
+            calle: values.calle ? values.calle.trim() : '',
+            numeracion: values.numeracion ? values.numeracion.trim() : '',
+            barrio: values.barrio ? values.barrio.trim() : '',
+            manzanaPiso: values.manzanaPiso ? values.manzanaPiso.trim() : '',
+            casaDepartamento: values.casaDepartamento ? values.casaDepartamento.trim() : '',
+            referencia: values.referencia ? values.referencia.trim() : '',
+            idLocalidad: values.idLocalidad
+          };
+          
+          console.log('[Direcciones] payload constructed:', payload);
+          return payload;
+        } else {
+          // Para otros subtipos (localidades, departamentos, provincias, paises)
+          if (subType === 'localidades') {
+            return {
+              nombre: values.nombre ? values.nombre.trim() : '',
+              codigoPostal: values.codigoPostal ? values.codigoPostal.trim() : '',
+              idDepartamento: values.idDepartamento
+            };
+          } else if (subType === 'departamentos') {
+            return {
+              nombre: values.nombre ? values.nombre.trim() : '',
+              idProvincia: values.idProvincia
+            };
+          } else if (subType === 'provincias') {
+            return {
+              nombre: values.nombre ? values.nombre.trim() : '',
+              idPais: values.idPais
+            };
+          } else if (subType === 'paises') {
+            return {
+              nombre: values.nombre ? values.nombre.trim() : ''
+            };
+          }
+          
+          // Fallback para otros casos
+          return { nombre: values.nombre ? values.nombre.trim() : '' };
+        }
       },
       isInactive(item) {
         return !!item?.eliminado;
@@ -804,7 +837,7 @@
         };
       },
       toPayload(mode, values) {
-        return { nombre: values.nombre.trim() };
+        return { nombre: values.nombre ? values.nombre.trim() : '' };
       },
       isInactive(item) {
         return !!item?.eliminado;
@@ -859,7 +892,7 @@
       },
       toPayload(mode, values) {
         return { 
-          nombre: values.nombre.trim(),
+          nombre: values.nombre ? values.nombre.trim() : '',
           idPais: values.idPais
         };
       },
@@ -917,7 +950,7 @@
       },
       toPayload(mode, values) {
         return { 
-          nombre: values.nombre.trim(),
+          nombre: values.nombre ? values.nombre.trim() : '',
           idProvincia: values.idProvincia
         };
       },
@@ -976,7 +1009,7 @@
       },
       toPayload(mode, values) {
         return { 
-          nombre: values.nombre.trim(),
+          nombre: values.nombre ? values.nombre.trim() : '',
           codigoPostal: values.codigoPostal ? values.codigoPostal.trim() : '',
           idDepartamento: values.idDepartamento
         };
@@ -1028,8 +1061,8 @@
       },
       toPayload(mode, values) {
         return {
-          nombreUsuario: values.nombreUsuario.trim(),
-          clave: values.clave.trim(),
+          nombreUsuario: values.nombreUsuario ? values.nombreUsuario.trim() : '',
+          clave: values.clave ? values.clave.trim() : '',
           rol: values.rol
         };
       }
@@ -1536,18 +1569,44 @@
   }
 
   function collectFormValues(form) {
+    console.log('[DEBUG] collectFormValues called, form:', form);
     const values = {};
     const elements = form.querySelectorAll('[name]');
-    elements.forEach(el => {
+    console.log('[DEBUG] Form elements found:', elements.length);
+    
+    elements.forEach((el, index) => {
+      console.log(`[DEBUG] Processing element ${index}:`, {
+        name: el.name,
+        type: el.type,
+        value: el.value,
+        disabled: el.disabled,
+        valueType: typeof el.value,
+        valueStringified: JSON.stringify(el.value)
+      });
+      
       if (el.disabled || !el.name) {
+        console.log(`[DEBUG] Skipping element ${index} - disabled:${el.disabled}, name:${el.name}`);
         return;
       }
       if (el.type === 'checkbox') {
         values[el.name] = el.checked;
+        console.log(`[DEBUG] Checkbox ${el.name} = ${el.checked}`);
       } else {
-        values[el.name] = el.value != null ? el.value.trim() : '';
+        // Manejo seguro de valores que pueden ser undefined o no-string
+        const rawValue = el.value;
+        console.log(`[DEBUG] Processing field ${el.name} - rawValue:`, rawValue, 'type:', typeof rawValue);
+        
+        if (rawValue != null && typeof rawValue === 'string') {
+          values[el.name] = rawValue.trim();
+          console.log(`[DEBUG] Field ${el.name} trimmed:`, values[el.name]);
+        } else {
+          values[el.name] = rawValue || '';
+          console.log(`[DEBUG] Field ${el.name} fallback:`, values[el.name]);
+        }
       }
     });
+    
+    console.log('[DEBUG] Final values collected:', values);
     return values;
   }
 

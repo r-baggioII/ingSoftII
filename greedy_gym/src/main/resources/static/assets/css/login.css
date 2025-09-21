@@ -1,0 +1,180 @@
+/* CSS específico para la página de login */
+
+/* Estilo para el botón de login en la página principal */
+.header-area .nav li a.login-btn {
+    background: linear-gradient(135deg, #ed1c24, #c41e3a);
+    color: #fff !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.header-area .nav li a.login-btn:hover {
+    background: linear-gradient(135deg, #c41e3a, #ed1c24);
+    box-shadow: 0 5px 15px rgba(237, 28, 36, 0.4);
+    transform: translateY(-2px);
+}
+
+.login-section {
+    padding-top: 120px;
+    padding-bottom: 80px;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
+    min-height: 100vh;
+}
+
+.login-form {
+    background: rgba(0, 0, 0, 0.85);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(237, 28, 36, 0.3);
+    margin-bottom: 40px;
+}
+
+.login-form fieldset {
+    margin-bottom: 25px;
+}
+
+.login-form label {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.login-form input[type="text"],
+.login-form input[type="password"] {
+    width: 100%;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 16px;
+    padding: 0 20px;
+    transition: all 0.3s ease;
+}
+
+.login-form input[type="text"]:focus,
+.login-form input[type="password"]:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #ed1c24;
+    outline: none;
+    box-shadow: 0 0 15px rgba(237, 28, 36, 0.5);
+}
+
+.login-form input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.login-form .main-button {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.login-form .main-button button {
+    width: 100%;
+    height: 55px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.alert {
+    border: none;
+    border-radius: 8px;
+    padding: 15px 20px;
+    margin-bottom: 25px;
+    font-weight: 500;
+}
+
+.alert-danger {
+    background: rgba(220, 53, 69, 0.15);
+    color: #f8d7da;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+/* Información de roles */
+.roles-info {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 40px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.roles-info h4 {
+    color: #fff;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.role-item {
+    text-align: center;
+    padding: 20px 15px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.role-item:hover {
+    background: rgba(237, 28, 36, 0.1);
+    transform: translateY(-5px);
+}
+
+.role-icon {
+    font-size: 40px;
+    color: #ed1c24;
+    margin-bottom: 15px;
+}
+
+.role-item h5 {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.role-item p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .login-section {
+        padding-top: 100px;
+        padding-bottom: 60px;
+    }
+    
+    .login-form {
+        padding: 30px 20px;
+        margin: 0 15px 30px;
+    }
+    
+    .roles-info {
+        padding: 30px 20px;
+        margin: 0 15px;
+    }
+    
+    .role-item {
+        margin-bottom: 15px;
+    }
+    
+    .roles-info h4 {
+        font-size: 20px;
+    }
+}
+
+/* Override para el header en la página de login */
+.login-section .header-area {
+    background: rgba(35, 35, 35, 0.95);
+}

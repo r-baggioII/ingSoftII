@@ -1,8 +1,11 @@
 package com.example.greedy_gym.servicios;
 
+import com.example.greedy_gym.entidades.RolUsuario;
 import com.example.greedy_gym.entidades.Usuario;
 import com.example.greedy_gym.repositorios.UsuarioRepositorio;
 import jakarta.validation.ValidationException;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -17,18 +20,16 @@ public class UsuarioServicio {
         this.repository = repository;
     }
 
-    public Usuario crearUsuario(String nombreUsuario, String clave, String correoElectronico) {
-        validar(nombreUsuario, correoElectronico);
-        Usuario usuario = new Usuario(nombreUsuario, clave, correoElectronico);
+    public Usuario crearUsuario(@NotBlank String nombreUsuario, 
+                               @NotBlank String clave, 
+                               @NotNull RolUsuario rol) {
+        Usuario usuario = new Usuario(nombreUsuario, clave, rol);
         return repository.save(usuario);
     }
 
-    public void validar(String nombreUsuario, String correoElectronico) {
+    public void validar(String nombreUsuario, String clave, RolUsuario rol) {
         if (repository.findByNombreUsuarioIgnoreCase(nombreUsuario).isPresent()) {
             throw new ValidationException("El nombre de usuario ya existe: " + nombreUsuario);
-        }
-        if (repository.findByCorreoElectronicoIgnoreCase(correoElectronico).isPresent()) {
-            throw new ValidationException("El correo electrónico ya está registrado: " + correoElectronico);
         }
     }
 
@@ -38,14 +39,16 @@ public class UsuarioServicio {
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado: " + id));
     }
 
-    public void modificarUsuario(String id, String nombreUsuario, String clave, String correoElectronico) {
+    public void modificarUsuario(String id, @NotBlank String nombreUsuario, 
+                                @NotBlank String clave, 
+                                @NotNull RolUsuario rol) {
         Usuario actual = buscarUsuario(id);
         if (!actual.getNombreUsuario().equalsIgnoreCase(nombreUsuario)) {
-            validar(nombreUsuario, correoElectronico);
+            validar(nombreUsuario, clave, rol);
             actual.setNombreUsuario(nombreUsuario);
         }
         actual.setClave(clave);
-        actual.setCorreoElectronico(correoElectronico);
+        actual.setRol(rol);
         repository.save(actual);
     }
 
@@ -65,5 +68,35 @@ public class UsuarioServicio {
         return repository.findAll().stream()
                 .filter(usuario -> !usuario.isEliminado())
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Usuario buscarUsuarioPorNombre(String nombre) {
+        return repository.findByNombreUsuarioIgnoreCase(nombre)
+                .filter(usuario -> !usuario.isEliminado())
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado: " + nombre));
+    }
+
+    @Transactional(readOnly = true)
+    public Usuario login(String nombreUsuario, String clave) {
+        Usuario usuario = repository.findByNombreUsuarioIgnoreCase(nombreUsuario)
+                .filter(u -> !u.isEliminado())
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado: " + nombreUsuario));
+        if (!usuario.getClave().equals(clave)) {
+            throw new ValidationException("Clave incorrecta");
+        }
+        return usuario;
+    }
+
+    public void modificarClave(String id, String claveActual, String nuevaClave, String confirmarClave) {
+        Usuario actual = buscarUsuario(id);
+        if (!actual.getClave().equals(claveActual)) {
+            throw new ValidationException("Clave actual incorrecta");
+        }
+        if (!nuevaClave.equals(confirmarClave)) {
+            throw new ValidationException("La nueva clave y la confirmación no coinciden");
+        }
+        actual.setClave(nuevaClave);
+        repository.save(actual);
     }
 }

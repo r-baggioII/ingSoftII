@@ -62,6 +62,15 @@ public class EmpleadoServicio {
         return empleadoRepositorio.save(existente);
     }
 
+    // Método con la signatura exacta del diagrama de clases (incluyendo el typo)
+    public Empleado mdoificarEmpleado(String id, String nombre, String apellido, LocalDate fechaNacimiento,
+            TipoDocumento tipoDocumento, String numeroDocumento, TipoEmpleado tipoEmpleado) {
+        Empleado existente = empleadoRepositorio.findByIdAndEliminadoFalse(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Empleado no encontrado"));
+        return modificarEmpleado(id, nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento,
+                existente.getTelefono(), existente.getCorreoElectronico(), tipoEmpleado);
+    }
+
     @Transactional(readOnly = true)
     public Empleado buscarPersona(String id) {
         return empleadoRepositorio.findByIdAndEliminadoFalse(id)
@@ -93,6 +102,17 @@ public class EmpleadoServicio {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Empleado no encontrado"));
         empleado.setUsuarioId(usuarioId);
         return empleadoRepositorio.save(empleado);
+    }
+
+    // Método sobrecargado según el diagrama de clases
+    public void asociarEmpleadoUsuario(Empleado empleado, com.example.greedy_gym.entidades.Usuario usuario) {
+        if (empleado == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El empleado es obligatorio");
+        }
+        if (usuario == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El usuario es obligatorio");
+        }
+        asociarEmpleadoUsuario(empleado.getId(), usuario.getId());
     }
 
     private void validar(String nombre, String apellido, LocalDate fechaNacimiento, TipoDocumento tipoDocumento,

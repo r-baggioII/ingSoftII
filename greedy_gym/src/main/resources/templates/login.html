@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Login - Greedy Gym">
+    <meta name="author" content="Greedy Gym">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i&display=swap" rel="stylesheet">
+
+    <title>Login - Greedy Gym</title>
+
+    <!-- Archivos CSS -->
+    <link rel="stylesheet" type="text/css" th:href="@{/assets/css/bootstrap.min.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/assets/css/font-awesome.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/templatemo-training-studio.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/login.css}">
+</head>
+
+<body>
+
+<!-- ***** Preloader Start ***** -->
+<div id="js-preloader" class="js-preloader">
+    <div class="preloader-inner">
+        <span class="dot"></span>
+        <div class="dots">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+</div>
+<!-- ***** Preloader End ***** -->
+
+<!-- ***** Header Area Start ***** -->
+<header class="header-area header-sticky">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <nav class="main-nav">
+                    <!-- ***** Logo Start ***** -->
+                    <a th:href="@{/}" class="logo">Greedy<em> Gym</em></a>
+                    <!-- ***** Logo End ***** -->
+                    <!-- ***** Menu Start ***** -->
+                    <ul class="nav">
+                        <li><a th:href="@{/}">Inicio</a></li>
+                        <li><a th:href="@{/panel/entidades}">Panel de datos</a></li>
+                    </ul>
+                    <a class='menu-trigger'>
+                        <span>Menú</span>
+                    </a>
+                    <!-- ***** Menu End ***** -->
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+<!-- ***** Header Area End ***** -->
+
+<!-- ***** Login Section Start ***** -->
+<section class="section login-section" id="login">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 offset-lg-3">
+                <div class="section-heading">
+                    <h2>Acceso al <em>Sistema</em></h2>
+                    <img th:src="@{/assets/images/line-dec.png}" alt="waves">
+                    <p>Ingresa tus credenciales para acceder a las funcionalidades según tu rol.</p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-6 offset-lg-3 col-md-8 offset-md-2">
+                <div class="login-form">
+                    <div th:if="${error}" class="alert alert-danger" role="alert">
+                        <span th:text="${error}"></span>
+                    </div>
+                    
+                    <form th:action="@{/login}" method="post" id="loginForm">
+                        <div class="row">
+                            <div class="col-12">
+                                <fieldset>
+                                    <label for="nombreUsuario">Nombre de Usuario</label>
+                                    <input name="nombreUsuario" type="text" id="nombreUsuario" 
+                                           placeholder="Ingresa tu nombre de usuario" required>
+                                </fieldset>
+                            </div>
+                            <div class="col-12">
+                                <fieldset>
+                                    <label for="clave">Contraseña</label>
+                                    <input name="clave" type="password" id="clave" 
+                                           placeholder="Ingresa tu contraseña" required>
+                                </fieldset>
+                            </div>
+                            <div class="col-12">
+                                <fieldset>
+                                    <button type="submit" id="form-submit" class="main-button">
+                                        Ingresar al Sistema
+                                    </button>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Información de roles -->
+        <div class="row mt-5">
+            <div class="col-lg-10 offset-lg-1">
+                <div class="roles-info">
+                    <h4>Tipos de Usuario</h4>
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <div class="role-item">
+                                <div class="role-icon">
+                                    <i class="fa fa-user-circle"></i>
+                                </div>
+                                <h5>Administrador</h5>
+                                <p>Acceso completo a todas las funcionalidades del sistema</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="role-item">
+                                <div class="role-icon">
+                                    <i class="fa fa-users"></i>
+                                </div>
+                                <h5>Empleado</h5>
+                                <p>Acceso a gestión operativa, excepto usuarios y valores de cuota</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="role-item">
+                                <div class="role-icon">
+                                    <i class="fa fa-user"></i>
+                                </div>
+                                <h5>Socio</h5>
+                                <p>Acceso a rutinas personales y pagos de cuotas</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- ***** Login Section End ***** -->
+
+<!-- ***** Footer Start ***** -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <p>&copy; 2024 Greedy Gym
+                <br>
+                Sistema de Gestión Integral
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script th:src="@{/assets/js/jquery-2.1.0.min.js}"></script>
+
+<!-- Bootstrap -->
+<script th:src="@{/assets/js/popper.js}"></script>
+<script th:src="@{/assets/js/bootstrap.min.js}"></script>
+
+<!-- Plugins -->
+<script th:src="@{/assets/js/scrollreveal.min.js}"></script>
+<script th:src="@{/assets/js/waypoints.min.js}"></script>
+<script th:src="@{/assets/js/jquery.counterup.min.js}"></script>
+<script th:src="@{/assets/js/imgfix.min.js}"></script>
+
+<!-- Global Init -->
+<script th:src="@{/assets/js/custom.js}"></script>
+
+</body>
+</html>

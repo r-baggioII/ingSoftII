@@ -47,10 +47,8 @@
   ];
 
   const CUOTA_STATE_OPTIONS = [
-    { value: 'PENDIENTE', label: 'Pendiente' },
-    { value: 'PAGADA', label: 'Pagada' },
-    { value: 'VENCIDA', label: 'Vencida' },
-    { value: 'CANCELADA', label: 'Cancelada' }
+    { value: 'ADEUDADA', label: 'Adeudada' },
+    { value: 'PAGADA', label: 'Pagada' }
   ];
 
   const DOCUMENT_OPTIONS = ['DNI', 'PASAPORTE', 'CEDULA', 'LIBRETA_CIVICA', 'LIBRETA_ENROLAMIENTO']
@@ -286,6 +284,82 @@
         ].filter(Boolean).join(' ').toLowerCase();
       }
     },
+    socios: {
+      label: 'Socios',
+      description: 'Miembros del gimnasio.',
+      singular: 'socio',
+      createLabel: 'Nuevo socio',
+      searchPlaceholder: 'Buscar por nombre, apellido, DNI, correo electrónico o número de socio',
+      allowCreate: true,
+      allowUpdate: true,
+      allowDelete: true,
+      columns: [
+        { header: 'Nombre completo', value: item => `${(item?.nombre || '').trim()} ${(item?.apellido || '').trim()}`.trim() || '—' },
+        { header: 'Documento', value: item => `${item?.tipoDocumento || ''} ${item?.numeroDocumento || ''}`.trim() || '—' },
+        { header: 'Número de socio', value: item => item?.numeroSocio || '—' },
+        { header: 'Correo', value: item => item?.correoElectronico || '—' },
+        { header: 'Estado', value: item => item?.eliminado ? 'Dado de baja' : 'Activo' }
+      ],
+      formFields: [
+        { name: 'nombre', label: 'Nombre', type: 'text', required: true },
+        { name: 'apellido', label: 'Apellido', type: 'text', required: true },
+        { name: 'fechaNacimiento', label: 'Fecha de nacimiento', type: 'date', required: true },
+        { name: 'tipoDocumento', label: 'Tipo de documento', type: 'select', required: true, options: DOCUMENT_OPTIONS },
+        { name: 'numeroDocumento', label: 'Número de documento', type: 'text', required: true },
+        { name: 'telefono', label: 'Teléfono', type: 'text', required: true },
+        { name: 'correoElectronico', label: 'Correo electrónico', type: 'email', required: true },
+        { name: 'numeroSocio', label: 'Número de socio', type: 'number', required: true }
+      ],
+      async list() {
+        return requestJson(buildUrl('/api/v1/socios'));
+      },
+      async create(payload) {
+        return sendJson(buildUrl('/api/v1/socios'), 'POST', payload);
+      },
+      async update(item, payload) {
+        return sendJson(buildUrl('/api/v1/socios/' + item.id), 'PUT', payload);
+      },
+      async remove(item) {
+        return requestJson(buildUrl('/api/v1/socios/' + item.id), { method: 'DELETE' });
+      },
+      prepareFormValues(item) {
+        return {
+          nombre: item?.nombre || '',
+          apellido: item?.apellido || '',
+          fechaNacimiento: item?.fechaNacimiento || '',
+          tipoDocumento: item?.tipoDocumento || DOCUMENT_OPTIONS[0].value,
+          numeroDocumento: item?.numeroDocumento || '',
+          telefono: item?.telefono || '',
+          correoElectronico: item?.correoElectronico || '',
+          numeroSocio: item?.numeroSocio || ''
+        };
+      },
+      toPayload(mode, values) {
+        return {
+          nombre: values.nombre.trim(),
+          apellido: values.apellido.trim(),
+          fechaNacimiento: values.fechaNacimiento,
+          tipoDocumento: values.tipoDocumento,
+          numeroDocumento: values.numeroDocumento.trim(),
+          telefono: values.telefono.trim(),
+          correoElectronico: values.correoElectronico.trim(),
+          numeroSocio: parseInt(values.numeroSocio, 10)
+        };
+      },
+      isInactive(item) {
+        return !!item?.eliminado;
+      },
+      searchText(item) {
+        return [
+          item?.nombre,
+          item?.apellido,
+          item?.correoElectronico,
+          item?.telefono,
+          item?.numeroDocumento,
+          item?.numeroSocio?.toString()
+        ].filter(Boolean).join(' ').toLowerCase();
+      }
+    },
     cuotas: {
       label: 'Cuotas mensuales',
       description: 'Gestión de cuotas emitidas a cada socio.',
@@ -307,21 +381,31 @@
         { name: 'idSocio', label: 'ID de socio', type: 'text', required: true, modes: ['create'] },
         { name: 'mes', label: 'Mes', type: 'select', required: true, options: MONTH_OPTIONS, modes: ['create'] },
         { name: 'anio', label: 'Año', type: 'number', required: true, min: 2000, modes: ['create'] },
-        { name: 'fechaVencimiento', label: 'Fecha de vencimiento', type: 'date', required: true },
         { name: 'valorCuotaId', label: 'Valor de cuota', type: 'select', required: true, modes: ['create'], loadOptions: loadValorCuotasOptions },
         { name: 'estado', label: 'Estado', type: 'select', required: true, options: CUOTA_STATE_OPTIONS, modes: ['edit'] }
       ],
       async list() {
-        return requestJson(buildUrl('/api/v1/cuotas'));
+        return requestJson(buildUrl('/api/cuotas-mensuales'));
       },
       async create(payload) {
-        return sendJson(buildUrl('/api/v1/cuotas'), 'POST', payload);
+        const params = new URLSearchParams();
+        params.set('idSocio', payload.idSocio || '');
+        params.set('mes', payload.mes || '');
+        params.set('anio', payload.anio || '');
+        params.set('idValorCuota', payload.idValorCuota || '');
+        return requestJson(`${buildUrl('/api/cuotas-mensuales')}?${params.toString()}`, { method: 'POST' });
       },
       async update(item, payload) {
-        return sendJson(buildUrl('/api/v1/cuotas/' + item.id), 'PUT', payload);
+        const params = new URLSearchParams();
+        params.set('idSocio', payload.idSocio || item.idSocio || '');
+        params.set('mes', payload.mes || item.mes || '');
+        params.set('anio', payload.anio || item.anio || '');
+        params.set('idValorCuota', payload.idValorCuota || item.valorCuota?.id || '');
+        params.set('estado', payload.estado || item.estado || '');
+        return requestJson(`${buildUrl('/api/cuotas-mensuales/' + item.id)}?${params.toString()}`, { method: 'PUT' });
       },
       async remove(item) {
-        return requestJson(buildUrl('/api/v1/cuotas/' + item.id), { method: 'DELETE' });
+        return requestJson(buildUrl('/api/cuotas-mensuales/' + item.id), { method: 'DELETE' });
       },
       prepareFormValues(item, mode) {
         if (mode === 'create') {
@@ -330,18 +414,16 @@
             idSocio: '',
             mes: MONTH_OPTIONS[0].value,
             anio: year,
-            fechaVencimiento: '',
             valorCuotaId: '',
-            estado: 'PENDIENTE'
+            estado: 'ADEUDADA'
           };
         }
         return {
           idSocio: item?.idSocio || '',
           mes: item?.mes || MONTH_OPTIONS[0].value,
           anio: item?.anio != null ? item.anio : new Date().getFullYear(),
-          fechaVencimiento: item?.fechaVencimiento || '',
           valorCuotaId: item?.valorCuota?.id || '',
-          estado: item?.estado || 'PENDIENTE'
+          estado: item?.estado || 'ADEUDADA'
         };
       },
       toPayload(mode, values, item) {
@@ -350,18 +432,16 @@
             idSocio: values.idSocio.trim(),
             mes: values.mes,
             anio: Number(values.anio),
-            fechaVencimiento: values.fechaVencimiento,
-            valorCuota: { id: values.valorCuotaId }
+            idValorCuota: values.valorCuotaId
           };
         }
-        const payload = {};
-        if (values.estado) {
-          payload.estado = values.estado;
-        }
-        if (values.fechaVencimiento) {
-          payload.fechaVencimiento = values.fechaVencimiento;
-        }
-        return payload;
+        return {
+          idSocio: values.idSocio || item?.idSocio,
+          mes: values.mes || item?.mes,
+          anio: Number(values.anio) || item?.anio,
+          idValorCuota: values.valorCuotaId || item?.valorCuota?.id,
+          estado: values.estado || item?.estado
+        };
       },
       isInactive(item) {
         return !!item?.eliminado;
@@ -398,19 +478,31 @@
         { name: 'valorCuota', label: 'Monto', type: 'number', step: '0.01', min: 0, required: true }
       ],
       async list() {
-        return requestJson(buildUrl('/api/v1/valor-cuotas'));
+        return requestJson(buildUrl('/api/valor-cuotas'));
       },
       async create(payload) {
+        const params = new URLSearchParams();
+        params.set('fechaDesde', payload.fechaDesde || '');
+        if (payload.fechaHasta) {
+          params.set('fechaHasta', payload.fechaHasta);
+        }
+        params.set('valorCuota', payload.valorCuota || '');
         invalidateOptions('valorCuotas');
-        return sendJson(buildUrl('/api/v1/valor-cuotas'), 'POST', payload);
+        return requestJson(`${buildUrl('/api/valor-cuotas')}?${params.toString()}`, { method: 'POST' });
       },
       async update(item, payload) {
+        const params = new URLSearchParams();
+        params.set('fechaDesde', payload.fechaDesde || '');
+        if (payload.fechaHasta) {
+          params.set('fechaHasta', payload.fechaHasta);
+        }
+        params.set('valorCuota', payload.valorCuota || '');
         invalidateOptions('valorCuotas');
-        return sendJson(buildUrl('/api/v1/valor-cuotas/' + item.id), 'PUT', payload);
+        return requestJson(`${buildUrl('/api/valor-cuotas/' + item.id)}?${params.toString()}`, { method: 'PUT' });
       },
       async remove(item) {
         invalidateOptions('valorCuotas');
-        return requestJson(buildUrl('/api/v1/valor-cuotas/' + item.id), { method: 'DELETE' });
+        return requestJson(buildUrl('/api/valor-cuotas/' + item.id), { method: 'DELETE' });
       },
       prepareFormValues(item) {
         return {
@@ -420,15 +512,15 @@
         };
       },
       toPayload(mode, values) {
-        const payload = {
-          fechaDesde: values.fechaDesde || null,
-          fechaHasta: values.fechaHasta || null,
-          valorCuota: values.valorCuota !== '' ? Number(values.valorCuota) : null
-        };
-        if (payload.valorCuota == null || Number.isNaN(payload.valorCuota)) {
+        const valorCuota = values.valorCuota !== '' ? Number(values.valorCuota) : 0;
+        if (valorCuota == null || Number.isNaN(valorCuota) || valorCuota <= 0) {
           throw new Error('Ingresá un monto válido.');
         }
-        return payload;
+        return {
+          fechaDesde: values.fechaDesde || '',
+          fechaHasta: values.fechaHasta || '',
+          valorCuota: valorCuota
+        };
       },
       isInactive(item) {
         return !!item?.eliminado;
@@ -1563,7 +1655,7 @@
     if (optionCache.valorCuotas) {
       return optionCache.valorCuotas;
     }
-    const data = await requestJson(buildUrl('/api/v1/valor-cuotas'));
+    const data = await requestJson(buildUrl('/api/valor-cuotas/activos'));
     const list = normalizeList(data)
       .filter(item => !item.eliminado)
       .map(item => ({

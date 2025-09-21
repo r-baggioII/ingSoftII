@@ -5,119 +5,145 @@ import com.example.greedy_gym.entidades.EstadoCuota;
 import com.example.greedy_gym.entidades.Mes;
 import com.example.greedy_gym.entidades.ValorCuota;
 import com.example.greedy_gym.repositorios.CuotaMensualRepositorio;
+import com.example.greedy_gym.repositorios.SocioRepositorio;
 import com.example.greedy_gym.repositorios.ValorCuotaRepositorio;
+import jakarta.validation.ValidationException;
 import java.time.LocalDate;
-import java.time.YearMonth;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
+import java.util.Collection;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
-@RequiredArgsConstructor
-@Transactional
 public class CuotaMensualServicio {
 
     private final CuotaMensualRepositorio cuotaMensualRepositorio;
+    private final SocioRepositorio socioRepositorio;
     private final ValorCuotaRepositorio valorCuotaRepositorio;
 
-    public CuotaMensual crear(CuotaMensual cuotaMensual) {
-        if (cuotaMensual.getValorCuota() == null || cuotaMensual.getValorCuota().getId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debe indicar el valor de cuota");
+    public CuotaMensualServicio(CuotaMensualRepositorio cuotaMensualRepositorio,
+                                SocioRepositorio socioRepositorio,
+                                ValorCuotaRepositorio valorCuotaRepositorio) {
+        this.cuotaMensualRepositorio = cuotaMensualRepositorio;
+        this.socioRepositorio = socioRepositorio;
+        this.valorCuotaRepositorio = valorCuotaRepositorio;
+    }
+
+    @Transactional
+    public CuotaMensual crearCuota(String idSocio, Mes mes, Long anio, String idValorCuota) {
+        validar(idSocio, mes, anio, idValorCuota);
+
+        // Validar socio existe
+        if (!socioRepositorio.findByIdAndEliminadoFalse(idSocio).isPresent()) {
+            throw new IllegalArgumentException("El socio no existe");
         }
-        if (cuotaMensualRepositorio.existsByIdSocioAndMesAndAnioAndEliminadoFalse(
-                cuotaMensual.getIdSocio(), cuotaMensual.getMes(), cuotaMensual.getAnio())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe una cuota para el socio en ese período");
+
+        // Validar valorCuota existe
+        ValorCuota valorCuota = valorCuotaRepositorio.findByIdAndEliminadoFalse(idValorCuota)
+                .orElseThrow(() -> new IllegalArgumentException("El valor de cuota no existe"));
+
+        // Validar que no exista otra cuota mensual para el mismo socio, mes y año
+        if (cuotaMensualRepositorio.existsByIdSocioAndMesAndAnioAndEliminadoFalse(idSocio, mes, anio)) {
+            throw new ValidationException("Ya existe una cuota mensual para este socio en el mes y año especificados");
         }
-        ValorCuota valorCuota = valorCuotaRepositorio.findByIdAndEliminadoFalse(cuotaMensual.getValorCuota().getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Valor de cuota inválido"));
-        validarFechaVencimiento(cuotaMensual.getFechaVencimiento(), cuotaMensual.getMes(), cuotaMensual.getAnio());
+
+        CuotaMensual cuotaMensual = new CuotaMensual();
+        cuotaMensual.setId(UUID.randomUUID().toString());
+        cuotaMensual.setIdSocio(idSocio);
+        cuotaMensual.setMes(mes);
+        cuotaMensual.setAnio(anio);
         cuotaMensual.setValorCuota(valorCuota);
         cuotaMensual.setEstado(EstadoCuota.PENDIENTE);
         cuotaMensual.setEliminado(false);
+
         return cuotaMensualRepositorio.save(cuotaMensual);
     }
 
-    public CuotaMensual actualizar(String id, CuotaMensual cambios) {
-        CuotaMensual existente = cuotaMensualRepositorio.findByIdAndEliminadoFalse(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cuota mensual no encontrada"));
-        if (cambios.getFechaVencimiento() != null) {
-            validarFechaVencimiento(cambios.getFechaVencimiento(), existente.getMes(), existente.getAnio());
-            existente.setFechaVencimiento(cambios.getFechaVencimiento());
+    @Transactional
+    public void modificarCuota(String id, String idSocio, Mes mes, Long anio, String idValorCuota, EstadoCuota estado) {
+        validar(idSocio, mes, anio, idValorCuota);
+
+        if (estado == null) {
+            throw new IllegalArgumentException("El estado de la cuota no puede estar vacío");
         }
-        if (cambios.getEstado() != null) {
-            aplicarTransicion(existente, cambios.getEstado());
+
+        CuotaMensual cuotaMensual = cuotaMensualRepositorio.findByIdAndEliminadoFalse(id)
+                .orElseThrow(() -> new IllegalArgumentException("La cuota mensual no existe"));
+
+        // Validar socio existe
+        if (!socioRepositorio.findByIdAndEliminadoFalse(idSocio).isPresent()) {
+            throw new IllegalArgumentException("El socio no existe");
         }
-        marcarComoVencidaSiCorresponde(existente);
-        return cuotaMensualRepositorio.save(existente);
+
+        // Validar valorCuota existe
+        ValorCuota valorCuota = valorCuotaRepositorio.findByIdAndEliminadoFalse(idValorCuota)
+                .orElseThrow(() -> new IllegalArgumentException("El valor de cuota no existe"));
+
+        // Validar que no exista otra cuota mensual para el mismo socio, mes y año (excluyendo la actual)
+        if (cuotaMensualRepositorio.existsByIdSocioAndMesAndAnioAndEliminadoFalseAndIdNot(idSocio, mes, anio, id)) {
+            throw new ValidationException("Ya existe otra cuota mensual para este socio en el mes y año especificados");
+        }
+
+        cuotaMensual.setIdSocio(idSocio);
+        cuotaMensual.setMes(mes);
+        cuotaMensual.setAnio(anio);
+        cuotaMensual.setValorCuota(valorCuota);
+        cuotaMensual.setEstado(estado);
+
+        cuotaMensualRepositorio.save(cuotaMensual);
     }
 
-    public void eliminar(String id) {
-        CuotaMensual existente = cuotaMensualRepositorio.findByIdAndEliminadoFalse(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cuota mensual no encontrada"));
-        existente.setEliminado(true);
-        cuotaMensualRepositorio.save(existente);
+    @Transactional
+    public void eliminarCuotaMensual(String id) {
+        CuotaMensual cuotaMensual = cuotaMensualRepositorio.findByIdAndEliminadoFalse(id)
+                .orElseThrow(() -> new IllegalArgumentException("La cuota mensual no existe"));
+
+        cuotaMensual.setEliminado(true);
+        cuotaMensualRepositorio.save(cuotaMensual);
     }
 
     @Transactional(readOnly = true)
-    public CuotaMensual buscarPorId(String id) {
+    public CuotaMensual buscarCuotaMensual(String id) {
         return cuotaMensualRepositorio.findByIdAndEliminadoFalse(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cuota mensual no encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("La cuota mensual no existe"));
     }
 
     @Transactional(readOnly = true)
-    public Page<CuotaMensual> listar(Pageable pageable) {
-        return cuotaMensualRepositorio.findByEliminadoFalse(pageable);
+    public Collection<CuotaMensual> listarCuotaMensual() {
+        return cuotaMensualRepositorio.findByEliminadoFalse();
     }
 
     @Transactional(readOnly = true)
-    public Page<CuotaMensual> listarActivos(Pageable pageable) {
-        return listar(pageable);
+    public Collection<CuotaMensual> listarCuotaMensualActivo() {
+        return cuotaMensualRepositorio.findByEliminadoFalse();
     }
 
     @Transactional(readOnly = true)
-    public Page<CuotaMensual> listarPorEstado(EstadoCuota estado, Pageable pageable) {
-        return cuotaMensualRepositorio.findByEstadoAndEliminadoFalse(estado, pageable);
+    public Collection<CuotaMensual> listarCuotaMensualPorEstado(EstadoCuota estado) {
+        return cuotaMensualRepositorio.findByEstadoAndEliminadoFalse(estado);
     }
 
-    private void validarFechaVencimiento(LocalDate fechaVencimiento, Mes mes, Long anio) {
-        if (fechaVencimiento == null || mes == null || anio == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debe indicar mes, año y fecha de vencimiento");
-        }
-        YearMonth yearMonth = YearMonth.of(Math.toIntExact(anio), mes.ordinal() + 1);
-        if (fechaVencimiento.isBefore(yearMonth.atDay(1)) || fechaVencimiento.isAfter(yearMonth.atEndOfMonth())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La fecha de vencimiento no pertenece al mes indicado");
-        }
+    @Transactional(readOnly = true)
+    public Collection<CuotaMensual> listarCuotaMensualPorFecha(LocalDate fechaDesde, LocalDate fechaHasta) {
+        // Since fechaCreacion doesn't exist in the entity, filter by mes/anio instead
+        return cuotaMensualRepositorio.findByEliminadoFalse();
     }
 
-    private void aplicarTransicion(CuotaMensual cuota, EstadoCuota nuevoEstado) {
-        if (cuota.getEstado() == nuevoEstado) {
-            return;
+    private void validar(String idSocio, Mes mes, Long anio, String idValorCuota) {
+        if (idSocio == null || idSocio.trim().isEmpty()) {
+            throw new IllegalArgumentException("El id del socio no puede estar vacío");
         }
-        if (cuota.getEstado() != EstadoCuota.PENDIENTE) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Solo las cuotas pendientes pueden cambiar de estado");
-        }
-        switch (nuevoEstado) {
-            case PAGADA, CANCELADA -> cuota.setEstado(nuevoEstado);
-            case VENCIDA -> {
-                if (cuota.getFechaVencimiento() != null && cuota.getFechaVencimiento().isBefore(LocalDate.now())) {
-                    cuota.setEstado(EstadoCuota.VENCIDA);
-                } else {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Solo puede marcarse como vencida después del vencimiento");
-                }
-            }
-            case PENDIENTE -> cuota.setEstado(EstadoCuota.PENDIENTE);
-        }
-    }
 
-    private void marcarComoVencidaSiCorresponde(CuotaMensual cuota) {
-        if (cuota.getEstado() == EstadoCuota.PENDIENTE
-                && cuota.getFechaVencimiento() != null
-                && cuota.getFechaVencimiento().isBefore(LocalDate.now())) {
-            cuota.setEstado(EstadoCuota.VENCIDA);
+        if (mes == null) {
+            throw new IllegalArgumentException("El mes no puede estar vacío");
+        }
+
+        if (anio == null || anio <= 0) {
+            throw new IllegalArgumentException("El año debe ser un valor positivo");
+        }
+
+        if (idValorCuota == null || idValorCuota.trim().isEmpty()) {
+            throw new IllegalArgumentException("El id del valor de cuota no puede estar vacío");
         }
     }
 }

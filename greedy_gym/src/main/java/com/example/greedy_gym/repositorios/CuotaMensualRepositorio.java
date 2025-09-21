@@ -3,19 +3,21 @@ package com.example.greedy_gym.repositorios;
 import com.example.greedy_gym.entidades.CuotaMensual;
 import com.example.greedy_gym.entidades.EstadoCuota;
 import com.example.greedy_gym.entidades.Mes;
+import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Optional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CuotaMensualRepositorio extends JpaRepository<CuotaMensual, String> {
 
-    Page<CuotaMensual> findByEliminadoFalse(Pageable pageable);
+    Collection<CuotaMensual> findByEliminadoFalse();
 
     Optional<CuotaMensual> findByIdAndEliminadoFalse(String id);
 
     boolean existsByIdSocioAndMesAndAnioAndEliminadoFalse(String idSocio, Mes mes, Long anio);
 
-    Page<CuotaMensual> findByEstadoAndEliminadoFalse(EstadoCuota estado, Pageable pageable);
+    boolean existsByIdSocioAndMesAndAnioAndEliminadoFalseAndIdNot(String idSocio, Mes mes, Long anio, String id);
+
+    Collection<CuotaMensual> findByEstadoAndEliminadoFalse(EstadoCuota estado);
 }
 

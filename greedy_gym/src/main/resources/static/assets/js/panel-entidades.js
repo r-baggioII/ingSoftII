@@ -364,7 +364,7 @@
       description: 'Gestión de cuotas emitidas a cada socio.',
       singular: 'cuota',
       createLabel: 'Nueva cuota',
-      searchPlaceholder: 'Buscar por socio, mes o estado de pago',
+      searchPlaceholder: 'Buscar por DNI, mes o estado de pago',
       allowCreate: true,
       allowUpdate: true,
       allowDelete: true,

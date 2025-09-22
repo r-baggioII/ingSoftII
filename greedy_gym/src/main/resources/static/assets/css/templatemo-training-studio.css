@@ -658,6 +658,10 @@ banner
   font-weight: 900;
 }
 
+.main-banner .caption p {
+  color: #fff;
+}
+
 
 /*
 ---------------------------------------------

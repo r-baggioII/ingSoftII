@@ -57,50 +57,61 @@
 </header>
 <!-- ***** Header Area End ***** -->
 
-<!-- ***** Login Section Start ***** -->
-<section class="section login-section" id="login">
+<!-- ***** Main Banner Area Start ***** -->
+<div class="main-banner" id="top">
+    <video autoplay muted loop id="bg-video">
+        <source th:src="@{/assets/images/gym-video.mp4}" type="video/mp4" />
+    </video>
+
+    <div class="video-overlay header-text">
+        <div class="caption">
+            <h6>Acceso seguro al sistema</h6>
+            <h2>Ingresa a tu <em>cuenta</em></h2>
+            <div class="login-form">
+                <div th:if="${error}" class="alert alert-danger" role="alert">
+                    <span th:text="${error}"></span>
+                </div>
+                
+                <form th:action="@{/login}" method="post" id="loginForm">
+                    <div class="row">
+                        <div class="col-12">
+                            <fieldset>
+                                <label for="nombreUsuario">Nombre de Usuario</label>
+                                <input name="nombreUsuario" type="text" id="nombreUsuario" 
+                                       placeholder="Ingresa tu nombre de usuario" required>
+                            </fieldset>
+                        </div>
+                        <div class="col-12">
+                            <fieldset>
+                                <label for="clave">Contraseña</label>
+                                <input name="clave" type="password" id="clave" 
+                                       placeholder="Ingresa tu contraseña" required>
+                            </fieldset>
+                        </div>
+                        <div class="col-12">
+                            <fieldset>
+                                <button type="submit" id="form-submit" class="main-button">
+                                    Ingresar al Sistema
+                                </button>
+                            </fieldset>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ***** Main Banner Area End ***** -->
+
+<!-- ***** Roles Section Start ***** -->
+<section class="section" id="roles">
     <div class="container">
         <div class="row">
             <div class="col-lg-6 offset-lg-3">
                 <div class="section-heading">
-                    <h2>Acceso al <em>Sistema</em></h2>
+                    <h2>Información de <em>Roles</em></h2>
                     <img th:src="@{/assets/images/line-dec.png}" alt="waves">
-                    <p>Ingresa tus credenciales para acceder a las funcionalidades según tu rol.</p>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-6 offset-lg-3 col-md-8 offset-md-2">
-                <div class="login-form">
-                    <div th:if="${error}" class="alert alert-danger" role="alert">
-                        <span th:text="${error}"></span>
-                    </div>
-                    
-                    <form th:action="@{/login}" method="post" id="loginForm">
-                        <div class="row">
-                            <div class="col-12">
-                                <fieldset>
-                                    <label for="nombreUsuario">Nombre de Usuario</label>
-                                    <input name="nombreUsuario" type="text" id="nombreUsuario" 
-                                           placeholder="Ingresa tu nombre de usuario" required>
-                                </fieldset>
-                            </div>
-                            <div class="col-12">
-                                <fieldset>
-                                    <label for="clave">Contraseña</label>
-                                    <input name="clave" type="password" id="clave" 
-                                           placeholder="Ingresa tu contraseña" required>
-                                </fieldset>
-                            </div>
-                            <div class="col-12">
-                                <fieldset>
-                                    <button type="submit" id="form-submit" class="main-button">
-                                        Ingresar al Sistema
-                                    </button>
-                                </fieldset>
-                            </div>
-                        </div>
-                    </form>
+                    <p>Conoce los diferentes tipos de usuario y sus accesos.</p>
                 </div>
             </div>
         </div>
@@ -109,7 +120,6 @@
         <div class="row mt-5">
             <div class="col-lg-10 offset-lg-1">
                 <div class="roles-info">
-                    <h4>Tipos de Usuario</h4>
                     <div class="row">
                         <div class="col-lg-4">
                             <div class="role-item">
@@ -144,7 +154,7 @@
         </div>
     </div>
 </section>
-<!-- ***** Login Section End ***** -->
+<!-- ***** Roles Section End ***** -->
 
 <!-- ***** Footer Start ***** -->
 <footer>

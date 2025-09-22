@@ -68,18 +68,51 @@ public class DireccionControlador {
     @PostMapping("/con-nombres")
     @ResponseStatus(HttpStatus.CREATED)
     public Direccion crearConNombres(@RequestBody DireccionConNombresRequest request) {
-        return direccionServicio.crearDireccionConNombres(
+        // Validar campos básicos
+        if (request.getCalle() == null || request.getCalle().trim().isEmpty()) {
+            throw new IllegalArgumentException("La calle es obligatoria");
+        }
+        if (request.getNumeracion() == null || request.getNumeracion().trim().isEmpty()) {
+            throw new IllegalArgumentException("La numeración es obligatoria");
+        }
+        
+        // Buscar o crear país
+        Pais pais = paisServicio.buscarPorNombre(request.getNombrePais());
+        if (pais == null) {
+            pais = paisServicio.crearPais(request.getNombrePais());
+        }
+
+        // Buscar o crear provincia
+        Provincia provincia = provinciaServicio.buscarPorNombreYPais(request.getNombreProvincia(), pais.getId());
+        if (provincia == null) {
+            provincia = provinciaServicio.crearProvincia(request.getNombreProvincia(), pais.getId());
+        }
+
+        // Buscar o crear departamento
+        Departamento departamento = departamentoServicio.buscarPorNombreYProvincia(request.getNombreDepartamento(), provincia.getId());
+        if (departamento == null) {
+            departamento = departamentoServicio.crearDepartamento(request.getNombreDepartamento(), provincia.getId());
+        }
+
+        // Buscar o crear localidad
+        Localidad localidad = localidadServicio.buscarPorNombreYDepartamento(request.getNombreLocalidad(), departamento.getId());
+        if (localidad == null) {
+            localidad = localidadServicio.crearLocalidad(
+                request.getNombreLocalidad(),
+                request.getCodigoPostal(),
+                departamento.getId()
+            );
+        }
+
+        // Crear la dirección usando solo DireccionServicio
+        return direccionServicio.crearDireccion(
             request.getCalle(),
             request.getNumeracion(),
             request.getBarrio(),
             request.getManzanaPiso(),
             request.getCasaDepartamento(),
             request.getReferencia(),
-            request.getNombrePais(),
-            request.getNombreProvincia(),
-            request.getNombreDepartamento(),
-            request.getNombreLocalidad(),
-            request.getCodigoPostal()
+            localidad.getId()
         );
     }
 

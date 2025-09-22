@@ -31,15 +31,6 @@ public class Direccion {
     @Column(length = 20)
     private String numero;
 
-    @Column(length = 120)
-    private String ciudad;
-
-    @Column(length = 120)
-    private String provincia;
-
-    @Column(length = 120)
-    private String pais;
-
     @Column(length = 20)
     private String codigoPostal;
 

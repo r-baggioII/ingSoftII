@@ -115,13 +115,16 @@ public class SucursalServicio {
         if (direccion.getNumero() == null || direccion.getNumero().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El número es obligatorio");
         }
-        if (direccion.getCiudad() == null || direccion.getCiudad().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La ciudad es obligatoria");
+        if (direccion.getLocalidad() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La localidad es obligatoria");
         }
-        if (direccion.getProvincia() == null || direccion.getProvincia().isBlank()) {
+        if (direccion.getLocalidad().getDepartamento() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El departamento es obligatorio");
+        }
+        if (direccion.getLocalidad().getDepartamento().getProvincia() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La provincia es obligatoria");
         }
-        if (direccion.getPais() == null || direccion.getPais().isBlank()) {
+        if (direccion.getLocalidad().getDepartamento().getProvincia().getPais() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El país es obligatorio");
         }
     }
@@ -171,9 +174,11 @@ public class SucursalServicio {
     private void copiarDireccion(Direccion destino, Direccion origen) {
         destino.setCalle(origen.getCalle().trim());
         destino.setNumero(origen.getNumero().trim());
-        destino.setCiudad(origen.getCiudad().trim());
-        destino.setProvincia(origen.getProvincia().trim());
-        destino.setPais(origen.getPais().trim());
+        destino.setLocalidad(origen.getLocalidad());
         destino.setCodigoPostal(origen.getCodigoPostal() != null ? origen.getCodigoPostal().trim() : null);
+        destino.setBarrio(origen.getBarrio() != null ? origen.getBarrio().trim() : null);
+        destino.setManzanaPiso(origen.getManzanaPiso() != null ? origen.getManzanaPiso().trim() : null);
+        destino.setCasaDepartamento(origen.getCasaDepartamento() != null ? origen.getCasaDepartamento().trim() : null);
+        destino.setReferencia(origen.getReferencia() != null ? origen.getReferencia().trim() : null);
     }
 }

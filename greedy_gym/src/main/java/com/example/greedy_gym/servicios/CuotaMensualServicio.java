@@ -9,6 +9,7 @@ import com.example.greedy_gym.repositorios.SocioRepositorio;
 import com.example.greedy_gym.repositorios.ValorCuotaRepositorio;
 import jakarta.validation.ValidationException;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.Collection;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -54,9 +55,12 @@ public class CuotaMensualServicio {
         cuotaMensual.setAnio(anio);
         cuotaMensual.setValorCuota(valorCuota);
         cuotaMensual.setEstado(EstadoCuota.PENDIENTE);
+        cuotaMensual.setFechaVencimiento(calcularVencimiento(mes, anio));
         cuotaMensual.setEliminado(false);
 
-        return cuotaMensualRepositorio.save(cuotaMensual);
+        CuotaMensual guardada = cuotaMensualRepositorio.save(cuotaMensual);
+        enriquecerConDatosSocio(guardada);
+        return guardada;
     }
 
     @Transactional
@@ -89,8 +93,10 @@ public class CuotaMensualServicio {
         cuotaMensual.setAnio(anio);
         cuotaMensual.setValorCuota(valorCuota);
         cuotaMensual.setEstado(estado);
+        cuotaMensual.setFechaVencimiento(calcularVencimiento(mes, anio));
 
         cuotaMensualRepositorio.save(cuotaMensual);
+        enriquecerConDatosSocio(cuotaMensual);
     }
 
     @Transactional
@@ -104,29 +110,39 @@ public class CuotaMensualServicio {
 
     @Transactional(readOnly = true)
     public CuotaMensual buscarCuotaMensual(String id) {
-        return cuotaMensualRepositorio.findByIdAndEliminadoFalse(id)
+        CuotaMensual c = cuotaMensualRepositorio.findByIdAndEliminadoFalse(id)
                 .orElseThrow(() -> new IllegalArgumentException("La cuota mensual no existe"));
+        enriquecerConDatosSocio(c);
+        return c;
     }
 
     @Transactional(readOnly = true)
     public Collection<CuotaMensual> listarCuotaMensual() {
-        return cuotaMensualRepositorio.findByEliminadoFalse();
+        Collection<CuotaMensual> list = cuotaMensualRepositorio.findByEliminadoFalse();
+        list.forEach(this::enriquecerConDatosSocio);
+        return list;
     }
 
     @Transactional(readOnly = true)
     public Collection<CuotaMensual> listarCuotaMensualActivo() {
-        return cuotaMensualRepositorio.findByEliminadoFalse();
+        Collection<CuotaMensual> list = cuotaMensualRepositorio.findByEliminadoFalse();
+        list.forEach(this::enriquecerConDatosSocio);
+        return list;
     }
 
     @Transactional(readOnly = true)
     public Collection<CuotaMensual> listarCuotaMensualPorEstado(EstadoCuota estado) {
-        return cuotaMensualRepositorio.findByEstadoAndEliminadoFalse(estado);
+        Collection<CuotaMensual> list = cuotaMensualRepositorio.findByEstadoAndEliminadoFalse(estado);
+        list.forEach(this::enriquecerConDatosSocio);
+        return list;
     }
 
     @Transactional(readOnly = true)
     public Collection<CuotaMensual> listarCuotaMensualPorFecha(LocalDate fechaDesde, LocalDate fechaHasta) {
         // Since fechaCreacion doesn't exist in the entity, filter by mes/anio instead
-        return cuotaMensualRepositorio.findByEliminadoFalse();
+        Collection<CuotaMensual> list = cuotaMensualRepositorio.findByEliminadoFalse();
+        list.forEach(this::enriquecerConDatosSocio);
+        return list;
     }
 
     private void validar(String idSocio, Mes mes, Long anio, String idValorCuota) {
@@ -146,5 +162,22 @@ public class CuotaMensualServicio {
             throw new IllegalArgumentException("El id del valor de cuota no puede estar vacío");
         }
     }
-}
 
+    private LocalDate calcularVencimiento(Mes mes, Long anio) {
+        int month = mes.ordinal() + 1; // ENERO=1, ... DICIEMBRE=12
+        YearMonth ym = YearMonth.of(Math.toIntExact(anio), month);
+        return ym.atEndOfMonth();
+    }
+
+    private void enriquecerConDatosSocio(CuotaMensual cuota) {
+        if (cuota == null) return;
+        socioRepositorio.findByIdAndEliminadoFalse(cuota.getIdSocio()).ifPresent(s -> {
+            cuota.setSocioNumeroDocumento(s.getNumeroDocumento());
+            cuota.setSocioNumeroSocio(s.getNumeroSocio());
+            String nombre = (s.getNombre() != null ? s.getNombre().trim() : "");
+            String apellido = (s.getApellido() != null ? s.getApellido().trim() : "");
+            String full = (nombre + " " + apellido).trim();
+            cuota.setSocioNombreCompleto(full.isEmpty() ? null : full);
+        });
+    }
+}

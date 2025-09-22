@@ -24,14 +24,21 @@ public class SocioServicio {
         if (socio == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Los datos del socio son obligatorios");
         }
+        Long numeroSocio = socio.getNumeroSocio();
+        if (numeroSocio == null) {
+            numeroSocio = siguienteNumeroSocio();
+        }
         return crearSocio(socio.getNombre(), socio.getApellido(), socio.getFechaNacimiento(),
                 socio.getTipoDocumento(), socio.getNumeroDocumento(), socio.getTelefono(),
-                socio.getCorreoElectronico(), socio.getNumeroSocio());
+                socio.getCorreoElectronico(), numeroSocio);
     }
 
     public Socio crearSocio(String nombre, String apellido, LocalDate fechaNacimiento,
             TipoDocumento tipoDocumento, String numeroDocumento, String telefono,
             String correoElectronico, Long numeroSocio) {
+        if (numeroSocio == null) {
+            numeroSocio = siguienteNumeroSocio();
+        }
         validar(nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento,
                 telefono, correoElectronico, numeroSocio);
         Socio socio = new Socio();
@@ -53,6 +60,9 @@ public class SocioServicio {
             TipoDocumento tipoDocumento, String numeroDocumento, Long numeroSocio) {
         Socio existente = socioRepositorio.findByIdAndEliminadoFalse(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Socio no encontrado"));
+        if (numeroSocio == null) {
+            numeroSocio = existente.getNumeroSocio();
+        }
         validar(nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento,
                 existente.getTelefono(), existente.getCorreoElectronico(), numeroSocio, id);
         aplicarDatos(existente, nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento,
@@ -139,9 +149,7 @@ public class SocioServicio {
         if (correoElectronico == null || correoElectronico.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El correo electrónico es obligatorio");
         }
-        if (numeroSocio == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El número de socio es obligatorio");
-        }
+        // numeroSocio: si viene provisto, se valida unicidad; en creación se genera automáticamente
         
         // Validar que no exista otro socio con el mismo número de documento
         socioRepositorio.findByNumeroDocumentoAndEliminadoFalse(numeroDocumento)
@@ -158,11 +166,13 @@ public class SocioServicio {
                 });
         
         // Validar que no exista otro socio con el mismo número de socio
-        socioRepositorio.findByNumeroSocioAndEliminadoFalse(numeroSocio)
-                .filter(encontrado -> !Objects.equals(encontrado.getId(), idActual))
-                .ifPresent(e -> {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe un socio con ese número de socio");
-                });
+        if (numeroSocio != null) {
+            socioRepositorio.findByNumeroSocioAndEliminadoFalse(numeroSocio)
+                    .filter(encontrado -> !Objects.equals(encontrado.getId(), idActual))
+                    .ifPresent(e -> {
+                        throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe un socio con ese número de socio");
+                    });
+        }
     }
 
     private void aplicarDatos(Socio socio, String nombre, String apellido, LocalDate fechaNacimiento,
@@ -176,5 +186,13 @@ public class SocioServicio {
         socio.setTelefono(telefono.trim());
         socio.setCorreoElectronico(correoElectronico.trim().toLowerCase());
         socio.setNumeroSocio(numeroSocio);
+    }
+
+    private Long siguienteNumeroSocio() {
+        Long max = socioRepositorio.obtenerMaxNumeroSocio();
+        if (max == null) {
+            max = 0L;
+        }
+        return max + 1L;
     }
 }

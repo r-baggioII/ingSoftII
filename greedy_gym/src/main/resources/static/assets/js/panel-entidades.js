@@ -309,8 +309,7 @@
         { name: 'tipoDocumento', label: 'Tipo de documento', type: 'select', required: true, options: DOCUMENT_OPTIONS },
         { name: 'numeroDocumento', label: 'Número de documento', type: 'text', required: true },
         { name: 'telefono', label: 'Teléfono', type: 'text', required: true },
-        { name: 'correoElectronico', label: 'Correo electrónico', type: 'email', required: true },
-        { name: 'numeroSocio', label: 'Número de socio', type: 'number', required: true }
+        { name: 'correoElectronico', label: 'Correo electrónico', type: 'email', required: true }
       ],
       async list() {
         return requestJson(buildUrl('/api/v1/socios'));
@@ -332,8 +331,7 @@
           tipoDocumento: item?.tipoDocumento || DOCUMENT_OPTIONS[0].value,
           numeroDocumento: item?.numeroDocumento || '',
           telefono: item?.telefono || '',
-          correoElectronico: item?.correoElectronico || '',
-          numeroSocio: item?.numeroSocio || ''
+          correoElectronico: item?.correoElectronico || ''
         };
       },
       toPayload(mode, values) {
@@ -344,8 +342,7 @@
           tipoDocumento: values.tipoDocumento,
           numeroDocumento: values.numeroDocumento ? values.numeroDocumento.trim() : '',
           telefono: values.telefono ? values.telefono.trim() : '',
-          correoElectronico: values.correoElectronico ? values.correoElectronico.trim() : '',
-          numeroSocio: parseInt(values.numeroSocio, 10)
+          correoElectronico: values.correoElectronico ? values.correoElectronico.trim() : ''
         };
       },
       isInactive(item) {
@@ -372,7 +369,7 @@
       allowUpdate: true,
       allowDelete: true,
       columns: [
-        { header: 'Socio', value: item => item?.idSocio || '—' },
+        { header: 'DNI', value: item => item?.socioNumeroDocumento || '—' },
         { header: 'Mes', value: item => formatMonth(item?.mes) || '—' },
         { header: 'Año', value: item => item?.anio != null ? String(item.anio) : '—' },
         { header: 'Estado', value: item => formatLabel(item?.estado) || '—' },
@@ -380,7 +377,7 @@
         { header: 'Vencimiento', value: item => item?.fechaVencimiento || '—' }
       ],
       formFields: [
-        { name: 'idSocio', label: 'ID de socio', type: 'text', required: true, modes: ['create'] },
+        { name: 'numeroDocumento', label: 'DNI', type: 'text', required: true, modes: ['create'] },
         { name: 'mes', label: 'Mes', type: 'select', required: true, options: MONTH_OPTIONS, modes: ['create'] },
         { name: 'anio', label: 'Año', type: 'number', required: true, min: 2000, modes: ['create'] },
         { name: 'valorCuotaId', label: 'Valor de cuota', type: 'select', required: true, modes: ['create'], loadOptions: loadValorCuotasOptions },
@@ -391,7 +388,7 @@
       },
       async create(payload) {
         const params = new URLSearchParams();
-        params.set('idSocio', payload.idSocio || '');
+        params.set('numeroDocumento', payload.numeroDocumento || '');
         params.set('mes', payload.mes || '');
         params.set('anio', payload.anio || '');
         params.set('idValorCuota', payload.idValorCuota || '');
@@ -413,7 +410,7 @@
         if (mode === 'create') {
           const year = new Date().getFullYear();
           return {
-            idSocio: '',
+            numeroDocumento: '',
             mes: MONTH_OPTIONS[0].value,
             anio: year,
             valorCuotaId: '',
@@ -431,7 +428,7 @@
       toPayload(mode, values, item) {
         if (mode === 'create') {
           return {
-            idSocio: values.idSocio ? values.idSocio.trim() : '',
+            numeroDocumento: values.numeroDocumento ? values.numeroDocumento.trim() : '',
             mes: values.mes,
             anio: Number(values.anio),
             idValorCuota: values.valorCuotaId
@@ -450,7 +447,9 @@
       },
       searchText(item) {
         return [
-          item?.idSocio,
+          item?.socioNumeroDocumento,
+          item?.socioNumeroSocio,
+          item?.socioNombreCompleto,
           formatMonth(item?.mes),
           item?.anio,
           formatLabel(item?.estado),

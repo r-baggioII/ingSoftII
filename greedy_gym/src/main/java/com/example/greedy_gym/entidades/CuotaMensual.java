@@ -11,6 +11,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Transient;
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -56,6 +57,16 @@ public class CuotaMensual {
     @JoinColumn(name = "valor_cuota_id", nullable = false, updatable = false)
     private ValorCuota valorCuota;
 
+    // Campos calculados para UI (no persistidos)
+    @Transient
+    private String socioNumeroDocumento;
+
+    @Transient
+    private Long socioNumeroSocio;
+
+    @Transient
+    private String socioNombreCompleto;
+
     @PrePersist
     public void prePersist() {
         if (this.id == null) {
@@ -66,4 +77,3 @@ public class CuotaMensual {
         }
     }
 }
-

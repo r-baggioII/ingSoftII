@@ -4,6 +4,8 @@ import com.example.greedy_gym.entidades.CuotaMensual;
 import com.example.greedy_gym.entidades.EstadoCuota;
 import com.example.greedy_gym.entidades.Mes;
 import com.example.greedy_gym.servicios.CuotaMensualServicio;
+import com.example.greedy_gym.repositorios.SocioRepositorio;
+import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.util.Collection;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -23,18 +25,30 @@ import org.springframework.web.bind.annotation.RestController;
 public class CuotaMensualControlador {
 
     private final CuotaMensualServicio service;
+    private final SocioRepositorio socioRepositorio;
 
-    public CuotaMensualControlador(CuotaMensualServicio service) {
+    public CuotaMensualControlador(CuotaMensualServicio service, SocioRepositorio socioRepositorio) {
         this.service = service;
+        this.socioRepositorio = socioRepositorio;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CuotaMensual crear(@RequestParam String idSocio,
+    public CuotaMensual crear(@RequestParam(required = false) String idSocio,
+                              @RequestParam(required = false) String numeroDocumento,
                               @RequestParam Mes mes,
                               @RequestParam Long anio,
                               @RequestParam String idValorCuota) {
-        return service.crearCuota(idSocio, mes, anio, idValorCuota);
+        String socioId = idSocio;
+        if ((socioId == null || socioId.isBlank()) && numeroDocumento != null && !numeroDocumento.isBlank()) {
+            socioId = socioRepositorio.findByNumeroDocumentoAndEliminadoFalse(numeroDocumento)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No existe un socio con ese número de documento"))
+                    .getId();
+        }
+        if (socioId == null || socioId.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debe enviar idSocio o numeroDocumento");
+        }
+        return service.crearCuota(socioId, mes, anio, idValorCuota);
     }
 
     @GetMapping("/{id}")
@@ -80,4 +94,3 @@ public class CuotaMensualControlador {
         return service.listarCuotaMensualPorFecha(fechaDesde, fechaHasta);
     }
 }
-

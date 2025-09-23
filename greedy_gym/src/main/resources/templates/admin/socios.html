@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Admin | Socios</title>
+  <link rel="stylesheet" type="text/css" th:href="@{/assets/css/bootstrap.min.css}">
+  <link rel="stylesheet" type="text/css" th:href="@{/assets/css/font-awesome.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/templatemo-training-studio.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/panel-shared.css}">
+</head>
+<body>
+<header class="header-area header-sticky">
+  <div class="container"><div class="row"><div class="col-12">
+    <nav class="main-nav">
+      <a th:href="@{/}" class="logo">Greedy<em> Gym</em></a>
+      <ul class="nav">
+        <li><a th:href="@{/dashboard/admin2}">Dashboard</a></li>
+        <li><a th:href="@{/panel/entidades(entity='socios')}">Abrir en Panel</a></li>
+        <li><a th:href="@{/logout}">Cerrar Sesión</a></li>
+      </ul>
+      <a class='menu-trigger'><span>Menú</span></a>
+    </nav>
+  </div></div></div>
+</header>
+
+<section class="section panel-management">
+  <div class="container">
+    <div class="row"><div class="col-lg-10 offset-lg-1">
+      <div class="section-heading">
+        <h2>Socios</h2>
+        <img th:src="@{/assets/images/line-dec.png}" alt="waves">
+        <p>Alta/Consulta/Mod/Baja. Opcional: crear y vincular un Usuario del sistema para este Socio.</p>
+      </div>
+    </div></div>
+
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
+          <div class="card-body">
+            <h5 class="card-title">Datos del Socio</h5>
+            <form id="socio-form">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Nombre</label>
+                  <input type="text" name="nombre" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Apellido</label>
+                  <input type="text" name="apellido" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Fecha de nacimiento</label>
+                  <input type="date" name="fechaNacimiento" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Tipo de documento</label>
+                  <select name="tipoDocumento" class="form-select" required>
+                    <option value="DNI">DNI</option>
+                    <option value="PASAPORTE">Pasaporte</option>
+                    <option value="CEDULA">Cédula</option>
+                    <option value="LIBRETA_CIVICA">Libreta Cívica</option>
+                    <option value="LIBRETA_ENROLAMIENTO">Libreta de Enrolamiento</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Número de documento</label>
+                  <input type="text" name="numeroDocumento" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Teléfono</label>
+                  <input type="text" name="telefono" class="form-control" required>
+                <form id="socio-form">
+                <div class="col-md-12">
+                  <label class="form-label">Correo electrónico</label>
+                      <label class="panel-label">Nombre</label>
+                      <input type="text" name="nombre" class="form-control panel-control" required>
+              </div>
+              <div class="mt-3 d-flex gap-2">
+                      <label class="panel-label">Apellido</label>
+                      <input type="text" name="apellido" class="form-control panel-control" required>
+                <button type="button" class="btn btn-outline-secondary" id="socio-reset">Limpiar</button>
+              </div>
+                      <label class="panel-label">Fecha de nacimiento</label>
+                      <input type="date" name="fechaNacimiento" class="form-control panel-control" required>
+        </div>
+      </div>
+                      <label class="panel-label">DNI</label>
+                      <input type="text" name="dni" class="form-control panel-control" required>
+        <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
+          <div class="card-body">
+                      <label class="panel-label">Correo</label>
+                      <input type="email" name="correo" class="form-control panel-control" required>
+            <form id="socio-usuario-form">
+              <div class="mb-2">
+                      <label class="panel-label">Teléfono</label>
+                      <input type="text" name="telefono" class="form-control panel-control">
+              </div>
+              <div class="mb-2">
+                <label class="form-label">Clave</label>
+                    <button type="submit" class="btn main-button-panel">Guardar Socio</button>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Rol</label>
+                <select name="rol" class="form-select">
+                  <option value="SOCIO">Socio</option>
+                  <option value="PROFESOR">Profesor</option>
+                  <option value="ADMINISTRATIVO">Administrativo</option>
+                </select>
+              </div>
+              <!-- JS: Al guardar, primero crear Usuario (POST /api/usuarios), luego PUT /api/v1/socios/{id} para setear usuarioId -->
+              <button type="submit" class="btn btn-outline-primary">Crear y vincular Usuario</button>
+            </form>
+                    <label class="panel-label">Nombre de usuario</label>
+                    <input type="text" name="nombreUsuario" class="form-control panel-control">
+
+        <div class="card mt-4" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
+                    <label class="panel-label">Clave</label>
+                    <input type="password" name="clave" class="form-control panel-control">
+            <div class="input-group mb-3">
+              <input type="text" id="socio-search" class="form-control" placeholder="Buscar por nombre, DNI o correo">
+                    <label class="panel-label">Rol</label>
+                    <select name="rol" class="form-select panel-control">
+            <!-- JS: GET /api/v1/socios?search=... ; acciones editar/baja -->
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead><tr><th>Nombre</th><th>DNI</th><th>Correo</th><th class="text-end">Acciones</th></tr></thead>
+                <tbody id="socio-table-body"></tbody>
+                  <button type="submit" class="btn main-button-panel">Crear y vincular Usuario</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+                  <input type="text" id="socio-search" class="form-control panel-control" placeholder="Buscar por nombre, DNI o correo">
+                  <button class="btn main-button-panel" id="socio-refresh">Buscar</button>
+</body>
+                <div class="panel-table table-responsive">

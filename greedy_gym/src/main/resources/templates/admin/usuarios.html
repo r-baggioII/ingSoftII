@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Admin | Gestión de Usuarios</title>
+  <link rel="stylesheet" type="text/css" th:href="@{/assets/css/bootstrap.min.css}">
+  <link rel="stylesheet" type="text/css" th:href="@{/assets/css/font-awesome.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/templatemo-training-studio.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/panel-shared.css}">
+</head>
+<body>
+<header class="header-area header-sticky">
+  <div class="container"><div class="row"><div class="col-12">
+    <nav class="main-nav">
+      <a th:href="@{/}" class="logo">Greedy<em> Gym</em></a>
+      <ul class="nav">
+        <li><a th:href="@{/dashboard/admin2}">Dashboard</a></li>
+        <li><a th:href="@{/panel/entidades(entity='usuarios')}">Abrir en Panel</a></li>
+        <li><a th:href="@{/logout}">Cerrar Sesión</a></li>
+      </ul>
+      <a class='menu-trigger'><span>Menú</span></a>
+    </nav>
+  </div></div></div>
+</header>
+
+<section class="section panel-management">
+  <div class="container">
+    <div class="row"><div class="col-lg-10 offset-lg-1">
+      <div class="section-heading">
+        <h2>Gestión de Usuarios</h2>
+        <img th:src="@{/assets/images/line-dec.png}" alt="waves">
+        <p>Crear, consultar, modificar, dar de baja y asignar rol. Permite vincular Usuario con Socio o Empleado.</p>
+      </div>
+    </div></div>
+
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
+          <div class="card-body">
+            <h5 class="card-title">Crear/Editar Usuario</h5>
+            <form id="usuario-form">
+              <div class="mb-3">
+                <label class="panel-label">Nombre de usuario</label>
+                <input type="text" class="form-control panel-control" name="nombreUsuario" required>
+              </div>
+              <div class="mb-3">
+                <label class="panel-label">Clave</label>
+                <input type="password" class="form-control panel-control" name="clave" required>
+              </div>
+              <div class="mb-3">
+                <label class="panel-label">Rol</label>
+                <select class="form-select panel-control" name="rol" required>
+                  <option value="ADMINISTRATIVO">Administrativo</option>
+                  <option value="PROFESOR">Profesor</option>
+                  <option value="SOCIO">Socio</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="panel-label">Vincular con</label>
+                <select class="form-select panel-control" name="tipoVinculo">
+                  <option value="NINGUNO">Ninguno</option>
+                  <option value="SOCIO">Socio existente</option>
+                  <option value="EMPLEADO">Empleado existente</option>
+                </select>
+              </div>
+
+              <div class="mb-3 d-none" id="vinculo-socio">
+                <label class="form-label">Seleccionar Socio</label>
+                <!-- JS: llenar dropdown con socios activos vía /api/v1/socios -->
+                <select class="form-select panel-control" name="socioId">
+                  <option value="">Seleccione un socio...</option>
+                </select>
+              </div>
+
+              <div class="mb-3 d-none" id="vinculo-empleado">
+                <label class="form-label">Seleccionar Empleado</label>
+                <!-- JS: llenar dropdown con empleados activos vía /api/v1/empleados -->
+                <select class="form-select panel-control" name="empleadoId">
+                  <option value="">Seleccione un empleado...</option>
+                </select>
+              </div>
+
+              <div class="d-flex gap-2">
+                <!-- JS: POST /api/usuarios (payload: nombreUsuario, clave, rol). Si tipoVinculo=SOCIO/EMPLEADO, luego PUT en socio/empleado para setear usuarioId -->
+                <button type="submit" class="btn main-button-panel">Guardar</button>
+                <button type="button" class="btn btn-outline-secondary" id="usuario-reset">Limpiar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
+          <div class="card-body">
+            <h5 class="card-title">Búsqueda y acciones</h5>
+            <div class="row g-2 mb-3">
+              <div class="col-md-8"><input type="text" class="form-control panel-control" id="usuario-search" placeholder="Buscar por nombre de usuario"></div>
+              <div class="col-md-4"><button class="btn main-button-panel w-100" id="usuario-refresh">Buscar</button></div>
+            </div>
+            <!-- JS: GET /api/usuarios?search=... ; render tabla; acciones PUT/DELETE -->
+            <div class="panel-table table-responsive">
+              <table class="table table-hover align-middle">
+                <thead>
+                  <tr><th>Usuario</th><th>Rol</th><th>Estado</th><th class="text-end">Acciones</th></tr>
+                </thead>
+                <tbody id="usuario-table-body">
+                  <!-- JS: filas -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script th:src="@{/assets/js/jquery-2.1.0.min.js}"></script>
+<script th:src="@{/assets/js/bootstrap.min.js}"></script>
+</body>
+</html>

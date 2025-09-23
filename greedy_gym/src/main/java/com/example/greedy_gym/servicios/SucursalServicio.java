@@ -2,6 +2,7 @@ package com.example.greedy_gym.servicios;
 
 import com.example.greedy_gym.entidades.Direccion;
 import com.example.greedy_gym.entidades.Empresa;
+import com.example.greedy_gym.entidades.Localidad;
 import com.example.greedy_gym.entidades.Sucursal;
 import com.example.greedy_gym.repositorios.EmpresaRepositorio;
 import com.example.greedy_gym.repositorios.SucursalRepositorio;
@@ -20,6 +21,8 @@ public class SucursalServicio {
 
     private final SucursalRepositorio sucursalRepositorio;
     private final EmpresaRepositorio empresaRepositorio;
+    private final LocalidadServicio localidadServicio;
+    private final DireccionServicio direccionServicio;
 
     public Sucursal crearSucursal(String nombre, String idEmpresa, Direccion direccion) {
         validar(nombre, direccion);
@@ -109,6 +112,10 @@ public class SucursalServicio {
         if (direccion == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La dirección es obligatoria");
         }
+        // Si viene solo el id de la dirección, aceptamos y validamos contra DB más adelante
+        if (direccion.getId() != null && !direccion.getId().isBlank()) {
+            return;
+        }
         if (direccion.getCalle() == null || direccion.getCalle().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La calle es obligatoria");
         }
@@ -158,6 +165,15 @@ public class SucursalServicio {
     private void aplicarDatos(Sucursal sucursal, String nombre, Empresa empresa, Direccion direccion) {
         sucursal.setNombre(nombre.trim());
         sucursal.setEmpresa(empresa);
+
+        // Si viene una direccion existente por id, asociarla directamente
+        if (direccion != null && direccion.getId() != null && !direccion.getId().isBlank()) {
+            Direccion existente = direccionServicio.buscarDireccion(direccion.getId());
+            sucursal.setDireccion(existente);
+            return;
+        }
+
+        // Caso contrario, crear/actualizar la direccion embebida
         if (sucursal.getDireccion() == null) {
             sucursal.setDireccion(clonarDireccion(direccion));
         } else {
@@ -172,9 +188,21 @@ public class SucursalServicio {
     }
 
     private void copiarDireccion(Direccion destino, Direccion origen) {
+        // Copiar campos sueltos resolviendo Localidad por id si aplica
         destino.setCalle(origen.getCalle().trim());
         destino.setNumero(origen.getNumero().trim());
-        destino.setLocalidad(origen.getLocalidad());
+
+        if (origen.getLocalidad() != null && origen.getLocalidad().getId() != null) {
+            try {
+                Localidad localidad = localidadServicio.buscarLocalidad(origen.getLocalidad().getId());
+                destino.setLocalidad(localidad);
+            } catch (Exception e) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Localidad no encontrada: " + origen.getLocalidad().getId());
+            }
+        } else {
+            destino.setLocalidad(origen.getLocalidad());
+        }
+
         destino.setCodigoPostal(origen.getCodigoPostal() != null ? origen.getCodigoPostal().trim() : null);
         destino.setBarrio(origen.getBarrio() != null ? origen.getBarrio().trim() : null);
         destino.setManzanaPiso(origen.getManzanaPiso() != null ? origen.getManzanaPiso().trim() : null);

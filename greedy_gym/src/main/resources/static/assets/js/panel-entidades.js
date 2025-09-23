@@ -134,7 +134,7 @@
           .toLowerCase();
       }
     },
-    sucursales: {
+  sucursales: {
       label: 'Sucursales',
       description: 'Ubicaciones físicas asociadas a cada empresa.',
       singular: 'sucursal',
@@ -152,12 +152,7 @@
       formFields: [
         { name: 'nombre', label: 'Nombre', type: 'text', required: true },
         { name: 'empresaId', label: 'Empresa', type: 'select', required: true, loadOptions: loadEmpresasOptions },
-        { name: 'calle', label: 'Calle', type: 'text', required: true },
-        { name: 'numero', label: 'Altura', type: 'text', required: true },
-        { name: 'ciudad', label: 'Ciudad', type: 'text', required: true },
-        { name: 'provincia', label: 'Provincia', type: 'text', required: true },
-        { name: 'pais', label: 'País', type: 'text', required: true },
-        { name: 'codigoPostal', label: 'Código postal', type: 'text' }
+        { name: 'idDireccion', label: 'Dirección existente', type: 'select', required: true, loadOptions: loadDireccionesOptions, help: 'Seleccioná una dirección ya creada en el módulo Direcciones' }
       ],
       async list() {
         return requestJson(buildUrl('/api/v1/sucursales'));
@@ -176,27 +171,19 @@
         return {
           nombre: item?.nombre || '',
           empresaId: item?.empresa?.id || '',
-          calle: direccion.calle || '',
-          numero: direccion.numero || '',
-          ciudad: direccion.ciudad || '',
-          provincia: direccion.provincia || '',
-          pais: direccion.pais || '',
-          codigoPostal: direccion.codigoPostal || ''
+          idDireccion: direccion.id || ''
         };
       },
       toPayload(mode, values, item) {
-        return {
-          nombre: values.nombre ? values.nombre.trim() : '',
-          idEmpresa: values.empresaId || item?.empresa?.id || '',
-          direccion: {
-            calle: values.calle ? values.calle.trim() : '',
-            numero: values.numero ? values.numero.trim() : '',
-            ciudad: values.ciudad ? values.ciudad.trim() : '',
-            provincia: values.provincia ? values.provincia.trim() : '',
-            pais: values.pais ? values.pais.trim() : '',
-            codigoPostal: values.codigoPostal ? values.codigoPostal.trim() : null
-          }
-        };
+        if (values.idDireccion) {
+          return {
+            nombre: values.nombre ? values.nombre.trim() : '',
+            idEmpresa: values.empresaId || item?.empresa?.id || '',
+            direccion: { id: values.idDireccion }
+          };
+        }
+        // En este flujo simplificado, exigimos elegir una dirección existente
+        throw new Error('Seleccioná una dirección existente para la sucursal. Podés crearla antes en el módulo Direcciones.');
       },
       isInactive(item) {
         return !!item?.eliminado;
@@ -1449,7 +1436,7 @@
 
     let control = '';
 
-    if (field.type === 'select') {
+  if (field.type === 'select') {
       const currentValue = value == null ? '' : String(value);
       const options = (field.options || []).map(opt => {
         const optionValue = opt.value != null ? String(opt.value) : '';
@@ -1463,7 +1450,7 @@
       const placeholderOption = `<option value=""${placeholderSelected}${placeholderDisabled}>${placeholderText}</option>`;
       const dependsOnAttr = field.dependsOn ? ` data-depends-on="${escapeAttr(field.dependsOn)}"` : '';
       control = `<select class="form-control" name="${escapeAttr(field.name)}"${dependsOnAttr} ${requiredAttr} ${disabledAttr}>${placeholderOption}${options}</select>`;
-    } else if (field.type === 'select-with-create') {
+  } else if (field.type === 'select-with-create') {
       const currentValue = value == null ? '' : String(value);
       const options = (field.options || []).map(opt => {
         const optionValue = opt.value != null ? String(opt.value) : '';
@@ -1488,7 +1475,7 @@
             ${placeholderOption}${options}${createOption}
           </select>
         </div>`;
-    } else if (field.type === 'autocomplete') {
+  } else if (field.type === 'autocomplete') {
       const currentValue = value == null ? '' : String(value);
       const placeholderText = field.placeholder ? escapeHtml(field.placeholder) : `Buscar ${field.label}...`;
       const apiEndpoint = field.apiEndpoint || '';
@@ -1503,15 +1490,15 @@
                  ${requiredAttr} ${disabledAttr}>
           <ul class="autocomplete-suggestions list-group position-absolute w-100" style="z-index: 1050; display: none;"></ul>
         </div>`;
-    } else if (field.type === 'textarea') {
+  } else if (field.type === 'textarea') {
       const rows = field.rows || 3;
       control = `<textarea class="form-control" rows="${escapeAttr(rows)}" name="${escapeAttr(field.name)}" ${requiredAttr} ${disabledAttr}>${escapeHtml(value || '')}</textarea>`;
-    } else {
+  } else {
       const type = field.type || 'text';
       control = `<input class="form-control" type="${escapeAttr(type)}" name="${escapeAttr(field.name)}" value="${escapeAttr(value || '')}"${placeholder}${minAttr}${maxAttr}${stepAttr} ${requiredAttr} ${disabledAttr}>`;
     }
-
-    return `<div class="${colClass}">${label}${control}</div>`;
+    const helpText = field.help ? `<small class="form-text text-muted d-block mt-1">${escapeHtml(field.help)}</small>` : '';
+    return `<div class="${colClass}">${label}${control}${helpText}</div>`;
   }
 
   function setFormError(message) {
@@ -1653,12 +1640,20 @@
   }
 
   function formatAddress(direccion) {
-    if (!direccion) {
-      return '';
-    }
-    return [direccion.calle, direccion.numero, direccion.ciudad, direccion.provincia, direccion.pais]
-      .filter(Boolean)
-      .join(', ');
+    if (!direccion) return '';
+    const parts = [];
+    if (direccion.calle) parts.push(direccion.calle);
+    if (direccion.numero) parts.push(direccion.numero);
+    const loc = direccion.localidad;
+    if (loc?.nombre) parts.push(loc.nombre);
+    const dep = loc?.departamento;
+    if (dep?.nombre) parts.push(dep.nombre);
+    const prov = dep?.provincia;
+    if (prov?.nombre) parts.push(prov.nombre);
+    const pais = prov?.pais;
+    if (pais?.nombre) parts.push(pais.nombre);
+    if (direccion.codigoPostal) parts.push(`CP ${direccion.codigoPostal}`);
+    return parts.filter(Boolean).join(', ');
   }
 
   function formatLabel(value) {
@@ -1897,6 +1892,23 @@
   // Hacer las funciones disponibles globalmente para los event handlers
   window.loadPaisesOptionsForDirection = loadPaisesOptionsForDirection;
   window.loadProvinciasOptionsForDirection = loadProvinciasOptionsForDirection;
+  window.loadDepartamentosOptionsForDirection = loadDepartamentosOptionsForDirection;
+  window.loadLocalidadesOptionsForDirection = loadLocalidadesOptionsForDirection;
+
+  // Cargar direcciones existentes para selección directa
+  async function loadDireccionesOptions() {
+    if (optionCache.direcciones) return optionCache.direcciones;
+    const data = await requestJson(buildUrl('/api/direcciones'));
+    const list = normalizeList(data)
+      .filter(item => !item.eliminado)
+      .map(item => ({
+        value: item.id,
+        label: formatAddress(item) || `${item.calle || ''} ${item.numero || ''}`.trim()
+      }));
+    optionCache.direcciones = list;
+    return list;
+  }
+  window.loadDireccionesOptions = loadDireccionesOptions;
   window.loadDepartamentosOptionsForDirection = loadDepartamentosOptionsForDirection;
   window.loadLocalidadesOptionsForDirection = loadLocalidadesOptionsForDirection;
 
@@ -2334,6 +2346,7 @@
 
   function clearSelectOptions(selectElement) {
     if (selectElement) {
+      selectElement.value = '';  // Clear the selected value
       selectElement.innerHTML = '';
       const placeholderOption = document.createElement('option');
       placeholderOption.value = '';

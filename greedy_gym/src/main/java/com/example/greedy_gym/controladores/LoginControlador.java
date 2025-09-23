@@ -61,9 +61,18 @@ public class LoginControlador {
         if (!verificarSesion(session, RolUsuario.ADMINISTRATIVO)) {
             return "redirect:/login";
         }
+        // Redirigimos al nuevo dashboard administrativo (v2)
+        return "redirect:/dashboard/admin2";
+    }
+
+    @GetMapping("/dashboard/admin2")
+    public String dashboardAdmin2(HttpSession session, Model model) {
+        if (!verificarSesion(session, RolUsuario.ADMINISTRATIVO)) {
+            return "redirect:/login";
+        }
         Usuario usuario = (Usuario) session.getAttribute("usuario");
         model.addAttribute("usuario", usuario);
-        return "dashboard-admin";
+        return "dashboard-admin-2";
     }
 
     @GetMapping("/dashboard/empleado")
@@ -94,6 +103,11 @@ public class LoginControlador {
         if (errorPago != null) {
             model.addAttribute("errorPago", errorPago);
             session.removeAttribute("errorPago");
+        }
+        Object ultimaFacturaId = session.getAttribute("ultimaFacturaId");
+        if (ultimaFacturaId != null) {
+            model.addAttribute("ultimaFacturaId", ultimaFacturaId);
+            session.removeAttribute("ultimaFacturaId");
         }
         model.addAttribute("mercadoPagoHabilitado", true);
         model.addAttribute("mercadoPagoPublicKey", "");

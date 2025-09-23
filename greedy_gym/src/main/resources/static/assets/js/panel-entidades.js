@@ -134,7 +134,7 @@
           .toLowerCase();
       }
     },
-  sucursales: {
+    sucursales: {
       label: 'Sucursales',
       description: 'Ubicaciones físicas asociadas a cada empresa.',
       singular: 'sucursal',
@@ -152,7 +152,16 @@
       formFields: [
         { name: 'nombre', label: 'Nombre', type: 'text', required: true },
         { name: 'empresaId', label: 'Empresa', type: 'select', required: true, loadOptions: loadEmpresasOptions },
-        { name: 'idDireccion', label: 'Dirección existente', type: 'select', required: true, loadOptions: loadDireccionesOptions, help: 'Seleccioná una dirección ya creada en el módulo Direcciones' }
+        { name: 'idDireccion', label: 'Dirección existente', type: 'select', required: false, loadOptions: loadDireccionesOptions, help: 'Opcional: seleccioná una dirección ya creada' },
+        { name: 'calle', label: 'Calle', type: 'text', required: true, width: 'col-md-8' },
+        { name: 'numero', label: 'Altura', type: 'text', required: true, width: 'col-md-4' },
+        { name: 'idPais', label: 'País', type: 'select', required: true, width: 'col-md-6', loadOptions: loadPaisesOptionsForDirection },
+        { name: 'idProvincia', label: 'Provincia', type: 'select', required: true, width: 'col-md-6', loadOptions: loadProvinciasOptionsForDirection, dependsOn: 'idPais' },
+        { name: 'idDepartamento', label: 'Departamento', type: 'select', required: true, width: 'col-md-6', loadOptions: loadDepartamentosOptionsForDirection, dependsOn: 'idProvincia' },
+        { name: 'idLocalidad', label: 'Localidad', type: 'select', required: true, width: 'col-md-6', loadOptions: loadLocalidadesOptionsForDirection, dependsOn: 'idDepartamento' },
+        { name: 'codigoPostal', label: 'Código postal', type: 'text' },
+        { name: 'barrio', label: 'Barrio', type: 'text' },
+        { name: 'referencia', label: 'Referencia', type: 'textarea' }
       ],
       async list() {
         return requestJson(buildUrl('/api/v1/sucursales'));
@@ -168,13 +177,28 @@
       },
       prepareFormValues(item) {
         const direccion = item?.direccion || {};
+        const localidad = direccion.localidad || {};
+        const departamento = localidad.departamento || {};
+        const provincia = departamento.provincia || {};
+        const pais = provincia.pais || {};
+        
         return {
           nombre: item?.nombre || '',
           empresaId: item?.empresa?.id || '',
-          idDireccion: direccion.id || ''
+          idDireccion: direccion.id || '',
+          calle: direccion.calle || '',
+          numero: direccion.numero || '',
+          idPais: pais.id || '',
+          idProvincia: provincia.id || '',
+          idDepartamento: departamento.id || '',
+          idLocalidad: localidad.id || '',
+          codigoPostal: direccion.codigoPostal || '',
+          barrio: direccion.barrio || '',
+          referencia: direccion.referencia || ''
         };
       },
       toPayload(mode, values, item) {
+        // Si el usuario elige una dirección existente, priorizar ese id
         if (values.idDireccion) {
           return {
             nombre: values.nombre ? values.nombre.trim() : '',
@@ -182,8 +206,18 @@
             direccion: { id: values.idDireccion }
           };
         }
-        // En este flujo simplificado, exigimos elegir una dirección existente
-        throw new Error('Seleccioná una dirección existente para la sucursal. Podés crearla antes en el módulo Direcciones.');
+        return {
+          nombre: values.nombre ? values.nombre.trim() : '',
+          idEmpresa: values.empresaId || item?.empresa?.id || '',
+          direccion: {
+            calle: values.calle ? values.calle.trim() : '',
+            numero: values.numero ? values.numero.trim() : '',
+            localidad: values.idLocalidad ? { id: values.idLocalidad } : null,
+            codigoPostal: values.codigoPostal ? values.codigoPostal.trim() : null,
+            barrio: values.barrio ? values.barrio.trim() : null,
+            referencia: values.referencia ? values.referencia.trim() : null
+          }
+        };
       },
       isInactive(item) {
         return !!item?.eliminado;
@@ -1083,6 +1117,22 @@
       $(dom.modal).on('hidden.bs.modal', resetForm);
     }
 
+    // Deep-link support: read ?entity=... and optional &subtype=...
+    try {
+      const url = new URL(window.location.href);
+      const entityParam = url.searchParams.get('entity');
+      const subtypeParam = url.searchParams.get('subtype');
+      if (entityParam && ENTITIES[entityParam]) {
+        if (entityParam === 'direcciones' && subtypeParam && ENTITIES.direcciones?.subTypes?.[subtypeParam]) {
+          ENTITIES.direcciones.currentSubType = subtypeParam;
+          if (dom.subtype) dom.subtype.value = subtypeParam;
+        }
+        loadEntity(entityParam);
+        return;
+      }
+    } catch (e) {
+      console.warn('[Panel entidades] Deep-link parse error:', e);
+    }
     loadEntity('empresas');
   }
 
@@ -1436,7 +1486,7 @@
 
     let control = '';
 
-  if (field.type === 'select') {
+    if (field.type === 'select') {
       const currentValue = value == null ? '' : String(value);
       const options = (field.options || []).map(opt => {
         const optionValue = opt.value != null ? String(opt.value) : '';
@@ -1450,7 +1500,7 @@
       const placeholderOption = `<option value=""${placeholderSelected}${placeholderDisabled}>${placeholderText}</option>`;
       const dependsOnAttr = field.dependsOn ? ` data-depends-on="${escapeAttr(field.dependsOn)}"` : '';
       control = `<select class="form-control" name="${escapeAttr(field.name)}"${dependsOnAttr} ${requiredAttr} ${disabledAttr}>${placeholderOption}${options}</select>`;
-  } else if (field.type === 'select-with-create') {
+    } else if (field.type === 'select-with-create') {
       const currentValue = value == null ? '' : String(value);
       const options = (field.options || []).map(opt => {
         const optionValue = opt.value != null ? String(opt.value) : '';
@@ -1475,7 +1525,7 @@
             ${placeholderOption}${options}${createOption}
           </select>
         </div>`;
-  } else if (field.type === 'autocomplete') {
+    } else if (field.type === 'autocomplete') {
       const currentValue = value == null ? '' : String(value);
       const placeholderText = field.placeholder ? escapeHtml(field.placeholder) : `Buscar ${field.label}...`;
       const apiEndpoint = field.apiEndpoint || '';
@@ -1490,15 +1540,15 @@
                  ${requiredAttr} ${disabledAttr}>
           <ul class="autocomplete-suggestions list-group position-absolute w-100" style="z-index: 1050; display: none;"></ul>
         </div>`;
-  } else if (field.type === 'textarea') {
+    } else if (field.type === 'textarea') {
       const rows = field.rows || 3;
       control = `<textarea class="form-control" rows="${escapeAttr(rows)}" name="${escapeAttr(field.name)}" ${requiredAttr} ${disabledAttr}>${escapeHtml(value || '')}</textarea>`;
-  } else {
+    } else {
       const type = field.type || 'text';
       control = `<input class="form-control" type="${escapeAttr(type)}" name="${escapeAttr(field.name)}" value="${escapeAttr(value || '')}"${placeholder}${minAttr}${maxAttr}${stepAttr} ${requiredAttr} ${disabledAttr}>`;
     }
-    const helpText = field.help ? `<small class="form-text text-muted d-block mt-1">${escapeHtml(field.help)}</small>` : '';
-    return `<div class="${colClass}">${label}${control}${helpText}</div>`;
+
+    return `<div class="${colClass}">${label}${control}</div>`;
   }
 
   function setFormError(message) {

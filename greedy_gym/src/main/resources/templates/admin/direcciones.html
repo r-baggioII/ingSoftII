@@ -44,10 +44,10 @@
               <label class="panel-label">Nombre del país</label>
               <input type="text" name="nombre" class="form-control panel-control" required>
               <!-- JS: POST /api/direcciones/paises ; PUT /api/direcciones/paises/{id}?nombre=... -->
-              <div class="mt-2"><button class="btn btn-primary" type="submit">Guardar País</button></div>
+              <div class="mt-2"><button class="btn main-button-panel" type="submit">Guardar País</button></div>
             </form>
             <div class="table-responsive">
-              <table class="table table-sm">
+              <table class="table table-hover align-middle">
                 <thead><tr><th>Nombre</th><th class="text-end">Acciones</th></tr></thead>
                 <tbody id="pais-table"></tbody>
               </table>
@@ -69,10 +69,10 @@
                 </div>
               </div>
               <!-- JS: POST /api/direcciones/provincias -->
-              <div class="mt-2"><button class="btn btn-primary" type="submit">Guardar Provincia</button></div>
+              <div class="mt-2"><button class="btn main-button-panel" type="submit">Guardar Provincia</button></div>
             </form>
             <div class="table-responsive">
-              <table class="table table-sm">
+              <table class="table table-hover align-middle">
                 <thead><tr><th>Provincia</th><th>País</th><th class="text-end">Acciones</th></tr></thead>
                 <tbody id="provincia-table"></tbody>
               </table>
@@ -94,10 +94,10 @@
                 </div>
               </div>
               <!-- JS: POST /api/direcciones/departamentos -->
-              <div class="mt-2"><button class="btn btn-primary" type="submit">Guardar Departamento</button></div>
+              <div class="mt-2"><button class="btn main-button-panel" type="submit">Guardar Departamento</button></div>
             </form>
             <div class="table-responsive">
-              <table class="table table-sm">
+              <table class="table table-hover align-middle">
                 <thead><tr><th>Departamento</th><th>Provincia</th><th class="text-end">Acciones</th></tr></thead>
                 <tbody id="departamento-table"></tbody>
               </table>
@@ -120,10 +120,10 @@
                 </div>
               </div>
               <!-- JS: POST /api/direcciones/localidades -->
-              <div class="mt-2"><button class="btn btn-primary" type="submit">Guardar Localidad</button></div>
+              <div class="mt-2"><button class="btn main-button-panel" type="submit">Guardar Localidad</button></div>
             </form>
             <div class="table-responsive">
-              <table class="table table-sm">
+              <table class="table table-hover align-middle">
                 <thead><tr><th>Localidad</th><th>Depto</th><th>Provincia</th><th>País</th><th class="text-end">Acciones</th></tr></thead>
                 <tbody id="localidad-table"></tbody>
               </table>
@@ -162,10 +162,10 @@
                 <div class="col-12"><textarea name="referencia" class="form-control panel-control" rows="2" placeholder="Referencia"></textarea></div>
               </div>
               <!-- JS: POST /api/direcciones con localidad id -->
-              <div class="mt-2"><button class="btn btn-primary" type="submit">Guardar Dirección</button></div>
+              <div class="mt-2"><button class="btn main-button-panel" type="submit">Guardar Dirección</button></div>
             </form>
             <div class="table-responsive">
-              <table class="table table-sm">
+              <table class="table table-hover align-middle">
                 <thead><tr><th>Calle</th><th>Localidad</th><th>Departamento</th><th>Provincia</th><th>País</th><th class="text-end">Acciones</th></tr></thead>
                 <tbody id="direccion-table"></tbody>
               </table>

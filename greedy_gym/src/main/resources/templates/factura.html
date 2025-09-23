@@ -48,11 +48,20 @@
         <hr/>
         <div class="invoice-body">
             <div class="row mb-3">
-                <div class="col-md-6">
-                    <div><strong>Forma de pago:</strong> <span th:text="${factura.formaDePago != null ? factura.formaDePago.tipoPago : 'N/D'}"></span></div>
+                <div class="col-md-7">
+                    <div class="mb-1"><strong>Socio:</strong>
+                        <span th:text="${socio != null ? (socio.apellido + ' ' + socio.nombre) : (cuotaSocio != null ? cuotaSocio.socioNombreCompleto : 'N/D')}">Nombre Apellido</span>
+                    </div>
+                    <div class="mb-1"><strong>N° Socio:</strong>
+                        <span th:text="${socio != null ? socio.numeroSocio : (cuotaSocio != null ? cuotaSocio.socioNumeroSocio : 'N/D')}">-</span>
+                    </div>
+                    <div class="mb-1"><strong>Documento:</strong>
+                        <span th:text="${socio != null ? socio.numeroDocumento : (cuotaSocio != null ? cuotaSocio.socioNumeroDocumento : 'N/D')}">-</span>
+                    </div>
                 </div>
-                <div class="col-md-6 text-md-end">
-                    <div><strong>Total pagado:</strong> $ <span th:text="${#numbers.formatDecimal(factura.totalPagado, 1, 'COMMA', 2, 'POINT')}">0,00</span></div>
+                <div class="col-md-5 text-md-end">
+                    <div class="mb-1"><strong>Forma de pago:</strong> <span th:text="${factura.formaDePago != null ? factura.formaDePago.tipoPago : 'N/D'}"></span></div>
+                    <div class="mb-1"><strong>Total pagado:</strong> $ <span th:text="${#numbers.formatDecimal(factura.totalPagado, 1, 'COMMA', 2, 'POINT')}">0,00</span></div>
                 </div>
             </div>
 

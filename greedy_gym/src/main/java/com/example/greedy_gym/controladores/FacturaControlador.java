@@ -71,6 +71,8 @@ public class FacturaControlador {
         return ResponseEntity.ok(facturaServicio.listarDetalles(id));
     }
 
+    
+
     @PostMapping("/{id}/detalles")
     public ResponseEntity<DetalleFactura> agregarDetalle(@PathVariable String id,
                                                           @RequestBody DetalleFactura detalle) {

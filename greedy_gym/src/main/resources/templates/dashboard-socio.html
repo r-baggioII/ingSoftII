@@ -378,6 +378,40 @@
             </div>
         </div>
 
+        <!-- Mis Facturas -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="estado-cuenta">
+                    <div class="section-heading">
+                        <h4>Mis Facturas</h4>
+                        <p>Busca y revisa tus comprobantes emitidos</p>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-4">
+                            <input id="fact-numero" type="number" class="form-control" placeholder="N° factura">
+                        </div>
+                        <div class="col-md-4">
+                            <select id="fact-estado" class="form-select">
+                                <option value="">Todos los estados</option>
+                                <option value="PAGADA">PAGADA</option>
+                                <option value="ANULADA">ANULADA</option>
+                                <option value="SIN_DEFINIR">SIN_DEFINIR</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button id="btn-buscar-facturas" class="btn btn-secondary w-100">Buscar</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead><tr><th>N°</th><th>Fecha</th><th>Estado</th><th>Medio</th><th class="text-end">Total</th><th></th></tr></thead>
+                            <tbody id="mis-facturas-body"><tr><td colspan="6" class="text-muted text-center">Sin resultados</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Sección de pago de cuotas -->
         <div class="row" id="seccion-pago-cuotas">
             <div class="col-lg-12">
@@ -526,6 +560,7 @@ const formatoMoneda = new Intl.NumberFormat('es-AR', { style: 'currency', curren
 
 document.addEventListener('DOMContentLoaded', () => {
     configurarBotonesPago();
+    configurarMisFacturas();
     if (!mercadoPagoHabilitado) {
         mostrarMensajeDinamico('Mercado Pago no está configurado. Solicita al administrador que configure el access token.', 'warning');
         deshabilitarBotonesPago();
@@ -797,6 +832,63 @@ function irASeccionPago() {
 
 function mostrarNoImplementado(modulo) {
     alert('Módulo "' + modulo + '" no implementado aún.\n\nEsta funcionalidad estará disponible en una próxima versión del sistema.\n\nPor favor, contacta al administrador para más información.');
+}
+
+// --- Mis facturas (socio) ---
+function configurarMisFacturas(){
+    const btn = document.getElementById('btn-buscar-facturas');
+    if (btn) btn.addEventListener('click', buscarMisFacturas);
+}
+
+function buscarMisFacturas(){
+    const usuario = /*[[${usuario}]]*/ null;
+    const socio = /*[[${socio}]]*/ null;
+    const idSocio = socio?.id;
+    if (!idSocio){
+        renderMisFacturas([], 'No se pudo determinar tu socio asociado');
+        return;
+    }
+    const estado = document.getElementById('fact-estado')?.value || '';
+    const numero = document.getElementById('fact-numero')?.value || '';
+    const params = new URLSearchParams();
+    params.set('idSocio', idSocio);
+    if (estado) params.set('estado', estado);
+    if (numero) params.set('numero', numero);
+    params.set('sort','fechaFactura,desc');
+    fetch(withBase('api/facturas2/por-socio?' + params.toString()))
+      .then(r=>r.ok?r.json():Promise.reject('No se pudieron obtener tus facturas'))
+      .then(pagina => renderMisFacturas(pagina?.content||[]))
+      .catch(err => renderMisFacturas([], err));
+}
+
+function renderMisFacturas(items, error){
+    const tbody = document.getElementById('mis-facturas-body');
+    if (!tbody) return;
+    tbody.innerHTML='';
+    if (error){
+        tbody.innerHTML = `<tr><td colspan="6" class="text-danger text-center">${error}</td></tr>`;
+        return;
+    }
+    if (!items.length){
+        tbody.innerHTML = '<tr><td colspan="6" class="text-muted text-center">Sin resultados</td></tr>';
+        return;
+    }
+    const formato = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
+    for (const f of items){
+        const tr = document.createElement('tr');
+        const fecha = f.fechaFactura ? new Date(f.fechaFactura).toLocaleDateString('es-AR') : '-';
+        const total = typeof f.totalPagado === 'number' ? formato.format(f.totalPagado) : '$0,00';
+        const medio = f.formaDePago?.tipoPago || '-';
+        tr.innerHTML = `
+          <td>${f.numeroFactura ?? '-'}</td>
+          <td>${fecha}</td>
+          <td><span class="badge badge-success">${f.estado}</span></td>
+          <td>${medio}</td>
+          <td class="text-end">${total}</td>
+          <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="${withBase('facturas/'+f.id+'/ver')}">Ver</a></td>
+        `;
+        tbody.appendChild(tr);
+    }
 }
 </script>
 

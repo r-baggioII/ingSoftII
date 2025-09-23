@@ -20,4 +20,6 @@ public interface FacturaRepositorio extends JpaRepository<Factura, String> {
 
     @Query("select coalesce(max(f.numeroFactura), 0) from Factura f")
     Long obtenerMaxNumeroFactura();
+
+    
 }

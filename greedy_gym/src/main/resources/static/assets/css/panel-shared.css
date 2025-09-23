@@ -114,6 +114,11 @@
 }
 
 .panel-table table { margin-bottom: 0; }
+.badge { display: inline-block; padding: .35em .6em; border-radius: .5rem; font-size: .75rem; font-weight: 600; }
+.badge-success { background: #28a745; color: #fff; }
+.badge-danger { background: #dc3545; color: #fff; }
+.badge-warning { background: #ffc107; color: #212529; }
+.facturas-page .panel-card { margin-bottom: 18px; }
 
 .panel-table thead {
   background: linear-gradient(105deg, #232a34 0%, #2a3441 100%);

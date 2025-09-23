@@ -1,5 +1,6 @@
 package com.example.greedy_gym.entidades;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -24,6 +25,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "cuota_mensual", uniqueConstraints = {
         @UniqueConstraint(name = "uk_cuota_socio_mes_anio_eliminado",
                 columnNames = {"id_socio", "mes", "anio", "eliminado"})

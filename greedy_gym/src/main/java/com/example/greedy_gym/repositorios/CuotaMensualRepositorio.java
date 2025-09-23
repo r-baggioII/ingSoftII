@@ -5,6 +5,7 @@ import com.example.greedy_gym.entidades.EstadoCuota;
 import com.example.greedy_gym.entidades.Mes;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -19,5 +20,8 @@ public interface CuotaMensualRepositorio extends JpaRepository<CuotaMensual, Str
     boolean existsByIdSocioAndMesAndAnioAndEliminadoFalseAndIdNot(String idSocio, Mes mes, Long anio, String id);
 
     Collection<CuotaMensual> findByEstadoAndEliminadoFalse(EstadoCuota estado);
-}
 
+    List<CuotaMensual> findByIdSocioAndEstadoInAndEliminadoFalse(String idSocio, Collection<EstadoCuota> estados);
+
+    List<CuotaMensual> findByIdInAndEliminadoFalse(Collection<String> ids);
+}

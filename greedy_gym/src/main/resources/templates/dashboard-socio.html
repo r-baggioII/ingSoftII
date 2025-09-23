@@ -121,6 +121,12 @@
       opacity: 0.8;
     }
 
+    .pago-alert {
+      border-radius: 12px;
+      font-weight: 500;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    }
+
     .alert-panel {
       border-radius: 15px;
       border: none;
@@ -288,7 +294,23 @@
                 </div>
             </div>
         </div>
-        
+
+        <div class="row" th:if="${mensajePago} != null">
+            <div class="col-lg-10 offset-lg-1">
+                <div class="alert alert-success pago-alert" role="alert" th:text="${mensajePago}"></div>
+            </div>
+        </div>
+        <div class="row" th:if="${errorPago} != null">
+            <div class="col-lg-10 offset-lg-1">
+                <div class="alert alert-danger pago-alert" role="alert" th:text="${errorPago}"></div>
+            </div>
+        </div>
+        <div class="row d-none" id="pago-mensaje-dinamico">
+            <div class="col-lg-10 offset-lg-1">
+                <div class="alert pago-alert" role="alert" id="pago-alert-dinamica"></div>
+            </div>
+        </div>
+
         <!-- Información del socio -->
         <div class="row">
             <div class="col-lg-10 offset-lg-1">
@@ -309,7 +331,7 @@
                             <div class="module-description">Consulta y gestiona tus rutinas de entrenamiento personalizadas</div>
                         </li>
                         
-                        <li onclick="mostrarNoImplementado('Pago con Mercado Pago')">
+                        <li onclick="irASeccionPago()">
                             <i class="fa fa-credit-card"></i>
                             <div class="module-title">Pago de Cuotas</div>
                             <div class="module-description">Realiza el pago de tu cuota mensual con Mercado Pago</div>
@@ -330,19 +352,19 @@
                     <div class="row">
                         <div class="col-lg-4">
                             <div class="estado-item">
-                                <div class="estado-valor">No implementado</div>
+                                <div class="estado-valor" id="total-adeudado">$0,00</div>
                                 <div class="estado-label">Total Adeudado</div>
                             </div>
                         </div>
                         <div class="col-lg-4">
                             <div class="estado-item">
-                                <div class="estado-valor">No implementado</div>
+                                <div class="estado-valor" id="meses-pendientes">0</div>
                                 <div class="estado-label">Meses Pendientes</div>
                             </div>
                         </div>
                         <div class="col-lg-4">
                             <div class="estado-item">
-                                <div class="estado-valor">No implementado</div>
+                                <div class="estado-valor" id="ultimo-pago">-</div>
                                 <div class="estado-label">Último Pago</div>
                             </div>
                         </div>
@@ -355,7 +377,55 @@
                 </div>
             </div>
         </div>
-        
+
+        <!-- Sección de pago de cuotas -->
+        <div class="row" id="seccion-pago-cuotas">
+            <div class="col-lg-12">
+                <div class="estado-cuenta">
+                    <div class="section-heading">
+                        <h4>Cuotas Pendientes</h4>
+                        <p>Selecciona las cuotas adeudadas que deseas cancelar con Mercado Pago.</p>
+                    </div>
+
+                    <div class="alert alert-warning pago-alert" role="alert" id="mensaje-mercado-pago" style="display:none;"></div>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped cuotas-table">
+                            <thead>
+                            <tr>
+                                <th style="width: 60px;">#</th>
+                                <th>Mes/Año</th>
+                                <th>Estado</th>
+                                <th>Vencimiento</th>
+                                <th>Monto</th>
+                            </tr>
+                            </thead>
+                            <tbody id="tabla-cuotas">
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">Cargando cuotas pendientes...</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mt-4 gap-3">
+                        <div class="resumen-pago">
+                            <div>Total seleccionado: <strong id="total-seleccionado">$0,00</strong></div>
+                            <div>Cuotas seleccionadas: <strong id="cantidad-seleccionadas">0</strong></div>
+                        </div>
+                        <div class="botones-pago d-flex gap-2 flex-column flex-md-row">
+                            <button class="btn btn-secondary" id="btn-pagar-seleccionadas" disabled>
+                                <i class="fa fa-lock"></i> Pagar seleccionadas
+                            </button>
+                            <button class="btn btn-primary" id="btn-pagar-todas" disabled style="background: linear-gradient(105deg, #ed563b 0%, #ff6b47 100%); border: none;">
+                                <i class="fa fa-check"></i> Pagar todas
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Accesos restringidos -->
         <div class="row">
             <div class="col-lg-12">
@@ -440,7 +510,274 @@
 <!-- Global Init -->
 <script th:src="@{/assets/js/custom.js}"></script>
 
-<script>
+<script th:inline="javascript">
+const mercadoPagoHabilitado = /*[[${mercadoPagoHabilitado}]]*/ false;
+const mercadoPagoPublicKey = /*[[${mercadoPagoPublicKey}]]*/ '';
+let cuotasPendientes = [];
+let cuotasSeleccionadas = new Set();
+const formatoMoneda = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
+
+document.addEventListener('DOMContentLoaded', () => {
+    configurarBotonesPago();
+    if (!mercadoPagoHabilitado) {
+        mostrarMensajeDinamico('Mercado Pago no está configurado. Solicita al administrador que configure el access token.', 'warning');
+        deshabilitarBotonesPago();
+        actualizarResumenSeleccion();
+        return;
+    }
+    cargarCuotasPendientes();
+});
+
+function cargarCuotasPendientes() {
+    fetch('/api/socio/pagos/cuotas-pendientes')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('No se pudieron obtener las cuotas pendientes');
+            }
+            return response.json();
+        })
+        .then(data => {
+            cuotasPendientes = Array.isArray(data) ? data : [];
+            if (cuotasPendientes.length === 0) {
+                mostrarMensajeDinamico('No registras cuotas pendientes de pago. ¡Felicitaciones!', 'success');
+            }
+            renderTablaCuotas();
+            actualizarResumenGeneral();
+        })
+        .catch(error => {
+            mostrarMensajeDinamico(error.message, 'danger');
+            renderTablaCuotas(true);
+            deshabilitarBotonesPago();
+        });
+}
+
+function renderTablaCuotas(error = false) {
+    const cuerpo = document.getElementById('tabla-cuotas');
+    if (!cuerpo) {
+        return;
+    }
+    cuerpo.innerHTML = '';
+
+    if (error) {
+        cuerpo.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No fue posible cargar las cuotas.</td></tr>';
+        return;
+    }
+
+    if (!cuotasPendientes.length) {
+        cuerpo.innerHTML = '<tr><td colspan="5" class="text-center text-success">No tienes cuotas pendientes.</td></tr>';
+        cuotasSeleccionadas.clear();
+        actualizarResumenSeleccion();
+        return;
+    }
+
+    cuotasPendientes.forEach((cuota, index) => {
+        const fila = document.createElement('tr');
+        const estado = (cuota.estado || '').toUpperCase();
+        const badgeClass = estado === 'VENCIDA' ? 'badge badge-danger' : 'badge badge-warning text-dark';
+        const fecha = cuota.fechaVencimiento ? formatearFecha(cuota.fechaVencimiento) : '-';
+        const monto = cuota.valorCuota && typeof cuota.valorCuota.valorCuota === 'number'
+            ? cuota.valorCuota.valorCuota : 0;
+        const cuotaId = cuota.id;
+        const checked = cuotasSeleccionadas.has(cuotaId) ? 'checked' : '';
+
+        fila.innerHTML = `
+            <td class="text-center">
+                <input type="checkbox" class="form-check-input chk-cuota" data-id="${cuotaId}" ${checked}>
+            </td>
+            <td>${(cuota.mes || '')} ${cuota.anio || ''}</td>
+            <td><span class="${badgeClass}">${estado}</span></td>
+            <td>${fecha}</td>
+            <td>${formatearMoneda(monto)}</td>
+        `;
+
+        cuerpo.appendChild(fila);
+    });
+
+    cuerpo.querySelectorAll('.chk-cuota').forEach(chk => {
+        chk.addEventListener('change', event => {
+            const id = event.target.dataset.id;
+            if (!id) {
+                return;
+            }
+            if (event.target.checked) {
+                cuotasSeleccionadas.add(id);
+            } else {
+                cuotasSeleccionadas.delete(id);
+            }
+            actualizarResumenSeleccion();
+        });
+    });
+
+    actualizarResumenSeleccion();
+}
+
+function actualizarResumenGeneral() {
+    const totalAdeudado = cuotasPendientes.reduce((acc, cuota) => {
+        const monto = cuota.valorCuota && typeof cuota.valorCuota.valorCuota === 'number'
+            ? cuota.valorCuota.valorCuota : 0;
+        return acc + monto;
+    }, 0);
+    const totalElement = document.getElementById('total-adeudado');
+    if (totalElement) {
+        totalElement.textContent = formatearMoneda(totalAdeudado);
+    }
+    const mesesElement = document.getElementById('meses-pendientes');
+    if (mesesElement) {
+        mesesElement.textContent = cuotasPendientes.length.toString();
+    }
+    const ultimoPagoElement = document.getElementById('ultimo-pago');
+    if (ultimoPagoElement) {
+        ultimoPagoElement.textContent = cuotasPendientes.length == 0
+                ? 'Sin deuda'
+                : 'Pendiente';
+    }
+    actualizarResumenSeleccion();
+}
+
+function actualizarResumenSeleccion() {
+    const totalSeleccionado = cuotasPendientes
+        .filter(cuota => cuotasSeleccionadas.has(cuota.id))
+        .reduce((acc, cuota) => {
+            const monto = cuota.valorCuota && typeof cuota.valorCuota.valorCuota === 'number'
+                ? cuota.valorCuota.valorCuota : 0;
+            return acc + monto;
+        }, 0);
+
+    const totalSeleccionadoElement = document.getElementById('total-seleccionado');
+    if (totalSeleccionadoElement) {
+        totalSeleccionadoElement.textContent = formatearMoneda(totalSeleccionado);
+    }
+
+    const cantidadSeleccionadasElement = document.getElementById('cantidad-seleccionadas');
+    if (cantidadSeleccionadasElement) {
+        cantidadSeleccionadasElement.textContent = cuotasSeleccionadas.size.toString();
+    }
+
+    const btnSeleccionadas = document.getElementById('btn-pagar-seleccionadas');
+    if (btnSeleccionadas) {
+        btnSeleccionadas.disabled = !mercadoPagoHabilitado || cuotasSeleccionadas.size === 0;
+    }
+    const btnTodas = document.getElementById('btn-pagar-todas');
+    if (btnTodas) {
+        btnTodas.disabled = !mercadoPagoHabilitado || cuotasPendientes.length === 0;
+    }
+}
+
+function configurarBotonesPago() {
+    const btnSeleccionadas = document.getElementById('btn-pagar-seleccionadas');
+    if (btnSeleccionadas) {
+        btnSeleccionadas.addEventListener('click', () => {
+            const ids = Array.from(cuotasSeleccionadas);
+            if (!ids.length) {
+                mostrarMensajeDinamico('Seleccioná al menos una cuota para generar el pago.', 'warning');
+                return;
+            }
+            pagarCuotas(ids);
+        });
+    }
+
+    const btnTodas = document.getElementById('btn-pagar-todas');
+    if (btnTodas) {
+        btnTodas.addEventListener('click', () => {
+            if (!cuotasPendientes.length) {
+                mostrarMensajeDinamico('No hay cuotas para pagar.', 'info');
+                return;
+            }
+            const ids = cuotasPendientes.map(c => c.id);
+            cuotasSeleccionadas = new Set(ids);
+            actualizarResumenSeleccion();
+            pagarCuotas(ids);
+        });
+    }
+}
+
+function pagarCuotas(ids) {
+    if (!mercadoPagoHabilitado) {
+        mostrarMensajeDinamico('Mercado Pago no está habilitado actualmente.', 'warning');
+        return;
+    }
+    if (!ids || !ids.length) {
+        mostrarMensajeDinamico('No se seleccionaron cuotas para pagar.', 'warning');
+        return;
+    }
+
+    bloquearBotonesPago(true);
+    mostrarMensajeDinamico('Generando enlace de pago seguro...', 'info');
+
+    fetch('/api/socio/pagos/preferencia', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(ids)
+    })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(texto => {
+                    throw new Error(texto || 'No se pudo generar el enlace de pago');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data || !data.initPoint) {
+                throw new Error('Mercado Pago no respondió con un enlace válido');
+            }
+            window.location.href = data.initPoint;
+        })
+        .catch(error => {
+            mostrarMensajeDinamico(error.message, 'danger');
+            bloquearBotonesPago(false);
+        });
+}
+
+function mostrarMensajeDinamico(mensaje, tipo = 'info') {
+    const contenedor = document.getElementById('pago-mensaje-dinamico');
+    const alerta = document.getElementById('pago-alert-dinamica');
+    if (!contenedor || !alerta) {
+        return;
+    }
+    contenedor.classList.remove('d-none');
+    alerta.className = `alert pago-alert alert-${tipo}`;
+    alerta.textContent = mensaje;
+}
+
+function deshabilitarBotonesPago() {
+    bloquearBotonesPago(true);
+}
+
+function bloquearBotonesPago(bloquear) {
+    const btnSeleccionadas = document.getElementById('btn-pagar-seleccionadas');
+    const btnTodas = document.getElementById('btn-pagar-todas');
+    if (btnSeleccionadas) {
+        btnSeleccionadas.disabled = bloquear || !mercadoPagoHabilitado || cuotasSeleccionadas.size === 0;
+    }
+    if (btnTodas) {
+        btnTodas.disabled = bloquear || !mercadoPagoHabilitado || cuotasPendientes.length === 0;
+    }
+}
+
+function formatearMoneda(valor) {
+    return formatoMoneda.format(valor || 0);
+}
+
+function formatearFecha(valor) {
+    try {
+        const fecha = new Date(valor);
+        if (Number.isNaN(fecha.getTime())) {
+            return valor;
+        }
+        return fecha.toLocaleDateString('es-AR');
+    } catch (e) {
+        return valor;
+    }
+}
+
+function irASeccionPago() {
+    const seccion = document.getElementById('seccion-pago-cuotas');
+    if (seccion) {
+        seccion.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
 function mostrarNoImplementado(modulo) {
     alert('Módulo "' + modulo + '" no implementado aún.\n\nEsta funcionalidad estará disponible en una próxima versión del sistema.\n\nPor favor, contacta al administrador para más información.');
 }

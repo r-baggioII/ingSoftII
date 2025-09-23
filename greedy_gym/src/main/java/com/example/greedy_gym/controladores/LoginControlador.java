@@ -1,7 +1,9 @@
 package com.example.greedy_gym.controladores;
 
 import com.example.greedy_gym.entidades.RolUsuario;
+import com.example.greedy_gym.entidades.Socio;
 import com.example.greedy_gym.entidades.Usuario;
+import com.example.greedy_gym.repositorios.SocioRepositorio;
 import com.example.greedy_gym.servicios.UsuarioServicio;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
@@ -15,9 +17,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class LoginControlador {
 
     private final UsuarioServicio usuarioServicio;
+    private final SocioRepositorio socioRepositorio;
 
-    public LoginControlador(UsuarioServicio usuarioServicio) {
+    public LoginControlador(UsuarioServicio usuarioServicio,
+                            SocioRepositorio socioRepositorio) {
         this.usuarioServicio = usuarioServicio;
+        this.socioRepositorio = socioRepositorio;
     }
 
     @GetMapping("/login")
@@ -78,6 +83,20 @@ public class LoginControlador {
         }
         Usuario usuario = (Usuario) session.getAttribute("usuario");
         model.addAttribute("usuario", usuario);
+        socioRepositorio.findByUsuarioIdAndEliminadoFalse(usuario.getId())
+                .ifPresent(socio -> model.addAttribute("socio", socio));
+        Object mensajePago = session.getAttribute("mensajePago");
+        if (mensajePago != null) {
+            model.addAttribute("mensajePago", mensajePago);
+            session.removeAttribute("mensajePago");
+        }
+        Object errorPago = session.getAttribute("errorPago");
+        if (errorPago != null) {
+            model.addAttribute("errorPago", errorPago);
+            session.removeAttribute("errorPago");
+        }
+        model.addAttribute("mercadoPagoHabilitado", true);
+        model.addAttribute("mercadoPagoPublicKey", "");
         return "dashboard-socio";
     }
 

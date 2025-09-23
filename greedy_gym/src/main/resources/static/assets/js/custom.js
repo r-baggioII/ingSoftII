@@ -2,9 +2,10 @@
 	
 	"use strict";
 
-	$(function() {
-        $("#tabs").tabs();
-    });
+	// Tabs deshabilitado (no se usa jQuery UI)
+	// $(function() {
+	//        $("#tabs").tabs();
+	//    });
 
 	$(window).scroll(function() {
 	  var scroll = $(window).scrollTop();

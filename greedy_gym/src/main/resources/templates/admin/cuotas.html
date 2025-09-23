@@ -9,7 +9,7 @@
   <link rel="stylesheet" th:href="@{/assets/css/templatemo-training-studio.css}">
   <link rel="stylesheet" th:href="@{/assets/css/panel-shared.css}">
 </head>
-<body>
+<body th:data-context-path="@{/}">
 <header class="header-area header-sticky">
   <div class="container"><div class="row"><div class="col-12">
     <nav class="main-nav">
@@ -35,47 +35,7 @@
       </div>
     </div></div>
 
-    <!-- Filtros de búsqueda -->
-    <div class="row mb-3"><div class="col-lg-10 offset-lg-1">
-      <div class="card" style="border:none; border-radius:14px; box-shadow:0 10px 28px rgba(0,0,0,.08);">
-        <div class="card-body">
-          <form id="filtro-cuotas" class="row g-2 align-items-end">
-            <div class="col-sm-3">
-              <!-- JS: cargar socios /api/v1/socios para este select -->
-              <label class="panel-label">Socio</label>
-              <select name="idSocio" class="form-select panel-control"><option value="">Todos</option></select>
-            </div>
-            <div class="col-sm-2">
-              <label class="panel-label">Año</label>
-              <input type="number" name="anio" class="form-control panel-control" min="2000" max="2100" placeholder="YYYY">
-            </div>
-            <div class="col-sm-2">
-              <label class="panel-label">Mes</label>
-              <select name="mes" class="form-select panel-control">
-                <option value="">Todos</option>
-                <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
-                <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
-                <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
-                <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
-              </select>
-            </div>
-            <div class="col-sm-3">
-              <label class="panel-label">Estado</label>
-              <select name="estado" class="form-select panel-control">
-                <option value="">Todos</option>
-                <option value="GENERADA">Generada</option>
-                <option value="PAGADA">Pagada</option>
-                <option value="VENCIDA">Vencida</option>
-              </select>
-            </div>
-            <div class="col-sm-2 text-end">
-              <!-- JS: GET /api/cuotas-mensuales?filters... -->
-              <button class="btn main-button-panel w-100" type="submit">Filtrar</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div></div>
+    
 
     <div class="row g-4">
       <!-- Alta/Edición de cuota individual -->
@@ -84,96 +44,32 @@
           <div class="card-body">
             <h5 class="card-title">Crear/Editar cuota</h5>
             <form id="cuota-form" class="row g-2">
-              <input type="hidden" name="id" value="">
               <div class="col-12">
-                <label class="panel-label">Socio</label>
-                <!-- JS: cargar socios con deuda o todos los activos -->
-                <select name="idSocio" class="form-select panel-control" required><option value="">Seleccioná un socio...</option></select>
+                <label class="panel-label">DNI del Socio</label>
+                <input type="text" name="numeroDocumento" class="form-control panel-control" required placeholder="Número de documento">
               </div>
-              <div class="col-4">
+              <div class="col-6">
                 <label class="panel-label">Año</label>
-                <input type="number" name="anio" class="form-control panel-control" required>
+                <input type="number" name="anioForm" class="form-control panel-control" required>
               </div>
-              <div class="col-4">
+              <div class="col-6">
                 <label class="panel-label">Mes</label>
-                <select name="mes" class="form-select panel-control" required>
-                  <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
-                  <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
-                  <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
-                  <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+                <select name="mesForm" class="form-select panel-control" required>
                 </select>
               </div>
-              <div class="col-4">
-                <label class="panel-label">Importe</label>
-                <div class="input-group">
-                  <span class="input-group-text">$</span>
-                  <!-- JS: sugerir valor vigente GET /api/valor-cuotas/vigente -->
-                  <input type="number" name="importe" class="form-control panel-control" min="0" step="0.01" required>
-                </div>
+              <div class="col-6">
+                <label class="panel-label">Valor de cuota</label>
+                <select name="valorCuotaId" class="form-select panel-control" required>
+                </select>
               </div>
               <div class="col-6">
                 <label class="panel-label">Estado</label>
-                <select name="estado" class="form-select panel-control">
-                  <option value="GENERADA">Generada</option>
-                  <option value="PAGADA">Pagada</option>
-                  <option value="VENCIDA">Vencida</option>
+                <select name="estadoForm" class="form-select panel-control">
                 </select>
               </div>
-              <div class="col-6">
-                <label class="panel-label">Fecha de pago</label>
-                <input type="date" name="fechaPago" class="form-control panel-control">
-              </div>
-              <div class="col-12">
-                <label class="panel-label">Observaciones</label>
-                <textarea name="observaciones" class="form-control panel-control" rows="2"></textarea>
-              </div>
               <div class="col-12 d-flex gap-2 mt-2">
-                <!-- JS: POST /api/cuotas-mensuales para crear; PUT /api/cuotas-mensuales/{id} para editar -->
-                <button class="btn main-button-panel" type="submit">Guardar</button>
-                <button class="btn btn-outline-secondary" type="reset">Limpiar</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-
-      <!-- Generación masiva por mes -->
-      <div class="col-lg-6">
-        <div class="card" style="border:none; border-radius:14px; box-shadow:0 10px 28px rgba(0,0,0,.08);">
-          <div class="card-body">
-            <h5 class="card-title">Generar cuotas del mes</h5>
-            <form id="cuotas-masivas-form" class="row g-2">
-              <div class="col-4">
-                <label class="panel-label">Año</label>
-                <input type="number" name="anio" class="form-control panel-control" required>
-              </div>
-              <div class="col-4">
-                <label class="panel-label">Mes</label>
-                <select name="mes" class="form-select panel-control" required>
-                  <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
-                  <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
-                  <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
-                  <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
-                </select>
-              </div>
-              <div class="col-4">
-                <label class="panel-label">Importe</label>
-                <div class="input-group">
-                  <span class="input-group-text">$</span>
-                  <!-- JS: usar valor vigente por defecto, permitir override -->
-                  <input type="number" name="importe" class="form-control panel-control" min="0" step="0.01" required>
-                </div>
-              </div>
-              <div class="col-12">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="soloActivos" id="soloActivos" checked>
-                  <label class="form-check-label" for="soloActivos">Solo socios activos</label>
-                </div>
-              </div>
-              <div class="col-12 d-flex gap-2 mt-2">
-                <!-- JS: POST /api/cuotas-mensuales/generar?anio=..&mes=..&importe=..&soloActivos=.. -->
-                <button class="btn main-button-panel" type="submit">Generar</button>
-                <small class="text-muted">Crea cuotas para todos los socios seleccionados.</small>
+                <button id="btn-crear" class="btn main-button-panel" type="submit">Crear Cuota</button>
+                <button id="cuota-reset" class="btn btn-outline-secondary" type="button">Limpiar</button>
               </div>
             </form>
           </div>
@@ -181,19 +77,52 @@
       </div>
 
       <!-- Listado -->
-      <div class="col-12">
+      <div class="col-lg-6">
         <div class="card" style="border:none; border-radius:14px; box-shadow:0 10px 28px rgba(0,0,0,.08);">
           <div class="card-body">
-            <h5 class="card-title">Listado de cuotas</h5>
+            <h5 class="card-title">Cuotas registradas</h5>
+            <form id="filtro-cuotas" class="row g-2 align-items-end mb-3">
+              <div class="col-sm-4">
+                <label class="panel-label">Socio</label>
+                <select name="idSocio" class="form-select panel-control"><option value="">Todos</option></select>
+              </div>
+              <div class="col-sm-3">
+                <label class="panel-label">Año</label>
+                <input type="number" name="anio" class="form-control panel-control" min="2000" max="2100" placeholder="YYYY">
+              </div>
+              <div class="col-sm-2">
+                <label class="panel-label">Mes</label>
+                <select name="mes" class="form-select panel-control"><option value="">Todos</option></select>
+              </div>
+              <div class="col-sm-2">
+                <label class="panel-label">Estado</label>
+                <select name="estado" class="form-select panel-control">
+                  <option value="">Todos</option>
+                  <option value="PENDIENTE">Pendiente</option>
+                  <option value="PAGADA">Pagada</option>
+                  <option value="VENCIDA">Vencida</option>
+                  <option value="CANCELADA">Cancelada</option>
+                </select>
+              </div>
+              <div class="col-sm-1 text-end">
+                <button id="btn-buscar" class="btn main-button-panel w-100" type="button">Filtrar</button>
+              </div>
+            </form>
+            <div class="mb-2 text-info fw-bold" id="deuda-total"></div>
             <div class="panel-table table-responsive">
-              <table class="table table-sm align-middle">
+              <table class="table table-hover align-middle">
                 <thead>
                   <tr>
-                    <th>Socio</th><th>Año</th><th>Mes</th><th>Importe</th><th>Estado</th><th>Pago</th><th class="text-end">Acciones</th>
+                    <th>DNI</th>
+                    <th>Mes</th>
+                    <th>Año</th>
+                    <th>Estado</th>
+                    <th>Monto</th>
+                    <th>Vencimiento</th>
+                    <th class="text-end">Acciones</th>
                   </tr>
                 </thead>
-                <tbody id="cuotas-table">
-                  <!-- JS: render rows from GET /api/cuotas-mensuales -->
+                <tbody id="cuota-table-body">
                 </tbody>
               </table>
             </div>
@@ -206,5 +135,6 @@
 
 <script th:src="@{/assets/js/jquery-2.1.0.min.js}"></script>
 <script th:src="@{/assets/js/bootstrap.min.js}"></script>
+<script th:src="@{/assets/js/admin/cuotas-mensuales.js}"></script>
 </body>
 </html>

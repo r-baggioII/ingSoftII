@@ -47,8 +47,10 @@
   ];
 
   const CUOTA_STATE_OPTIONS = [
-    { value: 'ADEUDADA', label: 'Adeudada' },
-    { value: 'PAGADA', label: 'Pagada' }
+    { value: 'PENDIENTE', label: 'Pendiente' },
+    { value: 'PAGADA', label: 'Pagada' },
+    { value: 'VENCIDA', label: 'Vencida' },
+    { value: 'CANCELADA', label: 'Cancelada' }
   ];
 
   const DOCUMENT_OPTIONS = ['DNI', 'PASAPORTE', 'CEDULA', 'LIBRETA_CIVICA', 'LIBRETA_ENROLAMIENTO']
@@ -362,7 +364,7 @@
             mes: MONTH_OPTIONS[0].value,
             anio: year,
             valorCuotaId: '',
-            estado: 'ADEUDADA'
+            estado: 'PENDIENTE'
           };
         }
         return {
@@ -370,7 +372,7 @@
           mes: item?.mes || MONTH_OPTIONS[0].value,
           anio: item?.anio != null ? item.anio : new Date().getFullYear(),
           valorCuotaId: item?.valorCuota?.id || '',
-          estado: item?.estado || 'ADEUDADA'
+          estado: item?.estado || 'PENDIENTE'
         };
       },
       toPayload(mode, values, item) {

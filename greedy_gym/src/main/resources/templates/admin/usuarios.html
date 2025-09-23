@@ -57,14 +57,6 @@
                 </select>
               </div>
 
-              <div class="mb-3" id="grupo-vinculo">
-                <label class="panel-label">Vincular con</label>
-                <select class="form-select panel-control" name="tipoVinculo">
-                  <option value="NINGUNO">Ninguno</option>
-                  <option value="EMPLEADO_EXISTENTE">Empleado existente</option>
-                </select>
-              </div>
-
               <div class="mb-3 d-none" id="datos-socio">
                 <div class="row g-2">
                   <div class="col-md-6">
@@ -106,12 +98,49 @@
                 </div>
               </div>
 
-              <div class="mb-3 d-none" id="vinculo-empleado">
-                <label class="form-label">Seleccionar Empleado</label>
-                <!-- JS: llenar dropdown con empleados activos vía /api/v1/empleados -->
-                <select class="form-select panel-control" name="empleadoId">
-                  <option value="">Seleccione un empleado...</option>
-                </select>
+              <div class="mb-3 d-none" id="datos-empleado">
+                <div class="row g-2">
+                  <div class="col-md-6">
+                    <label class="form-label">Nombre</label>
+                    <input type="text" class="form-control panel-control" name="empleadoNombre">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Apellido</label>
+                    <input type="text" class="form-control panel-control" name="empleadoApellido">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Fecha de nacimiento</label>
+                    <input type="date" class="form-control panel-control" name="empleadoFechaNacimiento">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Tipo de documento</label>
+                    <select class="form-select panel-control" name="empleadoTipoDocumento">
+                      <option value="">Seleccione...</option>
+                      <option th:each="tipo : ${T(com.example.greedy_gym.entidades.TipoDocumento).values()}"
+                              th:value="${tipo}" th:text="${tipo}"></option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Número de documento</label>
+                    <input type="text" class="form-control panel-control" name="empleadoNumeroDocumento">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Teléfono</label>
+                    <input type="text" class="form-control panel-control" name="empleadoTelefono">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Correo electrónico</label>
+                    <input type="email" class="form-control panel-control" name="empleadoCorreo">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Tipo de empleado</label>
+                    <select class="form-select panel-control" name="empleadoTipo">
+                      <option value="">Seleccione...</option>
+                      <option th:each="tipo : ${T(com.example.greedy_gym.entidades.TipoEmpleado).values()}"
+                              th:value="${tipo}" th:text="${tipo}"></option>
+                    </select>
+                  </div>
+                </div>
               </div>
 
               <div class="d-flex gap-2">

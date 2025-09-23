@@ -111,9 +111,9 @@ public class MercadoPagoDemoControlador {
         LOGGER.info("Items enviados a MP: {}", items.size());
 
         PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
-            .success("https://roily-hydraulic-renna.ngrok-free.dev")
-            .pending("https://roily-hydraulic-renna.ngrok-free.dev")
-            .failure("https://roily-hydraulic-renna.ngrok-free.dev")
+            .success("https://roily-hydraulic-renna.ngrok-free.dev/greedy_gym/panel/entidades")
+            .pending("https://roily-hydraulic-renna.ngrok-free.dev/greedy_gym/panel/entidades")
+            .failure("https://roily-hydraulic-renna.ngrok-free.dev/greedy_gym/panel/entidades")
             .build();
 
 

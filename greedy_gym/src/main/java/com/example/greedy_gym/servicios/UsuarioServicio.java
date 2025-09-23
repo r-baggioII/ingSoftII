@@ -3,6 +3,7 @@ package com.example.greedy_gym.servicios;
 import com.example.greedy_gym.entidades.Empleado;
 import com.example.greedy_gym.entidades.RolUsuario;
 import com.example.greedy_gym.entidades.Socio;
+import com.example.greedy_gym.entidades.TipoEmpleado;
 import com.example.greedy_gym.entidades.Usuario;
 import com.example.greedy_gym.repositorios.UsuarioRepositorio;
 import jakarta.validation.ValidationException;
@@ -71,9 +72,20 @@ public class UsuarioServicio {
             return;
         }
         Empleado nuevoEmpleado = command.nuevoEmpleado();
-        if (nuevoEmpleado != null) {
-            empleadoServicio.crearEmpleadoConUsuario(nuevoEmpleado, usuario);
+        if (nuevoEmpleado == null) {
+            throw new ValidationException("Debe proporcionar los datos del empleado");
         }
+        if (nuevoEmpleado.getTipoEmpleado() == null) {
+            if (command.rol() == RolUsuario.ADMINISTRATIVO) {
+                nuevoEmpleado.setTipoEmpleado(TipoEmpleado.ADMINISTRATIVO);
+            } else if (command.rol() == RolUsuario.PROFESOR) {
+                nuevoEmpleado.setTipoEmpleado(TipoEmpleado.PROFESOR);
+            }
+        }
+        if (nuevoEmpleado.getTipoEmpleado() == null) {
+            throw new ValidationException("Debe indicar el tipo de empleado");
+        }
+        empleadoServicio.crearEmpleadoConUsuario(nuevoEmpleado, usuario);
     }
 
     public void validar(String nombreUsuario, String clave, RolUsuario rol) {

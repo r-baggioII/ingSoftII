@@ -47,7 +47,7 @@ public class CuotaMensual {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false)
-    private EstadoCuota estado = EstadoCuota.PENDIENTE;
+    private EstadoCuota estado = EstadoCuota.ADEUDADA;
 
     @Column(name = "fecha_vencimiento", nullable = false)
     private LocalDate fechaVencimiento;
@@ -75,7 +75,7 @@ public class CuotaMensual {
             this.id = UUID.randomUUID().toString();
         }
         if (this.estado == null) {
-            this.estado = EstadoCuota.PENDIENTE;
+            this.estado = EstadoCuota.ADEUDADA;
         }
     }
 }

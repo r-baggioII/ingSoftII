@@ -93,4 +93,12 @@ public class CuotaMensualControlador {
                                                    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaHasta) {
         return service.listarCuotaMensualPorFecha(fechaDesde, fechaHasta);
     }
+
+    @GetMapping("/deuda-por-socio/{idSocio}")
+    public Collection<CuotaMensual> obtenerDeudaPorSocio(@PathVariable String idSocio) {
+    return service.listarCuotaMensualPorEstado(EstadoCuota.ADEUDADA)
+                .stream()
+                .filter(cuota -> idSocio.equals(cuota.getIdSocio()))
+                .toList();
+    }
 }

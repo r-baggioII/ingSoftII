@@ -54,7 +54,7 @@ public class CuotaMensualServicio {
         cuotaMensual.setMes(mes);
         cuotaMensual.setAnio(anio);
         cuotaMensual.setValorCuota(valorCuota);
-        cuotaMensual.setEstado(EstadoCuota.PENDIENTE);
+    cuotaMensual.setEstado(EstadoCuota.ADEUDADA);
         cuotaMensual.setFechaVencimiento(calcularVencimiento(mes, anio));
         cuotaMensual.setEliminado(false);
 

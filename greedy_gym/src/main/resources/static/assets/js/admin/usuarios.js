@@ -39,8 +39,7 @@
   const state = {
     registros: [],
     editingId: null,
-    selectedUsuarioId: null,
-    empleados: []
+    selectedUsuarioId: null
   };
 
   // --- DOM ---
@@ -51,11 +50,8 @@
     refreshBtn: document.getElementById('usuario-refresh'),
     tableBody: document.getElementById('usuario-table-body'),
     rol: document.querySelector("select[name='rol']"),
-    tipoVinculo: document.querySelector("select[name='tipoVinculo']"),
-    tipoVinculoGroup: document.getElementById('grupo-vinculo'),
     datosSocioWrap: document.getElementById('datos-socio'),
-    vinculoEmpleadoWrap: document.getElementById('vinculo-empleado'),
-    empleadoSelect: document.querySelector("select[name='empleadoId']"),
+    datosEmpleadoWrap: document.getElementById('datos-empleado'),
     socioNuevo: {
       nombre: document.querySelector("input[name='socioNombre']"),
       apellido: document.querySelector("input[name='socioApellido']"),
@@ -65,24 +61,29 @@
       numeroDocumento: document.querySelector("input[name='socioNumeroDocumento']"),
       telefono: document.querySelector("input[name='socioTelefono']"),
       correo: document.querySelector("input[name='socioCorreo']")
+    },
+    empleadoNuevo: {
+      nombre: document.querySelector("input[name='empleadoNombre']"),
+      apellido: document.querySelector("input[name='empleadoApellido']"),
+      fechaNacimiento: document.querySelector("input[name='empleadoFechaNacimiento']"),
+      tipoDocumento: document.querySelector("select[name='empleadoTipoDocumento']"),
+      numeroDocumento: document.querySelector("input[name='empleadoNumeroDocumento']"),
+      telefono: document.querySelector("input[name='empleadoTelefono']"),
+      correo: document.querySelector("input[name='empleadoCorreo']"),
+      tipoEmpleado: document.querySelector("select[name='empleadoTipo']")
     }
   };
 
   // --- init ---
   document.addEventListener('DOMContentLoaded', () => {
     attachEvents();
-    loadVinculoOptions();
     onRolChange();
-    onTipoVinculoChange();
     listar();
   });
 
   function attachEvents(){
     if (dom.rol) {
       dom.rol.addEventListener('change', onRolChange);
-    }
-    if (dom.tipoVinculo) {
-      dom.tipoVinculo.addEventListener('change', onTipoVinculoChange);
     }
     if (dom.form) dom.form.addEventListener('submit', onFormSubmit);
     if (dom.reset) dom.reset.addEventListener('click', resetForm);
@@ -91,53 +92,17 @@
     if (dom.tableBody) dom.tableBody.addEventListener('click', onTableClick);
   }
 
-  async function loadVinculoOptions(){
-    try {
-      const empleados = await requestJson(buildUrl('/api/v1/empleados/activos')).catch(()=>[]);
-      state.empleados = Array.isArray(empleados)? empleados : [];
-      fillSelect(dom.empleadoSelect, state.empleados.map(e=>({value: e.id, label: `${e.nombre||''} ${e.apellido||''} - ${e.numeroDocumento||''}`.trim()})));
-    } catch(e){
-      console.warn('No se pudieron cargar opciones de vínculo', e);
-    }
-  }
-
-  function fillSelect(select, options){
-    if(!select) return;
-    const frag = document.createDocumentFragment();
-    const first = document.createElement('option');
-    first.value = '';
-    first.textContent = 'Seleccione...';
-    frag.appendChild(first);
-    for(const opt of (options||[])){
-      const o = document.createElement('option');
-      o.value = opt.value;
-      o.textContent = opt.label;
-      frag.appendChild(o);
-    }
-    select.innerHTML='';
-    select.appendChild(frag);
-  }
-
   function onRolChange(){
     const rol = dom.rol ? dom.rol.value : 'NINGUNO';
     const esSocio = rol === 'SOCIO';
+    const esEmpleado = rol === 'ADMINISTRATIVO' || rol === 'PROFESOR';
     toggle(dom.datosSocioWrap, esSocio);
-    toggle(dom.tipoVinculoGroup, !esSocio);
-    if (dom.tipoVinculo) {
-      if (esSocio) {
-        dom.tipoVinculo.value = 'NINGUNO';
-        dom.tipoVinculo.setAttribute('disabled', 'disabled');
-      } else {
-        dom.tipoVinculo.removeAttribute('disabled');
-        dom.tipoVinculo.value = 'NINGUNO';
+    toggle(dom.datosEmpleadoWrap, esEmpleado);
+    if (esEmpleado && dom.empleadoNuevo?.tipoEmpleado) {
+      if (!dom.empleadoNuevo.tipoEmpleado.value) {
+        dom.empleadoNuevo.tipoEmpleado.value = rol === 'ADMINISTRATIVO' ? 'ADMINISTRATIVO' : 'ENTRENADOR';
       }
-      onTipoVinculoChange();
     }
-  }
-
-  function onTipoVinculoChange(){
-    const v = dom.tipoVinculo ? dom.tipoVinculo.value : 'NINGUNO';
-    toggle(dom.vinculoEmpleadoWrap, v === 'EMPLEADO_EXISTENTE');
   }
   function toggle(el, show){ if(!el) return; el.classList[show?'remove':'add']('d-none'); }
 
@@ -188,42 +153,46 @@
     dom.form.nombreUsuario.value = item.nombreUsuario || '';
     dom.form.clave.value = '';
     dom.form.rol.value = item.rol || 'SOCIO';
-    if(dom.tipoVinculo){ dom.tipoVinculo.value = 'NINGUNO'; }
     onRolChange();
     clearSocioNuevo();
+    clearEmpleadoNuevo();
   }
 
   function resetForm(){
     state.editingId = null;
     if(!dom.form) return;
     dom.form.reset();
-    if(dom.tipoVinculo){ dom.tipoVinculo.value = 'NINGUNO'; }
     onRolChange();
     clearSocioNuevo();
+    clearEmpleadoNuevo();
   }
 
   async function onFormSubmit(e){
     e.preventDefault();
     const f = dom.form;
+    const isEditing = Boolean(state.editingId);
     const payload = {
       nombreUsuario: f.nombreUsuario.value.trim(),
       clave: f.clave.value.trim(),
       rol: f.rol.value,
-      socioId: null,
       socio: null,
-      empleadoId: null
+      empleado: null
     };
-    const tipoVinculo = dom.tipoVinculo ? dom.tipoVinculo.value : 'NINGUNO';
     try {
-      if(payload.rol === 'SOCIO'){
+      if(payload.rol === 'SOCIO' && !isEditing){
         const datosSocio = collectSocioNuevo();
         if(!datosSocio){
           alert('Completa todos los datos obligatorios del socio.');
           return;
         }
         payload.socio = datosSocio;
-      } else if(tipoVinculo === 'EMPLEADO_EXISTENTE' && f.empleadoId.value){
-        payload.empleadoId = f.empleadoId.value;
+      } else if ((payload.rol === 'ADMINISTRATIVO' || payload.rol === 'PROFESOR') && !isEditing) {
+        const datosEmpleado = collectEmpleadoNuevo();
+        if(!datosEmpleado){
+          alert('Completa todos los datos obligatorios del empleado.');
+          return;
+        }
+        payload.empleado = datosEmpleado;
       }
 
       let createdOrId = state.editingId;
@@ -289,5 +258,53 @@
       input.value = '';
     });
     if(campos.tipoDocumento) campos.tipoDocumento.value = '';
+  }
+
+  function collectEmpleadoNuevo(){
+    const campos = dom.empleadoNuevo;
+    if(!campos) return null;
+    const nombre = campos.nombre?.value.trim();
+    const apellido = campos.apellido?.value.trim();
+    const fechaNacimiento = campos.fechaNacimiento?.value;
+    const tipoDocumento = campos.tipoDocumento?.value;
+    const numeroDocumento = campos.numeroDocumento?.value.trim();
+    const telefono = campos.telefono?.value.trim();
+    const correo = campos.correo?.value.trim();
+    let tipoEmpleado = campos.tipoEmpleado?.value;
+    if(!nombre || !apellido || !fechaNacimiento || !tipoDocumento || !numeroDocumento || !telefono || !correo){
+      return null;
+    }
+    if(!tipoEmpleado){
+      const rol = dom.rol ? dom.rol.value : null;
+      if(rol === 'ADMINISTRATIVO') {
+        tipoEmpleado = 'ADMINISTRATIVO';
+      } else if (rol === 'PROFESOR') {
+        tipoEmpleado = 'ENTRENADOR';
+      }
+    }
+    if(!tipoEmpleado){
+      return null;
+    }
+    return {
+      nombre,
+      apellido,
+      fechaNacimiento,
+      tipoDocumento,
+      numeroDocumento,
+      telefono,
+      correoElectronico: correo,
+      tipoEmpleado
+    };
+  }
+
+  function clearEmpleadoNuevo(){
+    const campos = dom.empleadoNuevo;
+    if(!campos) return;
+    Object.values(campos).forEach(input => {
+      if(!input) return;
+      input.value = '';
+    });
+    if(campos.tipoDocumento) campos.tipoDocumento.value = '';
+    if(campos.tipoEmpleado) campos.tipoEmpleado.value = '';
   }
 })();

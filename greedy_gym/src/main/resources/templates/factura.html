@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Factura</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/assets/css/bootstrap.min.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/assets/css/font-awesome.css}">
+    <style>
+        body { background: #f8f9fa; }
+        .invoice-container { max-width: 900px; margin: 40px auto; }
+        .invoice-card { background: #fff; border-radius: 12px; box-shadow: 0 8px 18px rgba(0,0,0,0.08); }
+        .invoice-header { padding: 24px 24px 0; }
+        .invoice-body { padding: 0 24px 24px; }
+        .invoice-footer { padding: 16px 24px 24px; }
+        .brand { color: #ed563b; font-weight: 800; font-size: 24px; }
+        .badge-status { background: #28a745; }
+    </style>
+    <script>
+        function printInvoice(){ window.print(); }
+    </script>
+    <link rel="stylesheet" th:href="@{/assets/css/templatemo-training-studio.css}">
+    <link rel="icon" href="data:,">
+    <meta name="robots" content="noindex">
+    <meta name="googlebot" content="noindex">
+    <meta name="description" content="Factura de pago">
+    <meta name="author" content="Greedy Gym">
+    <meta name="theme-color" content="#ed563b">
+    <meta http-equiv="Cache-Control" content="no-store"/>
+    <meta http-equiv="Pragma" content="no-cache"/>
+    <meta http-equiv="Expires" content="0"/>
+</head>
+<body>
+
+<div class="invoice-container">
+    <div class="invoice-card">
+        <div class="invoice-header d-flex justify-content-between align-items-start">
+            <div>
+                <div class="brand">Greedy <em>Gym</em></div>
+                <small class="text-muted">Comprobante de pago</small>
+            </div>
+            <div class="text-end">
+                <div><strong>N°:</strong> <span th:text="${factura.numeroFactura}">-</span></div>
+                <div><strong>Fecha:</strong> <span th:text="${#temporals.format(factura.fechaFactura, 'dd/MM/yyyy')}">-</span></div>
+                <div><span class="badge badge-status text-white p-2" th:text="${factura.estado}">PAGADA</span></div>
+            </div>
+        </div>
+        <hr/>
+        <div class="invoice-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div><strong>Forma de pago:</strong> <span th:text="${factura.formaDePago != null ? factura.formaDePago.tipoPago : 'N/D'}"></span></div>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div><strong>Total pagado:</strong> $ <span th:text="${#numbers.formatDecimal(factura.totalPagado, 1, 'COMMA', 2, 'POINT')}">0,00</span></div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Mes/Año</th>
+                        <th>Vencimiento</th>
+                        <th>Monto</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="d,iter : ${factura.detalles}">
+                        <td th:text="${iter.index + 1}">1</td>
+                        <td>
+                            <span th:text="${d.cuotaMensual.mes}">MES</span>
+                            <span th:text="${d.cuotaMensual.anio}">AAAA</span>
+                        </td>
+                        <td th:text="${#temporals.format(d.cuotaMensual.fechaVencimiento, 'dd/MM/yyyy')}">--/--/----</td>
+                        <td>
+                            $ <span th:text="${#numbers.formatDecimal(d.cuotaMensual.valorCuota.valorCuota, 1, 'COMMA', 2, 'POINT')}">0,00</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <th colspan="3" class="text-end">Total</th>
+                        <th>$ <span th:text="${#numbers.formatDecimal(factura.totalPagado, 1, 'COMMA', 2, 'POINT')}">0,00</span></th>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+        <div class="invoice-footer d-flex justify-content-between">
+            <a class="btn btn-outline-secondary" th:href="@{/dashboard/socio}">
+                <i class="fa fa-arrow-left"></i> Volver al panel
+            </a>
+            <div>
+                <button class="btn btn-secondary me-2" onclick="printInvoice()"><i class="fa fa-print"></i> Imprimir</button>
+                <a class="btn" style="background: linear-gradient(105deg, #ed563b 0%, #ff6b47 100%); color: #fff;" th:href="@{/dashboard/socio}"><i class="fa fa-check"></i> Finalizar</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/assets/js/jquery-2.1.0.min.js}"></script>
+<script th:src="@{/assets/js/bootstrap.min.js}"></script>
+</body>
+</html>
+

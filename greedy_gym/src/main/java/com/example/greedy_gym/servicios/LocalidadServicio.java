@@ -67,8 +67,12 @@ public class LocalidadServicio {
 
     @Transactional(readOnly = true)
     public Localidad buscarLocalidad(String id) {
-        return repository.findById(id)
+        Localidad localidad = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Localidad no encontrada: " + id));
+        if (localidad.isEliminado()) {
+            throw new IllegalArgumentException("Localidad no disponible: " + id);
+        }
+        return localidad;
     }
 
     @Transactional(readOnly = true)

@@ -2,8 +2,15 @@ package com.example.greedy_gym.controladores;
 
 import com.example.greedy_gym.entidades.CuotaMensual;
 import com.example.greedy_gym.entidades.EstadoCuota;
+import com.example.greedy_gym.entidades.EstadoFactura;
+import com.example.greedy_gym.entidades.DetalleFactura;
+import com.example.greedy_gym.entidades.Factura;
+import com.example.greedy_gym.entidades.FormaDePago;
+import com.example.greedy_gym.entidades.TipoPago;
 import com.example.greedy_gym.entidades.ValorCuota;
 import com.example.greedy_gym.repositorios.CuotaMensualRepositorio;
+import com.example.greedy_gym.repositorios.FormaDePagoRepositorio;
+import com.example.greedy_gym.servicios.FacturaServicio;
 import com.mercadopago.MercadoPagoConfig;
 import com.mercadopago.client.preference.PreferenceBackUrlsRequest;
 import com.mercadopago.client.preference.PreferenceClient;
@@ -16,6 +23,7 @@ import com.mercadopago.resources.preference.PreferenceItem;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,6 +43,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/api/socio/pagos")
@@ -44,11 +53,17 @@ public class MercadoPagoDemoControlador {
 
     private final String accessToken;
     private final CuotaMensualRepositorio cuotaMensualRepositorio;
+    private final FacturaServicio facturaServicio;
+    private final FormaDePagoRepositorio formaDePagoRepositorio;
 
     public MercadoPagoDemoControlador(@Value("${mercadopago.access-token:}") String accessToken,
-                                      CuotaMensualRepositorio cuotaMensualRepositorio) {
+                                      CuotaMensualRepositorio cuotaMensualRepositorio,
+                                      FacturaServicio facturaServicio,
+                                      FormaDePagoRepositorio formaDePagoRepositorio) {
         this.accessToken = "APP_USR-1161916719081917-092219-7d27c8faacdc9c984b9bd4539830b21b-2708507674";
         this.cuotaMensualRepositorio = cuotaMensualRepositorio;
+        this.facturaServicio = facturaServicio;
+        this.formaDePagoRepositorio = formaDePagoRepositorio;
     }
 
     @GetMapping("/cuotas-pendientes")
@@ -137,14 +152,27 @@ public class MercadoPagoDemoControlador {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("status", "error", "message", "preferenceId requerido"));
         }
-        procesarCuotasPagadas(preferenceId);
+        List<CuotaMensual> cuotas = obtenerCuotasDePreferencia(preferenceId);
+        if (cuotas.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("status", "error", "message", "No se encontraron cuotas para la preferencia"));
+        }
+        marcarCuotasComoPagadas(cuotas, preferenceId);
+        crearFacturaParaCuotas(cuotas);
         return ResponseEntity.ok(Map.of("status", "ok", "message", "Preferencia verificada"));
     }
 
     @GetMapping("/success")
-    public ResponseEntity<String> pagoExitoso(@RequestParam(name = "preference_id", required = false) String preferenceId) {
-        procesarCuotasPagadas(preferenceId);
-        return html("Pago Exitoso", "¡Gracias! Tu pago fue procesado correctamente.", "/");
+    public ResponseEntity<String> pagoExitoso(@RequestParam(name = "preference_id", required = false) String preferenceId,
+                                              HttpSession session) {
+        List<CuotaMensual> cuotasPagadas = obtenerCuotasDePreferencia(preferenceId);
+        if (!cuotasPagadas.isEmpty()) {
+            marcarCuotasComoPagadas(cuotasPagadas, preferenceId);
+            Optional<String> facturaId = crearFacturaParaCuotas(cuotasPagadas);
+            facturaId.ifPresent(id -> session.setAttribute("ultimaFacturaId", id));
+        }
+        session.setAttribute("mensajePago", "¡Gracias! Tu pago fue procesado correctamente.");
+        return html("Pago Exitoso", "¡Gracias! Tu pago fue procesado correctamente.", "/dashboard/socio");
     }
 
     @GetMapping("/pending")
@@ -157,16 +185,17 @@ public class MercadoPagoDemoControlador {
         return html("Pago Rechazado", "El pago no se completó. Inténtalo nuevamente o usa otro medio de pago.", "/");
     }
 
-    private void procesarCuotasPagadas(String preferenceId) {
+    private List<CuotaMensual> obtenerCuotasDePreferencia(String preferenceId) {
+        List<CuotaMensual> result = new ArrayList<>();
         if (preferenceId == null || preferenceId.isBlank()) {
             LOGGER.warn("No se recibió preference_id en la redirección de éxito");
-            return;
+            return result;
         }
         try {
             configurarMercadoPago();
         } catch (IllegalStateException e) {
             LOGGER.error("No se pudo preparar Mercado Pago para consultar la preferencia: {}", e.getMessage());
-            return;
+            return result;
         }
 
         PreferenceClient client = new PreferenceClient();
@@ -175,25 +204,71 @@ public class MercadoPagoDemoControlador {
             List<PreferenceItem> items = preference.getItems();
             if (items == null || items.isEmpty()) {
                 LOGGER.warn("La preferencia {} no tiene items para procesar", preferenceId);
-                return;
+                return result;
             }
             for (PreferenceItem item : items) {
                 String cuotaId = item.getId();
                 if (cuotaId == null || cuotaId.isBlank()) {
                     continue;
                 }
-                Optional<CuotaMensual> cuotaOpt = cuotaMensualRepositorio.findByIdAndEliminadoFalse(cuotaId);
-                if (cuotaOpt.isPresent()) {
-                    CuotaMensual cuota = cuotaOpt.get();
-                    if (cuota.getEstado() != EstadoCuota.PAGADA) {
-                        cuota.setEstado(EstadoCuota.PAGADA);
-                        cuotaMensualRepositorio.save(cuota);
-                        LOGGER.info("Cuota {} marcada como PAGADA tras preferencia {}", cuotaId, preferenceId);
-                    }
-                }
+                cuotaMensualRepositorio.findByIdAndEliminadoFalse(cuotaId).ifPresent(result::add);
             }
         } catch (MPApiException | MPException e) {
             LOGGER.error("No se pudo consultar la preferencia {}: {}", preferenceId, e.getMessage(), e);
+        }
+        return result;
+    }
+
+    private void marcarCuotasComoPagadas(List<CuotaMensual> cuotas, String preferenceId) {
+        for (CuotaMensual cuota : cuotas) {
+            if (cuota.getEstado() != EstadoCuota.PAGADA) {
+                cuota.setEstado(EstadoCuota.PAGADA);
+                cuotaMensualRepositorio.save(cuota);
+                LOGGER.info("Cuota {} marcada como PAGADA tras preferencia {}", cuota.getId(), preferenceId);
+            }
+        }
+    }
+
+    private Optional<String> crearFacturaParaCuotas(List<CuotaMensual> cuotas) {
+        try {
+            // Obtener o crear forma de pago de billetera virtual (Mercado Pago)
+            FormaDePago forma = formaDePagoRepositorio
+                    .findFirstByTipoPagoAndEliminadoFalse(TipoPago.BILLETERA_VIRTUAL)
+                    .orElseGet(() -> {
+                        FormaDePago f = new FormaDePago();
+                        f.setTipoPago(TipoPago.BILLETERA_VIRTUAL);
+                        f.setObservacion("Mercado Pago");
+                        f.setEliminado(false);
+                        return formaDePagoRepositorio.save(f);
+                    });
+
+            double total = cuotas.stream()
+                    .map(CuotaMensual::getValorCuota)
+                    .filter(v -> v != null)
+                    .mapToDouble(ValorCuota::getValorCuota)
+                    .sum();
+
+            Factura factura = new Factura();
+            factura.setFechaFactura(LocalDate.now());
+            factura.setTotalPagado(total);
+            factura.setEstado(EstadoFactura.PAGADA);
+            factura.setFormaDePago(forma);
+
+            List<DetalleFactura> detalles = new ArrayList<>();
+            for (CuotaMensual c : cuotas) {
+                DetalleFactura d = new DetalleFactura();
+                d.setCuotaMensual(c);
+                d.setEliminado(false);
+                detalles.add(d);
+            }
+            factura.setDetalles(detalles);
+
+            Factura creada = facturaServicio.crear(factura);
+            LOGGER.info("Factura {} creada por total {} para {} cuotas", creada.getId(), total, cuotas.size());
+            return Optional.ofNullable(creada.getId());
+        } catch (Exception e) {
+            LOGGER.error("No se pudo crear la factura tras el pago: {}", e.getMessage(), e);
+            return Optional.empty();
         }
     }
 

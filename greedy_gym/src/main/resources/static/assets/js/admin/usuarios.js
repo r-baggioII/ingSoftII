@@ -40,7 +40,6 @@
     registros: [],
     editingId: null,
     selectedUsuarioId: null,
-    socios: [],
     empleados: []
   };
 
@@ -51,21 +50,37 @@
     searchInput: document.getElementById('usuario-search'),
     refreshBtn: document.getElementById('usuario-refresh'),
     tableBody: document.getElementById('usuario-table-body'),
+    rol: document.querySelector("select[name='rol']"),
     tipoVinculo: document.querySelector("select[name='tipoVinculo']"),
-    vinculoSocioWrap: document.getElementById('vinculo-socio'),
+    tipoVinculoGroup: document.getElementById('grupo-vinculo'),
+    datosSocioWrap: document.getElementById('datos-socio'),
     vinculoEmpleadoWrap: document.getElementById('vinculo-empleado'),
-    socioSelect: document.querySelector("select[name='socioId']"),
-    empleadoSelect: document.querySelector("select[name='empleadoId']")
+    empleadoSelect: document.querySelector("select[name='empleadoId']"),
+    socioNuevo: {
+      nombre: document.querySelector("input[name='socioNombre']"),
+      apellido: document.querySelector("input[name='socioApellido']"),
+      fechaNacimiento: document.querySelector("input[name='socioFechaNacimiento']"),
+      numeroSocio: document.querySelector("input[name='socioNumero']"),
+      tipoDocumento: document.querySelector("select[name='socioTipoDocumento']"),
+      numeroDocumento: document.querySelector("input[name='socioNumeroDocumento']"),
+      telefono: document.querySelector("input[name='socioTelefono']"),
+      correo: document.querySelector("input[name='socioCorreo']")
+    }
   };
 
   // --- init ---
   document.addEventListener('DOMContentLoaded', () => {
     attachEvents();
     loadVinculoOptions();
+    onRolChange();
+    onTipoVinculoChange();
     listar();
   });
 
   function attachEvents(){
+    if (dom.rol) {
+      dom.rol.addEventListener('change', onRolChange);
+    }
     if (dom.tipoVinculo) {
       dom.tipoVinculo.addEventListener('change', onTipoVinculoChange);
     }
@@ -78,13 +93,8 @@
 
   async function loadVinculoOptions(){
     try {
-      const [socios, empleados] = await Promise.all([
-        requestJson(buildUrl('/api/v1/socios/activos')).catch(()=>[]),
-        requestJson(buildUrl('/api/v1/empleados/activos')).catch(()=>[])
-      ]);
-      state.socios = Array.isArray(socios)? socios : [];
+      const empleados = await requestJson(buildUrl('/api/v1/empleados/activos')).catch(()=>[]);
       state.empleados = Array.isArray(empleados)? empleados : [];
-      fillSelect(dom.socioSelect, state.socios.map(s=>({value: s.id, label: `${s.nombre||''} ${s.apellido||''} - ${s.numeroDocumento||''}`.trim()})));
       fillSelect(dom.empleadoSelect, state.empleados.map(e=>({value: e.id, label: `${e.nombre||''} ${e.apellido||''} - ${e.numeroDocumento||''}`.trim()})));
     } catch(e){
       console.warn('No se pudieron cargar opciones de vínculo', e);
@@ -108,10 +118,26 @@
     select.appendChild(frag);
   }
 
+  function onRolChange(){
+    const rol = dom.rol ? dom.rol.value : 'NINGUNO';
+    const esSocio = rol === 'SOCIO';
+    toggle(dom.datosSocioWrap, esSocio);
+    toggle(dom.tipoVinculoGroup, !esSocio);
+    if (dom.tipoVinculo) {
+      if (esSocio) {
+        dom.tipoVinculo.value = 'NINGUNO';
+        dom.tipoVinculo.setAttribute('disabled', 'disabled');
+      } else {
+        dom.tipoVinculo.removeAttribute('disabled');
+        dom.tipoVinculo.value = 'NINGUNO';
+      }
+      onTipoVinculoChange();
+    }
+  }
+
   function onTipoVinculoChange(){
-    const v = dom.tipoVinculo.value;
-    toggle(dom.vinculoSocioWrap, v === 'SOCIO');
-    toggle(dom.vinculoEmpleadoWrap, v === 'EMPLEADO');
+    const v = dom.tipoVinculo ? dom.tipoVinculo.value : 'NINGUNO';
+    toggle(dom.vinculoEmpleadoWrap, v === 'EMPLEADO_EXISTENTE');
   }
   function toggle(el, show){ if(!el) return; el.classList[show?'remove':'add']('d-none'); }
 
@@ -162,15 +188,18 @@
     dom.form.nombreUsuario.value = item.nombreUsuario || '';
     dom.form.clave.value = '';
     dom.form.rol.value = item.rol || 'SOCIO';
-    // No inferimos vínculo actual (se maneja desde persona)
-    if(dom.tipoVinculo){ dom.tipoVinculo.value = 'NINGUNO'; onTipoVinculoChange(); }
+    if(dom.tipoVinculo){ dom.tipoVinculo.value = 'NINGUNO'; }
+    onRolChange();
+    clearSocioNuevo();
   }
 
   function resetForm(){
     state.editingId = null;
     if(!dom.form) return;
     dom.form.reset();
-    if(dom.tipoVinculo){ dom.tipoVinculo.value = 'NINGUNO'; onTipoVinculoChange(); }
+    if(dom.tipoVinculo){ dom.tipoVinculo.value = 'NINGUNO'; }
+    onRolChange();
+    clearSocioNuevo();
   }
 
   async function onFormSubmit(e){
@@ -179,24 +208,30 @@
     const payload = {
       nombreUsuario: f.nombreUsuario.value.trim(),
       clave: f.clave.value.trim(),
-      rol: f.rol.value
+      rol: f.rol.value,
+      socioId: null,
+      socio: null,
+      empleadoId: null
     };
+    const tipoVinculo = dom.tipoVinculo ? dom.tipoVinculo.value : 'NINGUNO';
     try {
+      if(payload.rol === 'SOCIO'){
+        const datosSocio = collectSocioNuevo();
+        if(!datosSocio){
+          alert('Completa todos los datos obligatorios del socio.');
+          return;
+        }
+        payload.socio = datosSocio;
+      } else if(tipoVinculo === 'EMPLEADO_EXISTENTE' && f.empleadoId.value){
+        payload.empleadoId = f.empleadoId.value;
+      }
+
       let createdOrId = state.editingId;
       if(state.editingId){
         await sendJson(buildUrl(`/api/usuarios/${state.editingId}`), 'PUT', payload);
       } else {
         const created = await sendJson(buildUrl('/api/usuarios'), 'POST', payload);
         createdOrId = created?.id;
-      }
-      // Vínculo opcional
-      if(createdOrId && dom.tipoVinculo){
-        const tipo = f.tipoVinculo.value;
-        if(tipo === 'SOCIO' && f.socioId.value){
-          await sendJson(buildUrl(`/api/v1/socios/${f.socioId.value}/usuario`), 'POST', { usuarioId: createdOrId });
-        } else if(tipo === 'EMPLEADO' && f.empleadoId.value){
-          await sendJson(buildUrl(`/api/v1/empleados/${f.empleadoId.value}/usuario`), 'POST', { usuarioId: createdOrId });
-        }
       }
       await listar();
       resetForm();
@@ -218,5 +253,41 @@
 
   function escapeHtml(s){
     return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+  }
+
+  function collectSocioNuevo(){
+    const campos = dom.socioNuevo;
+    if(!campos) return null;
+    const nombre = campos.nombre?.value.trim();
+    const apellido = campos.apellido?.value.trim();
+    const fechaNacimiento = campos.fechaNacimiento?.value;
+    const tipoDocumento = campos.tipoDocumento?.value;
+    const numeroDocumento = campos.numeroDocumento?.value.trim();
+    const telefono = campos.telefono?.value.trim();
+    const correo = campos.correo?.value.trim();
+    if(!nombre || !apellido || !fechaNacimiento || !tipoDocumento || !numeroDocumento || !telefono || !correo){
+      return null;
+    }
+    const numeroSocioVal = campos.numeroSocio?.value;
+    return {
+      nombre,
+      apellido,
+      fechaNacimiento,
+      tipoDocumento,
+      numeroDocumento,
+      telefono,
+      correoElectronico: correo,
+      numeroSocio: numeroSocioVal ? Number(numeroSocioVal) : null
+    };
+  }
+
+  function clearSocioNuevo(){
+    const campos = dom.socioNuevo;
+    if(!campos) return;
+    Object.values(campos).forEach(input => {
+      if(!input) return;
+      input.value = '';
+    });
+    if(campos.tipoDocumento) campos.tipoDocumento.value = '';
   }
 })();

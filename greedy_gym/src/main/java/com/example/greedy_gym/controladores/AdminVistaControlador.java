@@ -34,7 +34,7 @@ public class AdminVistaControlador {
     public String adminSocios(HttpSession session, Model model) {
         if (!verificarSesion(session)) return "redirect:/login";
         withUser(session, model);
-        return "admin/socios";
+        return "redirect:/admin/usuarios";
     }
 
     @GetMapping("/admin/empleados")

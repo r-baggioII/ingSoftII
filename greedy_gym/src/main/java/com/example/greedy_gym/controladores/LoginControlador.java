@@ -92,7 +92,7 @@ public class LoginControlador {
         }
         Usuario usuario = (Usuario) session.getAttribute("usuario");
         model.addAttribute("usuario", usuario);
-        socioRepositorio.findByUsuarioIdAndEliminadoFalse(usuario.getId())
+        socioRepositorio.findByUsuario_IdAndEliminadoFalse(usuario.getId())
                 .ifPresent(socio -> model.addAttribute("socio", socio));
         Object mensajePago = session.getAttribute("mensajePago");
         if (mensajePago != null) {

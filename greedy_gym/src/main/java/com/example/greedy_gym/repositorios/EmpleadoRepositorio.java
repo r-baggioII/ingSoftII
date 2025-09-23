@@ -13,8 +13,9 @@ public interface EmpleadoRepositorio extends JpaRepository<Empleado, String> {
 
     Optional<Empleado> findByCorreoElectronicoAndEliminadoFalse(String correoElectronico);
 
+    Optional<Empleado> findByUsuario_IdAndEliminadoFalse(String usuarioId);
+
     List<Empleado> findAllByOrderByApellidoAscNombreAsc();
 
     List<Empleado> findByEliminadoFalseOrderByApellidoAscNombreAsc();
 }
-

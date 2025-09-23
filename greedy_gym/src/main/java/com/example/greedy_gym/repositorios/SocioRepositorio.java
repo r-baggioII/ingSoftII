@@ -16,7 +16,7 @@ public interface SocioRepositorio extends JpaRepository<Socio, String> {
 
     Optional<Socio> findByNumeroSocioAndEliminadoFalse(Long numeroSocio);
 
-    Optional<Socio> findByUsuarioIdAndEliminadoFalse(String usuarioId);
+    Optional<Socio> findByUsuario_IdAndEliminadoFalse(String usuarioId);
 
     List<Socio> findAllByOrderByApellidoAscNombreAsc();
 

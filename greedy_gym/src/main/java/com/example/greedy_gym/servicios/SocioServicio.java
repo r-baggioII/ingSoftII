@@ -4,6 +4,7 @@ import com.example.greedy_gym.entidades.Socio;
 import com.example.greedy_gym.entidades.TipoDocumento;
 import com.example.greedy_gym.entidades.Usuario;
 import com.example.greedy_gym.repositorios.SocioRepositorio;
+import com.example.greedy_gym.repositorios.UsuarioRepositorio;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -19,6 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class SocioServicio {
 
     private final SocioRepositorio socioRepositorio;
+    private final UsuarioRepositorio usuarioRepositorio;
 
     public Socio crearSocio(Socio socio) {
         if (socio == null) {
@@ -30,22 +32,48 @@ public class SocioServicio {
         }
         return crearSocio(socio.getNombre(), socio.getApellido(), socio.getFechaNacimiento(),
                 socio.getTipoDocumento(), socio.getNumeroDocumento(), socio.getTelefono(),
-                socio.getCorreoElectronico(), numeroSocio);
+                socio.getCorreoElectronico(), numeroSocio, socio.getUsuario());
+    }
+
+    public Socio crearSocioConUsuario(Socio socio, Usuario usuario) {
+        if (socio == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Los datos del socio son obligatorios");
+        }
+        if (usuario == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El usuario es obligatorio");
+        }
+        socio.setUsuario(usuario);
+        return crearSocio(socio);
     }
 
     public Socio crearSocio(String nombre, String apellido, LocalDate fechaNacimiento,
             TipoDocumento tipoDocumento, String numeroDocumento, String telefono,
-            String correoElectronico, Long numeroSocio) {
+            String correoElectronico, Long numeroSocio, Usuario usuario) {
         if (numeroSocio == null) {
             numeroSocio = siguienteNumeroSocio();
         }
         validar(nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento,
                 telefono, correoElectronico, numeroSocio);
+        if (usuario != null) {
+            socioRepositorio.findByUsuario_IdAndEliminadoFalse(usuario.getId())
+                    .ifPresent(existing -> {
+                        throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                "El usuario ya está asociado a otro socio activo");
+                    });
+        }
         Socio socio = new Socio();
         aplicarDatos(socio, nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento,
                 telefono, correoElectronico, numeroSocio);
+        socio.setUsuario(usuario);
         socio.setEliminado(false);
         return socioRepositorio.save(socio);
+    }
+
+    public Socio crearSocio(String nombre, String apellido, LocalDate fechaNacimiento,
+            TipoDocumento tipoDocumento, String numeroDocumento, String telefono,
+            String correoElectronico, Long numeroSocio) {
+        return crearSocio(nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento,
+                telefono, correoElectronico, numeroSocio, null);
     }
 
     public Socio modificarSocio(String id, Socio cambios) {
@@ -99,7 +127,17 @@ public class SocioServicio {
         }
         Socio socio = socioRepositorio.findByIdAndEliminadoFalse(socioId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Socio no encontrado"));
-        socio.setUsuarioId(usuarioId);
+        Usuario usuario = usuarioRepositorio.findByIdAndEliminadoFalse(usuarioId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        socioRepositorio.findByUsuario_IdAndEliminadoFalse(usuarioId)
+                .filter(encontrado -> !Objects.equals(encontrado.getId(), socioId))
+                .ifPresent(encontrado -> {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT,
+                            "El usuario ya está asociado a otro socio activo");
+                });
+
+        socio.setUsuario(usuario);
         return socioRepositorio.save(socio);
     }
 
@@ -111,7 +149,14 @@ public class SocioServicio {
         if (usuario == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El usuario es obligatorio");
         }
-        asociarSocioUsuario(socio.getId(), usuario.getId());
+        socioRepositorio.findByUsuario_IdAndEliminadoFalse(usuario.getId())
+                .filter(encontrado -> !Objects.equals(encontrado.getId(), socio.getId()))
+                .ifPresent(encontrado -> {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT,
+                            "El usuario ya está asociado a otro socio activo");
+                });
+        socio.setUsuario(usuario);
+        socioRepositorio.save(socio);
     }
 
     // Método de validación según el diagrama de clases - sobrecarga con long en lugar de Long

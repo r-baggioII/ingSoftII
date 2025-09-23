@@ -57,21 +57,53 @@
                 </select>
               </div>
 
-              <div class="mb-3">
+              <div class="mb-3" id="grupo-vinculo">
                 <label class="panel-label">Vincular con</label>
                 <select class="form-select panel-control" name="tipoVinculo">
                   <option value="NINGUNO">Ninguno</option>
-                  <option value="SOCIO">Socio existente</option>
-                  <option value="EMPLEADO">Empleado existente</option>
+                  <option value="EMPLEADO_EXISTENTE">Empleado existente</option>
                 </select>
               </div>
 
-              <div class="mb-3 d-none" id="vinculo-socio">
-                <label class="form-label">Seleccionar Socio</label>
-                <!-- JS: llenar dropdown con socios activos vía /api/v1/socios -->
-                <select class="form-select panel-control" name="socioId">
-                  <option value="">Seleccione un socio...</option>
-                </select>
+              <div class="mb-3 d-none" id="datos-socio">
+                <div class="row g-2">
+                  <div class="col-md-6">
+                    <label class="form-label">Nombre</label>
+                    <input type="text" class="form-control panel-control" name="socioNombre">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Apellido</label>
+                    <input type="text" class="form-control panel-control" name="socioApellido">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Fecha de nacimiento</label>
+                    <input type="date" class="form-control panel-control" name="socioFechaNacimiento">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Número de socio (opcional)</label>
+                    <input type="number" class="form-control panel-control" name="socioNumero">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Tipo de documento</label>
+                    <select class="form-select panel-control" name="socioTipoDocumento">
+                      <option value="">Seleccione...</option>
+                      <option th:each="tipo : ${T(com.example.greedy_gym.entidades.TipoDocumento).values()}"
+                              th:value="${tipo}" th:text="${tipo}"></option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Número de documento</label>
+                    <input type="text" class="form-control panel-control" name="socioNumeroDocumento">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Teléfono</label>
+                    <input type="text" class="form-control panel-control" name="socioTelefono">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Correo electrónico</label>
+                    <input type="email" class="form-control panel-control" name="socioCorreo">
+                  </div>
+                </div>
               </div>
 
               <div class="mb-3 d-none" id="vinculo-empleado">
@@ -83,7 +115,7 @@
               </div>
 
               <div class="d-flex gap-2">
-                <!-- JS: POST /api/usuarios (payload: nombreUsuario, clave, rol). Si tipoVinculo=SOCIO/EMPLEADO, luego PUT en socio/empleado para setear usuarioId -->
+                <!-- JS: POST /api/usuarios incluyendo datos de socio/empleado según la selección -->
                 <button type="submit" class="btn main-button-panel">Guardar</button>
                 <button type="button" class="btn btn-outline-secondary" id="usuario-reset">Limpiar</button>
               </div>

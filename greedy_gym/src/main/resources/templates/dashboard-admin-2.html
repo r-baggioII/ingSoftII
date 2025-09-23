@@ -44,12 +44,7 @@
       <a class="card-tile" th:href="@{/admin/usuarios}">
         <i class="fa fa-users"></i>
         <h5>Gestión de Usuarios</h5>
-        <p>Crear, editar, borrar y vincular con Socios/Empleados</p>
-      </a>
-      <a class="card-tile" th:href="@{/admin/socios}">
-        <i class="fa fa-user"></i>
-        <h5>Socios</h5>
-        <p>Alta, edición, baja y vinculación con Usuario</p>
+        <p>Crear, editar y administrar cuentas (incluye datos de socios)</p>
       </a>
       <a class="card-tile" th:href="@{/admin/empleados}">
         <i class="fa fa-user-tie"></i>
@@ -207,16 +202,10 @@
         <div class="row">
             <div class="col-12">
                 <div class="module-grid">
-                    <a class="module-card" th:href="@{/panel/entidades(entity='usuarios')}">
+                    <a class="module-card" th:href="@{/admin/usuarios}">
                         <div class="icon"><i class="fa fa-users"></i></div>
                         <div class="title">Gestión de Usuarios</div>
-                        <div class="desc">Alta, consulta, modificación, baja y rol</div>
-                    </a>
-
-                    <a class="module-card" th:href="@{/panel/entidades(entity='socios')}">
-                        <div class="icon"><i class="fa fa-user"></i></div>
-                        <div class="title">Socios</div>
-                        <div class="desc">Administrar datos de socios</div>
+                        <div class="desc">Administra cuentas y datos de socios desde un único lugar</div>
                     </a>
 
                     <a class="module-card" th:href="@{/panel/entidades(entity='empleados')}">

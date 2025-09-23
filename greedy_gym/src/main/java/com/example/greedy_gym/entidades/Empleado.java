@@ -18,14 +18,12 @@ import lombok.Setter;
 @Entity
 @Table(name = "empleado", uniqueConstraints = {
         @UniqueConstraint(name = "uk_empleado_documento_activo", columnNames = {"numero_documento", "eliminado"}),
-        @UniqueConstraint(name = "uk_empleado_correo_activo", columnNames = {"correo_electronico", "eliminado"})
+        @UniqueConstraint(name = "uk_empleado_correo_activo", columnNames = {"correo_electronico", "eliminado"}),
+        @UniqueConstraint(name = "uk_empleado_usuario_activo", columnNames = {"usuario_id", "eliminado"})
 })
 public class Empleado extends Persona {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_empleado", nullable = false)
     private TipoEmpleado tipoEmpleado;
-
-    @Column(name = "usuario_id")
-    private String usuarioId;
 }

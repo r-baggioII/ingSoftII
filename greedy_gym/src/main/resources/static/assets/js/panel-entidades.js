@@ -307,79 +307,6 @@
         ].filter(Boolean).join(' ').toLowerCase();
       }
     },
-    socios: {
-      label: 'Socios',
-      description: 'Miembros del gimnasio.',
-      singular: 'socio',
-      createLabel: 'Nuevo socio',
-      searchPlaceholder: 'Buscar por nombre, apellido, DNI, correo electrónico o número de socio',
-      allowCreate: true,
-      allowUpdate: true,
-      allowDelete: true,
-      columns: [
-        { header: 'Nombre completo', value: item => `${(item?.nombre || '').trim()} ${(item?.apellido || '').trim()}`.trim() || '—' },
-        { header: 'Documento', value: item => `${item?.tipoDocumento || ''} ${item?.numeroDocumento || ''}`.trim() || '—' },
-        { header: 'Número de socio', value: item => item?.numeroSocio || '—' },
-        { header: 'Correo', value: item => item?.correoElectronico || '—' },
-        { header: 'Estado', value: item => item?.eliminado ? 'Dado de baja' : 'Activo' }
-      ],
-      formFields: [
-        { name: 'nombre', label: 'Nombre', type: 'text', required: true },
-        { name: 'apellido', label: 'Apellido', type: 'text', required: true },
-        { name: 'fechaNacimiento', label: 'Fecha de nacimiento', type: 'date', required: true },
-        { name: 'tipoDocumento', label: 'Tipo de documento', type: 'select', required: true, options: DOCUMENT_OPTIONS },
-        { name: 'numeroDocumento', label: 'Número de documento', type: 'text', required: true },
-        { name: 'telefono', label: 'Teléfono', type: 'text', required: true },
-        { name: 'correoElectronico', label: 'Correo electrónico', type: 'email', required: true }
-      ],
-      async list() {
-        return requestJson(buildUrl('/api/v1/socios'));
-      },
-      async create(payload) {
-        return sendJson(buildUrl('/api/v1/socios'), 'POST', payload);
-      },
-      async update(item, payload) {
-        return sendJson(buildUrl('/api/v1/socios/' + item.id), 'PUT', payload);
-      },
-      async remove(item) {
-        return requestJson(buildUrl('/api/v1/socios/' + item.id), { method: 'DELETE' });
-      },
-      prepareFormValues(item) {
-        return {
-          nombre: item?.nombre || '',
-          apellido: item?.apellido || '',
-          fechaNacimiento: item?.fechaNacimiento || '',
-          tipoDocumento: item?.tipoDocumento || DOCUMENT_OPTIONS[0].value,
-          numeroDocumento: item?.numeroDocumento || '',
-          telefono: item?.telefono || '',
-          correoElectronico: item?.correoElectronico || ''
-        };
-      },
-      toPayload(mode, values) {
-        return {
-          nombre: values.nombre ? values.nombre.trim() : '',
-          apellido: values.apellido ? values.apellido.trim() : '',
-          fechaNacimiento: values.fechaNacimiento,
-          tipoDocumento: values.tipoDocumento,
-          numeroDocumento: values.numeroDocumento ? values.numeroDocumento.trim() : '',
-          telefono: values.telefono ? values.telefono.trim() : '',
-          correoElectronico: values.correoElectronico ? values.correoElectronico.trim() : ''
-        };
-      },
-      isInactive(item) {
-        return !!item?.eliminado;
-      },
-      searchText(item) {
-        return [
-          item?.nombre,
-          item?.apellido,
-          item?.correoElectronico,
-          item?.telefono,
-          item?.numeroDocumento,
-          item?.numeroSocio?.toString()
-        ].filter(Boolean).join(' ').toLowerCase();
-      }
-    },
     cuotas: {
       label: 'Cuotas mensuales',
       description: 'Gestión de cuotas emitidas a cada socio.',
@@ -1120,7 +1047,8 @@
     // Deep-link support: read ?entity=... and optional &subtype=...
     try {
       const url = new URL(window.location.href);
-      const entityParam = url.searchParams.get('entity');
+      const rawEntityParam = url.searchParams.get('entity');
+      const entityParam = resolveEntityKey(rawEntityParam);
       const subtypeParam = url.searchParams.get('subtype');
       if (entityParam && ENTITIES[entityParam]) {
         if (entityParam === 'direcciones' && subtypeParam && ENTITIES.direcciones?.subTypes?.[subtypeParam]) {
@@ -1170,13 +1098,21 @@
     loadEntity(entity);
   }
 
+  function resolveEntityKey(entityKey) {
+    if (entityKey === 'socios') {
+      return 'usuarios';
+    }
+    return entityKey;
+  }
+
   function loadEntity(entityKey) {
+    const resolvedKey = resolveEntityKey(entityKey);
     console.log('[Panel entidades] Loading entity:', entityKey);
-    if (!ENTITIES[entityKey]) {
-      console.error('[Panel entidades] Entity not found in ENTITIES:', entityKey, Object.keys(ENTITIES));
+    if (!ENTITIES[resolvedKey]) {
+      console.error('[Panel entidades] Entity not found in ENTITIES:', resolvedKey, Object.keys(ENTITIES));
       return;
     }
-    state.entity = entityKey;
+    state.entity = resolvedKey;
     state.records = [];
     state.search = '';
     state.status = 'activos';

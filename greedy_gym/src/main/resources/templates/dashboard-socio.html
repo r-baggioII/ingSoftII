@@ -519,6 +519,7 @@
 <script th:inline="javascript">
 const mercadoPagoHabilitado = /*[[${mercadoPagoHabilitado}]]*/ false;
 const mercadoPagoPublicKey = /*[[${mercadoPagoPublicKey}]]*/ '';
+const appBaseUrl = /*[[@{/}]]*/ '';
 let cuotasPendientes = [];
 let cuotasSeleccionadas = new Set();
 const formatoMoneda = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
@@ -534,8 +535,18 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarCuotasPendientes();
 });
 
+function withBase(path) {
+    if (!path) {
+        return appBaseUrl;
+    }
+    const normalized = path.startsWith('/') ? path : `/${path}`;
+    return appBaseUrl.endsWith('/')
+        ? `${appBaseUrl.slice(0, -1)}${normalized}`
+        : `${appBaseUrl}${normalized}`;
+}
+
 function cargarCuotasPendientes() {
-    fetch('/api/socio/pagos/cuotas-pendientes')
+    fetch(withBase('api/socio/pagos/cuotas-pendientes'))
         .then(response => {
             if (!response.ok) {
                 throw new Error('No se pudieron obtener las cuotas pendientes');
@@ -710,7 +721,7 @@ function pagarCuotas(ids) {
     bloquearBotonesPago(true);
     mostrarMensajeDinamico('Generando enlace de pago seguro...', 'info');
 
-    fetch('/api/socio/pagos/preferencia', {
+    fetch(withBase('api/socio/pagos/preferencia'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(ids)

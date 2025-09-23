@@ -55,7 +55,7 @@ public class CuotaMensual {
     @Column(name = "eliminado", nullable = false)
     private boolean eliminado = false;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "valor_cuota_id", nullable = false, updatable = false)
     private ValorCuota valorCuota;
 

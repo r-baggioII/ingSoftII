@@ -51,16 +51,28 @@ public class MercadoPagoDemoControlador {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MercadoPagoDemoControlador.class);
 
+    private static final String DEFAULT_ACCESS_TOKEN = "APP_USR-1161916719081917-092219-7d27c8faacdc9c984b9bd4539830b21b-2708507674";
+
     private final String accessToken;
+    private final String successBackUrl;
+    private final String pendingBackUrl;
+    private final String failureBackUrl;
     private final CuotaMensualRepositorio cuotaMensualRepositorio;
     private final FacturaServicio facturaServicio;
     private final FormaDePagoRepositorio formaDePagoRepositorio;
 
     public MercadoPagoDemoControlador(@Value("${mercadopago.access-token:}") String accessToken,
+                                      @Value("${mercadopago.back-url.success:https://roily-hydraulic-renna.ngrok-free.dev/greedy_gym/api/socio/pagos/success}") String successBackUrl,
+                                      @Value("${mercadopago.back-url.pending:https://roily-hydraulic-renna.ngrok-free.dev/greedy_gym/api/socio/pagos/pending}") String pendingBackUrl,
+                                      @Value("${mercadopago.back-url.failure:https://roily-hydraulic-renna.ngrok-free.dev/greedy_gym/api/socio/pagos/failure}") String failureBackUrl,
                                       CuotaMensualRepositorio cuotaMensualRepositorio,
                                       FacturaServicio facturaServicio,
                                       FormaDePagoRepositorio formaDePagoRepositorio) {
-        this.accessToken = "APP_USR-1161916719081917-092219-7d27c8faacdc9c984b9bd4539830b21b-2708507674";
+        String tokenNormalizado = accessToken != null ? accessToken.trim() : "";
+        this.accessToken = tokenNormalizado.isEmpty() ? DEFAULT_ACCESS_TOKEN : tokenNormalizado;
+        this.successBackUrl = normalizarUrl(successBackUrl, "success");
+        this.pendingBackUrl = normalizarUrl(pendingBackUrl, "pending");
+        this.failureBackUrl = normalizarUrl(failureBackUrl, "failure");
         this.cuotaMensualRepositorio = cuotaMensualRepositorio;
         this.facturaServicio = facturaServicio;
         this.formaDePagoRepositorio = formaDePagoRepositorio;
@@ -111,10 +123,10 @@ public class MercadoPagoDemoControlador {
         LOGGER.info("Items enviados a MP: {}", items.size());
 
         PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
-            .success("https://roily-hydraulic-renna.ngrok-free.dev/greedy_gym/panel/entidades")
-            .pending("https://roily-hydraulic-renna.ngrok-free.dev/greedy_gym/panel/entidades")
-            .failure("https://roily-hydraulic-renna.ngrok-free.dev/greedy_gym/panel/entidades")
-            .build();
+                .success(successBackUrl)
+                .pending(pendingBackUrl)
+                .failure(failureBackUrl)
+                .build();
 
 
         PreferenceRequest preferenceRequest = PreferenceRequest.builder()
@@ -172,7 +184,7 @@ public class MercadoPagoDemoControlador {
             facturaId.ifPresent(id -> session.setAttribute("ultimaFacturaId", id));
         }
         session.setAttribute("mensajePago", "¡Gracias! Tu pago fue procesado correctamente.");
-        return html("Pago Exitoso", "¡Gracias! Tu pago fue procesado correctamente.", "/dashboard/socio");
+        return html("Pago Exitoso", "¡Gracias! Tu pago fue procesado correctamente.", "/greedy_gym/dashboard/socio");
     }
 
     @GetMapping("/pending")
@@ -313,5 +325,13 @@ public class MercadoPagoDemoControlador {
             return token;
         }
         return token.substring(0, 6) + "..." + token.substring(token.length() - 4);
+    }
+
+    private String normalizarUrl(String url, String etiqueta) {
+        String valor = url != null ? url.trim() : "";
+        if (valor.isEmpty()) {
+            throw new IllegalStateException("La URL de Mercado Pago para '" + etiqueta + "' no puede estar vacía");
+        }
+        return valor;
     }
 }

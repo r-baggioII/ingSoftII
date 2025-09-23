@@ -46,11 +46,6 @@
         <h5>Gestión de Usuarios</h5>
         <p>Crear, editar y administrar cuentas (incluye datos de socios)</p>
       </a>
-      <a class="card-tile" th:href="@{/admin/empleados}">
-        <i class="fa fa-user-tie"></i>
-        <h5>Empleados</h5>
-        <p>Gestionar colaboradores y su usuario del sistema</p>
-      </a>
       <a class="card-tile" th:href="@{/admin/empresas}">
         <i class="fa fa-building"></i>
         <h5>Empresas</h5>
@@ -206,12 +201,6 @@
                         <div class="icon"><i class="fa fa-users"></i></div>
                         <div class="title">Gestión de Usuarios</div>
                         <div class="desc">Administra cuentas y datos de socios desde un único lugar</div>
-                    </a>
-
-                    <a class="module-card" th:href="@{/panel/entidades(entity='empleados')}">
-                        <div class="icon"><i class="fa fa-user-tie"></i></div>
-                        <div class="title">Empleados</div>
-                        <div class="desc">Alta, consulta, modificación y baja</div>
                     </a>
 
                     <a class="module-card" th:href="@{/panel/entidades(entity='empresas')}">

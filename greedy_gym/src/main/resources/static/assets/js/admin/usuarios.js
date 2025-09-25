@@ -134,6 +134,8 @@
       numeroDocumento: document.querySelector("input[name='socioNumeroDocumento']"),
       telefono: document.querySelector("input[name='socioTelefono']"),
       correo: document.querySelector("input[name='socioCorreo']"),
+      // FALTABA: referencia al select de dirección para socios
+      direccionId: document.querySelector("select[name='socioDireccionId']"),
       sucursalId: document.querySelector("select[name='socioSucursalId']")
     },
     empleadoNuevo: {
@@ -497,6 +499,15 @@
       return null;
     }
     
+    // Permitir crear nueva dirección para socio igual que empleado
+    if (direccionId === '__CREATE_NEW__') {
+      const nuevaDireccion = await createNewDireccion(dom.nuevaDireccion);
+      if(!nuevaDireccion) return null; // usuario canceló/errores
+      direccionId = nuevaDireccion.id;
+      setSelectValue(dom.socioNuevo?.direccionId, direccionId, formatDireccion(nuevaDireccion));
+      handleDireccionSelection(dom.socioNuevo?.direccionId, dom.nuevaDireccionForm);
+    }
+
     const numeroSocioVal = campos.numeroSocio?.value;
     return {
       nombre,

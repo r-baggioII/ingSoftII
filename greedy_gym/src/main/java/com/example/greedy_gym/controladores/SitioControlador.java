@@ -13,6 +13,7 @@ public class SitioControlador {
 
     @GetMapping("/panel/entidades")
     public String panelEntidades() {
-        return "panel-entidades";
+        // Panel de entidades fue deprecado. Redirigimos a la vista principal de direcciones.
+        return "redirect:/admin/direcciones";
     }
 }

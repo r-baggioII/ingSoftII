@@ -57,7 +57,7 @@
                     <!-- ***** Menu Start ***** -->
                     <ul class="nav">
                         <li><a th:href="@{/dashboard/admin2}" class="active">Dashboard</a></li>
-                        <li><a th:href="@{/panel/entidades}">Panel de datos</a></li>
+                        <li><a th:href="@{/admin/direcciones}">Direcciones</a></li>
                         <li><a th:href="@{/logout}">Cerrar Sesión</a></li>
                     </ul>
                     <a class='menu-trigger'>
@@ -121,31 +121,31 @@
                         <div class="desc">Administra cuentas y datos de socios desde un único lugar</div>
                     </a>
 
-                    <a class="module-card" th:href="@{/panel/entidades(entity='empresas')}">
+                    <a class="module-card" th:href="@{/admin/empresas}">
                         <div class="icon"><i class="fa fa-building"></i></div>
                         <div class="title">Empresas</div>
                         <div class="desc">Gestión de empresas</div>
                     </a>
 
-                    <a class="module-card" th:href="@{/panel/entidades(entity='sucursales')}">
+                    <a class="module-card" th:href="@{/admin/sucursales}">
                         <div class="icon"><i class="fa fa-store"></i></div>
                         <div class="title">Sucursales</div>
                         <div class="desc">Asociadas a empresa y dirección existente</div>
                     </a>
 
-                    <a class="module-card" th:href="@{/panel/entidades(entity='direcciones')}">
+                    <a class="module-card" th:href="@{/admin/direcciones}">
                         <div class="icon"><i class="fa fa-map-marked"></i></div>
                         <div class="title">Gestión Geográfica</div>
                         <div class="desc">Países, provincias, departamentos, localidades y direcciones</div>
                     </a>
 
-                    <a class="module-card" th:href="@{/panel/entidades(entity='cuotas')}">
+                    <a class="module-card" th:href="@{/admin/cuotas}">
                         <div class="icon"><i class="fa fa-money"></i></div>
                         <div class="title">Cuotas mensuales</div>
                         <div class="desc">Crear, listar y actualizar estado</div>
                     </a>
 
-                    <a class="module-card" th:href="@{/panel/entidades(entity='valorCuotas')}">
+                    <a class="module-card" th:href="@{/admin/valor-cuotas}">
                         <div class="icon"><i class="fa fa-dollar"></i></div>
                         <div class="title">Valores de cuota</div>
                         <div class="desc">Definición del valor vigente e histórico</div>

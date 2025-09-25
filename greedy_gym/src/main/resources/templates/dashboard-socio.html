@@ -568,6 +568,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
     cargarCuotasPendientes();
+    // Si el usuario vuelve a esta pestaña (por ejemplo después de pagar en Mercado Pago en otra), recargamos las cuotas
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            cargarCuotasPendientes();
+        }
+    });
 });
 
 function withBase(path) {
@@ -589,7 +595,9 @@ function cargarCuotasPendientes() {
             return response.json();
         })
         .then(data => {
-            cuotasPendientes = Array.isArray(data) ? data : [];
+            // Tomamos sólo las cuotas que NO estén pagadas para que el total adeudado sea correcto.
+            const todas = Array.isArray(data) ? data : [];
+            cuotasPendientes = todas.filter(c => (c.estado || '').toUpperCase() !== 'PAGADA');
             if (cuotasPendientes.length === 0) {
                 mostrarMensajeDinamico('No registras cuotas pendientes de pago. ¡Felicitaciones!', 'success');
             }

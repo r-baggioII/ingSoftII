@@ -2,11 +2,9 @@ package com.example.greedy_gym.servicios;
 
 import com.example.greedy_gym.entidades.CuotaMensual;
 import com.example.greedy_gym.entidades.DetalleFactura;
-import com.example.greedy_gym.entidades.EstadoCuota;
 import com.example.greedy_gym.entidades.EstadoFactura;
 import com.example.greedy_gym.entidades.Factura;
 import com.example.greedy_gym.entidades.FormaDePago;
-import com.example.greedy_gym.entidades.TipoPago;
 import com.example.greedy_gym.repositorios.CuotaMensualRepositorio;
 import com.example.greedy_gym.repositorios.DetalleFacturaRepositorio;
 import com.example.greedy_gym.repositorios.FacturaRepositorio;
@@ -72,15 +70,7 @@ public class FacturaServicio {
         List<DetalleFactura> detalles = construirDetalles(factura.getDetalles(), nueva);
         nueva.setDetalles(new ArrayList<>(detalles));
 
-        Factura facturaGuardada = facturaRepositorio.save(nueva);
-
-        // Marcar cuotas como pagadas si la factura está pagada y es pago en efectivo
-        if (EstadoFactura.PAGADA.equals(facturaGuardada.getEstado()) && 
-            TipoPago.EFECTIVO.equals(formaDePago.getTipoPago())) {
-            marcarCuotasComoPagadas(detalles);
-        }
-
-        return facturaGuardada;
+        return facturaRepositorio.save(nueva);
     }
 
     public Factura actualizar(String id, Factura datosFactura) {
@@ -228,16 +218,6 @@ public class FacturaServicio {
         if (detalle == null || detalle.getCuotaMensual() == null || detalle.getCuotaMensual().getId() == null
                 || detalle.getCuotaMensual().getId().isBlank()) {
             throw new ValidationException("El detalle debe contener un id de cuota mensual");
-        }
-    }
-
-    private void marcarCuotasComoPagadas(List<DetalleFactura> detalles) {
-        for (DetalleFactura detalle : detalles) {
-            CuotaMensual cuota = detalle.getCuotaMensual();
-            if (cuota != null && !EstadoCuota.PAGADA.equals(cuota.getEstado())) {
-                cuota.setEstado(EstadoCuota.PAGADA);
-                cuotaMensualRepositorio.save(cuota);
-            }
         }
     }
 

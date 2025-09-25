@@ -5,4 +5,3 @@ public enum TipoMensaje {
     CUMPLEANOS,
     OTROS
 }
-

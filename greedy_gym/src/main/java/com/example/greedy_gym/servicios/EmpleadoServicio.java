@@ -1,10 +1,14 @@
 package com.example.greedy_gym.servicios;
 
+import com.example.greedy_gym.entidades.Direccion;
 import com.example.greedy_gym.entidades.Empleado;
+import com.example.greedy_gym.entidades.Sucursal;
 import com.example.greedy_gym.entidades.TipoDocumento;
 import com.example.greedy_gym.entidades.TipoEmpleado;
 import com.example.greedy_gym.entidades.Usuario;
+import com.example.greedy_gym.repositorios.DireccionRepositorio;
 import com.example.greedy_gym.repositorios.EmpleadoRepositorio;
+import com.example.greedy_gym.repositorios.SucursalRepositorio;
 import com.example.greedy_gym.repositorios.UsuarioRepositorio;
 import java.time.LocalDate;
 import java.util.List;
@@ -22,19 +26,30 @@ public class EmpleadoServicio {
 
     private final EmpleadoRepositorio empleadoRepositorio;
     private final UsuarioRepositorio usuarioRepositorio;
+    private final DireccionRepositorio direccionRepositorio;
+    private final SucursalRepositorio sucursalRepositorio;
 
     public Empleado crearEmpleado(Empleado empleado) {
         if (empleado == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Los datos del empleado son obligatorios");
         }
+        String direccionId = empleado.getDireccion() != null ? empleado.getDireccion().getId() : null;
+        String sucursalId = empleado.getSucursal() != null ? empleado.getSucursal().getId() : null;
         return crearEmpleado(empleado.getNombre(), empleado.getApellido(), empleado.getFechaNacimiento(),
                 empleado.getTipoDocumento(), empleado.getNumeroDocumento(), empleado.getTelefono(),
-                empleado.getCorreoElectronico(), empleado.getTipoEmpleado(), empleado.getUsuario());
+                empleado.getCorreoElectronico(), empleado.getTipoEmpleado(), empleado.getUsuario(), direccionId, sucursalId);
     }
 
     public Empleado crearEmpleado(String nombre, String apellido, LocalDate fechaNacimiento,
             TipoDocumento tipoDocumento, String numeroDocumento, String telefono,
             String correoElectronico, TipoEmpleado tipoEmpleado, Usuario usuario) {
+        return crearEmpleado(nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento,
+                telefono, correoElectronico, tipoEmpleado, usuario, null, null);
+    }
+
+    public Empleado crearEmpleado(String nombre, String apellido, LocalDate fechaNacimiento,
+            TipoDocumento tipoDocumento, String numeroDocumento, String telefono,
+            String correoElectronico, TipoEmpleado tipoEmpleado, Usuario usuario, String direccionId, String sucursalId) {
         validar(nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento,
                 telefono, correoElectronico, tipoEmpleado, null);
         if (usuario != null) {
@@ -44,10 +59,25 @@ public class EmpleadoServicio {
                                 "El usuario ya está asociado a otro empleado activo");
                     });
         }
+        
+        Direccion direccion = null;
+        if (direccionId != null && !direccionId.trim().isEmpty()) {
+            direccion = direccionRepositorio.findByIdAndEliminadoFalse(direccionId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Dirección no encontrada"));
+        }
+        
+        Sucursal sucursal = null;
+        if (sucursalId != null && !sucursalId.trim().isEmpty()) {
+            sucursal = sucursalRepositorio.findByIdAndEliminadoFalse(sucursalId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sucursal no encontrada"));
+        }
+        
         Empleado empleado = new Empleado();
         aplicarDatos(empleado, nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento,
                 telefono, correoElectronico, tipoEmpleado);
         empleado.setUsuario(usuario);
+        empleado.setDireccion(direccion);
+        empleado.setSucursal(sucursal);
         empleado.setEliminado(false);
         return empleadoRepositorio.save(empleado);
     }
@@ -68,6 +98,20 @@ public class EmpleadoServicio {
         }
         empleado.setUsuario(usuario);
         return crearEmpleado(empleado);
+    }
+
+    public Empleado crearEmpleadoConUsuario(Empleado empleado, Usuario usuario, String direccionId, String sucursalId) {
+        if (empleado == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Los datos del empleado son obligatorios");
+        }
+        if (usuario == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El usuario es obligatorio");
+        }
+        String empleadoDireccionId = direccionId != null ? direccionId : (empleado.getDireccion() != null ? empleado.getDireccion().getId() : null);
+        String empleadoSucursalId = sucursalId != null ? sucursalId : (empleado.getSucursal() != null ? empleado.getSucursal().getId() : null);
+        return crearEmpleado(empleado.getNombre(), empleado.getApellido(), empleado.getFechaNacimiento(),
+                empleado.getTipoDocumento(), empleado.getNumeroDocumento(), empleado.getTelefono(),
+                empleado.getCorreoElectronico(), empleado.getTipoEmpleado(), usuario, empleadoDireccionId, empleadoSucursalId);
     }
 
     public Empleado modificarEmpleado(String id, Empleado cambios) {

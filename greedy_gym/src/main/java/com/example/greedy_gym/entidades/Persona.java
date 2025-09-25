@@ -54,6 +54,14 @@ public abstract class Persona {
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
+    @JoinColumn(name = "direccion_id")
+    private Direccion direccion;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sucursal_id")
+    private Sucursal sucursal;
+
     @PrePersist
     protected void prePersist() {
         if (this.id == null) {

@@ -7,6 +7,23 @@
 	//        $("#tabs").tabs();
 	//    });
 
+	// Initialize schedule filter on page load
+	$(document).ready(function() {
+		// Find the active filter and initialize the schedule table
+		var activeFilter = $('.schedule-filter li.active');
+		if (activeFilter.length) {
+			var tsfilter = activeFilter.data('tsfilter');
+			if (tsfilter && tsfilter !== 'all') {
+				$('.schedule-table').addClass('filtering');
+				$('.ts-item').each(function() {
+					if ($(this).data('tsmeta') == tsfilter) {
+						$(this).addClass('show');
+					}
+				});
+			}
+		}
+	});
+
 	$(window).scroll(function() {
 	  var scroll = $(window).scrollTop();
 	  var box = $('.header-text').height();

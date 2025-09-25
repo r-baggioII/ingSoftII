@@ -1,6 +1,8 @@
 package com.example.greedy_gym.servicios;
 
+import com.example.greedy_gym.entidades.Direccion;
 import com.example.greedy_gym.entidades.Socio;
+import com.example.greedy_gym.entidades.Sucursal;
 import com.example.greedy_gym.entidades.TipoDocumento;
 import com.example.greedy_gym.entidades.Usuario;
 import com.example.greedy_gym.repositorios.SocioRepositorio;
@@ -21,6 +23,8 @@ public class SocioServicio {
 
     private final SocioRepositorio socioRepositorio;
     private final UsuarioRepositorio usuarioRepositorio;
+    private final DireccionServicio direccionServicio;
+    private final SucursalServicio sucursalServicio;
 
     public Socio crearSocio(Socio socio) {
         if (socio == null) {
@@ -32,7 +36,8 @@ public class SocioServicio {
         }
         return crearSocio(socio.getNombre(), socio.getApellido(), socio.getFechaNacimiento(),
                 socio.getTipoDocumento(), socio.getNumeroDocumento(), socio.getTelefono(),
-                socio.getCorreoElectronico(), numeroSocio, socio.getUsuario());
+                socio.getCorreoElectronico(), numeroSocio, socio.getUsuario(), 
+                socio.getDireccion(), socio.getSucursal());
     }
 
     public Socio crearSocioConUsuario(Socio socio, Usuario usuario) {
@@ -46,9 +51,35 @@ public class SocioServicio {
         return crearSocio(socio);
     }
 
+    public Socio crearSocioConUsuario(Socio socio, Usuario usuario, String direccionId, String sucursalId) {
+        if (socio == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Los datos del socio son obligatorios");
+        }
+        if (usuario == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El usuario es obligatorio");
+        }
+        String socioDireccionId = direccionId != null ? direccionId : (socio.getDireccion() != null ? socio.getDireccion().getId() : null);
+        String socioSucursalId = sucursalId != null ? sucursalId : (socio.getSucursal() != null ? socio.getSucursal().getId() : null);
+        
+        Direccion direccionEntity = null;
+        Sucursal sucursalEntity = null;
+        
+        if (socioDireccionId != null) {
+            direccionEntity = direccionServicio.buscarDireccion(socioDireccionId);
+        }
+        if (socioSucursalId != null) {
+            sucursalEntity = sucursalServicio.buscarSucursal(socioSucursalId);
+        }
+        
+        return crearSocio(socio.getNombre(), socio.getApellido(), socio.getFechaNacimiento(),
+                socio.getTipoDocumento(), socio.getNumeroDocumento(), socio.getTelefono(),
+                socio.getCorreoElectronico(), socio.getNumeroSocio(), usuario, direccionEntity, sucursalEntity);
+    }
+
     public Socio crearSocio(String nombre, String apellido, LocalDate fechaNacimiento,
             TipoDocumento tipoDocumento, String numeroDocumento, String telefono,
-            String correoElectronico, Long numeroSocio, Usuario usuario) {
+            String correoElectronico, Long numeroSocio, Usuario usuario, 
+            Direccion direccion, Sucursal sucursal) {
         if (numeroSocio == null) {
             numeroSocio = siguienteNumeroSocio();
         }
@@ -65,6 +96,8 @@ public class SocioServicio {
         aplicarDatos(socio, nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento,
                 telefono, correoElectronico, numeroSocio);
         socio.setUsuario(usuario);
+        socio.setDireccion(direccion);
+        socio.setSucursal(sucursal);
         socio.setEliminado(false);
         return socioRepositorio.save(socio);
     }
@@ -73,7 +106,7 @@ public class SocioServicio {
             TipoDocumento tipoDocumento, String numeroDocumento, String telefono,
             String correoElectronico, Long numeroSocio) {
         return crearSocio(nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento,
-                telefono, correoElectronico, numeroSocio, null);
+                telefono, correoElectronico, numeroSocio, null, null, null);
     }
 
     public Socio modificarSocio(String id, Socio cambios) {
@@ -81,11 +114,13 @@ public class SocioServicio {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Los datos del socio son obligatorios");
         }
         return mdoificarSocio(id, cambios.getNombre(), cambios.getApellido(), cambios.getFechaNacimiento(),
-                cambios.getTipoDocumento(), cambios.getNumeroDocumento(), cambios.getNumeroSocio());
+                cambios.getTipoDocumento(), cambios.getNumeroDocumento(), cambios.getNumeroSocio(),
+                cambios.getDireccion(), cambios.getSucursal());
     }
 
     public Socio mdoificarSocio(String id, String nombre, String apellido, LocalDate fechaNacimiento,
-            TipoDocumento tipoDocumento, String numeroDocumento, Long numeroSocio) {
+            TipoDocumento tipoDocumento, String numeroDocumento, Long numeroSocio,
+            Direccion direccion, Sucursal sucursal) {
         Socio existente = socioRepositorio.findByIdAndEliminadoFalse(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Socio no encontrado"));
         if (numeroSocio == null) {
@@ -95,6 +130,8 @@ public class SocioServicio {
                 existente.getTelefono(), existente.getCorreoElectronico(), numeroSocio, id);
         aplicarDatos(existente, nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento,
                 existente.getTelefono(), existente.getCorreoElectronico(), numeroSocio);
+        existente.setDireccion(direccion);
+        existente.setSucursal(sucursal);
         return socioRepositorio.save(existente);
     }
 

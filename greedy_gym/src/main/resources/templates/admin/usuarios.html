@@ -95,6 +95,37 @@
                     <label class="form-label">Correo electrónico</label>
                     <input type="email" class="form-control panel-control" name="socioCorreo">
                   </div>
+                  <div class="col-md-6">
+                    <label class="panel-label">Dirección</label>
+                    <select class="form-select panel-control" name="socioDireccionId">
+                      <option value="">Seleccione una dirección...</option>
+                      <option value="__CREATE_NEW__">+ Crear nueva dirección</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Sucursal</label>
+                    <select class="form-select panel-control" name="socioSucursalId">
+                      <option value="">Seleccione una sucursal...</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="nueva-direccion-panel d-none" id="nueva-direccion-form">
+                <div class="card card-body">
+                  <h6 class="mb-3">Nueva Dirección</h6>
+                  <div class="row g-3">
+                    <div class="col-md-8"><input type="text" class="form-control panel-control" name="nuevaDireccionCalle" placeholder="Calle"></div>
+                    <div class="col-md-4"><input type="text" class="form-control panel-control" name="nuevaDireccionNumeracion" placeholder="Altura"></div>
+                    <div class="col-md-3"><select class="form-select panel-control" name="nuevaDireccionPais"><option value="">País</option></select></div>
+                    <div class="col-md-3"><select class="form-select panel-control" name="nuevaDireccionProvincia"><option value="">Provincia</option></select></div>
+                    <div class="col-md-3"><select class="form-select panel-control" name="nuevaDireccionDepartamento"><option value="">Departamento</option></select></div>
+                    <div class="col-md-3"><select class="form-select panel-control" name="nuevaDireccionLocalidad"><option value="">Localidad</option></select></div>
+                    <div class="col-md-4"><input type="text" class="form-control panel-control" name="nuevaDireccionBarrio" placeholder="Barrio"></div>
+                    <div class="col-md-4"><input type="text" class="form-control panel-control" name="nuevaDireccionManzana" placeholder="Manzana/Piso"></div>
+                    <div class="col-md-4"><input type="text" class="form-control panel-control" name="nuevaDireccionCasa" placeholder="Casa/Departamento"></div>
+                    <div class="col-12"><textarea class="form-control panel-control" name="nuevaDireccionReferencia" rows="2" placeholder="Referencia"></textarea></div>
+                  </div>
                 </div>
               </div>
 
@@ -139,6 +170,37 @@
                       <option th:each="tipo : ${T(com.example.greedy_gym.entidades.TipoEmpleado).values()}"
                               th:value="${tipo}" th:text="${tipo}"></option>
                     </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="panel-label">Dirección</label>
+                    <select class="form-select panel-control" name="empleadoDireccionId">
+                      <option value="">Seleccione una dirección...</option>
+                      <option value="__CREATE_NEW__">+ Crear nueva dirección</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Sucursal</label>
+                    <select class="form-select panel-control" name="empleadoSucursalId">
+                      <option value="">Seleccione una sucursal...</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="nueva-direccion-panel d-none" id="nueva-empleado-direccion-form">
+                <div class="card card-body">
+                  <h6 class="mb-3">Nueva Dirección</h6>
+                  <div class="row g-3">
+                    <div class="col-md-8"><input type="text" class="form-control panel-control" name="nuevaEmpleadoDireccionCalle" placeholder="Calle"></div>
+                    <div class="col-md-4"><input type="text" class="form-control panel-control" name="nuevaEmpleadoDireccionNumeracion" placeholder="Altura"></div>
+                    <div class="col-md-3"><select class="form-select panel-control" name="nuevaEmpleadoDireccionPais"><option value="">País</option></select></div>
+                    <div class="col-md-3"><select class="form-select panel-control" name="nuevaEmpleadoDireccionProvincia"><option value="">Provincia</option></select></div>
+                    <div class="col-md-3"><select class="form-select panel-control" name="nuevaEmpleadoDireccionDepartamento"><option value="">Departamento</option></select></div>
+                    <div class="col-md-3"><select class="form-select panel-control" name="nuevaEmpleadoDireccionLocalidad"><option value="">Localidad</option></select></div>
+                    <div class="col-md-4"><input type="text" class="form-control panel-control" name="nuevaEmpleadoDireccionBarrio" placeholder="Barrio"></div>
+                    <div class="col-md-4"><input type="text" class="form-control panel-control" name="nuevaEmpleadoDireccionManzana" placeholder="Manzana/Piso"></div>
+                    <div class="col-md-4"><input type="text" class="form-control panel-control" name="nuevaEmpleadoDireccionCasa" placeholder="Casa/Departamento"></div>
+                    <div class="col-12"><textarea class="form-control panel-control" name="nuevaEmpleadoDireccionReferencia" rows="2" placeholder="Referencia"></textarea></div>
                   </div>
                 </div>
               </div>

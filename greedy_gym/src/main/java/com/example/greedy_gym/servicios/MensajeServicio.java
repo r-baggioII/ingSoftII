@@ -2,101 +2,80 @@ package com.example.greedy_gym.servicios;
 
 import com.example.greedy_gym.entidades.Mensaje;
 import com.example.greedy_gym.entidades.TipoMensaje;
+import com.example.greedy_gym.entidades.Usuario;
 import com.example.greedy_gym.repositorios.MensajeRepositorio;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ValidationException;
-import jakarta.validation.constraints.NotBlank;
-import java.util.Collection;
-import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class MensajeServicio {
 
-    private final MensajeRepositorio repository;
+    private final MensajeRepositorio mensajeRepositorio;
 
-    public MensajeServicio(MensajeRepositorio repository) {
-        this.repository = repository;
+    public Mensaje crearMensaje(Usuario usuario, String titulo, String texto, TipoMensaje tipoMensaje) {
+        validar(usuario, titulo, texto, tipoMensaje);
+        Mensaje mensaje = new Mensaje();
+        mensaje.setUsuario(usuario);
+        mensaje.setTitulo(titulo.trim());
+        mensaje.setTexto(texto.trim());
+        mensaje.setTipoMensaje(tipoMensaje);
+        return mensajeRepositorio.save(mensaje);
     }
 
-    public void crearMensaje(@NotBlank String idUsuario,
-                             @NotBlank String titulo,
-                             @NotBlank String texto,
-                             TipoMensaje tipoMensaje) {
-        validar(idUsuario, null, titulo, texto, tipoMensaje);
-        Mensaje mensaje = new Mensaje(titulo, texto, tipoMensaje);
-        repository.save(mensaje);
-    }
-
-    public boolean validar(@NotBlank String idUsuario,
-                           Date fechaPromocion,
-                           @NotBlank String titulo,
-                           @NotBlank String texto,
-                           TipoMensaje tipoMensaje) {
-        if (idUsuario == null || idUsuario.isBlank()) {
-            throw new ValidationException("idUsuario es obligatorio");
-        }
-        if (titulo == null || titulo.isBlank()) {
-            throw new ValidationException("titulo es obligatorio");
-        }
-        if (texto == null || texto.isBlank()) {
-            throw new ValidationException("texto es obligatorio");
-        }
-        if (tipoMensaje == null) {
-            throw new ValidationException("tipoMensaje es obligatorio");
-        }
-        if (tipoMensaje == TipoMensaje.PROMOCION) {
-            if (fechaPromocion == null) {
-                throw new ValidationException("fechaPromocion es obligatoria para PROMOCION");
-            }
-            if (fechaPromocion.before(new Date())) {
-                throw new ValidationException("fechaPromocion no puede ser en el pasado");
-            }
-        }
-        return true;
+    public Mensaje modificarMensaje(String id, Usuario usuario, String titulo, String texto, TipoMensaje tipoMensaje) {
+        Mensaje existente = mensajeRepositorio.findByIdAndEliminadoFalse(id)
+                .orElseThrow(() -> new EntityNotFoundException("Mensaje no encontrado: " + id));
+        validar(usuario, titulo, texto, tipoMensaje);
+        existente.setUsuario(usuario);
+        existente.setTitulo(titulo.trim());
+        existente.setTexto(texto.trim());
+        existente.setTipoMensaje(tipoMensaje);
+        return mensajeRepositorio.save(existente);
     }
 
     @Transactional(readOnly = true)
     public Mensaje buscarMensaje(String id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Mensaje no encontrado: " + id));
+        return mensajeRepositorio.findByIdAndEliminadoFalse(id)
+                .orElseThrow(() -> new EntityNotFoundException("Mensaje no encontrado: " + id));
     }
 
-    public void modificarMensaje(String id,
-                                 @NotBlank String idUsuario,
-                                 @NotBlank String titulo,
-                                 @NotBlank String texto,
-                                 TipoMensaje tipoMensaje) {
-        Mensaje actual = buscarMensaje(id);
-        validar(idUsuario, null, titulo, texto, tipoMensaje);
-        actual.setTitulo(titulo);
-        actual.setTexto(texto);
-        actual.setTipoMensaje(tipoMensaje);
-        repository.save(actual);
+    @Transactional(readOnly = true)
+    public List<Mensaje> listarMensajes() {
+        return mensajeRepositorio.findByEliminadoFalseOrderByCreadoEnDesc();
     }
 
     public void eliminarMensaje(String id) {
-        Mensaje actual = buscarMensaje(id);
-        actual.setEliminado(true);
-        repository.save(actual);
+        Mensaje mensaje = mensajeRepositorio.findByIdAndEliminadoFalse(id)
+                .orElseThrow(() -> new EntityNotFoundException("Mensaje no encontrado: " + id));
+        mensaje.setEliminado(true);
+        mensajeRepositorio.save(mensaje);
     }
 
     @Transactional(readOnly = true)
-    public Collection<Mensaje> listarMensaje() {
-        return repository.findAll();
+    public Optional<Mensaje> buscarMensajeActivoPorTipo(TipoMensaje tipoMensaje) {
+        return mensajeRepositorio.findFirstByTipoMensajeAndEliminadoFalseOrderByActualizadoEnDesc(tipoMensaje);
     }
 
-    @Transactional(readOnly = true)
-    public Collection<Mensaje> listarMensajeActivo() {
-        return repository.findAll().stream().filter(m -> !m.isEliminado()).toList();
-    }
-
-    public void enviarMensaje(String id) {
-        Mensaje mensaje = buscarMensaje(id);
-        if (mensaje.isEliminado()) {
-            throw new IllegalStateException("No se puede enviar un mensaje eliminado");
+    private void validar(Usuario usuario, String titulo, String texto, TipoMensaje tipoMensaje) {
+        if (usuario == null) {
+            throw new ValidationException("El usuario es obligatorio");
         }
-        // no-op por ahora
+        if (!StringUtils.hasText(titulo)) {
+            throw new ValidationException("El título es obligatorio");
+        }
+        if (!StringUtils.hasText(texto)) {
+            throw new ValidationException("El texto es obligatorio");
+        }
+        if (tipoMensaje == null) {
+            throw new ValidationException("El tipo de mensaje es obligatorio");
+        }
     }
 }

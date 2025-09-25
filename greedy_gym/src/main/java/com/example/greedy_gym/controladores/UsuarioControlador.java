@@ -101,8 +101,12 @@ public class UsuarioControlador {
                     rol,
                     socioIdLimpio,
                     socio != null ? socio.toEntity() : null,
+                    socio != null ? socio.getDireccionId() : null,
+                    socio != null ? socio.getSucursalId() : null,
                     empleadoIdLimpio,
-                    empleado != null ? empleado.toEntity() : null
+                    empleado != null ? empleado.toEntity() : null,
+                    empleado != null ? empleado.getDireccionId() : null,
+                    empleado != null ? empleado.getSucursalId() : null
             );
         }
 
@@ -172,6 +176,8 @@ public class UsuarioControlador {
         private String telefono;
         private String correoElectronico;
         private Long numeroSocio;
+        private String direccionId;
+        private String sucursalId;
 
         public Socio toEntity() {
             Socio socio = new Socio();
@@ -249,6 +255,22 @@ public class UsuarioControlador {
         public void setNumeroSocio(Long numeroSocio) {
             this.numeroSocio = numeroSocio;
         }
+
+        public String getDireccionId() {
+            return direccionId;
+        }
+
+        public void setDireccionId(String direccionId) {
+            this.direccionId = direccionId;
+        }
+
+        public String getSucursalId() {
+            return sucursalId;
+        }
+
+        public void setSucursalId(String sucursalId) {
+            this.sucursalId = sucursalId;
+        }
     }
 
     public static class EmpleadoPayload {
@@ -260,6 +282,8 @@ public class UsuarioControlador {
         private String telefono;
         private String correoElectronico;
         private TipoEmpleado tipoEmpleado;
+        private String direccionId;
+        private String sucursalId;
 
         public Empleado toEntity() {
             Empleado empleado = new Empleado();
@@ -336,6 +360,22 @@ public class UsuarioControlador {
 
         public void setTipoEmpleado(TipoEmpleado tipoEmpleado) {
             this.tipoEmpleado = tipoEmpleado;
+        }
+
+        public String getDireccionId() {
+            return direccionId;
+        }
+
+        public void setDireccionId(String direccionId) {
+            this.direccionId = direccionId;
+        }
+
+        public String getSucursalId() {
+            return sucursalId;
+        }
+
+        public void setSucursalId(String sucursalId) {
+            this.sucursalId = sucursalId;
         }
     }
 }

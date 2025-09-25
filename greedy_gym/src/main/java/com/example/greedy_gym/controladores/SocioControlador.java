@@ -47,7 +47,7 @@ public class SocioControlador {
     public Socio actualizar(@PathVariable String id, @RequestBody Socio socio) {
         return socioServicio.mdoificarSocio(id, socio.getNombre(), socio.getApellido(), 
                 socio.getFechaNacimiento(), socio.getTipoDocumento(), socio.getNumeroDocumento(), 
-                socio.getNumeroSocio());
+                socio.getNumeroSocio(), socio.getDireccion(), socio.getSucursal());
     }
 
     @DeleteMapping("/{id}")

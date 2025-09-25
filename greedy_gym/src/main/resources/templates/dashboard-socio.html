@@ -664,34 +664,25 @@ function renderTablaCuotas(error = false) {
 }
 
 function actualizarResumenGeneral() {
-    // Solo considerar como deuda cuotas ADEUDADA, PENDIENTE o VENCIDA
-    const esDeuda = (cuota) => {
-        const estado = (cuota.estado || '').toUpperCase();
-        return estado === 'ADEUDADA' || estado === 'PENDIENTE' || estado === 'VENCIDA';
-    };
-    const cuotasEnDeuda = Array.isArray(cuotasPendientes) ? cuotasPendientes.filter(esDeuda) : [];
-
-    const totalAdeudado = cuotasEnDeuda.reduce((acc, cuota) => {
+    const totalAdeudado = cuotasPendientes.reduce((acc, cuota) => {
         const monto = cuota.valorCuota && typeof cuota.valorCuota.valorCuota === 'number'
             ? cuota.valorCuota.valorCuota : 0;
         return acc + monto;
     }, 0);
-
     const totalElement = document.getElementById('total-adeudado');
     if (totalElement) {
         totalElement.textContent = formatearMoneda(totalAdeudado);
     }
-
     const mesesElement = document.getElementById('meses-pendientes');
     if (mesesElement) {
-        mesesElement.textContent = cuotasEnDeuda.length.toString();
+        mesesElement.textContent = cuotasPendientes.length.toString();
     }
-
     const ultimoPagoElement = document.getElementById('ultimo-pago');
     if (ultimoPagoElement) {
-        ultimoPagoElement.textContent = cuotasEnDeuda.length === 0 ? 'Sin deuda' : 'Pendiente';
+        ultimoPagoElement.textContent = cuotasPendientes.length == 0
+                ? 'Sin deuda'
+                : 'Pendiente';
     }
-
     actualizarResumenSeleccion();
 }
 

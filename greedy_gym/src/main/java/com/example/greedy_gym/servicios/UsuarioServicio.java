@@ -63,7 +63,7 @@ public class UsuarioServicio {
         if (socioNuevo == null) {
             throw new ValidationException("Debe proporcionar los datos del socio o un socio existente");
         }
-        socioServicio.crearSocioConUsuario(socioNuevo, usuario);
+        socioServicio.crearSocioConUsuario(socioNuevo, usuario, command.socioDireccionId(), command.socioSucursalId());
     }
 
     private void manejarAsociacionEmpleado(CrearUsuarioCommand command, Usuario usuario) {
@@ -85,7 +85,7 @@ public class UsuarioServicio {
         if (nuevoEmpleado.getTipoEmpleado() == null) {
             throw new ValidationException("Debe indicar el tipo de empleado");
         }
-        empleadoServicio.crearEmpleadoConUsuario(nuevoEmpleado, usuario);
+        empleadoServicio.crearEmpleadoConUsuario(nuevoEmpleado, usuario, command.empleadoDireccionId(), command.empleadoSucursalId());
     }
 
     public void validar(String nombreUsuario, String clave, RolUsuario rol) {
@@ -175,8 +175,12 @@ public class UsuarioServicio {
                                       RolUsuario rol,
                                       String socioId,
                                       Socio nuevoSocio,
+                                      String socioDireccionId,
+                                      String socioSucursalId,
                                       String empleadoId,
-                                      Empleado nuevoEmpleado) {
+                                      Empleado nuevoEmpleado,
+                                      String empleadoDireccionId,
+                                      String empleadoSucursalId) {
 
         public CrearUsuarioCommand {
             Objects.requireNonNull(nombreUsuario, "nombreUsuario no puede ser nulo");

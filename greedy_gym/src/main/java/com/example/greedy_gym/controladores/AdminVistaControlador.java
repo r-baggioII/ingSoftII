@@ -78,4 +78,11 @@ public class AdminVistaControlador {
         withUser(session, model);
         return "admin/valor-cuotas";
     }
+
+    @GetMapping("/admin/mensajes")
+    public String adminMensajes(HttpSession session, Model model) {
+        if (!verificarSesion(session)) return "redirect:/login";
+        withUser(session, model);
+        return "admin/mensajes";
+    }
 }

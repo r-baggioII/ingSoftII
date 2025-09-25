@@ -63,6 +63,27 @@
   // Cascading selects for Direccion form (v1 lookups)
   async function fillCascading(){ // initial fill
     await fillPaises(dom.dir.selPais);
+    await fillPaisesForProv(dom.prov.selPais);
+    await fillProvinciasForDep(dom.dep.selProv);
+    await fillDepartamentosForLoc(dom.loc.selDep);
+  }
+  
+  async function fillPaisesForProv(select){ 
+    if(!select) return; 
+    const data = await req(url('/api/v1/paises/activos'))||[]; 
+    fillSelect(select, data.map(p=>({value:p.id,label:p.nombre})), 'País...'); 
+  }
+  
+  async function fillProvinciasForDep(select){ 
+    if(!select) return; 
+    const data = await req(url('/api/v1/provincias/activos'))||[]; 
+    fillSelect(select, data.map(p=>({value:p.id,label:p.nombre})), 'Provincia...'); 
+  }
+  
+  async function fillDepartamentosForLoc(select){ 
+    if(!select) return; 
+    const data = await req(url('/api/v1/departamentos/activos'))||[]; 
+    fillSelect(select, data.map(d=>({value:d.id,label:d.nombre})), 'Depto...'); 
   }
   async function fillPaises(select){ if(!select) return; const data = await req(url('/api/v1/paises/activos'))||[]; fillSelect(select, data.map(p=>({value:p.id,label:p.nombre})), 'País'); clearSelect(dom.dir.selProv, 'Provincia'); clearSelect(dom.dir.selDep, 'Departamento'); clearSelect(dom.dir.selLoc, 'Localidad'); }
   async function onDirPaisChange(){ const id = dom.dir.selPais?.value; if(!id){ clearSelect(dom.dir.selProv,'Provincia'); clearSelect(dom.dir.selDep,'Departamento'); clearSelect(dom.dir.selLoc,'Localidad'); return; } const data = await req(url(`/api/v1/provincias?paisId=${encodeURIComponent(id)}`))||[]; fillSelect(dom.dir.selProv, data.map(x=>({value:x.id,label:x.nombre})), 'Provincia'); clearSelect(dom.dir.selDep,'Departamento'); clearSelect(dom.dir.selLoc,'Localidad'); }

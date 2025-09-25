@@ -887,6 +887,12 @@ schedule
     transition: all 0.5s;
 }
 
+/* Hardcode empresas items to be visible by default */
+.schedule-table.filtering .ts-item[data-tsmeta="empresas"] {
+    opacity: 1;
+    transition: all 0.5s;
+}
+
 #schedule .filters {
   margin-bottom: 40px;
 }

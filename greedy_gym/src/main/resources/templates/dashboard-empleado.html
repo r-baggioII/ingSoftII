@@ -4,11 +4,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Dashboard Empleado - Greedy Gym">
+    <meta name="description" content="Dashboard Administrador - Greedy Gym">
     <meta name="author" content="Greedy Gym">
     <link href="https://fonts.googleapis.com/css?family=Poppins:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i&display=swap" rel="stylesheet">
 
-    <title>Panel Empleado - Greedy Gym</title>
+    <title>Panel Administrador - Greedy Gym</title>
 
     <!-- Archivos CSS -->
     <link rel="stylesheet" type="text/css" th:href="@{/assets/css/bootstrap.min.css}">
@@ -51,8 +51,8 @@
       box-shadow: 0px 8px 25px rgba(0,0,0,0.1);
       transition: all 0.3s ease-in-out;
       margin-bottom: 15px;
-      flex: 1 1 calc(33.333% - 15px);
-      max-width: 300px;
+      flex: 1 1 calc(25% - 15px);
+      max-width: 250px;
       min-height: 120px;
       display: flex;
       flex-direction: column;
@@ -69,17 +69,14 @@
     }
 
     .module-switcher ul li.restricted {
-      opacity: 0.4;
+      opacity: 0.6;
       cursor: not-allowed;
-      background: #e9ecef;
-      color: #6c757d;
     }
 
     .module-switcher ul li.restricted:hover {
       background: #e9ecef;
       color: #6c757d;
       transform: none;
-      box-shadow: 0px 8px 25px rgba(0,0,0,0.1);
     }
 
     .module-switcher ul li i {
@@ -126,22 +123,6 @@
       border: none;
       padding: 20px;
       margin-bottom: 30px;
-      background: rgba(23, 162, 184, 0.15);
-      color: #1a8aa3;
-      border: 1px solid rgba(23, 162, 184, 0.3);
-    }
-
-    .restrictions-info {
-      background: #f8f9fa;
-      padding: 30px;
-      border-radius: 15px;
-      margin-top: 40px;
-    }
-
-    .restrictions-info h4 {
-      color: #6c757d;
-      text-align: center;
-      margin-bottom: 25px;
     }
 
     @media (max-width: 991px) {
@@ -185,7 +166,7 @@
                     <!-- ***** Logo End ***** -->
                     <!-- ***** Menu Start ***** -->
                     <ul class="nav">
-                        <li><a th:href="@{/dashboard/empleado}" class="active">Dashboard</a></li>
+                        <li><a th:href="@{/dashboard/admin}" class="active">Dashboard</a></li>
                         <li><a th:href="@{/panel/entidades}">Panel de datos</a></li>
                         <li><a th:href="@{/logout}">Cerrar Sesión</a></li>
                     </ul>
@@ -209,8 +190,8 @@
     <div class="video-overlay header-text">
         <div class="caption">
             <h6>Panel de Control</h6>
-            <h2>Dashboard <em>Empleado</em></h2>
-            <p>Acceso a funcionalidades operativas del sistema</p>
+            <h2>Dashboard <em>Administrador</em></h2>
+            <p>Acceso completo a todas las funcionalidades del sistema</p>
             <div class="main-button scroll-to-section">
                 <a href="#dashboard-panel">Ver módulos</a>
             </div>
@@ -225,9 +206,9 @@
         <div class="row">
             <div class="col-lg-6 offset-lg-3">
                 <div class="section-heading">
-                    <h2>Panel <em>Empleado</em></h2>
+                    <h2>Panel <em>Administrador</em></h2>
                     <img th:src="@{/assets/images/line-dec.png}" alt="waves">
-                    <p>Acceso a las funcionalidades operativas del sistema.</p>
+                    <p>Gestión completa del sistema con acceso a todas las funcionalidades.</p>
                 </div>
             </div>
         </div>
@@ -237,16 +218,7 @@
             <div class="col-lg-8 offset-lg-2">
                 <div class="user-info">
                     <h3>Bienvenido, <span th:text="${usuario.nombreUsuario}"></span></h3>
-                    <p>Rol: <strong th:text="${usuario.rol}"></strong> | Acceso: Operativo</p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Restricciones del rol -->
-        <div class="row">
-            <div class="col-lg-10 offset-lg-1">
-                <div class="alert-panel">
-                    <strong>Nota:</strong> Como empleado, no tienes acceso a la gestión de usuarios ni a la configuración de valores de cuota mensual.
+                    <p>Rol: <strong th:text="${usuario.rol}"></strong> | Acceso: Completo</p>
                 </div>
             </div>
         </div>
@@ -256,23 +228,25 @@
             <div class="col-lg-12">
                 <div class="module-switcher">
                     <ul>
+                        
                         <li onclick="window.location.href='/panel/entidades'">
                             <i class="fa fa-building"></i>
                             <div class="module-title">Empresas y Sucursales</div>
-                            <div class="module-description">Consultar información de empresas y sucursales</div>
+                            <div class="module-description">Administrar empresas, sucursales y ubicaciones</div>
+                        </li>
+                        
+                        <li onclick="mostrarNoImplementado('Gestión de Empleados')">
+                            <i class="fa fa-user-tie"></i>
+                            <div class="module-title">Empleados</div>
+                            <div class="module-description">Gestionar perfiles de empleados y asignaciones</div>
                         </li>
                         
                         <li onclick="mostrarNoImplementado('Gestión de Socios')">
                             <i class="fa fa-user"></i>
                             <div class="module-title">Socios</div>
-                            <div class="module-description">Gestionar información de socios y membresías</div>
+                            <div class="module-description">Administrar información de socios y membresías</div>
                         </li>
                         
-                        <li onclick="mostrarNoImplementado('Consulta de Cuotas')">
-                            <i class="fa fa-money"></i>
-                            <div class="module-title">Consulta de Cuotas</div>
-                            <div class="module-description">Consultar estados de pagos (solo lectura)</div>
-                        </li>
                         
                         <li onclick="mostrarNoImplementado('Mensajes y Promociones')">
                             <i class="fa fa-envelope"></i>
@@ -283,38 +257,21 @@
                         <li onclick="mostrarNoImplementado('Gestión de Rutinas')">
                             <i class="fa fa-dumbbell"></i>
                             <div class="module-title">Rutinas</div>
-                            <div class="module-description">Crear y gestionar rutinas de entrenamiento</div>
+                            <div class="module-description">Supervisar y gestionar rutinas de entrenamiento</div>
                         </li>
                         
                         <li onclick="mostrarNoImplementado('Sistema de Facturación')">
                             <i class="fa fa-receipt"></i>
                             <div class="module-title">Facturación</div>
-                            <div class="module-description">Gestionar facturas y procesar pagos</div>
+                            <div class="module-description">Gestionar facturas y formas de pago</div>
+                        </li>
+                        
+                        <li onclick="mostrarNoImplementado('Sistema de Reportes')">
+                            <i class="fa fa-chart-bar"></i>
+                            <div class="module-title">Reportes</div>
+                            <div class="module-description">Generar reportes administrativos y financieros</div>
                         </li>
                     </ul>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Módulos restringidos -->
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="restrictions-info">
-                    <h4>Módulos Restringidos</h4>
-                    <div class="module-switcher">
-                        <ul>
-                            <li class="restricted">
-                                <i class="fa fa-users"></i>
-                                <div class="module-title">Gestión de Usuarios</div>
-                                <div class="module-description">Acceso restringido - Solo administradores</div>
-                            </li>
-                            <li class="restricted">
-                                <i class="fa fa-dollar-sign"></i>
-                                <div class="module-title">Configuración de Valores</div>
-                                <div class="module-description">Acceso restringido - Solo administradores</div>
-                            </li>
-                        </ul>
-                    </div>
                 </div>
             </div>
         </div>
@@ -327,7 +284,7 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
-                <p>&copy; 2024 Greedy Gym - Panel Empleado
+                <p>&copy; 2024 Greedy Gym - Panel Administrador
                 <br>
                 Usuario: <span th:text="${usuario.nombreUsuario}"></span> | Rol: <span th:text="${usuario.rol}"></span>
                 </p>

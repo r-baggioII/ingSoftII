@@ -17,6 +17,16 @@
     <link rel="stylesheet" th:href="@{/assets/css/templatemo-training-studio.css}">
     <link rel="stylesheet" th:href="@{/assets/css/login.css}">
 
+        <!-- Fix horizontal overflow / unwanted whitespace -->
+        <style>
+            html, body { overflow-x: hidden; }
+            /* Prevent table cumulative border from causing overflow */
+            #schedule table { border-collapse: collapse; }
+            #schedule table tbody tr td:last-child { border-right: none; }
+            /* Ensure video does not create fractional pixel overflow */
+            #bg-video { width: 100vw; }
+        </style>
+
   </head>
   
   <body>

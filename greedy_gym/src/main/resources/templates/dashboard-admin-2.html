@@ -1,92 +1,5 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>Panel Administrador 2 - Greedy Gym</title>
-  <link rel="stylesheet" type="text/css" th:href="@{/assets/css/bootstrap.min.css}">
-  <link rel="stylesheet" type="text/css" th:href="@{/assets/css/font-awesome.css}">
-  <link rel="stylesheet" th:href="@{/assets/css/templatemo-training-studio.css}">
-  <style>
-    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
-    .card-tile { border: none; border-radius: 16px; padding: 22px; box-shadow: 0 10px 24px rgba(0,0,0,.08); cursor: pointer; transition: transform .15s ease, box-shadow .15s ease; background: #fff; min-height: 150px; display:flex; flex-direction:column; justify-content:center; align-items:flex-start; }
-    .card-tile:hover{ transform: translateY(-3px); box-shadow: 0 16px 36px rgba(0,0,0,.12); }
-    .card-tile i { font-size: 28px; margin-bottom: 8px; color: #ed563b; }
-    .card-tile h5 { margin: 0 0 6px; font-weight: 700; }
-    .card-tile p { margin: 0; color: #666; font-size: 13px; }
-  </style>
-</head>
-<body>
-<header class="header-area header-sticky">
-  <div class="container"><div class="row"><div class="col-12">
-    <nav class="main-nav">
-      <a th:href="@{/}" class="logo">Greedy<em> Gym</em></a>
-      <ul class="nav">
-        <li><a th:href="@{/dashboard/admin2}" class="active">Dashboard</a></li>
-        <li><a th:href="@{/logout}">Cerrar Sesión</a></li>
-      </ul>
-      <a class='menu-trigger'><span>Menú</span></a>
-    </nav>
-  </div></div></div>
-</header>
-
-<section class="section" style="padding: 80px 0; background: #fff;">
-  <div class="container">
-    <div class="row"><div class="col-lg-8 offset-lg-2">
-      <div class="section-heading text-center">
-        <h2>Dashboard <em>Administrador</em> 2</h2>
-        <img th:src="@{/assets/images/line-dec.png}" alt="waves">
-        <p>Acceso a formularios integrados, con relaciones entre entidades.</p>
-      </div>
-    </div></div>
-
-    <div class="cards-grid">
-      <a class="card-tile" th:href="@{/admin/usuarios}">
-        <i class="fa fa-users"></i>
-        <h5>Gestión de Usuarios</h5>
-        <p>Crear, editar y administrar cuentas (incluye datos de socios)</p>
-      </a>
-      <a class="card-tile" th:href="@{/admin/empresas}">
-        <i class="fa fa-building"></i>
-        <h5>Empresas</h5>
-        <p>Datos de la empresa propietaria</p>
-      </a>
-      <a class="card-tile" th:href="@{/admin/sucursales}">
-        <i class="fa fa-map-marker"></i>
-        <h5>Sucursales</h5>
-        <p>Dirección existente o nueva con geografía</p>
-      </a>
-      <a class="card-tile" th:href="@{/admin/direcciones}">
-        <i class="fa fa-globe"></i>
-        <h5>Gestión Geográfica</h5>
-        <p>Países, Provincias, Departamentos, Localidades, Direcciones</p>
-      </a>
-      <a class="card-tile" th:href="@{/admin/cuotas}">
-        <i class="fa fa-money"></i>
-        <h5>Cuotas mensuales</h5>
-        <p>Emitir, actualizar estado y consultar por socio</p>
-      </a>
-      <a class="card-tile" th:href="@{/admin/valor-cuotas}">
-        <i class="fa fa-tag"></i>
-        <h5>Valores de cuota</h5>
-        <p>Vigencia e historial de montos</p>
-      </a>
-            <a class="card-tile" th:href="@{/admin/facturas}">
-                <i class="fa fa-file-invoice"></i>
-                <h5>Facturas</h5>
-                <p>Crear y buscar facturas</p>
-            </a>
-    </div>
-  </div>
-</section>
-
-<script th:src="@{/assets/js/jquery-2.1.0.min.js}"></script>
-<script th:src="@{/assets/js/bootstrap.min.js}"></script>
-<script th:src="@{/assets/js/custom.js}"></script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="utf-8">
@@ -241,6 +154,11 @@
                         <div class="icon"><i class="fa fa-file-invoice"></i></div>
                         <div class="title">Facturas</div>
                         <div class="desc">Crear y buscar facturas</div>
+                    </a>
+                    <a class="module-card" th:href="@{/admin/mensajes}">
+                        <div class="icon"><i class="fa fa-envelope"></i></div>
+                        <div class="title">Mensajes & Promos</div>
+                        <div class="desc">Plantillas y campañas promocionales</div>
                     </a>
                 </div>
             </div>

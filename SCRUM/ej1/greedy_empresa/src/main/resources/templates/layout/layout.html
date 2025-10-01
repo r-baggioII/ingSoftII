@@ -1,31 +1,36 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:fragment="layout (title, content)">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title th:replace="${title}">Greedy Empresa</title>
-    <link rel="stylesheet" th:href="@{/vendor/fontawesome-free/css/all.min.css}">
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900&display=swap">
-    <link rel="stylesheet" th:href="@{/css/sb-admin-2.min.css}">
+
+    <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css" />
+    <link rel="stylesheet" th:href="@{/dist/css/AdminLTE.min.css}" />
+    <link rel="stylesheet" th:href="@{/dist/css/skins/_all-skins.min.css}" />
+    <link rel="stylesheet" th:href="@{/plugins/iCheck/flat/blue.css}" />
+    <link rel="stylesheet" th:href="@{/plugins/datepicker/datepicker3.css}" />
+    <link rel="stylesheet" th:href="@{/plugins/daterangepicker/daterangepicker-bs3.css}" />
+    <link rel="stylesheet" th:href="@{/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/custom.css}" />
 </head>
-<body id="page-top">
-    <div id="wrapper">
-        <th:block th:replace="~{fragments/sidebar :: sidebar(${activeMenu})}"></th:block>
-        <div id="content-wrapper" class="d-flex flex-column">
-            <div id="content">
-                <th:block th:replace="~{fragments/topbar :: topbar}"></th:block>
-                <main class="container-fluid" th:replace="${content}"></main>
-            </div>
-            <th:block th:replace="~{fragments/footer :: footer}"></th:block>
-        </div>
+<body class="skin-blue sidebar-mini">
+<div class="wrapper">
+    <th:block th:replace="~{fragments/topbar :: topbar}"></th:block>
+    <th:block th:replace="~{fragments/sidebar :: sidebar(${activeMenu})}"></th:block>
+
+    <div class="content-wrapper">
+        <th:block th:replace="${content}"></th:block>
     </div>
 
-    <a class="scroll-to-top rounded" href="#page-top">
-        <i class="fas fa-angle-up"></i>
-    </a>
+    <th:block th:replace="~{fragments/footer :: footer}"></th:block>
+    <aside class="control-sidebar control-sidebar-dark"></aside>
+    <div class="control-sidebar-bg"></div>
+</div>
 
-    <th:block th:replace="~{fragments/scripts :: scripts(null)}"></th:block>
-
+<th:block th:replace="~{fragments/scripts :: scripts}"></th:block>
 </body>
 </html>

@@ -19,6 +19,8 @@ public interface ProvinciaRepository extends JpaRepository<Provincia, String> {
 
     List<Provincia> findByPais_IdAndEliminadoFalseOrderByNombreAsc(String paisId);
 
+    List<Provincia> findByEliminadoFalseOrderByNombreAsc();
+
     Optional<Provincia> findByNombreIgnoreCaseAndPais_Id(String nombre, String paisId);
 
     Optional<Provincia> findByNombreIgnoreCaseAndPais_IdAndEliminadoFalse(String nombre, String paisId);

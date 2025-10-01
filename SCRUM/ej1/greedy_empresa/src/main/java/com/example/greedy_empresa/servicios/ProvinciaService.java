@@ -41,6 +41,10 @@ public class ProvinciaService {
         return provinciaRepository.findByPais_IdAndEliminadoFalseOrderByNombreAsc(paisId);
     }
 
+    public List<Provincia> listarTodas() {
+        return provinciaRepository.findByEliminadoFalseOrderByNombreAsc();
+    }
+
     public Provincia buscarPorId(String id) {
         Provincia provincia = provinciaRepository.findById(id)
                 .filter(prov -> !prov.isEliminado())

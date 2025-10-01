@@ -1,0 +1,9 @@
+.content-header h1 {
+  margin: 0;
+}
+.box-footer {
+  padding-top: 0;
+}
+.box .form-group:last-child {
+  margin-bottom: 0;
+}

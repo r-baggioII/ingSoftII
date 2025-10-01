@@ -1,8 +1,43 @@
 <th:block xmlns:th="http://www.thymeleaf.org" th:fragment="topbar">
-    <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-        <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-            <i class="fa fa-bars"></i>
-        </button>
-        <span class="ml-auto text-gray-600 small">Greedy Empresa</span>
-    </nav>
+    <header class="main-header">
+        <a th:href="@{/}" class="logo">
+            <span class="logo-mini"><b>G</b>ERP</span>
+            <span class="logo-lg"><b>Greedy</b>ERP</span>
+        </a>
+        <nav class="navbar navbar-static-top" role="navigation">
+            <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+                <span class="sr-only">Toggle navigation</span>
+            </a>
+            <div class="navbar-custom-menu">
+                <ul class="nav navbar-nav">
+                    <li class="dropdown user user-menu" th:if="${session.authUser != null}">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <img th:src="@{/dist/img/avatar5.png}" class="user-image" alt="Usuario" />
+                            <span class="hidden-xs" th:text="${session.authUser.username}">Usuario</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class="user-header">
+                                <img th:src="@{/dist/img/avatar5.png}" class="img-circle" alt="Usuario">
+                                <p>
+                                    <span th:text="${session.authUser.username}">Usuario</span>
+                                    <small th:text="${session.authUser.rol}">ROL</small>
+                                </p>
+                            </li>
+                            <li class="user-footer">
+                                <div class="pull-right">
+                                    <a th:href="@{/logout}" class="btn btn-default btn-flat">Salir</a>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                    <li th:if="${session.authUser == null}">
+                        <a th:href="@{/login}"><i class="fa fa-sign-in"></i> Ingresar</a>
+                    </li>
+                    <li th:if="${session.authUser == null}">
+                        <a th:href="@{/register}"><i class="fa fa-user-plus"></i> Registrarse</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
 </th:block>

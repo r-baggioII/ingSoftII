@@ -4,6 +4,7 @@ import com.example.greedy_empresa.entidades.Pais;
 import com.example.greedy_empresa.servicios.PaisService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
@@ -51,8 +52,10 @@ public class PaisController {
             paisService.guardar(pais);
             redirectAttributes.addFlashAttribute("successMessage", "País guardado correctamente");
             return "redirect:/paises";
-        } catch (IllegalArgumentException ex) {
-            bindingResult.reject("error.general", ex.getMessage());
+        } catch (IllegalArgumentException | DataIntegrityViolationException ex) {
+            String message = ex instanceof IllegalArgumentException ? ex.getMessage()
+                    : "Los datos ingresados ya existen o no son válidos.";
+            bindingResult.reject("error.general", message);
             model.addAttribute("activeMenu", "paises");
             return "paises/form";
         }
@@ -77,8 +80,10 @@ public class PaisController {
             paisService.guardar(pais);
             redirectAttributes.addFlashAttribute("successMessage", "País actualizado correctamente");
             return "redirect:/paises";
-        } catch (IllegalArgumentException ex) {
-            bindingResult.reject("error.general", ex.getMessage());
+        } catch (IllegalArgumentException | DataIntegrityViolationException ex) {
+            String message = ex instanceof IllegalArgumentException ? ex.getMessage()
+                    : "Los datos ingresados ya existen o no son válidos.";
+            bindingResult.reject("error.general", message);
             model.addAttribute("activeMenu", "paises");
             return "paises/form";
         }

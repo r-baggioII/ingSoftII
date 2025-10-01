@@ -49,6 +49,10 @@ public class DepartamentoService {
         return departamentoRepository.findByProvincia_IdAndEliminadoFalseOrderByNombreAsc(provinciaId);
     }
 
+    public List<Departamento> listarTodos() {
+        return departamentoRepository.findByEliminadoFalseOrderByNombreAsc();
+    }
+
     public Departamento buscarPorId(String id) {
         Departamento departamento = departamentoRepository.findById(id)
                 .filter(dep -> !dep.isEliminado())

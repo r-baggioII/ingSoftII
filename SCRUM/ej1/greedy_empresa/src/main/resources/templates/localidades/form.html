@@ -1,73 +1,72 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/layout :: layout(~{::title}, ~{::content})}">
-
 <head>
-    <title th:text="${localidad.id} == null ? 'Nueva Localidad' : 'Editar Localidad'"></title>
+    <title th:text="${localidad.id} == null ? 'Nueva localidad' : 'Editar localidad'"></title>
 </head>
-
 <body>
 <section th:fragment="content">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800" th:text="${localidad.id} == null ? 'Nueva Localidad' : 'Editar Localidad'"></h1>
-        <a class="btn btn-secondary" th:href="@{/localidades}">
-            <i class="fas fa-arrow-left"></i> Volver
-        </a>
-    </div>
-    <div class="card shadow mb-4">
-        <div class="card-body">
-            <form th:action="${localidad.id} == null ? @{/localidades} : @{'/localidades/' + ${localidad.id}}"
-                method="post" th:object="${localidad}">
-                <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger"
-                    th:each="err : ${#fields.globalErrors()}" th:text="${err.defaultMessage}"></div>
-                <input type="hidden" th:field="*{id}">
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="nombre">Nombre</label>
-                        <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required>
-                        <div class="text-danger" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="codigoPostal">Código Postal</label>
-                        <input type="text" class="form-control" id="codigoPostal" th:field="*{codigoPostal}" required>
-                        <div class="text-danger" th:if="${#fields.hasErrors('codigoPostal')}"
-                            th:errors="*{codigoPostal}"></div>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group col-md-4">
-                        <label for="paisSelect">País</label>
-                        <select class="form-control" id="paisSelect" name="paisId" th:value="${paisId}" required>
-                            <option value="">Seleccione un país</option>
-                            <option th:each="pais : ${paises}" th:value="${pais.id}"
-                                th:selected="${pais.id == paisId}" th:text="${pais.nombre}"></option>
-                        </select>
-                    </div>
-                    <div class="form-group col-md-4">
-                        <label for="provinciaSelect">Provincia</label>
-                        <select class="form-control" id="provinciaSelect" name="provinciaId"
-                            th:value="${provinciaId}" required>
-                            <option value="">Seleccione una provincia</option>
-                            <option th:each="provincia : ${provinciasSeleccionadas}" th:value="${provincia.id}"
-                                th:selected="${provincia.id == provinciaId}" th:text="${provincia.nombre}"></option>
-                        </select>
-                    </div>
-                    <div class="form-group col-md-4">
-                        <label for="departamentoId">Departamento</label>
-                        <select class="form-control" id="departamentoId" name="departamentoId"
-                            th:value="${departamentoId}" required>
-                            <option value="">Seleccione un departamento</option>
-                            <option th:each="departamento : ${departamentosSeleccionados}" th:value="${departamento.id}"
-                                th:selected="${departamento.id == departamentoId}"
-                                th:text="${departamento.nombre}"></option>
-                        </select>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary">Guardar</button>
-            </form>
+    <section class="content-header">
+        <h1 th:text="${localidad.id} == null ? 'Nueva localidad' : 'Editar localidad'"></h1>
+        <div class="pull-right">
+            <a class="btn btn-default" th:href="@{/localidades}"><i class="fa fa-arrow-left"></i> Volver</a>
         </div>
-    </div>
+    </section>
+    <section class="content">
+        <div class="box box-primary">
+            <div class="box-body">
+                <form th:action="${localidad.id} == null ? @{/localidades} : @{'/localidades/' + ${localidad.id}}" method="post"
+                      th:object="${localidad}">
+                    <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger"
+                         th:each="err : ${#fields.globalErrors()}" th:text="${err.defaultMessage}"></div>
+                    <input type="hidden" th:field="*{id}" />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="nombre">Nombre</label>
+                                <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required>
+                                <p class="text-danger" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="codigoPostal">Código postal</label>
+                                <input type="text" class="form-control" id="codigoPostal" th:field="*{codigoPostal}" required>
+                                <p class="text-danger" th:if="${#fields.hasErrors('codigoPostal')}" th:errors="*{codigoPostal}"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="paisId">País</label>
+                        <select class="form-control" id="paisId" th:field="*{paisId}" required>
+                            <option value="">Seleccione un país</option>
+                            <option th:each="pais : ${paises}" th:value="${pais.id}" th:text="${pais.nombre}"></option>
+                        </select>
+                        <p class="text-danger" th:if="${#fields.hasErrors('paisId')}" th:errors="*{paisId}"></p>
+                    </div>
+                    <div class="form-group">
+                        <label for="provinciaId">Provincia</label>
+                        <select class="form-control" id="provinciaId" th:field="*{provinciaId}" required>
+                            <option value="">Seleccione una provincia</option>
+                            <option th:each="provincia : ${provinciasSeleccionadas}" th:value="${provincia.id}" th:text="${provincia.nombre}"></option>
+                        </select>
+                        <p class="text-danger" th:if="${#fields.hasErrors('provinciaId')}" th:errors="*{provinciaId}"></p>
+                    </div>
+                    <div class="form-group">
+                        <label for="departamentoId">Departamento</label>
+                        <select class="form-control" id="departamentoId" th:field="*{departamentoId}" required>
+                            <option value="">Seleccione un departamento</option>
+                            <option th:each="departamento : ${departamentosSeleccionados}" th:value="${departamento.id}" th:text="${departamento.nombre}"></option>
+                        </select>
+                        <p class="text-danger" th:if="${#fields.hasErrors('departamentoId')}" th:errors="*{departamentoId}"></p>
+                    </div>
+                    <div class="box-footer">
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
 </section>
 </body>
-
 </html>

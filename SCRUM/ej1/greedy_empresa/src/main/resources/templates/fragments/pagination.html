@@ -1,21 +1,17 @@
 <th:block xmlns:th="http://www.thymeleaf.org" th:fragment="pagination(page, baseUrl)">
     <nav th:if="${page.totalPages} > 1" aria-label="Paginación">
-        <ul class="pagination justify-content-end mb-0">
-            <li class="page-item" th:classappend="${page.first} ? ' disabled'">
-                <a class="page-link" th:href="@{${baseUrl}(page=${page.number - 1},size=${page.size},filtro=${param.filtro},paisId=${param.paisId},provinciaId=${param.provinciaId},departamentoId=${param.departamentoId})}"
-                    aria-label="Anterior">
+        <ul class="pagination pagination-sm pull-right" style="margin:0;">
+            <li th:classappend="${page.first} ? ' disabled'">
+                <a th:href="@{${baseUrl}(page=${page.number - 1},size=${page.size},filtro=${param.filtro},paisId=${param.paisId},provinciaId=${param.provinciaId},departamentoId=${param.departamentoId})}" aria-label="Anterior">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
             </li>
-            <li class="page-item" th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
-                th:classappend="${page.number} == ${i} ? ' active'">
-                <a class="page-link"
-                    th:href="@{${baseUrl}(page=${i},size=${page.size},filtro=${param.filtro},paisId=${param.paisId},provinciaId=${param.provinciaId},departamentoId=${param.departamentoId})}"
-                    th:text="${i + 1}">1</a>
+            <li th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}" th:classappend="${page.number} == ${i} ? ' active'">
+                <a th:href="@{${baseUrl}(page=${i},size=${page.size},filtro=${param.filtro},paisId=${param.paisId},provinciaId=${param.provinciaId},departamentoId=${param.departamentoId})}"
+                   th:text="${i + 1}">1</a>
             </li>
-            <li class="page-item" th:classappend="${page.last} ? ' disabled'">
-                <a class="page-link" th:href="@{${baseUrl}(page=${page.number + 1},size=${page.size},filtro=${param.filtro},paisId=${param.paisId},provinciaId=${param.provinciaId},departamentoId=${param.departamentoId})}"
-                    aria-label="Siguiente">
+            <li th:classappend="${page.last} ? ' disabled'">
+                <a th:href="@{${baseUrl}(page=${page.number + 1},size=${page.size},filtro=${param.filtro},paisId=${param.paisId},provinciaId=${param.provinciaId},departamentoId=${param.departamentoId})}" aria-label="Siguiente">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
             </li>

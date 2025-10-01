@@ -7,9 +7,9 @@ import com.example.greedy_empresa.servicios.DepartamentoService;
 import com.example.greedy_empresa.servicios.PaisService;
 import com.example.greedy_empresa.servicios.ProvinciaService;
 import jakarta.validation.Valid;
-import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
@@ -56,10 +56,11 @@ public class DepartamentoController {
     public String nuevo(@RequestParam(value = "paisId", required = false) String paisId,
             @RequestParam(value = "provinciaId", required = false) String provinciaId,
             Model model) {
-        model.addAttribute("departamento", new Departamento());
-        model.addAttribute("paisId", paisId != null ? paisId : "");
-        model.addAttribute("provinciaId", provinciaId != null ? provinciaId : "");
-        model.addAttribute("provinciasSeleccionadas", obtenerProvincias(paisId));
+        Departamento departamento = new Departamento();
+        departamento.setPaisId(paisId != null ? paisId : "");
+        departamento.setProvinciaId(provinciaId != null ? provinciaId : "");
+        model.addAttribute("departamento", departamento);
+        model.addAttribute("provinciasSeleccionadas", obtenerProvincias(departamento.getPaisId()));
         model.addAttribute("activeMenu", "departamentos");
         return "departamentos/form";
     }
@@ -67,13 +68,17 @@ public class DepartamentoController {
     @PostMapping
     public String crear(@Valid @ModelAttribute("departamento") Departamento departamento,
             BindingResult bindingResult,
-            @RequestParam("paisId") String paisId,
-            @RequestParam("provinciaId") String provinciaId,
             RedirectAttributes redirectAttributes,
             Model model) {
+        String paisId = departamento.getPaisId();
+        String provinciaId = departamento.getProvinciaId();
+        if (paisId == null || paisId.isBlank()) {
+            bindingResult.rejectValue("paisId", "error.paisId", "El país es obligatorio");
+        }
+        if (provinciaId == null || provinciaId.isBlank()) {
+            bindingResult.rejectValue("provinciaId", "error.provinciaId", "La provincia es obligatoria");
+        }
         if (bindingResult.hasErrors()) {
-            model.addAttribute("paisId", paisId);
-            model.addAttribute("provinciaId", provinciaId);
             model.addAttribute("provinciasSeleccionadas", obtenerProvincias(paisId));
             model.addAttribute("activeMenu", "departamentos");
             return "departamentos/form";
@@ -82,10 +87,10 @@ public class DepartamentoController {
             departamentoService.guardar(departamento, provinciaId);
             redirectAttributes.addFlashAttribute("successMessage", "Departamento guardado correctamente");
             return "redirect:/departamentos";
-        } catch (IllegalArgumentException ex) {
-            bindingResult.reject("error.general", ex.getMessage());
-            model.addAttribute("paisId", paisId);
-            model.addAttribute("provinciaId", provinciaId);
+        } catch (IllegalArgumentException | DataIntegrityViolationException ex) {
+            String message = ex instanceof IllegalArgumentException ? ex.getMessage()
+                    : "Los datos ingresados ya existen o no son válidos.";
+            bindingResult.reject("error.general", message);
             model.addAttribute("provinciasSeleccionadas", obtenerProvincias(paisId));
             model.addAttribute("activeMenu", "departamentos");
             return "departamentos/form";
@@ -110,13 +115,17 @@ public class DepartamentoController {
     public String actualizar(@PathVariable String id,
             @Valid @ModelAttribute("departamento") Departamento departamento,
             BindingResult bindingResult,
-            @RequestParam("paisId") String paisId,
-            @RequestParam("provinciaId") String provinciaId,
             RedirectAttributes redirectAttributes,
             Model model) {
+        String paisId = departamento.getPaisId();
+        String provinciaId = departamento.getProvinciaId();
+        if (paisId == null || paisId.isBlank()) {
+            bindingResult.rejectValue("paisId", "error.paisId", "El país es obligatorio");
+        }
+        if (provinciaId == null || provinciaId.isBlank()) {
+            bindingResult.rejectValue("provinciaId", "error.provinciaId", "La provincia es obligatoria");
+        }
         if (bindingResult.hasErrors()) {
-            model.addAttribute("paisId", paisId);
-            model.addAttribute("provinciaId", provinciaId);
             model.addAttribute("provinciasSeleccionadas", obtenerProvincias(paisId));
             model.addAttribute("activeMenu", "departamentos");
             return "departamentos/form";
@@ -126,10 +135,10 @@ public class DepartamentoController {
             departamentoService.guardar(departamento, provinciaId);
             redirectAttributes.addFlashAttribute("successMessage", "Departamento actualizado correctamente");
             return "redirect:/departamentos";
-        } catch (IllegalArgumentException ex) {
-            bindingResult.reject("error.general", ex.getMessage());
-            model.addAttribute("paisId", paisId);
-            model.addAttribute("provinciaId", provinciaId);
+        } catch (IllegalArgumentException | DataIntegrityViolationException ex) {
+            String message = ex instanceof IllegalArgumentException ? ex.getMessage()
+                    : "Los datos ingresados ya existen o no son válidos.";
+            bindingResult.reject("error.general", message);
             model.addAttribute("provinciasSeleccionadas", obtenerProvincias(paisId));
             model.addAttribute("activeMenu", "departamentos");
             return "departamentos/form";
@@ -145,7 +154,7 @@ public class DepartamentoController {
 
     private List<Provincia> obtenerProvincias(String paisId) {
         if (paisId == null || paisId.isBlank()) {
-            return Collections.emptyList();
+            return provinciaService.listarTodas();
         }
         return provinciaService.listarPorPais(paisId);
     }

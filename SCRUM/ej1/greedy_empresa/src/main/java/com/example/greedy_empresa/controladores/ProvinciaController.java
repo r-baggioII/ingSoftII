@@ -6,6 +6,7 @@ import com.example.greedy_empresa.servicios.PaisService;
 import com.example.greedy_empresa.servicios.ProvinciaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
@@ -47,8 +48,9 @@ public class ProvinciaController {
 
     @GetMapping("/new")
     public String nuevo(Model model) {
-        model.addAttribute("provincia", new Provincia());
-        model.addAttribute("paisId", "");
+        Provincia provincia = new Provincia();
+        provincia.setPaisId("");
+        model.addAttribute("provincia", provincia);
         model.addAttribute("activeMenu", "provincias");
         return "provincias/form";
     }
@@ -56,11 +58,13 @@ public class ProvinciaController {
     @PostMapping
     public String crear(@Valid @ModelAttribute("provincia") Provincia provincia,
             BindingResult bindingResult,
-            @RequestParam("paisId") String paisId,
             RedirectAttributes redirectAttributes,
             Model model) {
+        String paisId = provincia.getPaisId();
+        if (paisId == null || paisId.isBlank()) {
+            bindingResult.rejectValue("paisId", "error.paisId", "El país es obligatorio");
+        }
         if (bindingResult.hasErrors()) {
-            model.addAttribute("paisId", paisId);
             model.addAttribute("activeMenu", "provincias");
             return "provincias/form";
         }
@@ -68,9 +72,10 @@ public class ProvinciaController {
             provinciaService.guardar(provincia, paisId);
             redirectAttributes.addFlashAttribute("successMessage", "Provincia guardada correctamente");
             return "redirect:/provincias";
-        } catch (IllegalArgumentException ex) {
-            bindingResult.reject("error.general", ex.getMessage());
-            model.addAttribute("paisId", paisId);
+        } catch (IllegalArgumentException | DataIntegrityViolationException ex) {
+            String message = ex instanceof IllegalArgumentException ? ex.getMessage()
+                    : "Los datos ingresados ya existen o no son válidos.";
+            bindingResult.reject("error.general", message);
             model.addAttribute("activeMenu", "provincias");
             return "provincias/form";
         }
@@ -89,11 +94,13 @@ public class ProvinciaController {
     public String actualizar(@PathVariable String id,
             @Valid @ModelAttribute("provincia") Provincia provincia,
             BindingResult bindingResult,
-            @RequestParam("paisId") String paisId,
             RedirectAttributes redirectAttributes,
             Model model) {
+        String paisId = provincia.getPaisId();
+        if (paisId == null || paisId.isBlank()) {
+            bindingResult.rejectValue("paisId", "error.paisId", "El país es obligatorio");
+        }
         if (bindingResult.hasErrors()) {
-            model.addAttribute("paisId", paisId);
             model.addAttribute("activeMenu", "provincias");
             return "provincias/form";
         }
@@ -102,9 +109,10 @@ public class ProvinciaController {
             provinciaService.guardar(provincia, paisId);
             redirectAttributes.addFlashAttribute("successMessage", "Provincia actualizada correctamente");
             return "redirect:/provincias";
-        } catch (IllegalArgumentException ex) {
-            bindingResult.reject("error.general", ex.getMessage());
-            model.addAttribute("paisId", paisId);
+        } catch (IllegalArgumentException | DataIntegrityViolationException ex) {
+            String message = ex instanceof IllegalArgumentException ? ex.getMessage()
+                    : "Los datos ingresados ya existen o no son válidos.";
+            bindingResult.reject("error.general", message);
             model.addAttribute("activeMenu", "provincias");
             return "provincias/form";
         }

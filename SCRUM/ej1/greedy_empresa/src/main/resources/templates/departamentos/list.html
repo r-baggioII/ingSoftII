@@ -1,55 +1,49 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/layout :: layout(~{::title}, ~{::content})}">
-
 <head>
     <title>Departamentos</title>
 </head>
-
 <body>
 <section th:fragment="content">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Departamentos</h1>
-        <a class="btn btn-primary" th:href="@{/departamentos/new}">
-            <i class="fas fa-plus"></i> Nuevo Departamento
-        </a>
-    </div>
-    <div th:insert="~{fragments/alerts :: alerts}"></div>
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <form class="form-inline" method="get" th:action="@{/departamentos}">
-                <div class="form-group mr-2 mb-2">
-                    <input type="text" class="form-control" placeholder="Buscar por nombre" name="filtro"
-                        th:value="${filtro}">
-                </div>
-                <div class="form-group mr-2 mb-2">
-                    <select class="form-control" name="paisId" id="filtroPais" th:value="${paisId}">
-                        <option value="">Todos los países</option>
-                        <option th:each="pais : ${paises}" th:value="${pais.id}" th:selected="${pais.id == paisId}"
-                            th:text="${pais.nombre}"></option>
-                    </select>
-                </div>
-                <div class="form-group mr-2 mb-2">
-                    <select class="form-control" name="provinciaId" id="filtroProvincia" th:value="${provinciaId}">
-                        <option value="">Todas las provincias</option>
-                        <option th:each="provincia : ${provinciasSeleccionadas}" th:value="${provincia.id}"
-                            th:selected="${provincia.id == provinciaId}" th:text="${provincia.nombre}"></option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-outline-primary mb-2">
-                    <i class="fas fa-filter"></i> Filtrar
-                </button>
-            </form>
+    <section class="content-header">
+        <h1>Departamentos</h1>
+        <div class="pull-right">
+            <a class="btn btn-primary" th:href="@{/departamentos/new}"><i class="fa fa-plus"></i> Nuevo departamento</a>
         </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered" width="100%" cellspacing="0">
-                    <thead class="thead-light">
+    </section>
+    <section class="content">
+        <div th:insert="~{fragments/alerts :: alerts}"></div>
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <form class="form-inline" method="get" th:action="@{/departamentos}">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Buscar por nombre" name="filtro"
+                               th:value="${filtro}">
+                    </div>
+                    <div class="form-group">
+                        <select class="form-control" name="paisId" id="filtroPais" th:value="${paisId}">
+                            <option value="">Todos los países</option>
+                            <option th:each="pais : ${paises}" th:value="${pais.id}" th:text="${pais.nombre}" th:selected="${pais.id == paisId}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select class="form-control" name="provinciaId" id="filtroProvincia" th:value="${provinciaId}">
+                            <option value="">Todas las provincias</option>
+                            <option th:each="provincia : ${provinciasSeleccionadas}" th:value="${provincia.id}" th:text="${provincia.nombre}" th:selected="${provincia.id == provinciaId}"></option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-default"><i class="fa fa-search"></i> Filtrar</button>
+                </form>
+            </div>
+            <div class="box-body table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
                         <tr>
                             <th>Departamento</th>
                             <th>Provincia</th>
                             <th>País</th>
-                            <th class="text-right">Acciones</th>
+                            <th class="text-center" style="width:120px;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -58,18 +52,16 @@
                         </tr>
                         <tr th:each="departamento : ${page.content}">
                             <td th:text="${departamento.nombre}">Centro</td>
-                            <td th:text="${departamento.provincia != null ? departamento.provincia.nombre : ''}">Buenos Aires</td>
-                            <td th:text="${departamento.provincia != null && departamento.provincia.pais != null ? departamento.provincia.pais.nombre : ''}">Argentina</td>
-                            <td class="text-right">
-                                <a class="btn btn-sm btn-outline-primary"
-                                    th:href="@{'/departamentos/' + ${departamento.id} + '/edit'}">
-                                    <i class="fas fa-edit"></i>
+                            <td th:text="${departamento.provincia != null ? departamento.provincia.nombre : ''}"></td>
+                            <td th:text="${departamento.provincia != null && departamento.provincia.pais != null ? departamento.provincia.pais.nombre : ''}"></td>
+                            <td class="text-center">
+                                <a class="btn btn-xs btn-default" th:href="@{'/departamentos/' + ${departamento.id} + '/edit'}" title="Editar">
+                                    <i class="fa fa-pencil"></i>
                                 </a>
-                                <form th:action="@{'/departamentos/' + ${departamento.id} + '/delete'}" method="post"
-                                    class="d-inline"
-                                    onsubmit="return confirm('¿Confirma eliminar el departamento seleccionado?');">
-                                    <button class="btn btn-sm btn-outline-danger" type="submit">
-                                        <i class="fas fa-trash"></i>
+                                <form th:action="@{'/departamentos/' + ${departamento.id} + '/delete'}" method="post" style="display:inline-block;"
+                                      onsubmit="return confirm('¿Confirma eliminar el departamento seleccionado?');">
+                                    <button class="btn btn-xs btn-danger" type="submit" title="Eliminar">
+                                        <i class="fa fa-trash"></i>
                                     </button>
                                 </form>
                             </td>
@@ -77,10 +69,9 @@
                     </tbody>
                 </table>
             </div>
-            <div th:insert="~{fragments/pagination :: pagination(${page}, '/departamentos')}"></div>
+            <div class="box-footer clearfix" th:insert="~{fragments/pagination :: pagination(${page}, '/departamentos')}"></div>
         </div>
-    </div>
+    </section>
 </section>
 </body>
-
 </html>

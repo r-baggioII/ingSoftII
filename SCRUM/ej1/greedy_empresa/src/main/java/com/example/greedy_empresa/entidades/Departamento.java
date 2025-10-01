@@ -13,7 +13,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,7 +36,6 @@ public class Departamento extends BaseEntity {
     @Column(name = "nombre", nullable = false, length = 120)
     private String nombre;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "provincia_id", nullable = false)
     @ToString.Exclude

@@ -1,37 +1,37 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/layout :: layout(~{::title}, ~{::content})}">
-
 <head>
-    <title th:text="${empresa.id} == null ? 'Nueva Empresa' : 'Editar Empresa'"></title>
+    <title th:text="${empresa.id} == null ? 'Nueva empresa' : 'Editar empresa'"></title>
 </head>
-
 <body>
 <section th:fragment="content">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800" th:text="${empresa.id} == null ? 'Nueva Empresa' : 'Editar Empresa'"></h1>
-        <a class="btn btn-secondary" th:href="@{/empresas}">
-            <i class="fas fa-arrow-left"></i> Volver
-        </a>
-    </div>
-    <div th:insert="~{fragments/alerts :: alerts}"></div>
-    <div class="card shadow mb-4">
-        <div class="card-body">
-            <form th:action="${empresa.id} == null ? @{/empresas} : @{'/empresas/' + ${empresa.id}}" method="post"
-                th:object="${empresa}">
-                <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger"
-                    th:each="err : ${#fields.globalErrors()}" th:text="${err.defaultMessage}"></div>
-                <input type="hidden" th:field="*{id}">
-                <div class="form-group">
-                    <label for="razonSocial">Razón social</label>
-                    <input type="text" class="form-control" id="razonSocial" th:field="*{razonSocial}" required>
-                    <div class="text-danger" th:if="${#fields.hasErrors('razonSocial')}" th:errors="*{razonSocial}"></div>
-                </div>
-                <button type="submit" class="btn btn-primary">Guardar</button>
-            </form>
+    <section class="content-header">
+        <h1 th:text="${empresa.id} == null ? 'Nueva empresa' : 'Editar empresa'"></h1>
+        <div class="pull-right">
+            <a class="btn btn-default" th:href="@{/empresas}"><i class="fa fa-arrow-left"></i> Volver</a>
         </div>
-    </div>
+    </section>
+    <section class="content">
+        <div class="box box-primary">
+            <div class="box-body">
+                <form th:action="${empresa.id} == null ? @{/empresas} : @{'/empresas/' + ${empresa.id}}" method="post"
+                      th:object="${empresa}">
+                    <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger"
+                         th:each="err : ${#fields.globalErrors()}" th:text="${err.defaultMessage}"></div>
+                    <input type="hidden" th:field="*{id}" />
+                    <div class="form-group">
+                        <label for="razonSocial">Razón social</label>
+                        <input type="text" class="form-control" id="razonSocial" th:field="*{razonSocial}" required>
+                        <p class="text-danger" th:if="${#fields.hasErrors('razonSocial')}" th:errors="*{razonSocial}"></p>
+                    </div>
+                    <div class="box-footer">
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
 </section>
 </body>
-
 </html>

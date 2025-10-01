@@ -8,7 +8,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,7 +34,6 @@ public class Localidad extends BaseEntity {
     @Column(name = "codigo_postal", nullable = false, length = 20)
     private String codigoPostal;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "departamento_id", nullable = false)
     @ToString.Exclude

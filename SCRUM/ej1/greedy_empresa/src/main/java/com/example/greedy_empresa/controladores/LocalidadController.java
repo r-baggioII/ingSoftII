@@ -9,9 +9,9 @@ import com.example.greedy_empresa.servicios.LocalidadService;
 import com.example.greedy_empresa.servicios.PaisService;
 import com.example.greedy_empresa.servicios.ProvinciaService;
 import jakarta.validation.Valid;
-import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
@@ -63,12 +63,13 @@ public class LocalidadController {
             @RequestParam(value = "provinciaId", required = false) String provinciaId,
             @RequestParam(value = "departamentoId", required = false) String departamentoId,
             Model model) {
-        model.addAttribute("localidad", new Localidad());
-        model.addAttribute("paisId", paisId != null ? paisId : "");
-        model.addAttribute("provinciaId", provinciaId != null ? provinciaId : "");
-        model.addAttribute("departamentoId", departamentoId != null ? departamentoId : "");
-        model.addAttribute("provinciasSeleccionadas", obtenerProvincias(paisId));
-        model.addAttribute("departamentosSeleccionados", obtenerDepartamentos(provinciaId));
+        Localidad localidad = new Localidad();
+        localidad.setPaisId(paisId != null ? paisId : "");
+        localidad.setProvinciaId(provinciaId != null ? provinciaId : "");
+        localidad.setDepartamentoId(departamentoId != null ? departamentoId : "");
+        model.addAttribute("localidad", localidad);
+        model.addAttribute("provinciasSeleccionadas", obtenerProvincias(localidad.getPaisId()));
+        model.addAttribute("departamentosSeleccionados", obtenerDepartamentos(localidad.getProvinciaId()));
         model.addAttribute("activeMenu", "localidades");
         return "localidades/form";
     }
@@ -76,15 +77,21 @@ public class LocalidadController {
     @PostMapping
     public String crear(@Valid @ModelAttribute("localidad") Localidad localidad,
             BindingResult bindingResult,
-            @RequestParam("paisId") String paisId,
-            @RequestParam("provinciaId") String provinciaId,
-            @RequestParam("departamentoId") String departamentoId,
             RedirectAttributes redirectAttributes,
             Model model) {
+        String paisId = localidad.getPaisId();
+        String provinciaId = localidad.getProvinciaId();
+        String departamentoId = localidad.getDepartamentoId();
+        if (paisId == null || paisId.isBlank()) {
+            bindingResult.rejectValue("paisId", "error.paisId", "El país es obligatorio");
+        }
+        if (provinciaId == null || provinciaId.isBlank()) {
+            bindingResult.rejectValue("provinciaId", "error.provinciaId", "La provincia es obligatoria");
+        }
+        if (departamentoId == null || departamentoId.isBlank()) {
+            bindingResult.rejectValue("departamentoId", "error.departamentoId", "El departamento es obligatorio");
+        }
         if (bindingResult.hasErrors()) {
-            model.addAttribute("paisId", paisId);
-            model.addAttribute("provinciaId", provinciaId);
-            model.addAttribute("departamentoId", departamentoId);
             model.addAttribute("provinciasSeleccionadas", obtenerProvincias(paisId));
             model.addAttribute("departamentosSeleccionados", obtenerDepartamentos(provinciaId));
             model.addAttribute("activeMenu", "localidades");
@@ -94,11 +101,10 @@ public class LocalidadController {
             localidadService.guardar(localidad, departamentoId);
             redirectAttributes.addFlashAttribute("successMessage", "Localidad guardada correctamente");
             return "redirect:/localidades";
-        } catch (IllegalArgumentException ex) {
-            bindingResult.reject("error.general", ex.getMessage());
-            model.addAttribute("paisId", paisId);
-            model.addAttribute("provinciaId", provinciaId);
-            model.addAttribute("departamentoId", departamentoId);
+        } catch (IllegalArgumentException | DataIntegrityViolationException ex) {
+            String message = ex instanceof IllegalArgumentException ? ex.getMessage()
+                    : "Los datos ingresados ya existen o no son válidos.";
+            bindingResult.reject("error.general", message);
             model.addAttribute("provinciasSeleccionadas", obtenerProvincias(paisId));
             model.addAttribute("departamentosSeleccionados", obtenerDepartamentos(provinciaId));
             model.addAttribute("activeMenu", "localidades");
@@ -130,15 +136,21 @@ public class LocalidadController {
     public String actualizar(@PathVariable String id,
             @Valid @ModelAttribute("localidad") Localidad localidad,
             BindingResult bindingResult,
-            @RequestParam("paisId") String paisId,
-            @RequestParam("provinciaId") String provinciaId,
-            @RequestParam("departamentoId") String departamentoId,
             RedirectAttributes redirectAttributes,
             Model model) {
+        String paisId = localidad.getPaisId();
+        String provinciaId = localidad.getProvinciaId();
+        String departamentoId = localidad.getDepartamentoId();
+        if (paisId == null || paisId.isBlank()) {
+            bindingResult.rejectValue("paisId", "error.paisId", "El país es obligatorio");
+        }
+        if (provinciaId == null || provinciaId.isBlank()) {
+            bindingResult.rejectValue("provinciaId", "error.provinciaId", "La provincia es obligatoria");
+        }
+        if (departamentoId == null || departamentoId.isBlank()) {
+            bindingResult.rejectValue("departamentoId", "error.departamentoId", "El departamento es obligatorio");
+        }
         if (bindingResult.hasErrors()) {
-            model.addAttribute("paisId", paisId);
-            model.addAttribute("provinciaId", provinciaId);
-            model.addAttribute("departamentoId", departamentoId);
             model.addAttribute("provinciasSeleccionadas", obtenerProvincias(paisId));
             model.addAttribute("departamentosSeleccionados", obtenerDepartamentos(provinciaId));
             model.addAttribute("activeMenu", "localidades");
@@ -149,11 +161,10 @@ public class LocalidadController {
             localidadService.guardar(localidad, departamentoId);
             redirectAttributes.addFlashAttribute("successMessage", "Localidad actualizada correctamente");
             return "redirect:/localidades";
-        } catch (IllegalArgumentException ex) {
-            bindingResult.reject("error.general", ex.getMessage());
-            model.addAttribute("paisId", paisId);
-            model.addAttribute("provinciaId", provinciaId);
-            model.addAttribute("departamentoId", departamentoId);
+        } catch (IllegalArgumentException | DataIntegrityViolationException ex) {
+            String message = ex instanceof IllegalArgumentException ? ex.getMessage()
+                    : "Los datos ingresados ya existen o no son válidos.";
+            bindingResult.reject("error.general", message);
             model.addAttribute("provinciasSeleccionadas", obtenerProvincias(paisId));
             model.addAttribute("departamentosSeleccionados", obtenerDepartamentos(provinciaId));
             model.addAttribute("activeMenu", "localidades");
@@ -170,14 +181,14 @@ public class LocalidadController {
 
     private List<Provincia> obtenerProvincias(String paisId) {
         if (paisId == null || paisId.isBlank()) {
-            return Collections.emptyList();
+            return provinciaService.listarTodas();
         }
         return provinciaService.listarPorPais(paisId);
     }
 
     private List<Departamento> obtenerDepartamentos(String provinciaId) {
         if (provinciaId == null || provinciaId.isBlank()) {
-            return Collections.emptyList();
+            return departamentoService.listarTodos();
         }
         return departamentoService.listarPorProvincia(provinciaId);
     }

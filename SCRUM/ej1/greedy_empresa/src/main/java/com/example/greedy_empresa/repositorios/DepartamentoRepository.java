@@ -25,6 +25,8 @@ public interface DepartamentoRepository extends JpaRepository<Departamento, Stri
 
     List<Departamento> findByProvincia_IdAndEliminadoFalseOrderByNombreAsc(String provinciaId);
 
+    List<Departamento> findByEliminadoFalseOrderByNombreAsc();
+
     Optional<Departamento> findByNombreIgnoreCaseAndProvincia_Id(String nombre, String provinciaId);
 
     Optional<Departamento> findByNombreIgnoreCaseAndProvincia_IdAndEliminadoFalse(String nombre, String provinciaId);

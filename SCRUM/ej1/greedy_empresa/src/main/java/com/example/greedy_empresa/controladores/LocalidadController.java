@@ -1,0 +1,184 @@
+package com.example.greedy_empresa.controladores;
+
+import com.example.greedy_empresa.entidades.Departamento;
+import com.example.greedy_empresa.entidades.Localidad;
+import com.example.greedy_empresa.entidades.Pais;
+import com.example.greedy_empresa.entidades.Provincia;
+import com.example.greedy_empresa.servicios.DepartamentoService;
+import com.example.greedy_empresa.servicios.LocalidadService;
+import com.example.greedy_empresa.servicios.PaisService;
+import com.example.greedy_empresa.servicios.ProvinciaService;
+import jakarta.validation.Valid;
+import java.util.Collections;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+@Controller
+@RequestMapping("/localidades")
+@RequiredArgsConstructor
+public class LocalidadController {
+
+    private final LocalidadService localidadService;
+    private final DepartamentoService departamentoService;
+    private final ProvinciaService provinciaService;
+    private final PaisService paisService;
+
+    @ModelAttribute("paises")
+    public List<Pais> cargarPaises() {
+        return paisService.listarActivos();
+    }
+
+    @GetMapping
+    public String listar(@RequestParam(value = "filtro", required = false) String filtro,
+            @RequestParam(value = "paisId", required = false) String paisId,
+            @RequestParam(value = "provinciaId", required = false) String provinciaId,
+            @RequestParam(value = "departamentoId", required = false) String departamentoId,
+            @PageableDefault(size = 10) Pageable pageable,
+            Model model) {
+        model.addAttribute("page", localidadService.buscar(filtro, paisId, provinciaId, departamentoId, pageable));
+        model.addAttribute("filtro", filtro);
+        model.addAttribute("paisId", paisId);
+        model.addAttribute("provinciaId", provinciaId);
+        model.addAttribute("departamentoId", departamentoId);
+        model.addAttribute("provinciasSeleccionadas", obtenerProvincias(paisId));
+        model.addAttribute("departamentosSeleccionados", obtenerDepartamentos(provinciaId));
+        model.addAttribute("activeMenu", "localidades");
+        return "localidades/list";
+    }
+
+    @GetMapping("/new")
+    public String nuevo(@RequestParam(value = "paisId", required = false) String paisId,
+            @RequestParam(value = "provinciaId", required = false) String provinciaId,
+            @RequestParam(value = "departamentoId", required = false) String departamentoId,
+            Model model) {
+        model.addAttribute("localidad", new Localidad());
+        model.addAttribute("paisId", paisId != null ? paisId : "");
+        model.addAttribute("provinciaId", provinciaId != null ? provinciaId : "");
+        model.addAttribute("departamentoId", departamentoId != null ? departamentoId : "");
+        model.addAttribute("provinciasSeleccionadas", obtenerProvincias(paisId));
+        model.addAttribute("departamentosSeleccionados", obtenerDepartamentos(provinciaId));
+        model.addAttribute("activeMenu", "localidades");
+        return "localidades/form";
+    }
+
+    @PostMapping
+    public String crear(@Valid @ModelAttribute("localidad") Localidad localidad,
+            BindingResult bindingResult,
+            @RequestParam("paisId") String paisId,
+            @RequestParam("provinciaId") String provinciaId,
+            @RequestParam("departamentoId") String departamentoId,
+            RedirectAttributes redirectAttributes,
+            Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("paisId", paisId);
+            model.addAttribute("provinciaId", provinciaId);
+            model.addAttribute("departamentoId", departamentoId);
+            model.addAttribute("provinciasSeleccionadas", obtenerProvincias(paisId));
+            model.addAttribute("departamentosSeleccionados", obtenerDepartamentos(provinciaId));
+            model.addAttribute("activeMenu", "localidades");
+            return "localidades/form";
+        }
+        try {
+            localidadService.guardar(localidad, departamentoId);
+            redirectAttributes.addFlashAttribute("successMessage", "Localidad guardada correctamente");
+            return "redirect:/localidades";
+        } catch (IllegalArgumentException ex) {
+            bindingResult.reject("error.general", ex.getMessage());
+            model.addAttribute("paisId", paisId);
+            model.addAttribute("provinciaId", provinciaId);
+            model.addAttribute("departamentoId", departamentoId);
+            model.addAttribute("provinciasSeleccionadas", obtenerProvincias(paisId));
+            model.addAttribute("departamentosSeleccionados", obtenerDepartamentos(provinciaId));
+            model.addAttribute("activeMenu", "localidades");
+            return "localidades/form";
+        }
+    }
+
+    @GetMapping("/{id}/edit")
+    public String editar(@PathVariable String id, Model model) {
+        Localidad localidad = localidadService.buscarPorId(id);
+        String paisId = localidad.getDepartamento() != null && localidad.getDepartamento().getProvincia() != null
+                && localidad.getDepartamento().getProvincia().getPais() != null
+                        ? localidad.getDepartamento().getProvincia().getPais().getId() : "";
+        String provinciaId = localidad.getDepartamento() != null && localidad.getDepartamento().getProvincia() != null
+                ? localidad.getDepartamento().getProvincia().getId() : "";
+        String departamentoId = localidad.getDepartamento() != null ? localidad.getDepartamento().getId() : "";
+
+        model.addAttribute("localidad", localidad);
+        model.addAttribute("paisId", paisId);
+        model.addAttribute("provinciaId", provinciaId);
+        model.addAttribute("departamentoId", departamentoId);
+        model.addAttribute("provinciasSeleccionadas", obtenerProvincias(paisId));
+        model.addAttribute("departamentosSeleccionados", obtenerDepartamentos(provinciaId));
+        model.addAttribute("activeMenu", "localidades");
+        return "localidades/form";
+    }
+
+    @PostMapping("/{id}")
+    public String actualizar(@PathVariable String id,
+            @Valid @ModelAttribute("localidad") Localidad localidad,
+            BindingResult bindingResult,
+            @RequestParam("paisId") String paisId,
+            @RequestParam("provinciaId") String provinciaId,
+            @RequestParam("departamentoId") String departamentoId,
+            RedirectAttributes redirectAttributes,
+            Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("paisId", paisId);
+            model.addAttribute("provinciaId", provinciaId);
+            model.addAttribute("departamentoId", departamentoId);
+            model.addAttribute("provinciasSeleccionadas", obtenerProvincias(paisId));
+            model.addAttribute("departamentosSeleccionados", obtenerDepartamentos(provinciaId));
+            model.addAttribute("activeMenu", "localidades");
+            return "localidades/form";
+        }
+        try {
+            localidad.setId(id);
+            localidadService.guardar(localidad, departamentoId);
+            redirectAttributes.addFlashAttribute("successMessage", "Localidad actualizada correctamente");
+            return "redirect:/localidades";
+        } catch (IllegalArgumentException ex) {
+            bindingResult.reject("error.general", ex.getMessage());
+            model.addAttribute("paisId", paisId);
+            model.addAttribute("provinciaId", provinciaId);
+            model.addAttribute("departamentoId", departamentoId);
+            model.addAttribute("provinciasSeleccionadas", obtenerProvincias(paisId));
+            model.addAttribute("departamentosSeleccionados", obtenerDepartamentos(provinciaId));
+            model.addAttribute("activeMenu", "localidades");
+            return "localidades/form";
+        }
+    }
+
+    @PostMapping("/{id}/delete")
+    public String eliminar(@PathVariable String id, RedirectAttributes redirectAttributes) {
+        localidadService.eliminar(id);
+        redirectAttributes.addFlashAttribute("successMessage", "Localidad eliminada correctamente");
+        return "redirect:/localidades";
+    }
+
+    private List<Provincia> obtenerProvincias(String paisId) {
+        if (paisId == null || paisId.isBlank()) {
+            return Collections.emptyList();
+        }
+        return provinciaService.listarPorPais(paisId);
+    }
+
+    private List<Departamento> obtenerDepartamentos(String provinciaId) {
+        if (provinciaId == null || provinciaId.isBlank()) {
+            return Collections.emptyList();
+        }
+        return departamentoService.listarPorProvincia(provinciaId);
+    }
+}

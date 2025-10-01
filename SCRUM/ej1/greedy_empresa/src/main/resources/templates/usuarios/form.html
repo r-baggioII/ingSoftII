@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout :: layout(~{::title}, ~{::content})}">
+
+<head>
+    <title th:text="${usuario.id} == null ? 'Nuevo Usuario' : 'Editar Usuario'"></title>
+</head>
+
+<body>
+<section th:fragment="content">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800" th:text="${usuario.id} == null ? 'Nuevo Usuario' : 'Editar Usuario'"></h1>
+        <a class="btn btn-secondary" th:href="@{/usuarios}">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form th:action="${usuario.id} == null ? @{/usuarios} : @{'/usuarios/' + ${usuario.id}}" method="post"
+                th:object="${usuario}">
+                <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger"
+                    th:each="err : ${#fields.globalErrors()}" th:text="${err.defaultMessage}"></div>
+                <input type="hidden" th:field="*{id}">
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="username">Usuario</label>
+                        <input type="text" class="form-control" id="username" th:field="*{username}" required>
+                        <div class="text-danger" th:if="${#fields.hasErrors('username')}"
+                            th:errors="*{username}"></div>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="rol">Rol</label>
+                        <select class="form-control" id="rol" th:field="*{rol}" required>
+                            <option th:each="rol : ${roles}" th:value="${rol}" th:text="${rol}">ADMIN</option>
+                        </select>
+                        <div class="text-danger" th:if="${#fields.hasErrors('rol')}" th:errors="*{rol}"></div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="password">Contraseña</label>
+                        <input type="password" class="form-control" id="password" th:field="*{password}"
+                            th:attr="${usuario.id} != null ? 'placeholder=Dejar en blanco para mantener' : 'required=required'">
+                        <div class="text-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="confirmPassword">Confirmación</label>
+                        <input type="password" class="form-control" id="confirmPassword"
+                            th:field="*{confirmPassword}"
+                            th:attr="${usuario.id} != null ? 'placeholder=Dejar en blanco para mantener' : 'required=required'">
+                        <div class="text-danger" th:if="${#fields.hasErrors('confirmPassword')}"
+                            th:errors="*{confirmPassword}"></div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+            </form>
+        </div>
+    </div>
+</section>
+</body>
+
+</html>

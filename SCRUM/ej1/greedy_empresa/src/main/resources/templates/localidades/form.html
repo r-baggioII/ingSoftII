@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout :: layout(~{::title}, ~{::content})}">
+
+<head>
+    <title th:text="${localidad.id} == null ? 'Nueva Localidad' : 'Editar Localidad'"></title>
+</head>
+
+<body>
+<section th:fragment="content">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800" th:text="${localidad.id} == null ? 'Nueva Localidad' : 'Editar Localidad'"></h1>
+        <a class="btn btn-secondary" th:href="@{/localidades}">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form th:action="${localidad.id} == null ? @{/localidades} : @{'/localidades/' + ${localidad.id}}"
+                method="post" th:object="${localidad}">
+                <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger"
+                    th:each="err : ${#fields.globalErrors()}" th:text="${err.defaultMessage}"></div>
+                <input type="hidden" th:field="*{id}">
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="nombre">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required>
+                        <div class="text-danger" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="codigoPostal">Código Postal</label>
+                        <input type="text" class="form-control" id="codigoPostal" th:field="*{codigoPostal}" required>
+                        <div class="text-danger" th:if="${#fields.hasErrors('codigoPostal')}"
+                            th:errors="*{codigoPostal}"></div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <label for="paisSelect">País</label>
+                        <select class="form-control" id="paisSelect" name="paisId" th:value="${paisId}" required>
+                            <option value="">Seleccione un país</option>
+                            <option th:each="pais : ${paises}" th:value="${pais.id}"
+                                th:selected="${pais.id == paisId}" th:text="${pais.nombre}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="provinciaSelect">Provincia</label>
+                        <select class="form-control" id="provinciaSelect" name="provinciaId"
+                            th:value="${provinciaId}" required>
+                            <option value="">Seleccione una provincia</option>
+                            <option th:each="provincia : ${provinciasSeleccionadas}" th:value="${provincia.id}"
+                                th:selected="${provincia.id == provinciaId}" th:text="${provincia.nombre}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="departamentoId">Departamento</label>
+                        <select class="form-control" id="departamentoId" name="departamentoId"
+                            th:value="${departamentoId}" required>
+                            <option value="">Seleccione un departamento</option>
+                            <option th:each="departamento : ${departamentosSeleccionados}" th:value="${departamento.id}"
+                                th:selected="${departamento.id == departamentoId}"
+                                th:text="${departamento.nombre}"></option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+            </form>
+        </div>
+    </div>
+</section>
+</body>
+
+</html>

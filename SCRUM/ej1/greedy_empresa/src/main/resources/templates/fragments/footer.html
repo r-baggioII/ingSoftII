@@ -1,0 +1,9 @@
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="footer">
+    <footer class="sticky-footer bg-white">
+        <div class="container my-auto">
+            <div class="copyright text-center my-auto">
+                <span>© Greedy Empresa <span th:text="${#temporals.format(#temporals.createNow(), 'yyyy')}">2024</span></span>
+            </div>
+        </div>
+    </footer>
+</th:block>

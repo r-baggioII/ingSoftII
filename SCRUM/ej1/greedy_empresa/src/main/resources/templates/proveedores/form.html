@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout :: layout(~{::title}, ~{::content})}">
+
+<head>
+    <title th:text="${proveedor.id} == null ? 'Nuevo Proveedor' : 'Editar Proveedor'"></title>
+</head>
+
+<body>
+<section th:fragment="content">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800" th:text="${proveedor.id} == null ? 'Nuevo Proveedor' : 'Editar Proveedor'"></h1>
+        <a class="btn btn-secondary" th:href="@{/proveedores}">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+    <div th:insert="~{fragments/alerts :: alerts}"></div>
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form th:action="${proveedor.id} == null ? @{/proveedores} : @{'/proveedores/' + ${proveedor.id}}" method="post"
+                th:object="${proveedor}">
+                <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger"
+                    th:each="err : ${#fields.globalErrors()}" th:text="${err.defaultMessage}"></div>
+                <input type="hidden" th:field="*{id}">
+                <div class="form-group">
+                    <label for="cuit">CUIT</label>
+                    <input type="text" class="form-control" id="cuit" th:field="*{cuit}" required>
+                    <div class="text-danger" th:if="${#fields.hasErrors('cuit')}" th:errors="*{cuit}"></div>
+                </div>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+            </form>
+        </div>
+    </div>
+</section>
+</body>
+
+</html>

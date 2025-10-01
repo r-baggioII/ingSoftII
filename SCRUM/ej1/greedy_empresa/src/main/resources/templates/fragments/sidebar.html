@@ -1,0 +1,97 @@
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="sidebar(activeMenu)">
+    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+        <a class="sidebar-brand d-flex align-items-center justify-content-center" th:href="@{/}">
+            <div class="sidebar-brand-icon rotate-n-15">
+                <i class="fas fa-building"></i>
+            </div>
+            <div class="sidebar-brand-text mx-3">Greedy<sup>ERP</sup></div>
+        </a>
+
+        <hr class="sidebar-divider my-0">
+
+        <li class="nav-item" th:classappend="${activeMenu} == 'dashboard' ? ' active'">
+            <a class="nav-link" th:href="@{/}">
+                <i class="fas fa-fw fa-tachometer-alt"></i>
+                <span>Dashboard</span></a>
+        </li>
+
+        <hr class="sidebar-divider">
+
+        <div class="sidebar-heading">
+            Usuario
+        </div>
+
+        <li class="nav-item" th:classappend="${activeMenu} == 'usuarios' ? ' active'">
+            <a class="nav-link" th:href="@{/usuarios}">
+                <i class="fas fa-users-cog"></i>
+                <span>ABM Usuarios</span>
+            </a>
+        </li>
+
+        <hr class="sidebar-divider">
+
+        <div class="sidebar-heading">
+            Dirección
+        </div>
+
+        <li class="nav-item" th:classappend="${activeMenu} == 'paises' ? ' active'">
+            <a class="nav-link" th:href="@{/paises}">
+                <i class="fas fa-globe"></i>
+                <span>ABM País</span>
+            </a>
+        </li>
+
+        <li class="nav-item" th:classappend="${activeMenu} == 'provincias' ? ' active'">
+            <a class="nav-link" th:href="@{/provincias}">
+                <i class="fas fa-map-marked-alt"></i>
+                <span>ABM Provincia</span>
+            </a>
+        </li>
+
+        <li class="nav-item" th:classappend="${activeMenu} == 'departamentos' ? ' active'">
+            <a class="nav-link" th:href="@{/departamentos}">
+                <i class="fas fa-city"></i>
+                <span>ABM Departamento</span>
+            </a>
+        </li>
+
+        <li class="nav-item" th:classappend="${activeMenu} == 'localidades' ? ' active'">
+            <a class="nav-link" th:href="@{/localidades}">
+                <i class="fas fa-map-pin"></i>
+                <span>ABM Localidad</span>
+            </a>
+        </li>
+
+        <hr class="sidebar-divider">
+
+        <div class="sidebar-heading">
+            Empresa
+        </div>
+
+        <li class="nav-item" th:classappend="${activeMenu} == 'empresas' ? ' active'">
+            <a class="nav-link" th:href="@{/empresas}">
+                <i class="fas fa-industry"></i>
+                <span>ABM Empresa</span>
+            </a>
+        </li>
+
+        <hr class="sidebar-divider">
+
+        <div class="sidebar-heading">
+            Proveedor
+        </div>
+
+        <li class="nav-item" th:classappend="${activeMenu} == 'proveedores' ? ' active'">
+            <a class="nav-link" th:href="@{/proveedores}">
+                <i class="fas fa-truck-loading"></i>
+                <span>ABM Proveedor</span>
+            </a>
+        </li>
+
+        <hr class="sidebar-divider d-none d-md-block">
+
+        <div class="text-center d-none d-md-inline">
+            <button class="rounded-circle border-0" id="sidebarToggle"></button>
+        </div>
+    </ul>
+</th:block>

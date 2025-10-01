@@ -1,11 +1,16 @@
 package com.example.greedy_empresa.controladores;
 
 import com.example.greedy_empresa.entidades.Proveedor;
+import com.example.greedy_empresa.servicios.ProveedorPdfService;
 import com.example.greedy_empresa.servicios.ProveedorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -17,12 +22,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
 @Controller
 @RequestMapping("/proveedores")
 @RequiredArgsConstructor
 public class ProveedorController {
 
     private final ProveedorService proveedorService;
+    private final ProveedorPdfService proveedorPdfService;
 
     @GetMapping
     public String listar(@RequestParam(value = "filtro", required = false) String filtro,
@@ -94,5 +104,24 @@ public class ProveedorController {
         proveedorService.eliminar(id);
         redirectAttributes.addFlashAttribute("successMessage", "Proveedor eliminado correctamente");
         return "redirect:/proveedores";
+    }
+
+    @GetMapping("/pdf")
+    public ResponseEntity<byte[]> descargarPdf() {
+        try {
+            List<Proveedor> proveedores = proveedorService.obtenerTodosParaPdf();
+            byte[] pdfBytes = proveedorPdfService.generateProveedoresPdf(proveedores);
+            
+            String fileName = "proveedores_" + 
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".pdf";
+            
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(pdfBytes);
+                    
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }

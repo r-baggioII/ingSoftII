@@ -1,0 +1,174 @@
+nohup: no se tendrá en cuenta la entrada
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------< com.example.greedy_empresa:greedy_empresa >--------------
+[INFO] Building greedy_empresa 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.3.5:run (default-cli) > test-compile @ greedy_empresa >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ greedy_empresa ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 584 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ greedy_empresa ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ greedy_empresa ---
+[INFO] Copying 1 resource from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ greedy_empresa ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] <<< spring-boot:3.3.5:run (default-cli) < test-compile @ greedy_empresa <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.3.5:run (default-cli) @ greedy_empresa ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.5)
+
+2025-10-01T16:00:20.219-03:00  INFO 29390 --- [           main] c.e.g.GreedyEmpresaApplication           : Starting GreedyEmpresaApplication using Java 17.0.16 with PID 29390 (/home/rocio/Documentos/GitHub/ingSoftII/SCRUM/ej1/greedy_empresa/target/classes started by rocio in /home/rocio/Documentos/GitHub/ingSoftII/SCRUM/ej1/greedy_empresa)
+2025-10-01T16:00:20.222-03:00  INFO 29390 --- [           main] c.e.g.GreedyEmpresaApplication           : No active profile set, falling back to 1 default profile: "default"
+2025-10-01T16:00:20.773-03:00  INFO 29390 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-10-01T16:00:20.835-03:00  INFO 29390 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 55 ms. Found 9 JPA repository interfaces.
+2025-10-01T16:00:21.304-03:00  INFO 29390 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-10-01T16:00:21.315-03:00  INFO 29390 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-10-01T16:00:21.316-03:00  INFO 29390 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.31]
+2025-10-01T16:00:21.371-03:00  INFO 29390 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-10-01T16:00:21.373-03:00  INFO 29390 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1110 ms
+2025-10-01T16:00:21.510-03:00  INFO 29390 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-10-01T16:00:21.543-03:00  INFO 29390 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.5.3.Final
+2025-10-01T16:00:21.563-03:00  INFO 29390 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-10-01T16:00:21.737-03:00  INFO 29390 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-10-01T16:00:21.755-03:00  INFO 29390 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-10-01T16:00:21.828-03:00  INFO 29390 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.mariadb.jdbc.Connection@1f758e4f
+2025-10-01T16:00:21.829-03:00  INFO 29390 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-10-01T16:00:22.599-03:00  INFO 29390 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Hibernate: 
+    alter table if exists usuario 
+       modify column rol enum ('ADMIN','USER') not null
+2025-10-01T16:00:22.677-03:00  INFO 29390 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-10-01T16:00:23.072-03:00  WARN 29390 --- [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-10-01T16:00:23.423-03:00  INFO 29390 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-10-01T16:00:23.431-03:00  INFO 29390 --- [           main] c.e.g.GreedyEmpresaApplication           : Started GreedyEmpresaApplication in 3.501 seconds (process running for 3.761)
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.eliminado,
+        u1_0.password_hash,
+        u1_0.rol,
+        u1_0.username 
+    from
+        usuario u1_0 
+    where
+        (
+            u1_0.eliminado = 0
+        ) 
+        and upper(u1_0.username)=upper(?)
+Hibernate: 
+    select
+        p1_0.id,
+        p1_0.apellido,
+        p1_0.correo_electronico,
+        p1_0.eliminado,
+        p1_0.nombre,
+        p1_0.telefono,
+        p1_0.usuario_id 
+    from
+        persona p1_0 
+    where
+        p1_0.usuario_id=? 
+        and (
+            p1_0.eliminado = 0
+        )
+Hibernate: 
+    select
+        p1_0.id,
+        p1_0.eliminado,
+        p1_0.nombre 
+    from
+        pais p1_0 
+    where
+        (
+            p1_0.eliminado = 0
+        ) 
+        and upper(p1_0.nombre)=upper(?)
+Hibernate: 
+    select
+        p1_0.id,
+        p1_0.eliminado,
+        p1_0.nombre,
+        p1_0.pais_id 
+    from
+        provincia p1_0 
+    where
+        (
+            p1_0.eliminado = 0
+        ) 
+        and upper(p1_0.nombre)=upper(?) 
+        and p1_0.pais_id=?
+Hibernate: 
+    select
+        d1_0.id,
+        d1_0.eliminado,
+        d1_0.nombre,
+        d1_0.provincia_id 
+    from
+        departamento d1_0 
+    where
+        (
+            d1_0.eliminado = 0
+        ) 
+        and upper(d1_0.nombre)=upper(?) 
+        and d1_0.provincia_id=?
+Hibernate: 
+    select
+        l1_0.id,
+        l1_0.codigo_postal,
+        l1_0.departamento_id,
+        l1_0.eliminado,
+        l1_0.nombre 
+    from
+        localidad l1_0 
+    where
+        (
+            l1_0.eliminado = 0
+        ) 
+        and upper(l1_0.nombre)=upper(?) 
+        and l1_0.departamento_id=?
+Hibernate: 
+    select
+        e1_0.id,
+        e1_0.eliminado,
+        e1_0.razon_social 
+    from
+        empresa e1_0 
+    where
+        (
+            e1_0.eliminado = 0
+        ) 
+        and upper(e1_0.razon_social)=upper(?)
+Hibernate: 
+    select
+        p1_0.id,
+        p1_0.cuit,
+        p1_0.eliminado 
+    from
+        proveedor p1_0 
+    where
+        (
+            p1_0.eliminado = 0
+        ) 
+        and upper(p1_0.cuit)=upper(?)
+2025-10-01T16:02:50.741-03:00  INFO 29390 --- [ionShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-10-01T16:02:50.743-03:00  INFO 29390 --- [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-10-01T16:02:50.747-03:00  INFO 29390 --- [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

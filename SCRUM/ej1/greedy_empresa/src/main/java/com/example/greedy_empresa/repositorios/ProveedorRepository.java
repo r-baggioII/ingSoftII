@@ -1,6 +1,7 @@
 package com.example.greedy_empresa.repositorios;
 
 import com.example.greedy_empresa.entidades.Proveedor;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,4 +18,6 @@ public interface ProveedorRepository extends JpaRepository<Proveedor, String> {
     Optional<Proveedor> findByCuitIgnoreCaseAndEliminadoFalse(String cuit);
 
     long countByEliminadoFalse();
+
+    List<Proveedor> findByEliminadoFalseOrderByCuit();
 }

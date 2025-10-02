@@ -1,0 +1,52 @@
+<!-- create_post.html -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Crear Publicación</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>body{background:#f8f9fa} .app-header{height:56px}</style>
+</head>
+<body>
+<nav class="navbar bg-white shadow-sm app-header">
+  <div class="container-fluid">
+    <a href="index.html" class="btn btn-link">&larr;</a>
+    <span class="navbar-brand mb-0 h1">Crear publicación</span>
+    <div></div>
+  </div>
+</nav>
+
+<main class="container py-3">
+  <div class="card p-3">
+    <div class="mb-3">
+      <label class="form-label">Imagen</label>
+      <input class="form-control" type="file" id="imgInput" accept="image/*">
+      <img id="preview" class="img-fluid mt-2 d-none" alt="preview" style="border-radius:6px;">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Descripción</label>
+      <textarea id="caption" class="form-control" rows="3" placeholder="Escribe algo..."></textarea>
+    </div>
+    <div class="d-grid">
+      <button class="btn btn-primary" onclick="publish()">Publicar</button>
+    </div>
+  </div>
+</main>
+
+<script>
+const input = document.getElementById('imgInput');
+const preview = document.getElementById('preview');
+input.addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const url = URL.createObjectURL(file);
+  preview.src = url; preview.classList.remove('d-none');
+});
+function publish(){
+  alert('Simulación: publicación creada (en la versión final esto enviaría al backend). Se te redirige al feed.');
+  window.location = 'index.html';
+}
+</script>
+</body>
+</html>

@@ -50,6 +50,9 @@
                     <a th:href="@{/proveedores}"><i class="fa fa-truck"></i> <span>Proveedores</span></a>
                 </li>
                 <li class="header">HERRAMIENTAS</li>
+                <li th:classappend="${activeMenu} == 'notificaciones' ? 'active'">
+                    <a th:href="@{/notificaciones}"><i class="fa fa-envelope"></i> <span>Notificaciones</span></a>
+                </li>
                 <li th:classappend="${activeMenu} == 'migracion' ? 'active'">
                     <a th:href="@{/migracion}"><i class="fa fa-upload"></i> <span>Migración</span></a>
                 </li>

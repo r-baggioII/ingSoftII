@@ -64,6 +64,12 @@
             <version>0.4</version>
         </dependency>
 
+        <!-- Dependency for email functionality -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
     
         <!-- Dependency for generating PDF files -->
         <dependency>

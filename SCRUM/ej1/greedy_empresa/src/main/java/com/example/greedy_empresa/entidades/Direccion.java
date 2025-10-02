@@ -6,6 +6,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -54,6 +55,15 @@ public class Direccion extends BaseEntity {
     @Column(name = "referencia", length = 255)
     private String referencia;
 
+    // Coordenadas geográficas (Google Maps) - opcionales
+    @Size(max = 32)
+    @Column(name = "latitud", length = 32)
+    private String latitud;
+
+    @Size(max = 32)
+    @Column(name = "longitud", length = 32)
+    private String longitud;
+
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "localidad_id", nullable = false)
@@ -74,4 +84,14 @@ public class Direccion extends BaseEntity {
     @JoinColumn(name = "proveedor_id")
     @ToString.Exclude
     private Proveedor proveedor;
+
+    @Transient
+    public boolean hasGeoPoint() {
+        return latitud != null && !latitud.isBlank() && longitud != null && !longitud.isBlank();
+    }
+
+    @Transient
+    public String getGoogleMapsUrl() {
+        return hasGeoPoint() ? "https://www.google.com/maps?q=" + latitud + "," + longitud : null;
+    }
 }

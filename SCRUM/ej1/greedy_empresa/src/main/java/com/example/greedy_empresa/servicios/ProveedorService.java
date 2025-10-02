@@ -1,6 +1,7 @@
 package com.example.greedy_empresa.servicios;
 
 import com.example.greedy_empresa.entidades.Proveedor;
+import com.example.greedy_empresa.entidades.ProveedorPersona;
 import com.example.greedy_empresa.repositorios.ProveedorRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,10 @@ public class ProveedorService {
 
     @Transactional
     public Proveedor guardar(Proveedor proveedor) {
+        if (proveedor == null) {
+            throw new IllegalArgumentException("El proveedor no puede ser nulo");
+        }
+        
         String cuitNormalizado = proveedor.getCuit() != null ? proveedor.getCuit().trim() : "";
         if (cuitNormalizado.isEmpty()) {
             throw new IllegalArgumentException("El CUIT es obligatorio");
@@ -44,13 +49,55 @@ public class ProveedorService {
                     throw new IllegalArgumentException("Ya existe un proveedor con ese CUIT");
                 });
 
+        // Crear o actualizar persona
+        if (proveedor.getPersona() != null) {
+            if (proveedor.getPersona().getId() == null) {
+                // Crear nueva persona concreta
+                ProveedorPersona persona = new ProveedorPersona();
+                persona.setNombre(proveedor.getPersona().getNombre());
+                persona.setApellido(proveedor.getPersona().getApellido());
+                persona.setCorreoElectronico(proveedor.getPersona().getCorreoElectronico());
+                persona.setTelefono(proveedor.getPersona().getTelefono());
+                persona.setEliminado(false);
+                proveedor.setPersona(persona);
+            }
+        } else {
+            throw new IllegalArgumentException("Los datos de persona son obligatorios");
+        }
+
+        // Procesar direcciones
+        if (proveedor.getDirecciones() != null) {
+            proveedor.getDirecciones().forEach(direccion -> {
+                if (direccion != null) {
+                    direccion.setProveedor(proveedor);
+                    direccion.setPersona(proveedor.getPersona());
+                    direccion.setEliminado(false);
+                }
+            });
+            // Remover direcciones nulas o vacías
+            proveedor.getDirecciones().removeIf(direccion -> 
+                direccion == null || 
+                (direccion.getCalle() == null || direccion.getCalle().isBlank()) ||
+                (direccion.getNumero() == null || direccion.getNumero().isBlank()) ||
+                direccion.getLocalidad() == null
+            );
+        }
+
         if (proveedor.getId() != null && !proveedor.getId().isBlank()) {
             Proveedor existente = buscarPorId(proveedor.getId());
             existente.setCuit(cuitNormalizado);
-            return existente;
+            existente.setPersona(proveedor.getPersona());
+            existente.getDirecciones().clear();
+            if (proveedor.getDirecciones() != null) {
+                existente.getDirecciones().addAll(proveedor.getDirecciones());
+            }
+            return proveedorRepository.save(existente);
         }
 
         proveedor.setCuit(cuitNormalizado);
+        if (proveedor.getPersona() != null) {
+            proveedor.getPersona().setEliminado(false);
+        }
         return proveedorRepository.save(proveedor);
     }
 

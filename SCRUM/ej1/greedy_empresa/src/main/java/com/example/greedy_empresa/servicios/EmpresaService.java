@@ -44,10 +44,31 @@ public class EmpresaService {
                     throw new IllegalArgumentException("Ya existe una empresa con esa razón social");
                 });
 
+        // Procesar direcciones
+        if (empresa.getDirecciones() != null) {
+            empresa.getDirecciones().forEach(direccion -> {
+                if (direccion != null) {
+                    direccion.setEmpresa(empresa);
+                    direccion.setEliminado(false);
+                }
+            });
+            // Remover direcciones nulas o vacías
+            empresa.getDirecciones().removeIf(direccion -> 
+                direccion == null || 
+                (direccion.getCalle() == null || direccion.getCalle().isBlank()) ||
+                (direccion.getNumero() == null || direccion.getNumero().isBlank()) ||
+                direccion.getLocalidad() == null
+            );
+        }
+
         if (empresa.getId() != null && !empresa.getId().isBlank()) {
             Empresa existente = buscarPorId(empresa.getId());
             existente.setRazonSocial(razonNormalizada);
-            return existente;
+            existente.getDirecciones().clear();
+            if (empresa.getDirecciones() != null) {
+                existente.getDirecciones().addAll(empresa.getDirecciones());
+            }
+            return empresaRepository.save(existente);
         }
 
         empresa.setRazonSocial(razonNormalizada);

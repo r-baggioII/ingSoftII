@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="direcciones-js">
+<script>
+$(document).ready(function() {
+    let direccionIndex = $('.direccion-item').length;
+    
+    // Agregar nueva dirección
+    $('#add-direccion').click(function() {
+        let template = `
+            <div class="direccion-item well" data-index="${direccionIndex}">
+                <input type="hidden" name="direcciones[${direccionIndex}].id" />
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="calle${direccionIndex}">Calle</label>
+                            <input type="text" class="form-control" id="calle${direccionIndex}" name="direcciones[${direccionIndex}].calle" required>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="numero${direccionIndex}">Número</label>
+                            <input type="text" class="form-control" id="numero${direccionIndex}" name="direcciones[${direccionIndex}].numero" required>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="numeroInterno${direccionIndex}">Nro. Interno</label>
+                            <input type="text" class="form-control" id="numeroInterno${direccionIndex}" name="direcciones[${direccionIndex}].numeroInterno">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="localidad${direccionIndex}">Localidad</label>
+                            <select class="form-control" id="localidad${direccionIndex}" name="direcciones[${direccionIndex}].localidad" required>
+                                <option value="">Seleccionar localidad...</option>
+                                <!-- Copiar opciones del primer select -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="referencia${direccionIndex}">Referencia</label>
+                            <input type="text" class="form-control" id="referencia${direccionIndex}" name="direcciones[${direccionIndex}].referencia">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="latitud${direccionIndex}">Latitud (Google Maps)</label>
+                            <input type="text" class="form-control" id="latitud${direccionIndex}" name="direcciones[${direccionIndex}].latitud" placeholder="-34.603722">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="longitud${direccionIndex}">Longitud (Google Maps)</label>
+                            <input type="text" class="form-control" id="longitud${direccionIndex}" name="direcciones[${direccionIndex}].longitud" placeholder="-58.381592">
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-danger btn-xs remove-direccion">Eliminar dirección</button>
+            </div>
+        `;
+        
+        let newDireccion = $(template);
+        $('#direcciones-container').append(newDireccion);
+        
+        // Copiar opciones de localidad del primer select
+        let primeraLocalidad = $('#direcciones-container select').first();
+        if (primeraLocalidad.length > 0) {
+            newDireccion.find('select').html(primeraLocalidad.html());
+        }
+        
+        direccionIndex++;
+    });
+    
+    // Eliminar dirección
+    $(document).on('click', '.remove-direccion', function() {
+        if ($('.direccion-item').length > 1) {
+            $(this).closest('.direccion-item').remove();
+            // Reindexar elementos restantes
+            reindexarDirecciones();
+        } else {
+            alert('Debe tener al menos una dirección');
+        }
+    });
+    
+    function reindexarDirecciones() {
+        $('.direccion-item').each(function(index) {
+            $(this).attr('data-index', index);
+            $(this).find('input, select').each(function() {
+                let name = $(this).attr('name');
+                let id = $(this).attr('id');
+                if (name && name.includes('direcciones[')) {
+                    let newName = name.replace(/direcciones\[\d+\]/, 'direcciones[' + index + ']');
+                    $(this).attr('name', newName);
+                }
+                if (id && id.match(/\d+$/)) {
+                    let newId = id.replace(/\d+$/, index);
+                    $(this).attr('id', newId);
+                    $(this).siblings('label').attr('for', newId);
+                }
+            });
+        });
+        direccionIndex = $('.direccion-item').length;
+    }
+});
+</script>
+</th:block>
+</body>
+</html>

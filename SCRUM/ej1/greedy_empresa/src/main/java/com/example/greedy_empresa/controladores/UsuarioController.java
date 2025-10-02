@@ -1,6 +1,7 @@
 package com.example.greedy_empresa.controladores;
 
 import com.example.greedy_empresa.entidades.Usuario;
+import com.example.greedy_empresa.entidades.UsuarioPersona;
 import com.example.greedy_empresa.entidades.enums.UsuarioRol;
 import com.example.greedy_empresa.servicios.UsuarioService;
 import jakarta.validation.Valid;
@@ -43,6 +44,7 @@ public class UsuarioController {
     public String nuevo(Model model) {
         Usuario usuario = new Usuario();
         usuario.setRol(UsuarioRol.USER);
+        usuario.setPersona(new UsuarioPersona()); // Inicializar persona
         model.addAttribute("usuario", usuario);
         model.addAttribute("activeMenu", "usuarios");
         return "usuarios/form";
@@ -53,6 +55,12 @@ public class UsuarioController {
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes,
             Model model) {
+        
+        // Asegurar que persona esté inicializada
+        if (usuario.getPersona() == null) {
+            usuario.setPersona(new UsuarioPersona());
+        }
+        
         if (bindingResult.hasErrors()) {
             model.addAttribute("activeMenu", "usuarios");
             return "usuarios/form";
@@ -71,6 +79,12 @@ public class UsuarioController {
     @GetMapping("/{id}/edit")
     public String editar(@PathVariable String id, Model model) {
         Usuario usuario = usuarioService.buscarPorId(id);
+        
+        // Asegurar que persona esté inicializada correctamente
+        if (usuario.getPersona() == null) {
+            usuario.setPersona(new UsuarioPersona());
+        }
+        
         usuario.setPassword("");
         usuario.setConfirmPassword("");
         model.addAttribute("usuario", usuario);
@@ -84,6 +98,12 @@ public class UsuarioController {
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes,
             Model model) {
+        
+        // Asegurar que persona esté inicializada
+        if (usuario.getPersona() == null) {
+            usuario.setPersona(new UsuarioPersona());
+        }
+        
         if (bindingResult.hasErrors()) {
             model.addAttribute("activeMenu", "usuarios");
             return "usuarios/form";

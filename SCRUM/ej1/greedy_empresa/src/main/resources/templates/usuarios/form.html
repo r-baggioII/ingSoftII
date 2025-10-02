@@ -19,6 +19,7 @@
                     <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger"
                          th:each="err : ${#fields.globalErrors()}" th:text="${err.defaultMessage}"></div>
                     <input type="hidden" th:field="*{id}" />
+                    <input type="hidden" th:field="*{persona.id}" th:if="${usuario.persona != null}" />
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -37,6 +38,43 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <h4>Datos Personales</h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="nombre">Nombre</label>
+                                <input type="text" class="form-control" id="nombre" th:field="*{persona.nombre}">
+                                <p class="text-danger" th:if="${#fields.hasErrors('persona.nombre')}" th:errors="*{persona.nombre}"></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="apellido">Apellido</label>
+                                <input type="text" class="form-control" id="apellido" th:field="*{persona.apellido}">
+                                <p class="text-danger" th:if="${#fields.hasErrors('persona.apellido')}" th:errors="*{persona.apellido}"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="correoElectronico">Email</label>
+                                <input type="email" class="form-control" id="correoElectronico" th:field="*{persona.correoElectronico}">
+                                <p class="text-danger" th:if="${#fields.hasErrors('persona.correoElectronico')}" th:errors="*{persona.correoElectronico}"></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="telefono">Teléfono</label>
+                                <input type="text" class="form-control" id="telefono" th:field="*{persona.telefono}">
+                                <p class="text-danger" th:if="${#fields.hasErrors('persona.telefono')}" th:errors="*{persona.telefono}"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h4>Contraseña</h4>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">

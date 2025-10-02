@@ -3,6 +3,7 @@ package com.example.greedy_empresa.servicios;
 import com.example.greedy_empresa.entidades.Direccion;
 import com.example.greedy_empresa.entidades.Localidad;
 import com.example.greedy_empresa.entidades.Persona;
+import com.example.greedy_empresa.entidades.ProveedorPersona;
 import com.example.greedy_empresa.entidades.Proveedor;
 import com.example.greedy_empresa.repositorios.DireccionRepository;
 import com.example.greedy_empresa.repositorios.LocalidadRepository;
@@ -110,7 +111,7 @@ public class MigracionService {
         Localidad localidad = localidadOpt.get();
 
         // Crear la persona
-        Persona persona = new Persona();
+        ProveedorPersona persona = new ProveedorPersona();
         persona.setNombre(nombre);
         persona.setApellido(apellido);
         persona.setTelefono(telefono.isEmpty() ? null : telefono);
@@ -120,6 +121,7 @@ public class MigracionService {
         // Crear el proveedor
         Proveedor proveedor = new Proveedor();
         proveedor.setCuit(cuit);
+        proveedor.setPersona(persona);
         proveedor = proveedorRepository.save(proveedor);
 
         // Crear la dirección

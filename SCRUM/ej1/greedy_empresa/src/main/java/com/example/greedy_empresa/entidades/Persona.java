@@ -48,12 +48,7 @@ public class Persona extends BaseEntity {
     @Column(name = "correo_electronico", nullable = false, length = 160)
     private String correoElectronico;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id", unique = true)
-    @ToString.Exclude
-    private Usuario usuario;
-
-    @OneToMany(mappedBy = "persona", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "persona", fetch = FetchType.LAZY, cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
     @Where(clause = "eliminado = false")
     @ToString.Exclude
     private List<Direccion> direcciones = new ArrayList<>();

@@ -1,6 +1,9 @@
 package com.example.greedy_empresa.controladores;
 
+import com.example.greedy_empresa.entidades.Direccion;
 import com.example.greedy_empresa.entidades.Proveedor;
+import com.example.greedy_empresa.entidades.Persona;
+import com.example.greedy_empresa.servicios.LocalidadService;
 import com.example.greedy_empresa.servicios.ProveedorPdfService;
 import com.example.greedy_empresa.servicios.ProveedorService;
 import jakarta.validation.Valid;
@@ -15,7 +18,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +26,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -32,6 +35,7 @@ import java.util.List;
 public class ProveedorController {
 
     private final ProveedorService proveedorService;
+    private final LocalidadService localidadService;
     private final ProveedorPdfService proveedorPdfService;
 
     @GetMapping
@@ -45,17 +49,33 @@ public class ProveedorController {
 
     @GetMapping("/new")
     public String nuevo(Model model) {
-        model.addAttribute("proveedor", new Proveedor());
+        Proveedor proveedor = new Proveedor();
+        proveedor.setPersona(new Persona()); // Inicializar persona
+        proveedor.getDirecciones().add(new Direccion()); // Agregar una dirección vacía por defecto
+        model.addAttribute("proveedor", proveedor);
+        model.addAttribute("localidades", localidadService.buscar(null, null, null, null, Pageable.unpaged()).getContent());
         model.addAttribute("activeMenu", "proveedores");
         return "proveedores/form";
     }
 
     @PostMapping
-    public String crear(@Valid @ModelAttribute("proveedor") Proveedor proveedor,
+    public String crear(@Valid Proveedor proveedor,
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes,
             Model model) {
+        
+        // Asegurar que persona esté inicializada
+        if (proveedor.getPersona() == null) {
+            proveedor.setPersona(new Persona());
+        }
+        
+        // Asegurar que haya al menos una dirección
+        if (proveedor.getDirecciones() == null || proveedor.getDirecciones().isEmpty()) {
+            proveedor.getDirecciones().add(new Direccion());
+        }
+        
         if (bindingResult.hasErrors()) {
+            model.addAttribute("localidades", localidadService.buscar(null, null, null, null, Pageable.unpaged()).getContent());
             model.addAttribute("activeMenu", "proveedores");
             return "proveedores/form";
         }
@@ -65,6 +85,7 @@ public class ProveedorController {
             return "redirect:/proveedores";
         } catch (IllegalArgumentException ex) {
             bindingResult.reject("error.general", ex.getMessage());
+            model.addAttribute("localidades", localidadService.buscar(null, null, null, null, Pageable.unpaged()).getContent());
             model.addAttribute("activeMenu", "proveedores");
             return "proveedores/form";
         }
@@ -72,18 +93,44 @@ public class ProveedorController {
 
     @GetMapping("/{id}/edit")
     public String editar(@PathVariable String id, Model model) {
-        model.addAttribute("proveedor", proveedorService.buscarPorId(id));
+        Proveedor proveedor = proveedorService.buscarPorId(id);
+        
+        // Asegurar que persona esté inicializada correctamente
+        // Si la persona es null o no es del tipo correcto, crear una nueva
+        if (proveedor.getPersona() == null) {
+            proveedor.setPersona(new Persona());
+        }
+        
+        // Asegurar que haya al menos una dirección para el formulario
+        if (proveedor.getDirecciones() == null || proveedor.getDirecciones().isEmpty()) {
+            proveedor.getDirecciones().add(new Direccion());
+        }
+        
+        model.addAttribute("proveedor", proveedor);
+        model.addAttribute("localidades", localidadService.buscar(null, null, null, null, Pageable.unpaged()).getContent());
         model.addAttribute("activeMenu", "proveedores");
         return "proveedores/form";
     }
 
     @PostMapping("/{id}")
     public String actualizar(@PathVariable String id,
-            @Valid @ModelAttribute("proveedor") Proveedor proveedor,
+            @Valid Proveedor proveedor,
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes,
             Model model) {
+        
+        // Asegurar que persona esté inicializada
+        if (proveedor.getPersona() == null) {
+            proveedor.setPersona(new Persona());
+        }
+        
+        // Asegurar que haya al menos una dirección
+        if (proveedor.getDirecciones() == null || proveedor.getDirecciones().isEmpty()) {
+            proveedor.getDirecciones().add(new Direccion());
+        }
+        
         if (bindingResult.hasErrors()) {
+            model.addAttribute("localidades", localidadService.buscar(null, null, null, null, Pageable.unpaged()).getContent());
             model.addAttribute("activeMenu", "proveedores");
             return "proveedores/form";
         }
@@ -94,6 +141,7 @@ public class ProveedorController {
             return "redirect:/proveedores";
         } catch (IllegalArgumentException ex) {
             bindingResult.reject("error.general", ex.getMessage());
+            model.addAttribute("localidades", localidadService.buscar(null, null, null, null, Pageable.unpaged()).getContent());
             model.addAttribute("activeMenu", "proveedores");
             return "proveedores/form";
         }

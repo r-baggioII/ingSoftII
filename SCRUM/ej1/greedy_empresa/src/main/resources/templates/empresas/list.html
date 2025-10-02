@@ -32,15 +32,27 @@
                     <thead>
                         <tr>
                             <th>Razón social</th>
-                            <th class="text-center" style="width:120px;">Acciones</th>
+                            <th>Ubicación</th>
+                            <th class="text-center" style="width:160px;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr th:if="${page.empty}">
-                            <td colspan="2" class="text-center">No hay empresas registradas.</td>
+                            <td colspan="3" class="text-center">No hay empresas registradas.</td>
                         </tr>
                         <tr th:each="empresa : ${page.content}">
                             <td th:text="${empresa.razonSocial}">Greedy Corp</td>
+                            <td>
+                                <th:block th:each="direccion : ${empresa.direcciones}">
+                                    <a th:if="${direccion.hasGeoPoint()}"
+                                       class="btn btn-xs btn-success" target="_blank" 
+                                       th:href="${direccion.googleMapsUrl}" 
+                                       title="Ver en Google Maps">
+                                        <i class="fa fa-map-marker"></i>
+                                    </a>
+                                    <th:block th:if="${direccion.hasGeoPoint()}" th:remove="all-but-first"></th:block>
+                                </th:block>
+                            </td>
                             <td class="text-center">
                                 <a class="btn btn-xs btn-default" th:href="@{'/empresas/' + ${empresa.id} + '/edit'}" title="Editar">
                                     <i class="fa fa-pencil"></i>

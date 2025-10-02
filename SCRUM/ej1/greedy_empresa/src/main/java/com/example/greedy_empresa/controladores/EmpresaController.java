@@ -1,8 +1,10 @@
 package com.example.greedy_empresa.controladores;
 
+import com.example.greedy_empresa.entidades.Direccion;
 import com.example.greedy_empresa.entidades.Empresa;
 import com.example.greedy_empresa.servicios.EmpresaExcelService;
 import com.example.greedy_empresa.servicios.EmpresaService;
+import com.example.greedy_empresa.servicios.LocalidadService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +35,7 @@ public class EmpresaController {
 
     private final EmpresaService empresaService;
     private final EmpresaExcelService empresaExcelService;
+    private final LocalidadService localidadService;
 
     @GetMapping
     public String listar(@RequestParam(value = "filtro", required = false) String filtro,
@@ -45,7 +48,10 @@ public class EmpresaController {
 
     @GetMapping("/new")
     public String nuevo(Model model) {
-        model.addAttribute("empresa", new Empresa());
+        Empresa empresa = new Empresa();
+        empresa.getDirecciones().add(new Direccion()); // Agregar una dirección vacía por defecto
+        model.addAttribute("empresa", empresa);
+        model.addAttribute("localidades", localidadService.buscar(null, null, null, null, Pageable.unpaged()).getContent());
         model.addAttribute("activeMenu", "empresas");
         return "empresas/form";
     }
@@ -53,7 +59,14 @@ public class EmpresaController {
     @PostMapping
     public String crear(@Valid @ModelAttribute("empresa") Empresa empresa, BindingResult bindingResult,
             RedirectAttributes redirectAttributes, Model model) {
+        
+        // Asegurar que haya al menos una dirección
+        if (empresa.getDirecciones() == null || empresa.getDirecciones().isEmpty()) {
+            empresa.getDirecciones().add(new Direccion());
+        }
+        
         if (bindingResult.hasErrors()) {
+            model.addAttribute("localidades", localidadService.buscar(null, null, null, null, Pageable.unpaged()).getContent());
             model.addAttribute("activeMenu", "empresas");
             return "empresas/form";
         }
@@ -63,6 +76,7 @@ public class EmpresaController {
             return "redirect:/empresas";
         } catch (IllegalArgumentException ex) {
             bindingResult.reject("error.general", ex.getMessage());
+            model.addAttribute("localidades", localidadService.buscar(null, null, null, null, Pageable.unpaged()).getContent());
             model.addAttribute("activeMenu", "empresas");
             return "empresas/form";
         }
@@ -71,6 +85,7 @@ public class EmpresaController {
     @GetMapping("/{id}/edit")
     public String editar(@PathVariable String id, Model model) {
         model.addAttribute("empresa", empresaService.buscarPorId(id));
+        model.addAttribute("localidades", localidadService.buscar(null, null, null, null, Pageable.unpaged()).getContent());
         model.addAttribute("activeMenu", "empresas");
         return "empresas/form";
     }
@@ -81,7 +96,14 @@ public class EmpresaController {
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes,
             Model model) {
+        
+        // Asegurar que haya al menos una dirección
+        if (empresa.getDirecciones() == null || empresa.getDirecciones().isEmpty()) {
+            empresa.getDirecciones().add(new Direccion());
+        }
+        
         if (bindingResult.hasErrors()) {
+            model.addAttribute("localidades", localidadService.buscar(null, null, null, null, Pageable.unpaged()).getContent());
             model.addAttribute("activeMenu", "empresas");
             return "empresas/form";
         }
@@ -92,6 +114,7 @@ public class EmpresaController {
             return "redirect:/empresas";
         } catch (IllegalArgumentException ex) {
             bindingResult.reject("error.general", ex.getMessage());
+            model.addAttribute("localidades", localidadService.buscar(null, null, null, null, Pageable.unpaged()).getContent());
             model.addAttribute("activeMenu", "empresas");
             return "empresas/form";
         }

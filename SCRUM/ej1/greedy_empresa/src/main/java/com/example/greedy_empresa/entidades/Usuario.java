@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -44,7 +45,8 @@ public class Usuario extends BaseEntity {
     @Column(name = "rol", nullable = false, length = 20)
     private UsuarioRol rol;
 
-    @OneToOne(mappedBy = "usuario", fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = jakarta.persistence.CascadeType.ALL)
+    @JoinColumn(name = "persona_id")
     @ToString.Exclude
     private Persona persona;
 

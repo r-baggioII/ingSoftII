@@ -33,7 +33,7 @@ public class Empresa extends BaseEntity {
     @Column(name = "razon_social", nullable = false, unique = true, length = 160)
     private String razonSocial;
 
-    @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY, cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
     @Where(clause = "eliminado = false")
     @ToString.Exclude
     private List<Direccion> direcciones = new ArrayList<>();

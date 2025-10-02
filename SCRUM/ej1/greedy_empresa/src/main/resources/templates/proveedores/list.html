@@ -32,15 +32,37 @@
                     <thead>
                         <tr>
                             <th>CUIT</th>
-                            <th class="text-center" style="width:120px;">Acciones</th>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Ubicación</th>
+                            <th class="text-center" style="width:160px;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr th:if="${page.empty}">
-                            <td colspan="2" class="text-center">No hay proveedores registrados.</td>
+                            <td colspan="5" class="text-center">No hay proveedores registrados.</td>
                         </tr>
                         <tr th:each="proveedor : ${page.content}">
                             <td th:text="${proveedor.cuit}">30-12345678-9</td>
+                            <td>
+                                <span th:if="${proveedor.persona}" th:text="${proveedor.persona.nombre + ' ' + proveedor.persona.apellido}">Nombre Apellido</span>
+                                <span th:unless="${proveedor.persona}" class="text-muted">Sin datos</span>
+                            </td>
+                            <td>
+                                <span th:if="${proveedor.persona}" th:text="${proveedor.persona.correoElectronico}">email@ejemplo.com</span>
+                                <span th:unless="${proveedor.persona}" class="text-muted">Sin email</span>
+                            </td>
+                            <td>
+                                <th:block th:each="direccion : ${proveedor.direcciones}">
+                                    <a th:if="${direccion.hasGeoPoint()}"
+                                       class="btn btn-xs btn-success" target="_blank" 
+                                       th:href="${direccion.googleMapsUrl}" 
+                                       title="Ver en Google Maps">
+                                        <i class="fa fa-map-marker"></i>
+                                    </a>
+                                    <th:block th:if="${direccion.hasGeoPoint()}" th:remove="all-but-first"></th:block>
+                                </th:block>
+                            </td>
                             <td class="text-center">
                                 <a class="btn btn-xs btn-default" th:href="@{'/proveedores/' + ${proveedor.id} + '/edit'}" title="Editar">
                                     <i class="fa fa-pencil"></i>

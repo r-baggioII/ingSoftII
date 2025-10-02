@@ -1,6 +1,7 @@
 package com.example.greedy_empresa.servicios;
 
 import com.example.greedy_empresa.entidades.Usuario;
+import com.example.greedy_empresa.entidades.UsuarioPersona;
 import com.example.greedy_empresa.repositorios.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -43,15 +44,30 @@ public class UsuarioService {
                     throw new IllegalArgumentException("Ya existe un usuario con ese nombre");
                 });
 
+        // Crear o actualizar persona
+        if (usuario.getPersona() != null) {
+            if (usuario.getPersona().getId() == null) {
+                // Crear nueva persona concreta
+                UsuarioPersona persona = new UsuarioPersona();
+                persona.setNombre(usuario.getPersona().getNombre());
+                persona.setApellido(usuario.getPersona().getApellido());
+                persona.setCorreoElectronico(usuario.getPersona().getCorreoElectronico());
+                persona.setTelefono(usuario.getPersona().getTelefono());
+                persona.setEliminado(false);
+                usuario.setPersona(persona);
+            }
+        }
+
         if (usuario.getId() != null && !usuario.getId().isBlank()) {
             Usuario existente = buscarPorId(usuario.getId());
             existente.setUsername(usernameNormalizado);
             existente.setRol(usuario.getRol());
+            existente.setPersona(usuario.getPersona());
             if (usuario.getPassword() != null && !usuario.getPassword().isBlank()) {
                 validarPasswords(usuario.getPassword(), usuario.getConfirmPassword());
                 existente.setPasswordHash(passwordService.hash(usuario.getPassword()));
             }
-            return existente;
+            return usuarioRepository.save(existente);
         }
 
         if (usuario.getPassword() == null || usuario.getPassword().isBlank()) {
@@ -60,6 +76,9 @@ public class UsuarioService {
         validarPasswords(usuario.getPassword(), usuario.getConfirmPassword());
         usuario.setUsername(usernameNormalizado);
         usuario.setPasswordHash(passwordService.hash(usuario.getPassword()));
+        if (usuario.getPersona() != null) {
+            usuario.getPersona().setEliminado(false);
+        }
         return usuarioRepository.save(usuario);
     }
 

@@ -15,5 +15,7 @@ public interface PersonaRepository extends JpaRepository<Persona, String> {
 
     Optional<Persona> findByCorreoElectronicoIgnoreCase(String correoElectronico);
 
-    Optional<Persona> findByUsuario_Id(String usuarioId);
+    Optional<Persona> findByIdAndEliminadoFalse(String id);
+
+    long countByEliminadoFalse();
 }

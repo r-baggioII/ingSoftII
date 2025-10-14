@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { LibroMutationInput } from '../api/libroApi';
 import type { AutorDTO } from '../dto/AutorDTO';
 import type { LibroDTO } from '../dto/LibroDTO';
 import type { PersonaDTO } from '../dto/PersonaDTO';
@@ -7,7 +8,7 @@ interface LibroFormProps {
   initialValue: LibroDTO;
   autores: AutorDTO[];
   personas: PersonaDTO[];
-  onSubmit: (libro: LibroDTO) => Promise<void> | void;
+  onSubmit: (input: LibroMutationInput) => Promise<void> | void;
   onCancel?: () => void;
   submitLabel?: string;
 }
@@ -18,7 +19,8 @@ const emptyLibro: LibroDTO = {
   genero: '',
   paginas: 0,
   autor: { nombre: '', apellido: '', biografia: '' },
-  persona: { id: 0, nombre: '', apellido: '' }
+  persona: { id: 0, nombre: '', apellido: '' },
+  hasPdf: false
 };
 
 export function LibroForm({
@@ -32,9 +34,11 @@ export function LibroForm({
   const [form, setForm] = useState<LibroDTO>({ ...emptyLibro, ...initialValue });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
 
   useEffect(() => {
     setForm({ ...emptyLibro, ...initialValue });
+    setPdfFile(null);
   }, [initialValue]);
 
   const validate = () => {
@@ -56,7 +60,8 @@ export function LibroForm({
     if (!validate()) return;
     setSubmitting(true);
     try {
-      await onSubmit(form);
+      await onSubmit({ libro: form, pdfFile: pdfFile ?? undefined });
+      setPdfFile(null);
     } finally {
       setSubmitting(false);
     }
@@ -162,6 +167,23 @@ export function LibroForm({
           ))}
         </select>
         {errors.persona && <small className="error">{errors.persona}</small>}
+      </div>
+
+      <div className="form-row">
+        <label htmlFor="pdf">Archivo PDF</label>
+        <input
+          id="pdf"
+          type="file"
+          accept="application/pdf"
+          onChange={(event) => {
+            const file = event.target.files?.[0] ?? null;
+            setPdfFile(file);
+          }}
+        />
+        {form.hasPdf && !pdfFile && (
+          <small>Este libro ya tiene un PDF cargado. Adjunte uno nuevo para reemplazarlo.</small>
+        )}
+        {pdfFile && <small>{pdfFile.name}</small>}
       </div>
 
       <div className="actions">

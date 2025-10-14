@@ -7,8 +7,9 @@ export interface LibroDTO {
   fecha: string;
   genero: string;
   paginas: number;
-  autor: AutorDTO;
-  persona: Pick<PersonaDTO, 'id' | 'nombre' | 'apellido'>;
   autorId?: number;
   personaId?: number;
+  autor?: AutorDTO;
+  persona?: Pick<PersonaDTO, 'id' | 'nombre' | 'apellido'>;
+  hasPdf?: boolean;
 }

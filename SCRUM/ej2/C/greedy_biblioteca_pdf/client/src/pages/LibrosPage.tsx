@@ -1,5 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { createLibro, fetchLibro, fetchLibros, removeLibro, updateLibro } from '../api/libroApi';
+import {
+  createLibro,
+  fetchLibro,
+  fetchLibros,
+  removeLibro,
+  updateLibro,
+  type LibroMutationInput
+} from '../api/libroApi';
 import { fetchAutores } from '../api/autorApi';
 import { fetchPersonas } from '../api/personaApi';
 import type { AutorDTO } from '../dto/AutorDTO';
@@ -16,7 +23,8 @@ const emptyLibro: LibroDTO = {
   genero: '',
   paginas: 0,
   autor: { nombre: '', apellido: '', biografia: '' },
-  persona: { id: 0, nombre: '', apellido: '' }
+  persona: { id: 0, nombre: '', apellido: '' },
+  hasPdf: false
 };
 
 export function LibrosPage() {
@@ -85,8 +93,8 @@ export function LibrosPage() {
         const libro = await fetchLibro(editingId);
         setCurrent({
           ...libro,
-          autorId: libro.autor.id,
-          personaId: libro.persona.id
+          autorId: libro.autorId ?? libro.autor?.id,
+          personaId: libro.personaId ?? libro.persona?.id
         });
         setShowForm(true);
       } catch (error) {
@@ -97,9 +105,9 @@ export function LibrosPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editingId]);
 
-  const handleCreate = async (libro: LibroDTO) => {
+  const handleCreate = async (input: LibroMutationInput) => {
     try {
-      await createLibro(libro);
+      await createLibro(input);
       showToast('Libro creado');
       setShowForm(false);
       setCurrent(emptyLibro);
@@ -110,10 +118,11 @@ export function LibrosPage() {
     }
   };
 
-  const handleUpdate = async (libro: LibroDTO) => {
-    if (!libro.id) return;
+  const handleUpdate = async (input: LibroMutationInput) => {
+    const libroId = input.libro.id;
+    if (!libroId) return;
     try {
-      await updateLibro(libro.id, libro);
+      await updateLibro(libroId, input);
       showToast('Libro actualizado');
       setShowForm(false);
       setEditingId(null);
@@ -246,6 +255,7 @@ export function LibrosPage() {
                   <th>Autor</th>
                   <th>Persona</th>
                   <th>Fecha</th>
+                  <th>PDF</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -256,12 +266,37 @@ export function LibrosPage() {
                     <td>{libro.genero}</td>
                     <td>{libro.paginas}</td>
                     <td>
-                      {libro.autor.nombre} {libro.autor.apellido}
+                      {libro.autor ? (
+                        <>
+                          {libro.autor.nombre} {libro.autor.apellido}
+                        </>
+                      ) : (
+                        '-'
+                      )}
                     </td>
                     <td>
-                      {libro.persona.nombre} {libro.persona.apellido}
+                      {libro.persona ? (
+                        <>
+                          {libro.persona.nombre} {libro.persona.apellido}
+                        </>
+                      ) : (
+                        '-'
+                      )}
                     </td>
                     <td>{libro.fecha}</td>
+                    <td>
+                      {libro.hasPdf && libro.id ? (
+                        <a
+                          href={`http://localhost:8080/api/libros/${libro.id}/pdf`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Ver PDF
+                        </a>
+                      ) : (
+                        <span style={{ opacity: 0.6 }}>Sin PDF</span>
+                      )}
+                    </td>
                     <td>
                       <div className="table-actions">
                         <button className="secondary" onClick={() => setEditingId(libro.id!)}>

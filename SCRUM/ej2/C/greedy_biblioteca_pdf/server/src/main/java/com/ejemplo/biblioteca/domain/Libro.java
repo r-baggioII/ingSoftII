@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 @Getter
@@ -53,4 +54,13 @@ public class Libro {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "persona_id", nullable = false)
     private Persona persona;
+
+    @Column(name = "pdf_file_name")
+    private String pdfFileName;
+
+    @Column(name = "pdf_size_bytes")
+    private Long pdfSizeBytes;
+
+    @Column(name = "pdf_uploaded_at")
+    private Instant pdfUploadedAt;
 }

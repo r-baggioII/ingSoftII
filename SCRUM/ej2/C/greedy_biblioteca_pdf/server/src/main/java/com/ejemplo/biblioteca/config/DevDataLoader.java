@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 @Configuration
@@ -56,7 +57,11 @@ public class DevDataLoader {
             autorRepository.save(autor2);
             autorRepository.save(autor3);
 
-            libroRepository.save(buildLibro("El Aleph", LocalDate.of(1949, 6, 1), "Ficción", 200, autor1, persona1));
+            Libro libroConPdf = libroRepository.save(buildLibro("El Aleph", LocalDate.of(1949, 6, 1), "Ficción", 200, autor1, persona1));
+            libroConPdf.setPdfFileName("libro_el_aleph_" + libroConPdf.getId() + ".pdf");
+            libroConPdf.setPdfSizeBytes(1024L);
+            libroConPdf.setPdfUploadedAt(Instant.now());
+            libroRepository.save(libroConPdf);
             libroRepository.save(buildLibro("Ficciones", LocalDate.of(1944, 5, 1), "Ficción", 250, autor1, persona1));
             libroRepository.save(buildLibro("Rayuela", LocalDate.of(1963, 6, 28), "Novela", 400, autor2, persona2));
             libroRepository.save(buildLibro("Historias de Cronopios y de Famas", LocalDate.of(1962, 1, 1), "Cuento", 210, autor2, persona2));

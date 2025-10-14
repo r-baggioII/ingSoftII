@@ -13,6 +13,8 @@
 /home/juanloncha/Documents/LicCienciasComp/Sem6/IngSoftware2/ingSoftII/SCRUM/ej2/C/greedy_biblioteca_pdf/server/src/main/java/com/ejemplo/biblioteca/service/AutorService.java
 /home/juanloncha/Documents/LicCienciasComp/Sem6/IngSoftware2/ingSoftII/SCRUM/ej2/C/greedy_biblioteca_pdf/server/src/main/java/com/ejemplo/biblioteca/service/LibroService.java
 /home/juanloncha/Documents/LicCienciasComp/Sem6/IngSoftware2/ingSoftII/SCRUM/ej2/C/greedy_biblioteca_pdf/server/src/main/java/com/ejemplo/biblioteca/service/LocalidadService.java
+/home/juanloncha/Documents/LicCienciasComp/Sem6/IngSoftware2/ingSoftII/SCRUM/ej2/C/greedy_biblioteca_pdf/server/src/main/java/com/ejemplo/biblioteca/service/PdfStorageService.java
+/home/juanloncha/Documents/LicCienciasComp/Sem6/IngSoftware2/ingSoftII/SCRUM/ej2/C/greedy_biblioteca_pdf/server/src/main/java/com/ejemplo/biblioteca/service/PdfStorageServiceImpl.java
 /home/juanloncha/Documents/LicCienciasComp/Sem6/IngSoftware2/ingSoftII/SCRUM/ej2/C/greedy_biblioteca_pdf/server/src/main/java/com/ejemplo/biblioteca/service/PersonaService.java
 /home/juanloncha/Documents/LicCienciasComp/Sem6/IngSoftware2/ingSoftII/SCRUM/ej2/C/greedy_biblioteca_pdf/server/src/main/java/com/ejemplo/biblioteca/web/controller/AutorController.java
 /home/juanloncha/Documents/LicCienciasComp/Sem6/IngSoftware2/ingSoftII/SCRUM/ej2/C/greedy_biblioteca_pdf/server/src/main/java/com/ejemplo/biblioteca/web/controller/LibroController.java
@@ -22,8 +24,9 @@
 /home/juanloncha/Documents/LicCienciasComp/Sem6/IngSoftware2/ingSoftII/SCRUM/ej2/C/greedy_biblioteca_pdf/server/src/main/java/com/ejemplo/biblioteca/web/dto/AutorRequest.java
 /home/juanloncha/Documents/LicCienciasComp/Sem6/IngSoftware2/ingSoftII/SCRUM/ej2/C/greedy_biblioteca_pdf/server/src/main/java/com/ejemplo/biblioteca/web/dto/DomicilioDTO.java
 /home/juanloncha/Documents/LicCienciasComp/Sem6/IngSoftware2/ingSoftII/SCRUM/ej2/C/greedy_biblioteca_pdf/server/src/main/java/com/ejemplo/biblioteca/web/dto/DomicilioRequest.java
+/home/juanloncha/Documents/LicCienciasComp/Sem6/IngSoftware2/ingSoftII/SCRUM/ej2/C/greedy_biblioteca_pdf/server/src/main/java/com/ejemplo/biblioteca/web/dto/LibroCreateRequest.java
 /home/juanloncha/Documents/LicCienciasComp/Sem6/IngSoftware2/ingSoftII/SCRUM/ej2/C/greedy_biblioteca_pdf/server/src/main/java/com/ejemplo/biblioteca/web/dto/LibroDTO.java
-/home/juanloncha/Documents/LicCienciasComp/Sem6/IngSoftware2/ingSoftII/SCRUM/ej2/C/greedy_biblioteca_pdf/server/src/main/java/com/ejemplo/biblioteca/web/dto/LibroRequest.java
+/home/juanloncha/Documents/LicCienciasComp/Sem6/IngSoftware2/ingSoftII/SCRUM/ej2/C/greedy_biblioteca_pdf/server/src/main/java/com/ejemplo/biblioteca/web/dto/LibroUpdateRequest.java
 /home/juanloncha/Documents/LicCienciasComp/Sem6/IngSoftware2/ingSoftII/SCRUM/ej2/C/greedy_biblioteca_pdf/server/src/main/java/com/ejemplo/biblioteca/web/dto/LocalidadDTO.java
 /home/juanloncha/Documents/LicCienciasComp/Sem6/IngSoftware2/ingSoftII/SCRUM/ej2/C/greedy_biblioteca_pdf/server/src/main/java/com/ejemplo/biblioteca/web/dto/LocalidadRequest.java
 /home/juanloncha/Documents/LicCienciasComp/Sem6/IngSoftware2/ingSoftII/SCRUM/ej2/C/greedy_biblioteca_pdf/server/src/main/java/com/ejemplo/biblioteca/web/dto/PersonaDTO.java

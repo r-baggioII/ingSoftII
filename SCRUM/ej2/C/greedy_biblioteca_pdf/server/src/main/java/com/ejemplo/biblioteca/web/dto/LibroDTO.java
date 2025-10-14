@@ -7,6 +7,9 @@ public record LibroDTO(
         String genero,
         Integer paginas,
         AutorDTO autor,
-        PersonaSummaryDTO persona
+        PersonaSummaryDTO persona,
+        Long autorId,
+        Long personaId,
+        Boolean hasPdf
 ) {
 }

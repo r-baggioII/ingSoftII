@@ -7,10 +7,7 @@ export interface ApiError {
 }
 
 const http = axios.create({
-  baseURL: 'http://localhost:8080/api',
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  baseURL: 'http://localhost:8080/api'
 });
 
 function buildError(error: unknown): ApiError {
@@ -45,8 +42,12 @@ export async function apiGet<T>(path: string, params?: Record<string, unknown>):
 }
 
 export async function apiPost<T, B = unknown>(path: string, body: B): Promise<T> {
+  const config =
+    typeof FormData !== 'undefined' && body instanceof FormData
+      ? { headers: { 'Content-Type': 'multipart/form-data' } }
+      : undefined;
   try {
-    const { data } = await http.post<T>(path, body);
+    const { data } = await http.post<T>(path, body, config);
     return data;
   } catch (error) {
     throw buildError(error);
@@ -54,8 +55,12 @@ export async function apiPost<T, B = unknown>(path: string, body: B): Promise<T>
 }
 
 export async function apiPut<T, B = unknown>(path: string, body: B): Promise<T> {
+  const config =
+    typeof FormData !== 'undefined' && body instanceof FormData
+      ? { headers: { 'Content-Type': 'multipart/form-data' } }
+      : undefined;
   try {
-    const { data } = await http.put<T>(path, body);
+    const { data } = await http.put<T>(path, body, config);
     return data;
   } catch (error) {
     throw buildError(error);

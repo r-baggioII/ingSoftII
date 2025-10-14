@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record LibroRequest(
+public record LibroUpdateRequest(
         @NotBlank(message = "El título es obligatorio")
         String titulo,
         @NotBlank(message = "La fecha es obligatoria")

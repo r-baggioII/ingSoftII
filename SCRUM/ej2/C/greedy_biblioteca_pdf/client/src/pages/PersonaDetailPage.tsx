@@ -100,7 +100,13 @@ export function PersonaDetailPage() {
                     <td>{libro.genero}</td>
                     <td>{libro.paginas}</td>
                     <td>
-                      {libro.autor.nombre} {libro.autor.apellido}
+                      {libro.autor ? (
+                        <>
+                          {libro.autor.nombre} {libro.autor.apellido}
+                        </>
+                      ) : (
+                        '-'
+                      )}
                     </td>
                     <td>{libro.fecha}</td>
                   </tr>

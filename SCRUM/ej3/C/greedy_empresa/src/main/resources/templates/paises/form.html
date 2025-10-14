@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title th:text="${pais.id} == null ? 'Nuevo país' : 'Editar país'"></title>
+</head>
+<body>
+<section th:fragment="content">
+    <section class="content-header">
+        <h1 th:text="${pais.id} == null ? 'Nuevo país' : 'Editar país'"></h1>
+        <div class="pull-right">
+            <a class="btn btn-default" th:href="@{/paises}"><i class="fa fa-arrow-left"></i> Volver</a>
+        </div>
+    </section>
+    <section class="content">
+        <div class="box box-primary">
+            <div class="box-body">
+                <form th:action="${pais.id} == null ? @{/paises} : @{'/paises/' + ${pais.id}}" method="post" th:object="${pais}">
+                    <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger"
+                         th:each="err : ${#fields.globalErrors()}" th:text="${err.defaultMessage}"></div>
+                    <input type="hidden" th:field="*{id}" />
+                    <div class="form-group">
+                        <label for="nombre">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required>
+                        <p class="text-danger" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></p>
+                    </div>
+                    <div class="box-footer">
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</section>
+</body>
+</html>

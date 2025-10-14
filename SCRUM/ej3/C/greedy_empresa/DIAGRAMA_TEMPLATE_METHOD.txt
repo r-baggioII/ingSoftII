@@ -1,0 +1,330 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║          PATRÓN TEMPLATE METHOD - GREEDY EMPRESA (MULTICAPA)                   ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+┌───────────────────────────────────────────────────────────────────────────────┐
+│                     CAPA WEB - BaseController<T, S>                            │
+│                        (Clase Abstracta)                                       │
+├───────────────────────────────────────────────────────────────────────────────┤
+│  # service: S                                                                  │
+├───────────────────────────────────────────────────────────────────────────────┤
+│  ┌─ TEMPLATE METHODS (endpoints HTTP) ────────────────────────────────────┐  │
+│  │                                                                          │  │
+│  │  + listar(filtro, pageable, model): String                              │  │
+│  │  + nuevo(model): String                                                 │  │
+│  │  + crear(entidad, bindingResult, redirectAttributes, model): String     │  │
+│  │  + editar(id, model): String                                            │  │
+│  │  + actualizar(id, entidad, bindingResult, ..., model): String           │  │
+│  │  + eliminar(id, redirectAttributes): String                             │  │
+│  └──────────────────────────────────────────────────────────────────────────┘  │
+│                                                                                 │
+│  ┌─ HOOK METHODS (pueden ser sobrescritos) ──────────────────────────────┐   │
+│  │                                                                         │   │
+│  │  # agregarDatosAdicionalesListado(model): void                         │   │
+│  │  # agregarDatosAdicionalesFormulario(model): void                      │   │
+│  │  # validacionesAdicionales(entidad, bindingResult): void               │   │
+│  │  # prepararEntidadParaEdicion(entidad): void                           │   │
+│  │  # getMensajeExitoCrear(): String                                      │   │
+│  │  # getMensajeExitoActualizar(): String                                 │   │
+│  │  # getMensajeExitoEliminar(): String                                   │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                 │
+│  ┌─ MÉTODOS ABSTRACTOS (deben implementarse) ────────────────────────────┐   │
+│  │                                                                         │   │
+│  │  * getActiveMenu(): String                                             │   │
+│  │  * getBasePath(): String                                               │   │
+│  │  * getModelAttributeName(): String                                     │   │
+│  │  * crearNuevaEntidad(): T                                              │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+└───────────────────────────────────────────────────────────────────────────────┘
+                                        △
+                                        │
+                ┌───────────────────────┼───────────────────────┐
+                │                       │                       │
+                │                       │                       │
+┌───────────────▼────────────┐ ┌────────▼──────────────┐ ┌─────▼──────────────────┐
+│  EmpresaController         │ │ ProveedorController   │ │  UsuarioController     │
+├────────────────────────────┤ ├───────────────────────┤ ├────────────────────────┤
+│ Sobrescribe:               │ │ Sobrescribe:          │ │ Sobrescribe:           │
+│ ✓ getActiveMenu()          │ │ ✓ getActiveMenu()     │ │ ✓ getActiveMenu()      │
+│   → "empresas"             │ │   → "proveedores"     │ │   → "usuarios"         │
+│                            │ │                       │ │                        │
+│ ✓ getBasePath()            │ │ ✓ getBasePath()       │ │ ✓ getBasePath()        │
+│   → "empresas"             │ │   → "proveedores"     │ │   → "usuarios"         │
+│                            │ │                       │ │                        │
+│ ✓ crearNuevaEntidad()      │ │ ✓ crearNuevaEntidad() │ │ ✓ crearNuevaEntidad()  │
+│   → Empresa + dirección    │ │   → Proveedor +       │ │   → Usuario +          │
+│                            │ │     persona +         │ │     persona            │
+│                            │ │     dirección         │ │                        │
+│                            │ │                       │ │                        │
+│ ✓ agregarDatos...()        │ │ ✓ agregarDatos...()   │ │ ✓ prepararEntidad...() │
+│   → carga localidades      │ │   → carga localidades │ │   → limpia password    │
+│                            │ │                       │ │                        │
+│ Métodos adicionales:       │ │ Métodos adicionales:  │ │ Métodos adicionales:   │
+│ • descargarExcel()         │ │ • descargarPdf()      │ │ • roles()              │
+└────────────────────────────┘ └───────────────────────┘ └────────────────────────┘
+                │                        │                        │
+                └────────────────────────┼────────────────────────┘
+                                         │ usa
+                                         │
+
+                │                        │                        │
+                └────────────────────────┼────────────────────────┘
+                                         │ usa
+                                         │
+                                         ▼
+
+┌───────────────────────────────────────────────────────────────────────────────┐
+│                  CAPA SERVICIOS - BaseService<T, REPOSITORY>                   │
+│                        (Clase Abstracta)                                       │
+├───────────────────────────────────────────────────────────────────────────────┤
+│  # repositorio: REPOSITORY                                                     │
+├───────────────────────────────────────────────────────────────────────────────┤
+│  ┌─ TEMPLATE METHODS (definen el algoritmo) ─────────────────────────────┐   │
+│  │                                                                         │   │
+│  │  + buscar(filtro, pageable): Page<T>                                   │   │
+│  │  + buscarPorId(id): T                                                  │   │
+│  │  + guardar(entidad): T           ◄── PRINCIPAL TEMPLATE METHOD         │   │
+│  │  + eliminar(id): void                                                  │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                 │
+│  ┌─ HOOK METHODS (pueden ser sobrescritos) ──────────────────────────────┐   │
+│  │                                                                         │   │
+│  │  # buscarConFiltro(filtro, pageable): Page<T>                          │   │
+│  │  # validarEntidad(entidad): void                                       │   │
+│  │  # normalizarDatos(entidad): void                                      │   │
+│  │  # validarUnicidad(entidad): void                                      │   │
+│  │  # procesarRelaciones(entidad): void                                   │   │
+│  │  # actualizarEntidad(entidad): T                                       │   │
+│  │  # crearNuevaEntidad(entidad): T                                       │   │
+│  │  # antesDeEliminar(entidad): void                                      │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                 │
+│  ┌─ MÉTODOS ABSTRACTOS (deben implementarse) ────────────────────────────┐   │
+│  │                                                                         │   │
+│  │  * actualizarCampos(existente, nueva): void                            │   │
+│  │  * getEntityClass(): Class<T>                                          │   │
+│  │  * getEntityName(): String                                             │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+└───────────────────────────────────────────────────────────────────────────────┘
+                                        △
+                                        │
+                ┌───────────────────────┼───────────────────────┐
+                │                       │                       │
+                │                       │                       │
+┌───────────────▼────────────┐ ┌────────▼──────────────┐ ┌─────▼──────────────────┐
+│    EmpresaService          │ │  ProveedorService     │ │   UsuarioService       │
+├────────────────────────────┤ ├───────────────────────┤ ├────────────────────────┤
+│ Sobrescribe:               │ │ Sobrescribe:          │ │ Sobrescribe:           │
+│ ✓ buscarConFiltro()        │ │ ✓ buscarConFiltro()   │ │ ✓ buscarConFiltro()    │
+│   → busca por razón social │ │   → busca por CUIT    │ │   → busca por username │
+│                            │ │                       │ │                        │
+│ ✓ validarEntidad()         │ │ ✓ validarEntidad()    │ │ ✓ validarEntidad()     │
+│   → razón social           │ │   → CUIT y persona    │ │   → username/password  │
+│     obligatoria            │ │     obligatorios      │ │     obligatorios       │
+│                            │ │                       │ │                        │
+│ ✓ normalizarDatos()        │ │ ✓ normalizarDatos()   │ │ ✓ normalizarDatos()    │
+│   → trim razón social      │ │   → trim CUIT         │ │   → trim username      │
+│                            │ │                       │ │                        │
+│ ✓ validarUnicidad()        │ │ ✓ validarUnicidad()   │ │ ✓ validarUnicidad()    │
+│   → razón social única     │ │   → CUIT único        │ │   → username único     │
+│                            │ │                       │ │                        │
+│ ✓ procesarRelaciones()     │ │ ✓ procesarRelaciones()│ │ ✓ procesarRelaciones() │
+│   → direcciones            │ │   → persona y         │ │   → persona            │
+│                            │ │     direcciones       │ │                        │
+│                            │ │                       │ │                        │
+│ ✓ actualizarCampos()       │ │ ✓ actualizarCampos()  │ │ ✓ actualizarCampos()   │
+│   → razón social y         │ │   → CUIT, persona y   │ │   → username, rol,     │
+│     direcciones            │ │     direcciones       │ │     persona, password  │
+│                            │ │                       │ │                        │
+│                            │ │ ✓ crearNuevaEntidad() │ │ ✓ crearNuevaEntidad()  │
+│                            │ │   → marca persona     │ │   → encripta password  │
+│                            │ │                       │ │     y marca persona    │
+└────────────────────────────┘ └───────────────────────┘ └────────────────────────┘
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                    FLUJO DEL TEMPLATE METHOD: guardar()                        ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+    Cliente
+       │
+       │ guardar(entidad)
+       ▼
+    ┌──────────────────────────┐
+    │  BaseService.guardar()   │  ◄── TEMPLATE METHOD (define el algoritmo)
+    └──────────────────────────┘
+       │
+       ├─► 1. validarEntidad(entidad)         ◄── Hook Method
+       │      ├─ EmpresaService: valida razón social
+       │      ├─ ProveedorService: valida CUIT y persona
+       │      └─ UsuarioService: valida username y password
+       │
+       ├─► 2. normalizarDatos(entidad)        ◄── Hook Method
+       │      ├─ EmpresaService: trim razón social
+       │      ├─ ProveedorService: trim CUIT
+       │      └─ UsuarioService: trim username
+       │
+       ├─► 3. validarUnicidad(entidad)        ◄── Hook Method
+       │      ├─ EmpresaService: verifica razón social única
+       │      ├─ ProveedorService: verifica CUIT único
+       │      └─ UsuarioService: verifica username único
+       │
+       ├─► 4. procesarRelaciones(entidad)     ◄── Hook Method
+       │      ├─ EmpresaService: configura direcciones
+       │      ├─ ProveedorService: configura persona y direcciones
+       │      └─ UsuarioService: configura persona
+       │
+       └─► 5. ¿Tiene ID?
+              │
+              ├─ SÍ ──► actualizarEntidad()   ◄── Hook Method
+              │           └─► actualizarCampos()  ◄── Abstract Method
+              │
+              └─ NO ──► crearNuevaEntidad()   ◄── Hook Method
+                          └─► repository.save()
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                              VENTAJAS DEL PATRÓN                               ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+┌────────────────────────────────────────────────────────────────────────────────┐
+│  ✓ REUTILIZACIÓN DE CÓDIGO EN MÚLTIPLES CAPAS                                  │
+│    └─ La lógica común está centralizada en BaseService Y BaseController        │
+│                                                                                 │
+│  ✓ CONSISTENCIA ARQUITECTÓNICA                                                 │
+│    └─ Mismo patrón aplicado en Web y Servicios                                 │
+│                                                                                 │
+│  ✓ SEPARACIÓN CLARA DE RESPONSABILIDADES                                       │
+│    ├─ BaseController: maneja HTTP, vistas, validaciones UI                     │
+│    └─ BaseService: maneja lógica de negocio, persistencia                      │
+│                                                                                 │
+│  ✓ EXTENSIBILIDAD                                                              │
+│    └─ Agregar nuevos CRUDs requiere mínimo código                              │
+│                                                                                 │
+│  ✓ PRINCIPIO ABIERTO/CERRADO (OCP)                                             │
+│    └─ Base classes: cerradas para modificación, abiertas para extensión        │
+│                                                                                 │
+│  ✓ TESTING SIMPLIFICADO                                                        │
+│    ├─ Tests de BaseController/BaseService cubren funcionalidad común           │
+│    └─ Tests específicos solo para hooks personalizados                         │
+│                                                                                 │
+│  ✓ MANTENIMIENTO EFICIENTE                                                     │
+│    └─ Cambios en un lugar se propagan a todas las implementaciones             │
+└────────────────────────────────────────────────────────────────────────────────┘
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                    COMPARACIÓN: SERVICIOS VS CONTROLADORES                     ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────┬────────────────────────┬─────────────────────────────────┐
+│     ASPECTO         │    BaseService         │      BaseController             │
+├─────────────────────┼────────────────────────┼─────────────────────────────────┤
+│ Propósito           │ Lógica de negocio      │ Manejo de HTTP requests         │
+│                     │ y persistencia         │ y respuestas                    │
+├─────────────────────┼────────────────────────┼─────────────────────────────────┤
+│ Template Methods    │ • guardar()            │ • crear()                       │
+│ principales         │ • buscar()             │ • actualizar()                  │
+│                     │ • eliminar()           │ • listar()                      │
+│                     │ • buscarPorId()        │ • editar()                      │
+│                     │                        │ • eliminar()                    │
+├─────────────────────┼────────────────────────┼─────────────────────────────────┤
+│ Hooks principales   │ • validarEntidad()     │ • validacionesAdicionales()     │
+│                     │ • normalizarDatos()    │ • agregarDatosFormulario()      │
+│                     │ • validarUnicidad()    │ • prepararParaEdicion()         │
+│                     │ • procesarRelaciones() │ • getMensajeExito*()            │
+├─────────────────────┼────────────────────────┼─────────────────────────────────┤
+│ Retorno             │ Entidades de dominio   │ Vistas (String)                 │
+│                     │ (Empresa, Proveedor)   │ y redirecciones                 │
+├─────────────────────┼────────────────────────┼─────────────────────────────────┤
+│ Manejo de errores   │ Excepciones de dominio │ BindingResult                   │
+│                     │ (IllegalArgument...)   │ FlashAttributes                 │
+├─────────────────────┼────────────────────────┼─────────────────────────────────┤
+│ Dependencias        │ Repository             │ Service + otros servicios       │
+├─────────────────────┼────────────────────────┼─────────────────────────────────┤
+│ Transaccionalidad   │ @Transactional         │ No aplica                       │
+└─────────────────────┴────────────────────────┴─────────────────────────────────┘
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                          EJEMPLO DE PERSONALIZACIÓN                            ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+// CAPA DE SERVICIO
+@Service
+public class ProductoService extends BaseService<Producto, ProductoRepository> {
+    
+    public ProductoService(ProductoRepository productoRepository) {
+        super(productoRepository);
+    }
+    
+    @Override
+    public Class<Producto> getEntityClass() {
+        return Producto.class;
+    }
+    
+    @Override
+    protected String getEntityName() {
+        return "Producto";
+    }
+    
+    @Override
+    protected void actualizarCampos(Producto existente, Producto nueva) {
+        existente.setNombre(nueva.getNombre());
+        existente.setPrecio(nueva.getPrecio());
+        existente.setStock(nueva.getStock());
+    }
+    
+    @Override
+    protected void validarEntidad(Producto producto) {
+        super.validarEntidad(producto);
+        if (producto.getPrecio() <= 0) {
+            throw new IllegalArgumentException("El precio debe ser mayor a 0");
+        }
+        if (producto.getStock() < 0) {
+            throw new IllegalArgumentException("El stock no puede ser negativo");
+        }
+    }
+}
+
+// CAPA DE CONTROLADOR
+@Controller
+@RequestMapping("/productos")
+public class ProductoController extends BaseController<Producto, ProductoService> {
+    
+    public ProductoController(ProductoService productoService) {
+        super(productoService);
+    }
+    
+    @Override
+    protected String getActiveMenu() {
+        return "productos";
+    }
+    
+    @Override
+    protected String getBasePath() {
+        return "productos";
+    }
+    
+    @Override
+    protected String getModelAttributeName() {
+        return "producto";
+    }
+    
+    @Override
+    protected Producto crearNuevaEntidad() {
+        Producto producto = new Producto();
+        producto.setStock(0);
+        return producto;
+    }
+}
+
+¡Y listo! Producto CRUD completo con validaciones y toda la funcionalidad estándar
+heredada de las clases base. Solo ~30 líneas de código por capa.
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  RESUMEN: El patrón Template Method aplicado en DOS CAPAS permite que ~80% del
+  código CRUD sea reutilizable, con solo ~20% de personalización por entidad.
+═══════════════════════════════════════════════════════════════════════════════

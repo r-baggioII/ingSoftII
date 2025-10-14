@@ -1,0 +1,62 @@
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="sidebar(activeMenu)">
+    <aside class="main-sidebar">
+        <section class="sidebar">
+            <div class="user-panel">
+                <div class="pull-left image">
+                    <img th:src="@{/dist/img/avatar5.png}" class="img-circle" alt="Usuario">
+                </div>
+                <div class="pull-left info">
+                    <p>Greedy ERP</p>
+                    <a href="#"><i class="fa fa-circle text-success"></i> En línea</a>
+                </div>
+            </div>
+
+            <form action="#" method="get" class="sidebar-form">
+                <div class="input-group">
+                    <input type="text" name="q" class="form-control" placeholder="Buscar..." disabled>
+                    <span class="input-group-btn">
+                        <button type="submit" name="search" id="search-btn" class="btn btn-flat" disabled>
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </span>
+                </div>
+            </form>
+
+            <ul class="sidebar-menu" data-widget="tree">
+                <li class="header">PRINCIPAL</li>
+                <li th:classappend="${activeMenu} == 'dashboard' ? 'active'">
+                    <a th:href="@{/}"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a>
+                </li>
+                <li class="header">ADMINISTRACIÓN</li>
+                <li th:classappend="${activeMenu} == 'usuarios' ? 'active'">
+                    <a th:href="@{/usuarios}"><i class="fa fa-users"></i> <span>Usuarios</span></a>
+                </li>
+                <li class="treeview" th:classappend="${activeMenu} == 'paises' or activeMenu == 'provincias' or activeMenu == 'departamentos' or activeMenu == 'localidades' ? ' active' : ''">
+                    <a href="#">
+                        <i class="fa fa-map"></i> <span>Direcciones</span>
+                        <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
+                    </a>
+                    <ul class="treeview-menu" th:style="${activeMenu} == 'paises' or activeMenu == 'provincias' or activeMenu == 'departamentos' or activeMenu == 'localidades' ? 'display: block;' : ''">
+                        <li th:classappend="${activeMenu} == 'paises' ? ' active' : ''"><a th:href="@{/paises}"><i class="fa fa-circle-o"></i> Países</a></li>
+                        <li th:classappend="${activeMenu} == 'provincias' ? ' active' : ''"><a th:href="@{/provincias}"><i class="fa fa-circle-o"></i> Provincias</a></li>
+                        <li th:classappend="${activeMenu} == 'departamentos' ? ' active' : ''"><a th:href="@{/departamentos}"><i class="fa fa-circle-o"></i> Departamentos</a></li>
+                        <li th:classappend="${activeMenu} == 'localidades' ? ' active' : ''"><a th:href="@{/localidades}"><i class="fa fa-circle-o"></i> Localidades</a></li>
+                    </ul>
+                </li>
+                <li th:classappend="${activeMenu} == 'empresas' ? 'active'">
+                    <a th:href="@{/empresas}"><i class="fa fa-building"></i> <span>Empresas</span></a>
+                </li>
+                <li th:classappend="${activeMenu} == 'proveedores' ? 'active'">
+                    <a th:href="@{/proveedores}"><i class="fa fa-truck"></i> <span>Proveedores</span></a>
+                </li>
+                <li class="header">HERRAMIENTAS</li>
+                <li th:classappend="${activeMenu} == 'notificaciones' ? 'active'">
+                    <a th:href="@{/notificaciones}"><i class="fa fa-envelope"></i> <span>Notificaciones</span></a>
+                </li>
+                <li th:classappend="${activeMenu} == 'migracion' ? 'active'">
+                    <a th:href="@{/migracion}"><i class="fa fa-upload"></i> <span>Migración</span></a>
+                </li>
+            </ul>
+        </section>
+    </aside>
+</th:block>

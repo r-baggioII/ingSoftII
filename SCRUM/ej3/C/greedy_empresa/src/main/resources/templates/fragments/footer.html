@@ -1,0 +1,9 @@
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="footer">
+    <footer class="main-footer">
+        <div class="pull-right hidden-xs">
+            Greedy ERP
+        </div>
+        <strong>&copy; <span th:text="${#temporals.format(#temporals.createNow(), 'yyyy')}">2025</span> Greedy Empresa.</strong>
+        Todos los derechos reservados.
+    </footer>
+</th:block>

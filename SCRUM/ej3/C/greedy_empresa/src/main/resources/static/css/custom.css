@@ -1,0 +1,36 @@
+.content-header h1 {
+  margin: 0;
+}
+.box-footer {
+  padding-top: 0;
+}
+.box .form-group:last-child {
+  margin-bottom: 0;
+}
+
+/* Fix for header buttons overlapping with content box */
+.content-header {
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 10;
+}
+
+.content-header .pull-right {
+  margin-top: 5px;
+}
+
+/* Ensure content section doesn't overlap header */
+.content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Additional spacing for button group */
+.content-header .pull-right .btn {
+  margin-left: 5px;
+}
+
+/* Ensure buttons are properly positioned */
+.content-header .pull-right .btn:first-child {
+  margin-left: 0;
+}

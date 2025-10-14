@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Notificaciones por Correo</title>
+</head>
+<body>
+<section th:fragment="content">
+    <section class="content-header">
+        <h1>
+            Notificaciones por Correo Electrónico
+            <small>Envío de correos publicitarios y de fin de año</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a th:href="@{/}"><i class="fa fa-dashboard"></i> Inicio</a></li>
+            <li class="active">Notificaciones</li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- Mensajes de éxito, warning y error -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <h4><i class="icon fa fa-check"></i> ¡Éxito!</h4>
+                    <span th:text="${success}"></span>
+                </div>
+
+                <div th:if="${warning}" class="alert alert-warning alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <h4><i class="icon fa fa-warning"></i> Advertencia</h4>
+                    <span th:text="${warning}"></span>
+                </div>
+
+                <div th:if="${error}" class="alert alert-danger alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <h4><i class="icon fa fa-ban"></i> Error</h4>
+                    <span th:text="${error}"></span>
+                </div>
+
+                <!-- Información del sistema -->
+                <div class="row">
+                    <div class="col-md-3 col-sm-6 col-xs-12">
+                        <div class="info-box">
+                            <span class="info-box-icon bg-blue"><i class="fa fa-users"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Total Proveedores</span>
+                                <span class="info-box-number" th:text="${totalProveedores}">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6 col-xs-12">
+                        <div class="info-box">
+                            <span class="info-box-icon bg-green"><i class="fa fa-envelope"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Con Email Válido</span>
+                                <span class="info-box-number" th:text="${proveedoresConEmail}">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6 col-xs-12">
+                        <div class="info-box">
+                            <span class="info-box-icon" th:classappend="${configurationOk} ? 'bg-green' : 'bg-red'">
+                                <i class="fa" th:classappend="${configurationOk} ? 'fa-check' : 'fa-times'"></i>
+                            </span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Estado Configuración</span>
+                                <span class="info-box-number" th:text="${configurationOk} ? 'OK' : 'ERROR'">OK</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6 col-xs-12">
+                        <div class="info-box">
+                            <span class="info-box-icon bg-yellow"><i class="fa fa-calendar"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Envíos Programados</span>
+                                <span class="info-box-number">2</span>
+                                <span class="info-box-more-info">5 del mes y 31 dic</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Envíos Manuales -->
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><i class="fa fa-paper-plane"></i> Envíos Manuales</h3>
+                    </div>
+                    
+                    <div class="box-body">
+                        <!-- Botón de Prueba -->
+                        <div class="row margin-bottom">
+                            <div class="col-md-12">
+                                <div class="callout callout-info">
+                                    <h4><i class="fa fa-flask"></i> Prueba del Sistema</h4>
+                                    <p>Antes de enviar correos masivos, puedes probar la configuración enviando un correo de prueba.</p>
+                                    <form th:action="@{/notificaciones/enviar-prueba}" method="post" style="display: inline;">
+                                        <button type="submit" class="btn btn-info" th:disabled="${!configurationOk}">
+                                            <i class="fa fa-flask"></i> Enviar Correo de Prueba
+                                        </button>
+                                    </form>
+                                    <small class="help-block">El correo de prueba se enviará a f.julian2617@gmail.com</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <!-- Correos Publicitarios -->
+                            <div class="col-md-6">
+                                <div class="box box-info">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title">🚀 Correos Publicitarios</h3>
+                                    </div>
+                                    <div class="box-body">
+                                        <p><strong>Descripción:</strong> Envía correos promocionales con oportunidades de negocio a todos los proveedores.</p>
+                                        
+                                        <ul class="list-unstyled">
+                                            <li><i class="fa fa-check text-green"></i> Diseño atractivo y profesional</li>
+                                            <li><i class="fa fa-check text-green"></i> Información de productos y servicios</li>
+                                            <li><i class="fa fa-check text-green"></i> Enlace a la página de la universidad</li>
+                                            <li><i class="fa fa-check text-green"></i> Formato responsive para móviles</li>
+                                        </ul>
+                                        
+                                        <form th:action="@{/notificaciones/enviar-publicitarios}" method="post" 
+                                              onsubmit="return confirmarEnvio('publicitarios')">
+                                            <button type="submit" class="btn btn-info btn-block" 
+                                                    th:disabled="${!configurationOk or proveedoresConEmail == 0}">
+                                                <i class="fa fa-send"></i> Enviar Correos Publicitarios
+                                            </button>
+                                        </form>
+                                        
+                                        <p class="help-block margin-top">
+                                            <small><i class="fa fa-clock-o"></i> Programado automáticamente el día 5 de cada mes a las 15:00</small>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Correos de Fin de Año -->
+                            <div class="col-md-6">
+                                <div class="box box-warning">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title">🎉 Correos de Fin de Año</h3>
+                                    </div>
+                                    <div class="box-body">
+                                        <p><strong>Descripción:</strong> Envía saludos de fin de año y agradecimientos a todos los proveedores.</p>
+                                        
+                                        <ul class="list-unstyled">
+                                            <li><i class="fa fa-check text-yellow"></i> Diseño festivo y celebratorio</li>
+                                            <li><i class="fa fa-check text-yellow"></i> Mensaje de agradecimiento personalizado</li>
+                                            <li><i class="fa fa-check text-yellow"></i> Deseos de prosperidad para el nuevo año</li>
+                                            <li><i class="fa fa-check text-yellow"></i> Enlace institucional incluido</li>
+                                        </ul>
+                                        
+                                        <form th:action="@{/notificaciones/enviar-fin-ano}" method="post" 
+                                              onsubmit="return confirmarEnvio('fin de año')">
+                                            <button type="submit" class="btn btn-warning btn-block" 
+                                                    th:disabled="${!configurationOk or proveedoresConEmail == 0}">
+                                                <i class="fa fa-gift"></i> Enviar Correos de Fin de Año
+                                            </button>
+                                        </form>
+                                        
+                                        <p class="help-block margin-top">
+                                            <small><i class="fa fa-clock-o"></i> Programado automáticamente el 31 de diciembre a las 15:00</small>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información de Configuración -->
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><i class="fa fa-info-circle"></i> Información del Sistema</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4>📧 Configuración de Correo</h4>
+                                <ul class="list-unstyled">
+                                    <li><strong>Servidor:</strong> smtp.gmail.com:587</li>
+                                    <li><strong>Remitente:</strong> greedyteam0@gmail.com</li>
+                                    <li><strong>Protocolo:</strong> SMTP con STARTTLS</li>
+                                    <li><strong>Estado:</strong> 
+                                        <span th:if="${configurationOk}" class="text-green"><i class="fa fa-check"></i> Configurado</span>
+                                        <span th:unless="${configurationOk}" class="text-red"><i class="fa fa-times"></i> Error de configuración</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h4>⏰ Envíos Programados</h4>
+                                <ul class="list-unstyled">
+                                    <li><strong>Correos Publicitarios:</strong> Día 5 de cada mes a las 15:00</li>
+                                    <li><strong>Correos de Fin de Año:</strong> 31 de diciembre a las 15:00</li>
+                                    <li><strong>Pausa entre envíos:</strong> 1 segundo</li>
+                                    <li><strong>Formato:</strong> HTML responsive</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="row margin-top">
+                            <div class="col-md-12">
+                                <div class="callout callout-info">
+                                    <h4><i class="fa fa-lightbulb-o"></i> Notas importantes:</h4>
+                                    <ul>
+                                        <li>Solo se enviarán correos a proveedores con dirección de email válida</li>
+                                        <li>Los envíos automáticos se ejecutan según la programación configurada</li>
+                                        <li>Cada correo incluye un enlace a <a href="https://www.uncuyo.edu.ar/" target="_blank">https://www.uncuyo.edu.ar/</a></li>
+                                        <li>Los errores de envío se registran en los logs del sistema</li>
+                                        <li>Se recomienda probar la configuración antes de envíos masivos</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="callout callout-warning">
+                                    <h4><i class="fa fa-exclamation-triangle"></i> Configuración de Gmail:</h4>
+                                    <p><strong>El correo de prueba se envía a:</strong> <code>f.julian2617@gmail.com</code></p>
+                                    <p><strong>Remitente configurado:</strong> <code>greedyteam0@gmail.com</code></p>
+                                    <p>Si tienes errores de autenticación:</p>
+                                    <ul>
+                                        <li>🔐 <strong>Autenticación de 2 factores habilitada:</strong> Necesitas generar una "Contraseña de aplicación" desde la configuración de tu cuenta Google</li>
+                                        <li>🔓 <strong>Sin autenticación de 2 factores:</strong> Asegúrate de que la contraseña sea correcta</li>
+                                        <li>🌐 <strong>Conectividad:</strong> Verifica que el servidor tenga acceso a internet y que no esté bloqueado el puerto 587</li>
+                                        <li>📧 <strong>Configuración SMTP:</strong> Gmail usa smtp.gmail.com:587 con STARTTLS</li>
+                                    </ul>
+                                    <p><strong>Para generar una contraseña de aplicación:</strong></p>
+                                    <ol>
+                                        <li>Ve a <a href="https://myaccount.google.com/" target="_blank">Google Account Settings</a></li>
+                                        <li>Seguridad → Autenticación de 2 factores → Contraseñas de aplicación</li>
+                                        <li>Genera una nueva contraseña para "Otra aplicación personalizada"</li>
+                                        <li>Usa esa contraseña en lugar de "Greedy123" en application.properties</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        function confirmarEnvio(tipo) {
+            const totalProveedores = /*[[${proveedoresConEmail}]]*/ 0;
+            const mensaje = `¿Está seguro que desea enviar correos ${tipo} a ${totalProveedores} proveedores?\n\nEsta operación puede tardar varios minutos.`;
+            return confirm(mensaje);
+        }
+    </script>
+</section>
+</body>
+</html>

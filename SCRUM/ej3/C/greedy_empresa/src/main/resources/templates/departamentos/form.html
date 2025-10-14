@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title th:text="${departamento.id} == null ? 'Nuevo departamento' : 'Editar departamento'"></title>
+</head>
+<body>
+<section th:fragment="content">
+    <section class="content-header">
+        <h1 th:text="${departamento.id} == null ? 'Nuevo departamento' : 'Editar departamento'"></h1>
+        <div class="pull-right">
+            <a class="btn btn-default" th:href="@{/departamentos}"><i class="fa fa-arrow-left"></i> Volver</a>
+        </div>
+    </section>
+    <section class="content">
+        <div class="box box-primary">
+            <div class="box-body">
+                <form th:action="${departamento.id} == null ? @{/departamentos} : @{'/departamentos/' + ${departamento.id}}" method="post"
+                      th:object="${departamento}">
+                    <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger"
+                         th:each="err : ${#fields.globalErrors()}" th:text="${err.defaultMessage}"></div>
+                    <input type="hidden" th:field="*{id}" />
+                    <div class="form-group">
+                        <label for="nombre">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required>
+                        <p class="text-danger" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></p>
+                    </div>
+                    <div class="form-group">
+                        <label for="paisId">País</label>
+                        <select class="form-control" id="paisId" th:field="*{paisId}" required>
+                            <option value="">Seleccione un país</option>
+                            <option th:each="pais : ${paises}" th:value="${pais.id}" th:text="${pais.nombre}"></option>
+                        </select>
+                        <p class="text-danger" th:if="${#fields.hasErrors('paisId')}" th:errors="*{paisId}"></p>
+                    </div>
+                    <div class="form-group">
+                        <label for="provinciaId">Provincia</label>
+                        <select class="form-control" id="provinciaId" th:field="*{provinciaId}" required>
+                            <option value="">Seleccione una provincia</option>
+                            <option th:each="provincia : ${provinciasSeleccionadas}" th:value="${provincia.id}" th:text="${provincia.nombre}"></option>
+                        </select>
+                        <p class="text-danger" th:if="${#fields.hasErrors('provinciaId')}" th:errors="*{provinciaId}"></p>
+                    </div>
+                    <div class="box-footer">
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</section>
+</body>
+</html>

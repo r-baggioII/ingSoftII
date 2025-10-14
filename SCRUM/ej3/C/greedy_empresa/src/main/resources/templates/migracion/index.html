@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Migración de Proveedores</title>
+</head>
+<body>
+<section th:fragment="content">
+            <section class="content-header">
+                <h1>
+                    Migración de Proveedores
+                    <small>Importar proveedores desde archivo de texto</small>
+                </h1>
+                <ol class="breadcrumb">
+                    <li><a th:href="@{/}"><i class="fa fa-dashboard"></i> Inicio</a></li>
+                    <li class="active">Migración</li>
+                </ol>
+            </section>
+
+            <section class="content">
+                <div class="row">
+                    <div class="col-md-12">
+                        <!-- Mensajes de éxito y error -->
+                        <div th:if="${success}" class="alert alert-success alert-dismissible">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                            <h4><i class="icon fa fa-check"></i> ¡Éxito!</h4>
+                            <span th:text="${success}"></span>
+                        </div>
+
+                        <div th:if="${error}" class="alert alert-danger alert-dismissible">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                            <h4><i class="icon fa fa-ban"></i> Error</h4>
+                            <span th:text="${error}"></span>
+                        </div>
+
+                        <!-- Caja principal -->
+                        <div class="box box-primary">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">Cargar Archivo de Migración</h3>
+                            </div>
+                            
+                            <div class="box-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <form th:action="@{/migracion/procesar}" method="post" enctype="multipart/form-data">
+                                            <div class="form-group">
+                                                <label for="archivo">Seleccionar archivo de migración (.txt):</label>
+                                                <input type="file" class="form-control" id="archivo" name="archivo" 
+                                                       accept=".txt" required>
+                                                <p class="help-block">
+                                                    Seleccione un archivo de texto (.txt) con los datos de los proveedores.
+                                                </p>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fa fa-upload"></i> Procesar Migración
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    
+                                    <div class="col-md-4">
+                                        <div class="box box-info">
+                                            <div class="box-header with-border">
+                                                <h3 class="box-title">Información</h3>
+                                            </div>
+                                            <div class="box-body">
+                                                <p><strong>Formato del archivo:</strong></p>
+                                                <p>Cada línea debe contener los datos de un proveedor separados por punto y coma (;):</p>
+                                                <code>
+                                                    NOMBRE;APELLIDO;TELEFONO;CORREO_ELECTRONICO;CUIT;CALLE;NUMERO;LOCALIDAD;DEPARTAMENTO;PROVINCIA;PAIS;CODIGO_POSTAL
+                                                </code>
+                                                
+                                                <p class="margin-top"><strong>Ejemplo:</strong></p>
+                                                <code style="font-size: 11px; word-break: break-all;">
+                                                    Juan;Pérez;123456789;juan@email.com;20123456789;San Martín;123;Buenos Aires;Buenos Aires;Buenos Aires;Argentina;1000
+                                                </code>
+                                                
+                                                <p class="margin-top"><strong>Notas importantes:</strong></p>
+                                                <ul class="list-unstyled">
+                                                    <li><i class="fa fa-info-circle text-blue"></i> Los campos nombre, apellido, correo electrónico y CUIT son obligatorios</li>
+                                                    <li><i class="fa fa-info-circle text-blue"></i> El sistema busca la localidad por código postal y nombre</li>
+                                                    <li><i class="fa fa-info-circle text-blue"></i> Si un proveedor ya existe (mismo CUIT), se omite</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+</section>
+</body>
+</html>

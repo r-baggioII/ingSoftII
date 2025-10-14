@@ -1,0 +1,10 @@
+Juan;Pérez;1145678901;juan.perez@email.com;20123456781;Av. Corrientes;1234;Buenos Aires;Buenos Aires;Buenos Aires;Argentina;1000
+María;González;1156789012;maria.gonzalez@email.com;27234567892;San Martín;567;La Plata;La Plata;Buenos Aires;Argentina;1900
+Carlos;Rodríguez;1167890123;carlos.rodriguez@email.com;20345678903;Belgrano;890;Córdoba;Capital;Córdoba;Argentina;5000
+Ana;López;1178901234;ana.lopez@email.com;27456789014;Mitre;123;Rosario;Rosario;Santa Fe;Argentina;2000
+Luis;Martínez;1189012345;luis.martinez@email.com;20567890125;9 de Julio;456;Mendoza;Capital;Mendoza;Argentina;5500
+Elena;Fernández;1190123456;elena.fernandez@email.com;27678901236;Rivadavia;789;San Miguel de Tucumán;Capital;Tucumán;Argentina;4000
+Roberto;Sánchez;1101234567;roberto.sanchez@email.com;20789012347;Sarmiento;321;Salta;Capital;Salta;Argentina;4400
+Claudia;Morales;1112345678;claudia.morales@email.com;27890123458;Independencia;654;Neuquén;Confluencia;Neuquén;Argentina;8300
+Diego;Herrera;1123456789;diego.herrera@email.com;20901234569;Libertad;987;Posadas;Capital;Misiones;Argentina;3300
+Patricia;Ruiz;1134567890;patricia.ruiz@email.com;27012345670;San Lorenzo;147;Formosa;Formosa;Formosa;Argentina;3600

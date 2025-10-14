@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Países</title>
+</head>
+<body>
+<section th:fragment="content">
+    <section class="content-header">
+        <h1>Países</h1>
+        <div class="pull-right">
+            <a class="btn btn-primary" th:href="@{/paises/new}"><i class="fa fa-plus"></i> Nuevo país</a>
+        </div>
+    </section>
+    <section class="content">
+        <div th:insert="~{fragments/alerts :: alerts}"></div>
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <form class="form-inline" method="get" th:action="@{/paises}">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Buscar por nombre" name="filtro"
+                               th:value="${filtro}">
+                    </div>
+                    <button type="submit" class="btn btn-default"><i class="fa fa-search"></i> Buscar</button>
+                </form>
+            </div>
+            <div class="box-body table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th class="text-center" style="width: 120px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${page.empty}">
+                            <td colspan="2" class="text-center">No hay países registrados.</td>
+                        </tr>
+                        <tr th:each="pais : ${page.content}">
+                            <td th:text="${pais.nombre}">Argentina</td>
+                            <td class="text-center">
+                                <a class="btn btn-xs btn-default" th:href="@{'/paises/' + ${pais.id} + '/edit'}" title="Editar">
+                                    <i class="fa fa-pencil"></i>
+                                </a>
+                                <form th:action="@{'/paises/' + ${pais.id} + '/delete'}" method="post" style="display:inline-block;"
+                                      onsubmit="return confirm('¿Confirma eliminar el país seleccionado?');">
+                                    <button class="btn btn-xs btn-danger" type="submit" title="Eliminar">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="box-footer clearfix" th:insert="~{fragments/pagination :: pagination(${page}, '/paises')}"></div>
+        </div>
+    </section>
+</section>
+</body>
+</html>

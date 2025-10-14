@@ -1,0 +1,8 @@
+#!/bin/sh
+MVN_CMD="mvn"
+if command -v "$MVN_CMD" >/dev/null 2>&1; then
+  exec "$MVN_CMD" "$@"
+else
+  echo "Maven no está instalado en el sistema. Instálalo o actualiza el script mvnw." >&2
+  exit 1
+fi

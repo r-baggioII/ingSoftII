@@ -7,6 +7,10 @@ import com.example.greedy_empresa.servicios.EmpresaService;
 import com.example.greedy_empresa.servicios.LocalidadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -65,6 +69,11 @@ public class EmpresaController extends BaseController<Empresa, EmpresaService> {
         return empresa;
     }
 
+    @GetMapping("/new")
+    public String nuevo(Model model) {
+        return super.nuevo(model);
+    }
+
     // ========== Sobrescritura de hooks para lógica específica ==========
 
     @Override
@@ -82,6 +91,13 @@ public class EmpresaController extends BaseController<Empresa, EmpresaService> {
     }
 
     // ========== Métodos adicionales específicos de Empresa ==========
+
+    @GetMapping
+    public String listar(@RequestParam(value = "filtro", required = false) String filtro,
+                         @PageableDefault(size = 10) Pageable pageable,
+                         Model model) {
+        return super.listar(filtro, pageable, model);
+    }
 
     @GetMapping("/excel")
     public ResponseEntity<byte[]> descargarExcel() {
@@ -103,22 +119,3 @@ public class EmpresaController extends BaseController<Empresa, EmpresaService> {
     }
 }
 
-    @GetMapping("/excel")
-    public ResponseEntity<byte[]> descargarExcel() {
-        try {
-            List<Empresa> empresas = empresaService.obtenerTodasParaExcel();
-            byte[] excelBytes = empresaExcelService.generateEmpresasExcel(empresas);
-            
-            String fileName = "empresas_" + 
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".xlsx";
-            
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
-                    .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                    .body(excelBytes);
-                    
-        } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-}

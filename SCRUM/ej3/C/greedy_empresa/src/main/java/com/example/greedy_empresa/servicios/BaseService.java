@@ -8,7 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Clase base que implementa el patrón Template Method para servicios CRUD.
  * Define el esqueleto de operaciones comunes (buscar, guardar, eliminar) 
  * y delega a métodos abstractos/hooks para personalización.
  */
@@ -133,8 +132,14 @@ public abstract class BaseService<T extends BaseEntity, REPOSITORY extends BaseR
 
     /**
      * Hook: Actualizar campos de entidad existente con datos nuevos
+     *
+     * Nota: Se proporciona una implementación por defecto vacía para
+     * reducir la cantidad de overrides obligatorios tras la refactorización.
+     * Las subclases que necesiten copiar campos deben sobreescribir este método.
      */
-    protected abstract void actualizarCampos(T existente, T nueva);
+    protected void actualizarCampos(T existente, T nueva) {
+        // Por defecto no hace nada. Subclases deben sobrescribir para copiar campos.
+    }
 
     /**
      * Hook: Crear nueva entidad

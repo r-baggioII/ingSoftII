@@ -7,6 +7,10 @@ import com.example.greedy_empresa.servicios.LocalidadService;
 import com.example.greedy_empresa.servicios.ProveedorPdfService;
 import com.example.greedy_empresa.servicios.ProveedorService;
 import org.springframework.data.domain.Pageable;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -102,6 +106,18 @@ public class ProveedorController extends BaseController<Proveedor, ProveedorServ
 
     // ========== Métodos adicionales específicos de Proveedor ==========
 
+    @GetMapping
+    public String listar(@RequestParam(value = "filtro", required = false) String filtro,
+                         @PageableDefault(size = 10) Pageable pageable,
+                         Model model) {
+        return super.listar(filtro, pageable, model);
+    }
+
+    @GetMapping("/new")
+    public String nuevo(Model model) {
+        return super.nuevo(model);
+    }
+
     @GetMapping("/pdf")
     public ResponseEntity<byte[]> descargarPdf() {
         try {
@@ -122,22 +138,3 @@ public class ProveedorController extends BaseController<Proveedor, ProveedorServ
     }
 }
 
-    @GetMapping("/pdf")
-    public ResponseEntity<byte[]> descargarPdf() {
-        try {
-            List<Proveedor> proveedores = proveedorService.obtenerTodosParaPdf();
-            byte[] pdfBytes = proveedorPdfService.generateProveedoresPdf(proveedores);
-            
-            String fileName = "proveedores_" + 
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".pdf";
-            
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
-                    .contentType(MediaType.APPLICATION_PDF)
-                    .body(pdfBytes);
-                    
-        } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-}

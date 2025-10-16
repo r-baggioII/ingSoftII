@@ -21,9 +21,18 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public abstract class BaseController<T extends BaseEntity, S extends BaseService<T, ?>> {
 
     protected final S service;
+    // Compatibilidad: algunos controladores usan el nombre 'servicio'
+    @SuppressWarnings("squid:S2386")
+    protected final S servicio;
+
+    public BaseController() {
+        this.service = null;
+        this.servicio = null;
+    }
 
     public BaseController(S service) {
         this.service = service;
+        this.servicio = service;
     }
 
     // ========== Métodos abstractos - Las subclases DEBEN implementar ==========
@@ -31,22 +40,51 @@ public abstract class BaseController<T extends BaseEntity, S extends BaseService
     /**
      * Retorna el nombre del menú activo para la navegación
      */
-    protected abstract String getActiveMenu();
+    protected String getActiveMenu() {
+        return ""; // Por defecto vacío; subclases pueden sobreescribir
+    }
 
     /**
      * Retorna la ruta base de las vistas (ej: "empresas", "proveedores", "usuarios")
      */
-    protected abstract String getBasePath();
+    protected String getBasePath() {
+        return ""; // Por defecto ruta vacía
+    }
 
     /**
      * Retorna el nombre del atributo del modelo (ej: "empresa", "proveedor", "usuario")
      */
-    protected abstract String getModelAttributeName();
+    protected String getModelAttributeName() {
+        return "entity"; // Nombre genérico por defecto
+    }
 
     /**
      * Inicializa una nueva entidad con valores por defecto
      */
-    protected abstract T crearNuevaEntidad();
+    protected T crearNuevaEntidad() {
+        try {
+            return getEntityClass().getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            throw new IllegalStateException("No se pudo instanciar la entidad por defecto", e);
+        }
+    }
+
+    /**
+     * Hook: Retornar la clase de la entidad manejada por el controlador. Las subclases
+     * pueden sobrescribir si lo desean. Se intenta inferir mediante reflection en las
+     * subclases que implementen getEntityClass en su servicio.
+     */
+    protected Class<T> getEntityClass() {
+        return null; // Subclases pueden sobrescribir para retorno fuerte
+    }
+
+    /**
+     * Compatibilidad con controladores existentes que implementaban
+     * `getNombreEntidad()`. Delegamos a `getModelAttributeName()` por defecto.
+     */
+    protected String getNombreEntidad() {
+        return getModelAttributeName();
+    }
 
     // ========== Hook Methods - Las subclases pueden sobrescribir ==========
 
@@ -104,7 +142,6 @@ public abstract class BaseController<T extends BaseEntity, S extends BaseService
     /**
      * Template Method: Listar entidades con paginación y filtro
      */
-    @GetMapping
     public String listar(@RequestParam(value = "filtro", required = false) String filtro,
                         @PageableDefault(size = 10) Pageable pageable,
                         Model model) {
@@ -118,7 +155,6 @@ public abstract class BaseController<T extends BaseEntity, S extends BaseService
     /**
      * Template Method: Mostrar formulario para nueva entidad
      */
-    @GetMapping("/new")
     public String nuevo(Model model) {
         T entidad = crearNuevaEntidad();
         model.addAttribute(getModelAttributeName(), entidad);

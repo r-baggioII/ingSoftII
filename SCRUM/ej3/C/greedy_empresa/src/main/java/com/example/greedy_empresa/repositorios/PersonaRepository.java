@@ -4,9 +4,9 @@ import com.example.greedy_empresa.entidades.Persona;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.example.greedy_empresa.repositorios.BaseRepository;
 
-public interface PersonaRepository extends JpaRepository<Persona, String> {
+public interface PersonaRepository extends BaseRepository<Persona, String> {
 
     Page<Persona> findByEliminadoFalse(Pageable pageable);
 

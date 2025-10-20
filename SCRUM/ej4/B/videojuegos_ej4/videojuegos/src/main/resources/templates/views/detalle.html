@@ -2,38 +2,179 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
-    <title>Detalle videojuego</title>
+    <meta name="description" content="Greedy Videojuegos">
+    <meta name="keywords" content="Videojuegos, gaming, tienda">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Detalle - Greedy Videojuegos</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Css Styles -->
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/elegant-icons.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/plyr.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/nice-select.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/owl.carousel.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/slicknav.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css">
 </head>
 <body>
-<nav th:replace="components/navbar :: nav_bar"></nav>
-<div class="container">
-    <div class="row mt-5" th:object="${videojuego}">
-        <div class="col-4">
-            <img th:src="${videojuego.imagen}" class="img-fluid" alt="videojuego imagen">
-        </div>
-        <div class="col-8">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title"th:text="*{titulo}">Card title</h5>
-                    <p class="card-text">Precio: <span th:text="*{precio}">1</span></p>
-                    <p class="card-text" th:if="*{stock}">
-                        Cantidad: <span th:text="*{stock}"></span>
-                    </p>
-                    <p class="card-text" th:unless="*{stock}">
-                        <span class="text-danger">No hay stock</span>
-                    </p>
-                </div>
-                <hr>
-                <div class="card-body">
-                    <p class="card-text" th:text="*{descripcion}"></p>
+    <!-- Page Preloder -->
+    <div id="preloder">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Header Section Begin -->
+    <nav th:replace="components/navbar :: nav_bar"></nav>
+    <!-- Header End -->
+
+    <!-- Breadcrumb Begin -->
+    <div class="breadcrumb-option">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="breadcrumb__links">
+                        <a th:href="@{/inicio}"><i class="fa fa-home"></i> Inicio</a>
+                        <a th:href="@{/inicio}">Videojuegos</a>
+                        <span th:text="${videojuego.titulo}">Detalle</span>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-12 mt-5">
-            <a th:href="@{/inicio}" class="btn btn-outline-dark">Volver</a>
+    </div>
+    <!-- Breadcrumb End -->
+
+    <!-- Anime Section Begin -->
+    <section class="anime-details spad" th:object="${videojuego}">
+        <div class="container">
+            <div class="anime__details__content">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <!-- Si la imagen es una URL completa (http/https), usarla directamente; si no, agregar /imagenes/ -->
+                        <div class="anime__details__pic set-bg" 
+                             th:data-setbg="${#strings.startsWith(videojuego.imagen, 'http') ? videojuego.imagen : '/imagenes/' + videojuego.imagen}">
+                            <div class="comment"><i class="fa fa-dollar"></i> <span th:text="*{precio}">0</span></div>
+                            <div class="view" th:if="*{stock}">
+                                <i class="fa fa-check"></i> En Stock: <span th:text="*{stock}">0</span>
+                            </div>
+                            <div class="view" th:unless="*{stock}">
+                                <i class="fa fa-times"></i> Sin Stock
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-9">
+                        <div class="anime__details__text">
+                            <div class="anime__details__title">
+                                <h3 th:text="*{titulo}">Título del Videojuego</h3>
+                                <span>Videojuego</span>
+                            </div>
+                            <div class="anime__details__rating">
+                                <div class="rating">
+                                    <a href="#"><i class="fa fa-star"></i></a>
+                                    <a href="#"><i class="fa fa-star"></i></a>
+                                    <a href="#"><i class="fa fa-star"></i></a>
+                                    <a href="#"><i class="fa fa-star"></i></a>
+                                    <a href="#"><i class="fa fa-star-half-o"></i></a>
+                                </div>
+                                <span>Calificación 4.5/5</span>
+                            </div>
+                            <p th:text="*{descripcion}">Descripción del videojuego...</p>
+                            <div class="anime__details__widget">
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-6">
+                                        <ul>
+                                            <li><span>Título:</span> <span th:text="*{titulo}">-</span></li>
+                                            <li><span>Precio:</span> $<span th:text="*{precio}">0</span></li>
+                                            <li><span>Estado:</span> 
+                                                <span th:if="*{stock}" class="text-success">Disponible</span>
+                                                <span th:unless="*{stock}" class="text-danger">Agotado</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6">
+                                        <ul>
+                                            <li><span>Stock:</span> 
+                                                <span th:if="*{stock}" th:text="*{stock} + ' unidades'">0</span>
+                                                <span th:unless="*{stock}" class="text-danger">Sin stock</span>
+                                            </li>
+                                            <li><span>Categoría:</span> Videojuegos</li>
+                                            <li><span>ID:</span> #<span th:text="*{id}">0</span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="anime__details__btn">
+                                <a th:href="@{/inicio}" class="follow-btn"><i class="fa fa-arrow-left"></i> Volver</a>
+                                <a href="#" class="watch-btn" th:if="*{stock}">
+                                    <span>Comprar Ahora</span> <i class="fa fa-shopping-cart"></i>
+                                </a>
+                                <a href="#" class="watch-btn disabled" th:unless="*{stock}" style="opacity: 0.5; cursor: not-allowed;">
+                                    <span>Sin Stock</span> <i class="fa fa-times"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Anime Section End -->
+
+    <!-- Footer Section Begin -->
+    <footer class="footer">
+        <div class="page-up">
+            <a href="#" id="scrollToTopButton"><span class="arrow_carrot-up"></span></a>
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3">
+                    <div class="footer__logo">
+                        <a th:href="@{/inicio}"><img th:src="@{/img/logo.png}" alt=""></a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="footer__nav">
+                        <ul>
+                            <li class="active"><a th:href="@{/inicio}">Inicio</a></li>
+                            <li><a th:href="@{/crud}">Administrar</a></li>
+                            <li><a href="#">Contacto</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <p>
+                        Copyright &copy;<script>document.write(new Date().getFullYear());</script> 
+                        Greedy Videojuegos. Todos los derechos reservados.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- Footer Section End -->
+
+    <!-- Search model Begin -->
+    <div class="search-model">
+        <div class="h-100 d-flex align-items-center justify-content-center">
+            <div class="search-close-switch"><i class="icon_close"></i></div>
+            <form class="search-model-form" th:action="@{/busqueda}" method="get">
+                <input type="text" id="search-input" name="query" placeholder="Buscar videojuegos.....">
+            </form>
         </div>
     </div>
-</div>
+    <!-- Search model end -->
+
+    <!-- Js Plugins -->
+    <script th:src="@{/js/jquery-3.3.1.min.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+    <script th:src="@{/js/player.js}"></script>
+    <script th:src="@{/js/jquery.nice-select.min.js}"></script>
+    <script th:src="@{/js/mixitup.min.js}"></script>
+    <script th:src="@{/js/jquery.slicknav.js}"></script>
+    <script th:src="@{/js/owl.carousel.min.js}"></script>
+    <script th:src="@{/js/main.js}"></script>
 </body>
 </html>

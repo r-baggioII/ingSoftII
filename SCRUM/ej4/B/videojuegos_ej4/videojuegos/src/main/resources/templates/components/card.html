@@ -1,5 +1,7 @@
 <div th:fragment="_card" class="product__item">
-    <div class="product__item__pic set-bg" th:data-setbg="${videojuego.imagen}">
+    <!-- Si la imagen es una URL completa (http/https), usarla directamente; si no, agregar /imagenes/ -->
+    <div class="product__item__pic set-bg" 
+         th:data-setbg="${#strings.startsWith(videojuego.imagen, 'http') ? videojuego.imagen : '/imagenes/' + videojuego.imagen}">
         <div class="comment"><i class="fa fa-dollar"></i> <span th:text="${videojuego.precio}">0</span></div>
         <div class="view"><i class="fa fa-gamepad"></i> Videojuego</div>
     </div>

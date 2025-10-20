@@ -16,10 +16,7 @@ import java.util.Date;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Videojuego {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+public class Videojuego extends BaseEntity {
 
     @NotEmpty(message = "{NotEmpty.Videojuego.titulo}")
     private String titulo;
@@ -39,7 +36,6 @@ public class Videojuego {
     @NotNull(message="No puede ser nulo la fecha")
     @PastOrPresent(message="Debe ser igual o menor a la fecha de hoy")
     private Date fechaLanzamiento;
-    private boolean activo = true;
 
     @NotNull(message="Es requerido el estudio")
     @ManyToOne(fetch = FetchType.EAGER)
@@ -50,4 +46,69 @@ public class Videojuego {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "fk_categoria", nullable = false)
     private Categoria categoria;
+
+    // Getters y Setters explícitos (Lombok no está funcionando correctamente)
+    public String getTitulo() {
+        return titulo;
+    }
+
+    public void setTitulo(String titulo) {
+        this.titulo = titulo;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    public String getImagen() {
+        return imagen;
+    }
+
+    public void setImagen(String imagen) {
+        this.imagen = imagen;
+    }
+
+    public float getPrecio() {
+        return precio;
+    }
+
+    public void setPrecio(float precio) {
+        this.precio = precio;
+    }
+
+    public short getStock() {
+        return stock;
+    }
+
+    public void setStock(short stock) {
+        this.stock = stock;
+    }
+
+    public Date getFechaLanzamiento() {
+        return fechaLanzamiento;
+    }
+
+    public void setFechaLanzamiento(Date fechaLanzamiento) {
+        this.fechaLanzamiento = fechaLanzamiento;
+    }
+
+    public Estudio getEstudio() {
+        return estudio;
+    }
+
+    public void setEstudio(Estudio estudio) {
+        this.estudio = estudio;
+    }
+
+    public Categoria getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(Categoria categoria) {
+        this.categoria = categoria;
+    }
 }

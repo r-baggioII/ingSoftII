@@ -14,14 +14,27 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Categoria {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+public class Categoria extends BaseEntity {
 
     private String nombre;
-    private boolean activo = true;
 
     @OneToMany(mappedBy = "categoria")
     private List<Videojuego> videojuegos;
+
+    // Getters y Setters explícitos (Lombok no está funcionando correctamente)
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public List<Videojuego> getVideojuegos() {
+        return videojuegos;
+    }
+
+    public void setVideojuegos(List<Videojuego> videojuegos) {
+        this.videojuegos = videojuegos;
+    }
 }

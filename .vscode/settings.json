@@ -1,8 +1,6 @@
 {
-    "java.project.sourcePaths": [
-        "SCRUM/ej4/B/videojuegos_ej4/videojuegos/src"
+    "java.import.exclusions": [
+        "**/RUP/ej4/videojuegos_ej4_OLD/**"
     ],
-    "files.exclude": {
-        "**/RUP/ej4/videojuegos_ej4": true
-    }
+    "liveServer.settings.port": 5501
 }

@@ -35,7 +35,7 @@ public class ControladorVideojuego {
     @GetMapping("/inicio")
     public String inicio(Model model) {
         try {
-            List<Videojuego> videojuegos = this.svcVideojuego.findAllByActivo();
+            List<Videojuego> videojuegos = this.svcVideojuego.buscarTodosActivos();
             model.addAttribute("videojuegos", videojuegos);
             return "views/inicio";
         } catch (Exception e) {
@@ -47,7 +47,7 @@ public class ControladorVideojuego {
     @GetMapping("/detalle/{id}")
     public String detalleVideojuego(Model model, @PathVariable("id") long id) {
         try {
-            Videojuego videojuego = this.svcVideojuego.findByIdAndActivo(id);
+            Videojuego videojuego = this.svcVideojuego.buscarPorIdYActivo(id);
             model.addAttribute("videojuego", videojuego);
             return "views/detalle";
         } catch (Exception e) {
@@ -60,7 +60,7 @@ public class ControladorVideojuego {
     public String busquedaVideojuego(Model model,
                                      @RequestParam(value = "query", required = false) String q) {
         try {
-            List<Videojuego> videojuegos = this.svcVideojuego.findByTitle(q);
+            List<Videojuego> videojuegos = this.svcVideojuego.buscarPorTitulo(q);
             model.addAttribute("videojuegos", videojuegos);
             model.addAttribute("resultado", q);
             return "views/busqueda";
@@ -73,7 +73,7 @@ public class ControladorVideojuego {
     @GetMapping("/crud")
     public String crudVideojuego(Model model) {
         try {
-            List<Videojuego> videojuegos = this.svcVideojuego.findAll();
+            List<Videojuego> videojuegos = this.svcVideojuego.listar();
             model.addAttribute("videojuegos", videojuegos);
             return "views/crud";
         } catch (Exception e) {
@@ -85,12 +85,12 @@ public class ControladorVideojuego {
     @GetMapping("/formulario/videojuego/{id}")
     public String formularioVideojuego(Model model, @PathVariable("id") long id) {
         try {
-            model.addAttribute("categorias", this.svcCategoria.findAll());
-            model.addAttribute("estudios", this.svcEstudio.findAll());
+            model.addAttribute("categorias", this.svcCategoria.listar());
+            model.addAttribute("estudios", this.svcEstudio.listar());
             if (id == 0) {
                 model.addAttribute("videojuego", new Videojuego());
             } else {
-                model.addAttribute("videojuego", this.svcVideojuego.findById(id));
+                model.addAttribute("videojuego", this.svcVideojuego.obtener(id));
             }
             return "views/formulario/videojuego";
         } catch (Exception e) {
@@ -106,8 +106,8 @@ public class ControladorVideojuego {
                                     Model model,
                                     @PathVariable("id") long id) {
         try {
-            model.addAttribute("categorias", this.svcCategoria.findAll());
-            model.addAttribute("estudios", this.svcEstudio.findAll());
+            model.addAttribute("categorias", this.svcCategoria.listar());
+            model.addAttribute("estudios", this.svcEstudio.listar());
 
             if (result.hasErrors()) {
                 return "views/formulario/videojuego";
@@ -138,7 +138,7 @@ public class ControladorVideojuego {
                     model.addAttribute("errorImagenMsg", "Cargá un archivo");
                     return "views/formulario/videojuego";
                 }
-                this.svcVideojuego.saveOne(videojuego);
+                this.svcVideojuego.alta(videojuego);
 
             } else {
                 // EDITAR
@@ -161,10 +161,10 @@ public class ControladorVideojuego {
                     // Dejar la URL tal cual (no escribimos archivo ni armamos Path)
                 } else {
                     // Ni archivo ni URL nueva => mantener la imagen previa
-                    Videojuego actual = this.svcVideojuego.findById(id);
+                    Videojuego actual = this.svcVideojuego.obtener(id);
                     videojuego.setImagen(actual.getImagen());
                 }
-                this.svcVideojuego.updateOne(videojuego, id);
+                this.svcVideojuego.modificar(videojuego, id);
             }
 
             return "redirect:/crud";
@@ -177,7 +177,7 @@ public class ControladorVideojuego {
     @GetMapping("/eliminar/videojuego/{id}")
     public String eliminarVideojuego(Model model, @PathVariable("id") long id) {
         try {
-            model.addAttribute("videojuego", this.svcVideojuego.findById(id));
+            model.addAttribute("videojuego", this.svcVideojuego.obtener(id));
             return "views/formulario/eliminar";
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
@@ -188,7 +188,7 @@ public class ControladorVideojuego {
     @PostMapping("/eliminar/videojuego/{id}")
     public String desactivarVideojuego(Model model, @PathVariable("id") long id) {
         try {
-            this.svcVideojuego.deleteById(id);
+            this.svcVideojuego.baja(id);
             return "redirect:/crud";
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());

@@ -1,10 +1,13 @@
-<div th:fragment="_card" class="card my-2">
-  <img th:src="${videojuego.imagen}" class="card-img-top" alt="videojuego imagen">
-  <div class="card-body">
-    <h5 class="card-title"th:text="${videojuego.titulo}">Card title</h5>
-    <p class="card-text">Precio: <span th:text="${videojuego.precio}">1</span></p>
-    <a th:href="@{detalle/{id}(id=${videojuego.id})}" class="btn btn-primary btn-block">
-      ver detalle
-    </a>
-  </div>
+<div th:fragment="_card" class="product__item">
+    <div class="product__item__pic set-bg" th:data-setbg="${videojuego.imagen}">
+        <div class="comment"><i class="fa fa-dollar"></i> <span th:text="${videojuego.precio}">0</span></div>
+        <div class="view"><i class="fa fa-gamepad"></i> Videojuego</div>
+    </div>
+    <div class="product__item__text">
+        <ul>
+            <li>Disponible</li>
+            <li>Gaming</li>
+        </ul>
+        <h5><a th:href="@{detalle/{id}(id=${videojuego.id})}" th:text="${videojuego.titulo}">Título del Videojuego</a></h5>
+    </div>
 </div>

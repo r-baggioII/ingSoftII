@@ -4,109 +4,68 @@ import org.example.entity.Videojuego;
 import org.example.repository.RepositorioVideojuego;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ServicioVideojuego implements ServicioBase<Videojuego>{
+public class ServicioVideojuego extends BaseService<Videojuego, RepositorioVideojuego> {
+    
     @Autowired
-    private RepositorioVideojuego repositorio;
+    public ServicioVideojuego(RepositorioVideojuego repositorio) {
+        super(repositorio);
+    }
 
-    @Override
-    @Transactional
-    public List<Videojuego> findAll() throws Exception {
+    // Los métodos básicos CRUD (findAll, findById, saveOne, updateOne, deleteById) 
+    // son heredados de BaseService y no es necesario redefinirlos
+    
+    /*   Métodos específicos de Videojuego - Los adicionales que necesitas   */
+    
+    @Transactional(readOnly = true)
+    public List<Videojuego> buscarTodosActivos() throws Exception {
         try {
-            List<Videojuego> entities = this.repositorio.findAll();
+            List<Videojuego> entities = this.repository.findAllByActivo();
             return entities;
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw new Exception("Error al buscar videojuegos activos: " + e.getMessage());
         }
     }
 
-    @Override
-    @Transactional
-    public Videojuego findById(long id) throws Exception {
+    @Transactional(readOnly = true)
+    public Videojuego buscarPorIdYActivo(long id) throws Exception {
         try {
-            Optional<Videojuego> opt = this.repositorio.findById(id);
-            return opt.get();
+            Optional<Videojuego> opt = this.repository.findByIdAndActivo(id);
+            return opt.orElseThrow(() -> new Exception("Videojuego activo no encontrado con ID: " + id));
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw new Exception("Error al buscar videojuego: " + e.getMessage());
         }
     }
 
-    @Override
-    @Transactional
-    public Videojuego saveOne(Videojuego entity) throws Exception {
+    @Transactional(readOnly = true)
+    public List<Videojuego> buscarPorTitulo(String q) throws Exception {
         try {
-            Videojuego videojuego = this.repositorio.save(entity);
-            return videojuego;
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-    }
-
-    @Override
-    @Transactional
-    public Videojuego updateOne(Videojuego entity, long id) throws Exception {
-        try {
-            Optional<Videojuego> opt = this.repositorio.findById(id);
-            Videojuego videojuego = opt.get();
-            videojuego = this.repositorio.save(entity);
-            return videojuego;
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-    }
-
-    @Override
-    @Transactional
-    public boolean deleteById(long id) throws Exception {
-        try {
-            Optional<Videojuego> opt = this.repositorio.findById(id);
-            if (!opt.isEmpty()) {
-                Videojuego videojuego = opt.get();
-                videojuego.setActivo(!videojuego.isActivo());
-                this.repositorio.save(videojuego);
-            } else {
-                throw new Exception();
-            }
-            return true;
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-    }
-
-    /*   Metodos nuevos   */
-
-    @Transactional
-    public List<Videojuego> findAllByActivo() throws Exception{
-        try {
-            List<Videojuego> entities = this.repositorio.findAllByActivo();
+            List<Videojuego> entities = this.repository.findByTitle(q);
             return entities;
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw new Exception("Error al buscar videojuegos por título: " + e.getMessage());
         }
     }
-
-    @Transactional
-    public Videojuego findByIdAndActivo(long id) throws Exception {
-        try {
-            Optional<Videojuego> opt = this.repositorio.findByIdAndActivo(id);
-            return opt.get();
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
+    
+    // Puedes agregar validaciones específicas para Videojuego:
+    /*
+    @Override
+    protected void validar(Videojuego entidad) throws Exception {
+        if (entidad.getTitulo() == null || entidad.getTitulo().trim().isEmpty()) {
+            throw new Exception("El título del videojuego es obligatorio");
         }
-    }
-
-    @Transactional
-    public List<Videojuego> findByTitle(String q) throws Exception{
-        try{
-            List<Videojuego> entities = this.repositorio.findByTitle(q);
-            return entities;
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
+        if (entidad.getPrecio() <= 0) {
+            throw new Exception("El precio debe ser mayor a 0");
         }
+        if (entidad.getStock() < 0) {
+            throw new Exception("El stock no puede ser negativo");
+        }
+        // Otras validaciones...
     }
+    */
 }

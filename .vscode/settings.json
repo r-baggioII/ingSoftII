@@ -1,0 +1,8 @@
+{
+    "java.project.sourcePaths": [
+        "SCRUM/ej4/B/videojuegos_ej4/videojuegos/src"
+    ],
+    "files.exclude": {
+        "**/RUP/ej4/videojuegos_ej4": true
+    }
+}

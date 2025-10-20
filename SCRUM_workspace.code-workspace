@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"name": "SCRUM - Videojuegos (Active)",
+			"path": "SCRUM/ej4/B/videojuegos_ej4/videojuegos"
+		}
+	],
+	"settings": {
+		"java.configuration.updateBuildConfiguration": "automatic"
+	}
+}

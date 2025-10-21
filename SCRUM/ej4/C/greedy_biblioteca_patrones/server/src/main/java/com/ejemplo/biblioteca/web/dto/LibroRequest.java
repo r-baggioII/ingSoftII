@@ -1,0 +1,27 @@
+package com.ejemplo.biblioteca.web.dto;
+
+import com.ejemplo.biblioteca.domain.TipoLibro;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+public record LibroRequest(
+        @NotBlank(message = "El título es obligatorio")
+        String titulo,
+        @NotBlank(message = "La fecha es obligatoria")
+        String fecha,
+        @NotBlank(message = "El género es obligatorio")
+        String genero,
+        @NotNull(message = "Las páginas son obligatorias")
+        @Min(value = 1, message = "Las páginas deben ser positivas")
+        Integer paginas,
+        @NotNull(message = "El tipo de libro es obligatorio")
+        TipoLibro tipo,
+        Double pesoGramos,
+        Double tamanoMb,
+        @NotNull(message = "El autor es obligatorio")
+        Long autorId,
+        @NotNull(message = "La persona es obligatoria")
+        Long personaId
+) {
+}

@@ -1,13 +1,23 @@
 package com.is.biblioteca.business.logic.service;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.is.biblioteca.business.domain.entity.Imagen;
@@ -17,15 +27,19 @@ import com.is.biblioteca.business.logic.error.ErrorServiceException;
 import com.is.biblioteca.business.persistence.repository.UsuarioRepository;
 
 import jakarta.persistence.NoResultException;
+import jakarta.servlet.http.HttpSession;
 
 @Service
-public class UsuarioService {
+public class UsuarioService implements UserDetailsService{
 
 	@Autowired
     private UsuarioRepository repository;
 
 	@Autowired
     private ImagenService imagenService;
+	
+	@Autowired
+	private BCryptPasswordEncoder encoder;
 	
     public void validar(String nombre, String email, String clave, String confirmacion) throws ErrorServiceException {
        try { 
@@ -72,7 +86,7 @@ public class UsuarioService {
         usuario.setNombre(nombre);
         usuario.setEmail(email);
         usuario.setRol(Rol.USER);
-        usuario.setPassword(clave);
+        usuario.setPassword(encoder.encode(clave));
         usuario.setEliminado(false);
  
         if (archivo != null) {        
@@ -101,7 +115,7 @@ public class UsuarioService {
             usuario.setNombre(nombre);
             usuario.setEmail(email);
             usuario.setRol(Rol.USER);
-            usuario.setPassword(clave);
+            usuario.setPassword(encoder.encode(clave));
 
             String idImagen = null;
             if (usuario.getImagen() != null) {
@@ -163,6 +177,32 @@ public class UsuarioService {
 
     }
     
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    	
+    	Usuario usuario = repository.buscarUsuarioPorEmail(email);
+    		
+        if (usuario != null) {
+
+            List<GrantedAuthority> permisos = new ArrayList<>();
+
+            GrantedAuthority permiso = new SimpleGrantedAuthority("ROLE_" + usuario.getRol().toString());
+            permisos.add(permiso);
+
+            ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+            HttpSession session = attr.getRequest().getSession(true);
+
+            session.setAttribute("usuariosession", usuario);
+
+
+            return new User(usuario.getEmail(), usuario.getPassword(), permisos);
+
+        } else {
+            throw new UsernameNotFoundException("No se encontró un usuario con el email: " + email);
+        }
+    
+    }
+
     @Transactional(readOnly=true)
     public Usuario buscarUsuario(String idUsuario) throws ErrorServiceException {
 
@@ -241,7 +281,6 @@ public class UsuarioService {
         
     }
     
-
     public Usuario login(String email, String clave) throws ErrorServiceException {
     	
     	try {

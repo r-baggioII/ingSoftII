@@ -38,6 +38,7 @@ public class LibroController {
     //////////////////////////////////////////
     //////////////////////////////////////////
     
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/registrar")
     public String irEditAlta(ModelMap modelo) {
     	
@@ -56,6 +57,7 @@ public class LibroController {
        }
     }
 
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/registro")
     public String aceptarEditAlta(@RequestParam(required = false) Long isbn, @RequestParam String titulo,
             			   	      @RequestParam(required = false) Integer ejemplares, @RequestParam String idAutor,
@@ -112,6 +114,7 @@ public class LibroController {
     //////////////////////////////////////////
     //////////////////////////////////////////
     
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/modificar/{isbn}")
     public String irEditModificar(@PathVariable Long isbn, ModelMap modelo) {
       
@@ -132,6 +135,7 @@ public class LibroController {
        } 
     }
 
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/modificar/{isbn}")
     public String aceptarEditModificar(@PathVariable Long isbn, String titulo, Integer ejemplares, String idAutor, String idEditorial, ModelMap modelo, MultipartFile archivo) {
         try {

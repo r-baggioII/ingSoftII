@@ -43,7 +43,8 @@
 
         <div class="container-fluid m-5 contenedor">
 
-            <form class="formulario" th:action="@{/registro}" method="POST" enctype="multipart/form-data" >
+            <form class="formulario" th:action="@{/usuario/registro}" method="POST" enctype="multipart/form-data" >
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
 
                 <div class="form-group my-3">

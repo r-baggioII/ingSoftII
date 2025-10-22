@@ -88,17 +88,18 @@ public class UsuarioController {
 		return "registro.html";
 	}
 
-	@PostMapping("/registro")
-	public String aceptarEditAlta(@RequestParam String nombre, @RequestParam String email,
-			@RequestParam String password, String password2, ModelMap modelo, MultipartFile archivo) {
+    @PostMapping("/registro")
+    public String aceptarEditAlta(@RequestParam String nombre, @RequestParam String email,
+	    @RequestParam String password, String password2, ModelMap modelo, MultipartFile archivo,
+	    org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttrs) {
 
 		try {
 
 			usuarioService.crearUsuario(nombre, email, password, password2, archivo);
 
-			modelo.put("exito", "Usuario registrado correctamente!");
-
-			return "index.html";
+			// Mostrar confirmación en la pantalla de login usando flash attributes
+			redirectAttrs.addFlashAttribute("exito", "Usuario registrado correctamente!");
+			return "redirect:/usuario/login";
 
 		} catch (ErrorServiceException ex) {
 
@@ -168,5 +169,43 @@ public class UsuarioController {
 		}
 
 	}
+
+	@GetMapping("/inicio")
+	public String irInicio(HttpSession session, ModelMap modelo) {
+		try {
+			// Obtener el email del usuario autenticado por Spring Security
+			org.springframework.security.core.Authentication auth = 
+				org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+			
+			if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
+				String email = auth.getName(); // Spring Security usa el email como username
+				
+				// Buscar el usuario completo en la base de datos
+				Usuario usuario = usuarioService.buscarUsuarioPorEmail(email);
+				
+				// Guardarlo en sesión para que las vistas puedan accederlo
+				session.setAttribute("usuariosession", usuario);
+			}
+			
+			return "inicio.html";
+		} catch (Exception e) {
+			e.printStackTrace();
+			modelo.put("error", "Error al cargar la página de inicio");
+			return "redirect:/usuario/login";
+		}
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+	@GetMapping("usuario/inicio")
+	public String irInicioAdmin(HttpSession session) {
+		Usuario logueado = (Usuario) session.getAttribute("usuariosession");
+		
+		if (logueado.getRol().toString().equals("ADMIN")) {
+			return "redirect:/admin/dashboard";
+		} else {
+			return "inicio.html";
+		}
+	}
+
 
 }

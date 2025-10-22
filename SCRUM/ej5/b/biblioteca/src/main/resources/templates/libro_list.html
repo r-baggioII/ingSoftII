@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" >
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://thymeleaf.org/extras/spring-security">
     <head>
         <meta charset="utf-8" >
         <title>Biblioteca Egg</title>
@@ -80,7 +80,7 @@
                         <th scope="col">Ejemplares</th>
                         <th scope="col">Autor</th>
                         <th scope="col">Editorial</th>
-                        <th scope="col">Acciones</th>
+                        <th scope="col" sec:authorize="hasRole('ADMIN')">Acciones</th>
                         
                     </tr>
                 </thead>
@@ -95,7 +95,7 @@
                         <td th:text="${libro.autor.nombre}"></td>
                         <td th:text="${libro.editorial.nombre}"></td>
                          <td>
-                            <a th:href= "@{/libro/modificar/__${libro.isbn}__}"><i class="fas fa-feather-alt"></i> Modificar </a>
+                            <a sec:authorize="hasRole('ADMIN')" th:href= "@{/libro/modificar/__${libro.isbn}__}"><i class="fas fa-feather-alt"></i> Modificar </a>
                         </td>
                     </tr>
 

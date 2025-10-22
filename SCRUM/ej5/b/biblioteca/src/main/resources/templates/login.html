@@ -54,7 +54,8 @@
 
 		<!-- <form class="formulario" th:action="@{/usuario/inicio}" method="POST">-->
 
-		<form class="formulario" action="/logincheck" method="POST">
+		<form class="formulario" th:action="@{/logincheck}" method="POST">
+			<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 			
 			<div class="form-group my-3">
 				<h3 class="card-title">Accede a la Biblioteca!</h3>
@@ -70,7 +71,7 @@
 
 
 			<button type="submit" class="btn btn-primary mt-3 botones">Ingresar!</button>
-			
+            
 		</form>
 
 

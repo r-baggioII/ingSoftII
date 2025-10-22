@@ -1,218 +1,171 @@
 package org.example.controller;
 
 import org.example.entity.Videojuego;
-import org.example.service.ServicioCategoria;
-import org.example.service.ServicioEstudio;
 import org.example.service.ServicioVideojuego;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import javax.validation.Valid;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Calendar;
-import java.util.List;
+import java.util.Map;
 
-@Controller
+@RestController
+@RequestMapping("/api/v1/videojuegos")
 public class ControladorVideojuego {
 
-    @Autowired private ServicioVideojuego svcVideojuego;
-    @Autowired private ServicioCategoria svcCategoria;
-    @Autowired private ServicioEstudio svcEstudio;
+    @Autowired 
+    private ServicioVideojuego svcVideojuego;
 
-    // Ruta base para guardar archivos subidos (solo si se sube un archivo)
-    // Ej: C:/Videojuegos/imagenes
-    @Value("${app.images.base-path:C:/Videojuegos/imagenes}")
-    private String basePath;
+    // ==================== ENDPOINTS REST ====================
 
-    @GetMapping("/inicio")
-    public String inicio(Model model) {
+    /**
+     * GET /api/v1/videojuegos
+     * Obtiene todos los videojuegos
+     */
+    @GetMapping
+    public ResponseEntity<?> obtenerTodos() {
         try {
-            List<Videojuego> videojuegos = this.svcVideojuego.buscarTodosActivos();
-            model.addAttribute("videojuegos", videojuegos);
-            return "views/inicio";
+            return ResponseEntity.ok(svcVideojuego.listar());
         } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
-            return "error";
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "error", "Error al obtener videojuegos",
+                            "mensaje", e.getMessage(),
+                            "timestamp", System.currentTimeMillis()
+                    ));
         }
     }
 
-    @GetMapping("/detalle/{id}")
-    public String detalleVideojuego(Model model, @PathVariable("id") long id) {
+    /**
+     * GET /api/v1/videojuegos/activos
+     * Obtiene solo los videojuegos activos
+     */
+    @GetMapping("/activos")
+    public ResponseEntity<?> obtenerActivos() {
         try {
-            Videojuego videojuego = this.svcVideojuego.buscarPorIdYActivo(id);
-            model.addAttribute("videojuego", videojuego);
-            return "views/detalle";
+            return ResponseEntity.ok(svcVideojuego.buscarTodosActivos());
         } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
-            return "error";
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "error", "Error al obtener videojuegos activos",
+                            "mensaje", e.getMessage(),
+                            "timestamp", System.currentTimeMillis()
+                    ));
         }
     }
 
-    @GetMapping("/busqueda")
-    public String busquedaVideojuego(Model model,
-                                     @RequestParam(value = "query", required = false) String q) {
+    /**
+     * GET /api/v1/videojuegos/{id}
+     * Obtiene un videojuego por ID
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<?> obtenerPorId(@PathVariable Long id) {
         try {
-            List<Videojuego> videojuegos = this.svcVideojuego.buscarPorTitulo(q);
-            model.addAttribute("videojuegos", videojuegos);
-            model.addAttribute("resultado", q);
-            return "views/busqueda";
-        } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
-            return "error";
-        }
-    }
-
-    @GetMapping("/crud")
-    public String crudVideojuego(Model model) {
-        try {
-            List<Videojuego> videojuegos = this.svcVideojuego.listar();
-            model.addAttribute("videojuegos", videojuegos);
-            return "views/crud";
-        } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
-            return "error";
-        }
-    }
-
-    @GetMapping("/formulario/videojuego/{id}")
-    public String formularioVideojuego(Model model, @PathVariable("id") long id) {
-        try {
-            model.addAttribute("categorias", this.svcCategoria.listar());
-            model.addAttribute("estudios", this.svcEstudio.listar());
-            if (id == 0) {
-                model.addAttribute("videojuego", new Videojuego());
-            } else {
-                model.addAttribute("videojuego", this.svcVideojuego.obtener(id));
+            Videojuego videojuego = svcVideojuego.obtener(id);
+            if (videojuego == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of(
+                                "error", "Videojuego no encontrado",
+                                "id", id,
+                                "timestamp", System.currentTimeMillis()
+                        ));
             }
-            return "views/formulario/videojuego";
+            return ResponseEntity.ok(videojuego);
         } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
-            return "error";
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "error", "Error al obtener videojuego",
+                            "mensaje", e.getMessage(),
+                            "timestamp", System.currentTimeMillis()
+                    ));
         }
     }
 
-    @PostMapping("/formulario/videojuego/{id}")
-    public String guardarVideojuego(@RequestParam("archivo") MultipartFile archivo,
-                                    @Valid @ModelAttribute("videojuego") Videojuego videojuego,
-                                    BindingResult result,
-                                    Model model,
-                                    @PathVariable("id") long id) {
+    /**
+     * GET /api/v1/videojuegos/buscar?titulo=texto
+     * Busca videojuegos por título
+     */
+    @GetMapping("/buscar")
+    public ResponseEntity<?> buscarPorTitulo(@RequestParam String titulo) {
         try {
-            model.addAttribute("categorias", this.svcCategoria.listar());
-            model.addAttribute("estudios", this.svcEstudio.listar());
-
-            if (result.hasErrors()) {
-                return "views/formulario/videojuego";
-            }
-
-            boolean vieneUrl = isUrl(videojuego.getImagen());
-
-            if (id == 0) {
-                // CREAR
-                if (!archivo.isEmpty()) {
-                    if (!validarExtension(archivo)) {
-                        model.addAttribute("errorImagenMsg", "La extensión no es válida");
-                        return "views/formulario/videojuego";
-                    }
-                    if (archivo.getSize() >= 15_000_000) {
-                        model.addAttribute("errorImagenMsg", "El peso excede 15MB");
-                        return "views/formulario/videojuego";
-                    }
-                    Files.createDirectories(Paths.get(basePath));
-                    String ext = extraerExtensionSeguro(archivo.getOriginalFilename());
-                    String nombreFoto = Calendar.getInstance().getTimeInMillis() + ext;
-                    Path destino = Paths.get(basePath, nombreFoto);
-                    Files.write(destino, archivo.getBytes());
-                    videojuego.setImagen(nombreFoto); // guardamos SOLO el nombre del archivo
-                } else if (vieneUrl) {
-                    // Dejar la URL tal cual
-                } else {
-                    model.addAttribute("errorImagenMsg", "Cargá un archivo");
-                    return "views/formulario/videojuego";
-                }
-                this.svcVideojuego.alta(videojuego);
-
-            } else {
-                // EDITAR
-                if (!archivo.isEmpty()) {
-                    if (!validarExtension(archivo)) {
-                        model.addAttribute("errorImagenMsg", "La extensión no es válida");
-                        return "views/formulario/videojuego";
-                    }
-                    if (archivo.getSize() >= 15_000_000) {
-                        model.addAttribute("errorImagenMsg", "El peso excede 15MB");
-                        return "views/formulario/videojuego";
-                    }
-                    Files.createDirectories(Paths.get(basePath));
-                    String ext = extraerExtensionSeguro(archivo.getOriginalFilename());
-                    String nombreFoto = Calendar.getInstance().getTimeInMillis() + ext;
-                    Path destino = Paths.get(basePath, nombreFoto);
-                    Files.write(destino, archivo.getBytes());
-                    videojuego.setImagen(nombreFoto);
-                } else if (vieneUrl) {
-                    // Dejar la URL tal cual (no escribimos archivo ni armamos Path)
-                } else {
-                    // Ni archivo ni URL nueva => mantener la imagen previa
-                    Videojuego actual = this.svcVideojuego.obtener(id);
-                    videojuego.setImagen(actual.getImagen());
-                }
-                this.svcVideojuego.modificar(videojuego, id);
-            }
-
-            return "redirect:/crud";
+            return ResponseEntity.ok(svcVideojuego.buscarPorTitulo(titulo));
         } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
-            return "error";
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "error", "Error al buscar videojuegos",
+                            "mensaje", e.getMessage(),
+                            "timestamp", System.currentTimeMillis()
+                    ));
         }
     }
 
-    @GetMapping("/eliminar/videojuego/{id}")
-    public String eliminarVideojuego(Model model, @PathVariable("id") long id) {
+    /**
+     * POST /api/v1/videojuegos
+     * Crea un nuevo videojuego
+     */
+    @PostMapping
+    public ResponseEntity<?> crear(@RequestBody Videojuego videojuego) {
         try {
-            model.addAttribute("videojuego", this.svcVideojuego.obtener(id));
-            return "views/formulario/eliminar";
+            svcVideojuego.alta(videojuego);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(Map.of(
+                            "mensaje", "Videojuego creado exitosamente",
+                            "videojuego", videojuego,
+                            "timestamp", System.currentTimeMillis()
+                    ));
         } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
-            return "error";
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of(
+                            "error", "Error al guardar videojuego",
+                            "mensaje", e.getMessage(),
+                            "timestamp", System.currentTimeMillis()
+                    ));
         }
     }
 
-    @PostMapping("/eliminar/videojuego/{id}")
-    public String desactivarVideojuego(Model model, @PathVariable("id") long id) {
+    /**
+     * PUT /api/v1/videojuegos/{id}
+     * Actualiza un videojuego existente
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizar(@RequestBody Videojuego videojuego, @PathVariable Long id) {
         try {
-            this.svcVideojuego.baja(id);
-            return "redirect:/crud";
+            svcVideojuego.modificar(videojuego, id);
+            return ResponseEntity.ok(Map.of(
+                    "mensaje", "Videojuego actualizado exitosamente",
+                    "videojuego", videojuego,
+                    "timestamp", System.currentTimeMillis()
+            ));
         } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
-            return "error";
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of(
+                            "error", "Error al actualizar videojuego",
+                            "mensaje", e.getMessage(),
+                            "timestamp", System.currentTimeMillis()
+                    ));
         }
     }
 
-    /* ==================== HELPERS ==================== */
-
-    private boolean isUrl(String s) {
-        return s != null && (s.startsWith("http://") || s.startsWith("https://"));
-    }
-
-    private String extraerExtensionSeguro(String nombre) {
-        if (nombre == null) return "";
-        int i = nombre.lastIndexOf('.');
-        return (i >= 0 ? nombre.substring(i) : "");
-    }
-
-    public boolean validarExtension(MultipartFile archivo) {
+    /**
+     * DELETE /api/v1/videojuegos/{id}
+     * Elimina (desactiva) un videojuego
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminar(@PathVariable Long id) {
         try {
-            return ImageIO.read(archivo.getInputStream()) != null;
+            svcVideojuego.baja(id);
+            return ResponseEntity.ok(Map.of(
+                    "mensaje", "Videojuego eliminado exitosamente",
+                    "id", id,
+                    "timestamp", System.currentTimeMillis()
+            ));
         } catch (Exception e) {
-            return false;
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of(
+                            "error", "Error al eliminar videojuego",
+                            "mensaje", e.getMessage(),
+                            "timestamp", System.currentTimeMillis()
+                    ));
         }
     }
 }

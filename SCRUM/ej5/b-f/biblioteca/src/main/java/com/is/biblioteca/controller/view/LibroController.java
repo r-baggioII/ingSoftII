@@ -18,6 +18,7 @@ import com.is.biblioteca.business.domain.entity.Libro;
 import com.is.biblioteca.business.logic.service.AutorService;
 import com.is.biblioteca.business.logic.service.EditorialService;
 import com.is.biblioteca.business.logic.service.LibroService;
+import com.is.biblioteca.business.logic.facade.LibroRegistroFacade;
 
 @Controller
 @RequestMapping("/libro")
@@ -31,6 +32,9 @@ public class LibroController {
     
     @Autowired
     private EditorialService editorialService;
+    
+    @Autowired
+    private LibroRegistroFacade libroRegistroFacade;
     
     //////////////////////////////////////////
     //////////////////////////////////////////
@@ -63,8 +67,8 @@ public class LibroController {
             			   	      @RequestParam(required = false) Integer ejemplares, @RequestParam String idAutor,
                                   @RequestParam String idEditorial, ModelMap modelo, @RequestParam(required = false) MultipartFile archivo) {
         try {
-
-        	libroService.crearLibro(archivo,isbn, titulo, ejemplares, idAutor, idEditorial);
+        	// Uso de la Fachada para registrar el libro
+        	libroRegistroFacade.registrarLibro(archivo, isbn, titulo, ejemplares, idAutor, idEditorial);
             modelo.put("exito", "El Libro fue cargado correctamente!");
 
             return "redirect:/regresoPage";
@@ -85,6 +89,35 @@ public class LibroController {
             return "libro_form.html";
         }
         
+    }
+
+    //////////////////////////////////////////
+    //////////////////////////////////////////
+    ///////////// VIEW: BÚSQUEDA LIBROS //////
+    //////////////////////////////////////////
+    //////////////////////////////////////////
+
+    @GetMapping("/buscar")
+    public String buscar(@RequestParam(value = "filtro", required = false) String filtro,
+                         ModelMap modelo) {
+        try {
+            if (filtro == null || filtro.trim().isEmpty()) {
+                // Si no hay filtro, mostrar todos los libros
+                List<Libro> libros = libroService.listarLibro();
+                modelo.addAttribute("libros", libros);
+                return "libro_list";
+            }
+            
+            // Usar el método listarLibroPorFiltro del servicio existente
+            List<Libro> libros = libroService.listarLibroPorFiltro(filtro);
+            modelo.addAttribute("libros", libros);
+            modelo.addAttribute("filtro", filtro);
+            return "libro_list";
+        } catch (Exception e) {
+            modelo.put("error", e.getMessage());
+            modelo.addAttribute("libros", new ArrayList<>());
+            return "libro_list";
+        }
     }
     
     //////////////////////////////////////////

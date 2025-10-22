@@ -15,6 +15,7 @@ public class Libro {
     private Long isbn;
     private String titulo;
     private Integer ejemplares;
+    private Integer anioPublicacion;
     @ManyToOne
     private Autor autor;
     @ManyToOne
@@ -58,6 +59,14 @@ public class Libro {
 
     public void setEjemplares(Integer ejemplares) {
         this.ejemplares = ejemplares;
+    }
+
+    public Integer getAnioPublicacion() {
+        return anioPublicacion;
+    }
+
+    public void setAnioPublicacion(Integer anioPublicacion) {
+        this.anioPublicacion = anioPublicacion;
     }
 
     public Autor getAutor() {

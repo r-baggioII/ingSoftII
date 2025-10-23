@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Explorar y votar mascotas">
+  <meta name="author" content="">
+  <title>Tinder de Mascota - Votar</title>
+  <link href="/vendor/bootstrap/css/bootstrap.min.css" th:href="@{/vendor/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Catamaran:100,200,300,400,500,600,700,800,900" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Lato:100,100i,300,300i,400,400i,700,700i,900,900i" rel="stylesheet">
+  <link href="/css/one-page-wonder.min.css" th:href="@{/css/one-page-wonder.min.css}" rel="stylesheet">
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="/" th:href="@{/}">Tinder de Mascota</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item"><a class="nav-link" href="/inicio" th:href="@{/inicio}">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link" href="/mascota/mis-mascotas" th:href="@{/mascota/mis-mascotas}">Mis Mascotas</a></li>
+          <li class="nav-item"><a class="nav-link" href="/logout" th:href="@{/logout}">Salir</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header>
+    <h1 style="margin-top:80px; text-align:center;">Explorar y Votar</h1>
+  </header>
+
+  <section>
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-12 order-lg-12">
+          <div class="mb-3">
+            <form method="GET" action="/votos/explorar" th:action="@{/votos/explorar}" class="form-inline">
+              <label class="mr-2">Votar como:</label>
+              <select class="form-control mr-2" name="idMascota1" onchange="this.form.submit()">
+                <option th:each="m : ${misMascotas}"
+                        th:value="${m.id}"
+                        th:text="${m.nombre}"
+                        th:selected="${seleccionada != null && m.id == seleccionada}"></option>
+              </select>
+              <noscript><button type="submit" class="btn btn-primary">Cambiar</button></noscript>
+            </form>
+            <p th:if="${error != null}" th:text="${error}" style="color:red;"></p>
+          </div>
+
+          <div class="mb-2">
+            <a class="btn btn-outline-primary btn-sm" th:href="@{/votos/propios(idMascota=${seleccionada})}">Votos Propios</a>
+            <a class="btn btn-outline-primary btn-sm" th:href="@{/votos/recibidos(idMascota=${seleccionada})}">Votos Recibidos</a>
+          </div>
+
+          <table class="table table-light table-hover">
+            <thead>
+              <tr class="bg-black text-white">
+                <th>Foto</th>
+                <th>Nombre</th>
+                <th>Sexo</th>
+                <th>Dueño</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="m : ${sugeridas}">
+                <td>
+                  <img th:if="${m.foto != null}" th:src="@{/foto/mascota/{id}(id=${m.id})}" alt="" style="max-height: 60px; border-radius: 100%">
+                  <img th:if="${m.foto == null}" src="/img/m1.jpeg" th:src="@{/img/m1.jpeg}" alt="" style="max-height: 60px; border-radius: 100%">
+                </td>
+                <td th:text="${m.nombre}"></td>
+                <td th:text="${m.sexo}"></td>
+                <td th:text="${m.usuario != null ? m.usuario.nombre : 'N/A'}"></td>
+                <td>
+                  <form method="POST" action="/votos/votar" th:action="@{/votos/votar}" style="display:inline;">
+                    <input type="hidden" name="idMascota1" th:value="${seleccionada}" />
+                    <input type="hidden" name="idMascota2" th:value="${m.id}" />
+                    <button type="submit" class="btn btn-primary btn-sm" th:disabled="${seleccionada == null}">Votar</button>
+                  </form>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="py-5 bg-black">
+    <div class="container">
+      <p class="m-0 text-center text-white small">Copyright &copy; Tinder Mascotas</p>
+    </div>
+  </footer>
+
+  <script src="/vendor/jquery/jquery.min.js" th:src="@{/vendor/jquery/jquery.min.js}"></script>
+  <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js" th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+  <script src="/js/debug.js" th:src="@{/js/debug.js}"></script>
+</body>
+
+</html>
+

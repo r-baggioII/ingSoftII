@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: layout (~{::title}, ~{::content})}">
+<head>
+    <title>Inicio - Centro Médico</title>
+</head>
+<body>
+    <th:block th:fragment="content">
+        <!-- Hero Section Start -->
+        <div class="container-fluid p-0">
+            <div class="position-relative">
+                <img class="img-fluid w-100" src="/dental-clinic-website-template/img/carousel-1.jpg" alt="Centro Médico" style="max-height: 500px; object-fit: cover;">
+                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center" style="background: rgba(6, 3, 21, .5);">
+                    <div class="container">
+                        <div class="row justify-content-center">
+                            <div class="col-lg-10 text-center">
+                                <h5 class="text-white text-uppercase mb-3 animated slideInDown">Bienvenido al Sistema de Gestión</h5>
+                                <h1 class="display-3 text-white mb-md-4 animated zoomIn">Centro Médico</h1>
+                                <p class="fs-5 text-white mb-4 pb-2">Sistema integral para la administración de pacientes, médicos e historias clínicas</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Hero Section End -->
+
+        <!-- Dashboard Cards Start -->
+        <div class="container-fluid py-5">
+            <div class="container">
+                <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 600px;">
+                    <h5 class="position-relative d-inline-block text-primary text-uppercase">Panel de Control</h5>
+                    <h1 class="display-5 mb-0">Gestión del Centro Médico</h1>
+                </div>
+                
+                <div class="row g-4">
+                    <!-- Pacientes Card -->
+                    <div class="col-lg-3 col-md-6 wow zoomIn" data-wow-delay="0.1s">
+                        <div class="admin-card bg-white rounded h-100 p-5 text-center">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-primary rounded-circle mb-4" style="width: 80px; height: 80px;">
+                                <i class="fa fa-user-injured fa-2x text-white"></i>
+                            </div>
+                            <h4 class="mb-3">Pacientes</h4>
+                            <p class="mb-4">Gestión completa de pacientes: alta, modificación, consulta y baja de registros.</p>
+                            <a th:href="@{/paciente/list}" class="btn btn-primary py-2 px-4 mb-2 w-100">
+                                <i class="fa fa-list me-2"></i>Ver Listado
+                            </a>
+                            <a th:href="@{/paciente/alta}" class="btn btn-outline-primary py-2 px-4 w-100">
+                                <i class="fa fa-plus me-2"></i>Nuevo Paciente
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Médicos Card -->
+                    <div class="col-lg-3 col-md-6 wow zoomIn" data-wow-delay="0.3s">
+                        <div class="admin-card bg-white rounded h-100 p-5 text-center">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-primary rounded-circle mb-4" style="width: 80px; height: 80px;">
+                                <i class="fa fa-user-md fa-2x text-white"></i>
+                            </div>
+                            <h4 class="mb-3">Médicos</h4>
+                            <p class="mb-4">Administración del personal médico del centro de salud.</p>
+                            <a th:href="@{/medico/list}" class="btn btn-primary py-2 px-4 mb-2 w-100">
+                                <i class="fa fa-list me-2"></i>Ver Listado
+                            </a>
+                            <a th:href="@{/medico/alta}" class="btn btn-outline-primary py-2 px-4 w-100">
+                                <i class="fa fa-plus me-2"></i>Nuevo Médico
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Historias Clínicas Card -->
+                    <div class="col-lg-3 col-md-6 wow zoomIn" data-wow-delay="0.6s">
+                        <div class="admin-card bg-white rounded h-100 p-5 text-center">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-primary rounded-circle mb-4" style="width: 80px; height: 80px;">
+                                <i class="fa fa-file-medical fa-2x text-white"></i>
+                            </div>
+                            <h4 class="mb-3">Historias Clínicas</h4>
+                            <p class="mb-4">Gestión de historias clínicas de los pacientes registrados.</p>
+                            <a th:href="@{/historiaclinica/list}" class="btn btn-primary py-2 px-4 mb-2 w-100">
+                                <i class="fa fa-list me-2"></i>Ver Listado
+                            </a>
+                            <a th:href="@{/historiaclinica/alta}" class="btn btn-outline-primary py-2 px-4 w-100">
+                                <i class="fa fa-plus me-2"></i>Nueva Historia
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Detalles Historia Card -->
+                    <div class="col-lg-3 col-md-6 wow zoomIn" data-wow-delay="0.9s">
+                        <div class="admin-card bg-white rounded h-100 p-5 text-center">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-primary rounded-circle mb-4" style="width: 80px; height: 80px;">
+                                <i class="fa fa-notes-medical fa-2x text-white"></i>
+                            </div>
+                            <h4 class="mb-3">Detalles Historia</h4>
+                            <p class="mb-4">Registro de consultas y evoluciones de historias clínicas.</p>
+                            <a th:href="@{/detallehistoriaclinica/list}" class="btn btn-primary py-2 px-4 mb-2 w-100">
+                                <i class="fa fa-list me-2"></i>Ver Listado
+                            </a>
+                            <a th:href="@{/detallehistoriaclinica/alta}" class="btn btn-outline-primary py-2 px-4 w-100">
+                                <i class="fa fa-plus me-2"></i>Nuevo Detalle
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Dashboard Cards End -->
+
+        <!-- Statistics Section Start -->
+        <div class="container-fluid bg-primary bg-appointment my-5 wow fadeInUp" data-wow-delay="0.1s">
+            <div class="container py-5">
+                <div class="row g-5 align-items-center">
+                    <div class="col-lg-6 wow slideInLeft">
+                        <div class="section-title mb-4">
+                            <h5 class="position-relative d-inline-block text-white text-uppercase">Nuestro Sistema</h5>
+                            <h1 class="display-5 text-white mb-0">Sistema Integral de Gestión Médica</h1>
+                        </div>
+                        <p class="text-white mb-4">Plataforma completa para administrar todas las operaciones de su centro médico de manera eficiente y organizada.</p>
+                        <div class="row g-3">
+                            <div class="col-sm-6 wow zoomIn" data-wow-delay="0.3s">
+                                <h5 class="text-white mb-3"><i class="fa fa-check-circle me-3"></i>Fácil de Usar</h5>
+                                <h5 class="text-white mb-3"><i class="fa fa-check-circle me-3"></i>Seguro y Confiable</h5>
+                            </div>
+                            <div class="col-sm-6 wow zoomIn" data-wow-delay="0.6s">
+                                <h5 class="text-white mb-3"><i class="fa fa-check-circle me-3"></i>Gestión Completa</h5>
+                                <h5 class="text-white mb-3"><i class="fa fa-check-circle me-3"></i>Soporte 24/7</h5>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="bg-white text-center rounded p-5 wow zoomIn" data-wow-delay="0.6s">
+                            <h1 class="display-6 text-primary mb-4">Accesos Rápidos</h1>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <a th:href="@{/paciente/alta}" class="btn btn-primary w-100 py-3">
+                                        <i class="fa fa-user-injured me-2"></i>Registrar Nuevo Paciente
+                                    </a>
+                                </div>
+                                <div class="col-12">
+                                    <a th:href="@{/medico/alta}" class="btn btn-primary w-100 py-3">
+                                        <i class="fa fa-user-md me-2"></i>Registrar Nuevo Médico
+                                    </a>
+                                </div>
+                                <div class="col-12">
+                                    <a th:href="@{/historiaclinica/alta}" class="btn btn-primary w-100 py-3">
+                                        <i class="fa fa-file-medical me-2"></i>Nueva Historia Clínica
+                                    </a>
+                                </div>
+                                <div class="col-12">
+                                    <a th:href="@{/detallehistoriaclinica/alta}" class="btn btn-primary w-100 py-3">
+                                        <i class="fa fa-notes-medical me-2"></i>Registrar Consulta
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Statistics Section End -->
+
+        <!-- Features Section Start -->
+        <div class="container-fluid py-5">
+            <div class="container">
+                <div class="row g-5">
+                    <div class="col-lg-4 wow slideInUp" data-wow-delay="0.1s">
+                        <div class="position-relative h-100">
+                            <img class="position-absolute w-100 h-100 rounded wow zoomIn" data-wow-delay="0.3s" src="/dental-clinic-website-template/img/about.jpg" style="object-fit: cover;">
+                        </div>
+                    </div>
+                    <div class="col-lg-8 wow slideInUp" data-wow-delay="0.3s">
+                        <div class="section-title mb-4">
+                            <h5 class="position-relative d-inline-block text-primary text-uppercase">Acerca del Sistema</h5>
+                            <h1 class="display-5 mb-0">Gestión Eficiente para su Centro Médico</h1>
+                        </div>
+                        <p class="mb-4">Nuestro sistema le permite administrar de manera integral todos los aspectos relacionados con la atención médica, desde el registro de pacientes hasta el seguimiento detallado de historias clínicas.</p>
+                        <div class="row g-3">
+                            <div class="col-sm-6 wow zoomIn" data-wow-delay="0.6s">
+                                <h5><i class="fa fa-check-circle text-primary me-3"></i>Registro de Pacientes</h5>
+                                <p>Alta, modificación y consulta de información de pacientes.</p>
+                            </div>
+                            <div class="col-sm-6 wow zoomIn" data-wow-delay="0.6s">
+                                <h5><i class="fa fa-check-circle text-primary me-3"></i>Gestión de Médicos</h5>
+                                <p>Administración del personal médico del centro.</p>
+                            </div>
+                            <div class="col-sm-6 wow zoomIn" data-wow-delay="0.6s">
+                                <h5><i class="fa fa-check-circle text-primary me-3"></i>Historias Clínicas</h5>
+                                <p>Creación y seguimiento de historias clínicas completas.</p>
+                            </div>
+                            <div class="col-sm-6 wow zoomIn" data-wow-delay="0.6s">
+                                <h5><i class="fa fa-check-circle text-primary me-3"></i>Registro de Consultas</h5>
+                                <p>Detalles de cada consulta y evolución del paciente.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Features Section End -->
+    </th:block>
+</body>
+</html>

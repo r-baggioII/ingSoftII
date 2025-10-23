@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: layout(~{::title}, ~{::content})}">
+<head>
+    <title th:text="${titleList}">Gestión de Detalles de Historia Clínica</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <!-- Page Header Start -->
+        <div class="container-fluid bg-primary py-5 mb-5">
+            <div class="container py-5">
+                <div class="row justify-content-center">
+                    <div class="col-lg-10 text-center">
+                        <h1 class="display-3 text-white animated slideInDown" th:text="${titleList}">Detalles de Historia Clínica</h1>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb justify-content-center">
+                                <li class="breadcrumb-item"><a class="text-white" th:href="@{/}">Inicio</a></li>
+                                <li class="breadcrumb-item text-white active" aria-current="page">Detalles Historia</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Page Header End -->
+
+        <!-- List Section Start -->
+        <div class="container-fluid py-5">
+            <div class="container">
+                <!-- Mensajes de éxito/error -->
+                <div th:if="${msgExito}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fa fa-check-circle me-2"></i>
+                    <span th:text="${msgExito}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <div th:if="${msgError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fa fa-exclamation-triangle me-2"></i>
+                    <span th:text="${msgError}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <a th:href="@{/{entity}/alta(entity=${nameEntityLower})}" class="btn btn-primary btn-lg">
+                            <i class="fa fa-plus me-2"></i>Nueva Consulta
+                        </a>
+                        <a th:href="@{/}" class="btn btn-outline-secondary btn-lg">
+                            <i class="fa fa-home me-2"></i>Volver al Inicio
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="bg-white rounded shadow p-4">
+                            <h4 class="mb-4"><i class="fa fa-notes-medical text-primary me-2"></i>Listado de Consultas</h4>
+                            <div class="table-responsive">
+                                <table class="table table-hover table-striped align-middle">
+                                    <thead class="table-primary">
+                                        <tr>
+                                            <th scope="col">Fecha</th>
+                                            <th scope="col">Paciente</th>
+                                            <th scope="col">Médico</th>
+                                            <th scope="col">Detalle</th>
+                                            <th scope="col" class="text-center">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:if="${items == null || items.isEmpty()}">
+                                            <td colspan="5" class="text-center py-5">
+                                                <i class="fa fa-info-circle fa-3x text-muted mb-3 d-block"></i>
+                                                <p class="text-muted mb-0">No hay consultas registradas</p>
+                                            </td>
+                                        </tr>
+                                        <tr th:each="item : ${items}">
+                                            <td>
+                                                <i class="fa fa-calendar-alt text-primary me-2"></i>
+                                                <strong th:text="${#dates.format(item.fechaHistoria, 'dd/MM/yyyy')}">01/01/2024</strong>
+                                                <br>
+                                                <small class="text-muted" th:text="${#dates.format(item.fechaHistoria, 'HH:mm')}">10:30</small>
+                                            </td>
+                                            <td>
+                                                <div th:if="${item.historiaClinica?.paciente != null}">
+                                                    <strong th:text="${item.historiaClinica.paciente.nombre + ' ' + item.historiaClinica.paciente.apellido}">Juan Pérez</strong>
+                                                    <br>
+                                                    <small class="text-muted">
+                                                        Doc: <span th:text="${item.historiaClinica.paciente.documento}">12345678</span>
+                                                    </small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div th:if="${item.medico != null}">
+                                                    <i class="fa fa-user-md text-primary me-1"></i>
+                                                    <span th:text="${item.medico.nombre + ' ' + item.medico.apellido}">Dr. García</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span th:text="${#strings.abbreviate(item.detalleHistoria, 80)}">
+                                                    Detalle de la consulta médica...
+                                                </span>
+                                            </td>
+                                            <td class="text-center table-actions">
+                                                <a th:href="@{/{entity}/consultar/{id}(entity=${nameEntityLower}, id=${item.id})}" 
+                                                   class="btn btn-sm btn-info" title="Consultar">
+                                                    <i class="fa fa-eye"></i>
+                                                </a>
+                                                <a th:href="@{/{entity}/modificar/{id}(entity=${nameEntityLower}, id=${item.id})}" 
+                                                   class="btn btn-sm btn-warning" title="Modificar">
+                                                    <i class="fa fa-edit"></i>
+                                                </a>
+                                                <a th:href="@{/{entity}/baja/{id}(entity=${nameEntityLower}, id=${item.id})}" 
+                                                   class="btn btn-sm btn-danger" 
+                                                   onclick="return confirm('¿Está seguro que desea eliminar esta consulta?')" 
+                                                   title="Eliminar">
+                                                    <i class="fa fa-trash"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- List Section End -->
+    </div>
+</body>
+</html>

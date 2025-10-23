@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: layout(~{::title}, ~{::content})}">
+<head>
+    <title th:text="${titleEdit}">Formulario de Detalle Historia Clínica</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <!-- Page Header Start -->
+        <div class="container-fluid bg-primary py-5 mb-5">
+            <div class="container py-5">
+                <div class="row justify-content-center">
+                    <div class="col-lg-10 text-center">
+                        <h1 class="display-3 text-white animated slideInDown" th:text="${titleEdit}">Formulario de Consulta</h1>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb justify-content-center">
+                                <li class="breadcrumb-item"><a class="text-white" th:href="@{/}">Inicio</a></li>
+                                <li class="breadcrumb-item"><a class="text-white" th:href="@{/{entity}/list(entity=${nameEntityLower})}">Detalles Historia</a></li>
+                                <li class="breadcrumb-item text-white active" aria-current="page">Formulario</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Page Header End -->
+
+        <!-- Form Section Start -->
+        <div class="container-fluid py-5">
+            <div class="container">
+                <!-- Mensajes de error -->
+                <div th:if="${msgError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fa fa-exclamation-triangle me-2"></i>
+                    <span th:text="${msgError}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div class="row justify-content-center">
+                    <div class="col-lg-10">
+                        <div class="bg-white rounded shadow p-5">
+                                                        <h4 class="mb-4">
+                                <i class="fa fa-notes-medical text-primary me-2"></i>
+                                <span th:if="${item.id == null}">Nuevo Detalle</span>
+                                <span th:if="${item.id != null && (isDisabled == null || !isDisabled)}">Modificar Detalle</span>
+                                <span th:if="${item.id != null && isDisabled != null && isDisabled}">Consultar Detalle</span>
+                            </h4>
+
+                            <form th:action="@{/{entity}/actualizar(entity=${nameEntityLower})}" th:object="${item}" method="post">
+                                <!-- ID oculto -->
+                                <input type="hidden" th:field="*{id}" />
+                                <input type="hidden" th:field="*{eliminado}" />
+
+                                <div class="row g-3">
+                                    <!-- Información contextual (solo consulta/modificación) -->
+                                    <div class="col-12" th:if="${item.id != null && item.historiaClinica != null}">
+                                        <div class="alert alert-primary">
+                                            <h5><i class="fa fa-info-circle me-2"></i>Información de la Consulta</h5>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <strong>Paciente:</strong> 
+                                                    <span th:text="${item.historiaClinica.paciente?.nombre + ' ' + item.historiaClinica.paciente?.apellido}">Juan Pérez</span>
+                                                    <br>
+                                                    <small class="text-muted">
+                                                        Doc: <span th:text="${item.historiaClinica.paciente?.documento}">12345678</span>
+                                                    </small>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <strong>Médico:</strong> 
+                                                    <span th:text="${item.medico?.nombre + ' ' + item.medico?.apellido}">Dr. García</span>
+                                                    <br>
+                                                    <small class="text-muted">
+                                                        Doc: <span th:text="${item.medico?.documento}">87654321</span>
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Selección de Historia Clínica -->
+                                    <div class="col-md-6" th:if="${item.id == null}">
+                                        <div class="form-floating">
+                                            <select class="form-select" 
+                                                    id="historiaClinica" 
+                                                    th:field="*{historiaClinica.id}" 
+                                                    th:disabled="${isDisabled != null && isDisabled}"
+                                                    required>
+                                                <option value="">Seleccione una historia clínica</option>
+                                                <option th:each="hc : ${historiasClinicas}" 
+                                                        th:value="${hc.id}" 
+                                                        th:text="${hc.paciente?.apellido + ', ' + hc.paciente?.nombre + ' (Doc: ' + hc.paciente?.documento + ')'}">
+                                                    Pérez, Juan (Doc: 12345678)
+                                                </option>
+                                            </select>
+                                            <label for="historiaClinica"><i class="fa fa-file-medical me-2"></i>Paciente / Historia Clínica *</label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Selección de Médico -->
+                                    <div class="col-md-6" th:if="${item.id == null}">
+                                        <div class="form-floating">
+                                            <select class="form-select" 
+                                                    id="medico" 
+                                                    th:field="*{medico.id}" 
+                                                    th:disabled="${isDisabled != null && isDisabled}"
+                                                    required>
+                                                <option value="">Seleccione un médico</option>
+                                                <option th:each="medico : ${medicos}" 
+                                                        th:value="${medico.id}" 
+                                                        th:text="${medico.apellido + ', ' + medico.nombre + ' (Doc: ' + medico.documento + ')'}">
+                                                    García, Juan (Doc: 87654321)
+                                                </option>
+                                            </select>
+                                            <label for="medico"><i class="fa fa-user-md me-2"></i>Médico *</label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Fecha de Historia -->
+                                    <div class="col-md-12">
+                                        <div class="form-floating">
+                                            <input type="datetime-local" 
+                                                   class="form-control" 
+                                                   id="fechaHistoria" 
+                                                   th:field="*{fechaHistoria}" 
+                                                   th:disabled="${isDisabled != null && isDisabled}"
+                                                   required>
+                                            <label for="fechaHistoria"><i class="fa fa-calendar-alt me-2"></i>Fecha y Hora de Consulta *</label>
+                                        </div>
+                                        <small class="text-muted">Indique la fecha y hora en que se realizó la consulta</small>
+                                    </div>
+
+                                    <!-- Detalle de Historia -->
+                                    <div class="col-md-12">
+                                        <div class="form-floating">
+                                            <textarea class="form-control" 
+                                                      id="detalleHistoria" 
+                                                      th:field="*{detalleHistoria}" 
+                                                      th:disabled="${isDisabled != null && isDisabled}"
+                                                      placeholder="Detalle de la consulta"
+                                                      style="height: 250px"
+                                                      required></textarea>
+                                            <label for="detalleHistoria"><i class="fa fa-notes-medical me-2"></i>Detalle de la Consulta *</label>
+                                        </div>
+                                        <small class="text-muted">
+                                            Incluya síntomas, diagnóstico, tratamiento indicado y observaciones relevantes
+                                        </small>
+                                    </div>
+
+                                    <!-- Información adicional de ayuda -->
+                                    <div class="col-12" th:if="${item.id == null}">
+                                        <div class="alert alert-info">
+                                            <h6><i class="fa fa-lightbulb me-2"></i>Sugerencias para completar el registro:</h6>
+                                            <ul class="mb-0">
+                                                <li>Describa los síntomas reportados por el paciente</li>
+                                                <li>Incluya el diagnóstico realizado</li>
+                                                <li>Detalle el tratamiento o medicación indicada</li>
+                                                <li>Agregue observaciones o recomendaciones relevantes</li>
+                                                <li>Indique si se requieren estudios complementarios</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <!-- Acceso rápido a historia clínica completa -->
+                                    <div class="col-12" th:if="${item.id != null && item.historiaClinica != null}">
+                                        <div class="card">
+                                            <div class="card-header bg-light">
+                                                <h6 class="mb-0">
+                                                    <i class="fa fa-history me-2"></i>Acciones Relacionadas
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <a th:href="@{/historiaclinica/consultar/{id}(id=${item.historiaClinica.id})}" 
+                                                   class="btn btn-outline-primary me-2">
+                                                    <i class="fa fa-file-medical me-1"></i>Ver Historia Clínica Completa
+                                                </a>
+                                                <a th:href="@{/paciente/consultar/{id}(id=${item.historiaClinica.paciente?.id})}" 
+                                                   class="btn btn-outline-secondary">
+                                                    <i class="fa fa-user-injured me-1"></i>Ver Datos del Paciente
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Botones de acción -->
+                                    <div class="col-12">
+                                        <hr class="my-4">
+                                        <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                                            <a th:href="@{/{entity}/list(entity=${nameEntityLower})}" 
+                                               class="btn btn-outline-secondary btn-lg">
+                                                <i class="fa fa-arrow-left me-2"></i>Volver al Listado
+                                            </a>
+                                            <div th:if="${isDisabled == null || !isDisabled}">
+                                                <a th:href="@{/{entity}/cancelar(entity=${nameEntityLower})}" 
+                                                   class="btn btn-outline-danger btn-lg me-2">
+                                                    <i class="fa fa-times me-2"></i>Cancelar
+                                                </a>
+                                                <button type="submit" class="btn btn-primary btn-lg">
+                                                    <i class="fa fa-save me-2"></i>Guardar Consulta
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Form Section End -->
+    </div>
+</body>
+</html>

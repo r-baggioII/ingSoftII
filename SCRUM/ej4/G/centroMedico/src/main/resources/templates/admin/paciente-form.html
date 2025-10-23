@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: layout(~{::title}, ~{::content})}">
+<head>
+    <title th:text="${titleEdit}">Formulario de Paciente</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <!-- Page Header Start -->
+        <div class="container-fluid bg-primary py-5 mb-5">
+            <div class="container py-5">
+                <div class="row justify-content-center">
+                    <div class="col-lg-10 text-center">
+                        <h1 class="display-3 text-white animated slideInDown" th:text="${titleEdit}">Formulario de Paciente</h1>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb justify-content-center">
+                                <li class="breadcrumb-item"><a class="text-white" th:href="@{/}">Inicio</a></li>
+                                <li class="breadcrumb-item"><a class="text-white" th:href="@{/{entity}/list(entity=${nameEntityLower})}">Pacientes</a></li>
+                                <li class="breadcrumb-item text-white active" aria-current="page">Formulario</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Page Header End -->
+
+        <!-- Form Section Start -->
+        <div class="container-fluid py-5">
+            <div class="container">
+                <!-- Mensajes de error -->
+                <div th:if="${msgError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fa fa-exclamation-triangle me-2"></i>
+                    <span th:text="${msgError}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="bg-white rounded shadow p-5">
+                            <h4 class="mb-4">
+                                <i class="fa fa-user-injured text-primary me-2"></i>
+                                <span th:if="${item.id == null}">Nuevo Paciente</span>
+                                <span th:if="${item.id != null && (isDisabled == null || !isDisabled)}">Modificar Paciente</span>
+                                <span th:if="${item.id != null && isDisabled != null && isDisabled}">Consultar Paciente</span>
+                            </h4>
+
+                            <form th:action="@{/{entity}/actualizar(entity=${nameEntityLower})}" th:object="${item}" method="post">
+                                <!-- ID oculto -->
+                                <input type="hidden" th:field="*{id}" />
+                                <input type="hidden" th:field="*{eliminado}" />
+
+                                <div class="row g-3">
+                                    <!-- Documento -->
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input type="text" 
+                                                   class="form-control" 
+                                                   id="documento" 
+                                                   th:field="*{documento}" 
+                                                   th:disabled="${isDisabled != null && isDisabled}"
+                                                   placeholder="Documento"
+                                                   required>
+                                            <label for="documento"><i class="fa fa-id-card me-2"></i>Documento *</label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Nombre -->
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input type="text" 
+                                                   class="form-control" 
+                                                   id="nombre" 
+                                                   th:field="*{nombre}" 
+                                                   th:disabled="${isDisabled != null && isDisabled}"
+                                                   placeholder="Nombre"
+                                                   required>
+                                            <label for="nombre"><i class="fa fa-user me-2"></i>Nombre *</label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Apellido -->
+                                    <div class="col-md-12">
+                                        <div class="form-floating">
+                                            <input type="text" 
+                                                   class="form-control" 
+                                                   id="apellido" 
+                                                   th:field="*{apellido}" 
+                                                   th:disabled="${isDisabled != null && isDisabled}"
+                                                   placeholder="Apellido"
+                                                   required>
+                                            <label for="apellido"><i class="fa fa-user me-2"></i>Apellido *</label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Historia Clínica Info (solo consulta/modificación) -->
+                                    <div class="col-12" th:if="${item.id != null}">
+                                        <div class="alert alert-info">
+                                            <h6><i class="fa fa-file-medical me-2"></i>Historia Clínica</h6>
+                                            <div th:if="${item.historiaClinica != null}">
+                                                <p class="mb-0">
+                                                    <strong>ID:</strong> <span th:text="${item.historiaClinica.id}"></span>
+                                                    <a th:href="@{/historiaclinica/consultar/{id}(id=${item.historiaClinica.id})}" 
+                                                       class="btn btn-sm btn-primary ms-3">
+                                                        <i class="fa fa-eye me-1"></i>Ver Historia
+                                                    </a>
+                                                </p>
+                                            </div>
+                                            <div th:unless="${item.historiaClinica != null}">
+                                                <p class="mb-0 text-warning">
+                                                    <i class="fa fa-exclamation-triangle me-2"></i>
+                                                    Este paciente no tiene historia clínica asignada.
+                                                    <a th:href="@{/historiaclinica/alta}" class="btn btn-sm btn-warning ms-3">
+                                                        <i class="fa fa-plus me-1"></i>Crear Historia
+                                                    </a>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Botones de acción -->
+                                    <div class="col-12">
+                                        <hr class="my-4">
+                                        <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                                            <a th:href="@{/{entity}/list(entity=${nameEntityLower})}" 
+                                               class="btn btn-outline-secondary btn-lg">
+                                                <i class="fa fa-arrow-left me-2"></i>Volver al Listado
+                                            </a>
+                                            <div th:if="${isDisabled == null || !isDisabled}">
+                                                <a th:href="@{/{entity}/cancelar(entity=${nameEntityLower})}" 
+                                                   class="btn btn-outline-danger btn-lg me-2">
+                                                    <i class="fa fa-times me-2"></i>Cancelar
+                                                </a>
+                                                <button type="submit" class="btn btn-primary btn-lg">
+                                                    <i class="fa fa-save me-2"></i>Guardar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Form Section End -->
+    </div>
+</body>
+</html>

@@ -32,7 +32,7 @@
     params.append('page', 0);
     params.append('size', 20);
 
-    const resp = await fetch(`/greedy_gym/api/facturas2?${params.toString()}`);
+    const resp = await fetch(`/api/facturas2?${params.toString()}`);
     if (!resp.ok) {
       console.error('Error buscando facturas');
       return;
@@ -65,7 +65,7 @@
         <td><span class="badge ${badgeForEstado(f.estado)}">${f.estado}</span></td>
         <td>${medio}</td>
         <td class="text-end">${total}</td>
-        <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="/greedy_gym/facturas/${f.id}/ver">Ver</a></td>
+        <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="/facturas/${f.id}/ver">Ver</a></td>
       `;
       tbody.appendChild(tr);
     }
@@ -110,12 +110,12 @@
         detalles: ids.map(id => ({ cuotaMensual: { id } }))
       };
 
-      fetch('/greedy_gym/api/facturas',{
+      fetch('/api/facturas',{
         method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)
       }).then(r=>r.ok?r.json():r.text().then(t=>Promise.reject(t)))
         .then(f=>{
           alerta('Factura creada correctamente', 'success');
-          window.open(`/greedy_gym/facturas/${f.id}/ver`, '_blank');
+          window.open(`/facturas/${f.id}/ver`, '_blank');
           buscarFacturas();
         })
         .catch(err=>alerta(err||'No se pudo crear la factura','danger'))
@@ -139,12 +139,12 @@
 
   async function ensureFormaDePagoId(tipo){
     // Busca una FormaDePago existente por tipo; si no existe la crea y retorna su id
-    const resp = await fetch('/greedy_gym/api/formas-pago');
+    const resp = await fetch('/api/formas-pago');
     if (!resp.ok) throw 'No se pudo obtener formas de pago';
     const items = await resp.json();
     const existente = (items||[]).find(f => String(f.tipoPago).toUpperCase() === String(tipo).toUpperCase());
     if (existente && existente.id) return existente.id;
-    const crear = await fetch('/greedy_gym/api/formas-pago', {
+    const crear = await fetch('/api/formas-pago', {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ tipoPago: tipo, observacion: '' })
     });
@@ -170,7 +170,7 @@
 
   function buscarSocios(q){
     // Simple filtro cliente con el endpoint existente de socios
-    fetch('/greedy_gym/api/v1/socios/activos')
+    fetch('/api/v1/socios/activos')
       .then(r=>r.ok?r.json():[])
       .then(items=>{
         const lista = $('#socio-sugerencias');
@@ -200,7 +200,7 @@
   }
 
   function cargarCuotasDeSocio(idSocio){
-    fetch(`/greedy_gym/api/cuotas-mensuales/deuda-por-socio/${idSocio}`)
+    fetch(`/api/cuotas-mensuales/deuda-por-socio/${idSocio}`)
       .then(r=>r.ok?r.json():[])
       .then(data=>{
         cuotas = Array.isArray(data)?data:[];

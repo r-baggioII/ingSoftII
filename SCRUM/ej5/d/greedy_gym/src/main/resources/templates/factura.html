@@ -15,6 +15,14 @@
         .invoice-footer { padding: 16px 24px 24px; }
         .brand { color: #ed563b; font-weight: 800; font-size: 24px; }
         .badge-status { background: #28a745; }
+        
+        /* Ocultar botones y elementos de navegación al imprimir */
+        @media print {
+            body { background: #fff; }
+            .invoice-container { margin: 0; }
+            .invoice-card { box-shadow: none; border-radius: 0; }
+            .invoice-footer { display: none !important; }
+        }
     </style>
     <script>
         function printInvoice(){ window.print(); }

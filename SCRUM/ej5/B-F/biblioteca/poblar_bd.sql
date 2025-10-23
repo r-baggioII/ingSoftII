@@ -15,7 +15,7 @@ USE demospringsecuritybibliotecadb;
 -- Password para todos: "password123"
 -- Hash BCrypt: $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy
 
-INSERT INTO Usuario (id, nombre, email, password, rol, eliminado, imagen_id) VALUES
+INSERT INTO usuario (id, nombre, email, password, rol, eliminado, imagen_id) VALUES
 -- Usuario ADMIN
 ('admin-001', 'Administrador Principal', 'admin@biblioteca.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'ADMIN', false, NULL),
 

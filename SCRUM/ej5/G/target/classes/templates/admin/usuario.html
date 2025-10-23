@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${titleList}">Lista de Usuarios</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Sistema Mecánico</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/persona/list}">Personas</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/cliente/list}">Clientes</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/mecanico/list}">Mecánicos</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/usuario/list}">Usuarios</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/vehiculo/list}">Vehículos</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/historialarreglo/list}">Historial</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2 th:text="${titleList}">Lista de Usuarios</h2>
+        
+        <div th:if="${msgExito}" class="alert alert-success alert-dismissible fade show">
+            <span th:text="${msgExito}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="mb-3">
+            <a th:href="@{/{entity}/alta(entity=${nameEntityLower})}" class="btn btn-primary">Nuevo Usuario</a>
+        </div>
+
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Rol</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="item : ${items}">
+                    <td th:text="${item.id}"></td>
+                    <td th:text="${item.nombre}"></td>
+                    <td th:text="${item.rol}"></td>
+                    <td>
+                        <a th:href="@{/{entity}/consultar/{id}(entity=${nameEntityLower}, id=${item.id})}" 
+                           class="btn btn-sm btn-info">Ver</a>
+                        <a th:href="@{/{entity}/modificar/{id}(entity=${nameEntityLower}, id=${item.id})}" 
+                           class="btn btn-sm btn-warning">Editar</a>
+                        <a th:href="@{/{entity}/baja/{id}(entity=${nameEntityLower}, id=${item.id})}" 
+                           class="btn btn-sm btn-danger"
+                           onclick="return confirm('¿Está seguro de eliminar este usuario?')">Eliminar</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

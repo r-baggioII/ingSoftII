@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${titleEdit}">Formulario Mecánico</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Sistema Mecánico</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/persona/list}">Personas</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/cliente/list}">Clientes</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/mecanico/list}">Mecánicos</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/usuario/list}">Usuarios</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/vehiculo/list}">Vehículos</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/historialarreglo/list}">Historial</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2 th:text="${titleEdit}">Formulario Mecánico</h2>
+        
+        <div th:if="${msgError}" class="alert alert-danger alert-dismissible fade show">
+            <span th:text="${msgError}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <form th:action="@{/{entity}/actualizar(entity=${nameEntityLower})}" 
+              th:object="${item}" method="post" class="needs-validation">
+            
+            <input type="hidden" th:field="*{id}" />
+            
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre:</label>
+                <input type="text" class="form-control" id="nombre" th:field="*{nombre}" 
+                       th:disabled="${isDisabled}" required />
+            </div>
+            
+            <div class="mb-3">
+                <label for="apellido" class="form-label">Apellido:</label>
+                <input type="text" class="form-control" id="apellido" th:field="*{apellido}" 
+                       th:disabled="${isDisabled}" required />
+            </div>
+            
+            <div class="mb-3">
+                <label for="legajo" class="form-label">Legajo:</label>
+                <input type="text" class="form-control" id="legajo" th:field="*{legajo}" 
+                       th:disabled="${isDisabled}" required />
+            </div>
+            
+            <div class="mb-3">
+                <label for="usuario" class="form-label">Usuario:</label>
+                <select class="form-control" id="usuario" th:field="*{usuario}" 
+                        th:disabled="${isDisabled}">
+                    <option value="">Seleccione un usuario</option>
+                    <option th:each="u : ${usuarios}" 
+                            th:value="${u.id}" 
+                            th:text="${u.nombre}"></option>
+                </select>
+            </div>
+            
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary" th:unless="${isDisabled}">Guardar</button>
+                <a th:href="@{/{entity}/cancelar(entity=${nameEntityLower})}" class="btn btn-secondary">
+                    <span th:if="${isDisabled}">Volver</span>
+                    <span th:unless="${isDisabled}">Cancelar</span>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

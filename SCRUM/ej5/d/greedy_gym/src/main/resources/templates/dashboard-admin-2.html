@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Dashboard Administrador 2 - Greedy Gym">
+    <meta name="author" content="Greedy Gym">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i&display=swap" rel="stylesheet">
+
+    <title>Panel Administrador 2 - Greedy Gym</title>
+
+    <!-- Archivos CSS -->
+    <link rel="stylesheet" type="text/css" th:href="@{/assets/css/bootstrap.min.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/assets/css/font-awesome.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/templatemo-training-studio.css}">
+    
+    <style>
+    /* Estilos del Dashboard Admin 2 */
+    .panel-management { padding: 80px 0; background-color: #fff; }
+    .module-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
+    .module-card { background: #fff; border-radius: 16px; padding: 22px; box-shadow: 0px 10px 28px rgba(0,0,0,0.08); transition: all .25s ease; cursor: pointer; text-decoration: none; color: #232d39; }
+    .module-card:hover { transform: translateY(-6px); box-shadow: 0px 18px 40px rgba(237, 86, 59, 0.28); color: #232d39; }
+    .module-card .icon { width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; background: linear-gradient(105deg, #ed563b 0%, #ff6b47 100%); color: #fff; font-size: 22px; margin-bottom: 14px; }
+    .module-card .title { font-size: 15px; font-weight: 700; margin: 4px 0 6px; }
+    .module-card .desc { font-size: 12px; color: #666; min-height: 32px; }
+    .user-info { background: linear-gradient(105deg, #232a34 0%, #2a3441 100%); color: #fff; padding: 28px; border-radius: 15px; margin-bottom: 28px; text-align: center; }
+    .user-info h3 { margin: 0 0 8px; font-weight: 700; }
+    .user-info p { margin: 0; opacity: .85; }
+    </style>
+</head>
+
+<body>
+
+<!-- ***** Preloader Start ***** -->
+<div id="js-preloader" class="js-preloader">
+    <div class="preloader-inner">
+        <span class="dot"></span>
+        <div class="dots">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+    </div>
+<!-- ***** Preloader End ***** -->
+
+<!-- ***** Header Area Start ***** -->
+<header class="header-area header-sticky">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <nav class="main-nav">
+                    <!-- ***** Logo Start ***** -->
+                    <a th:href="@{/}" class="logo">Greedy<em> Gym</em></a>
+                    <!-- ***** Logo End ***** -->
+                    <!-- ***** Menu Start ***** -->
+                    <ul class="nav">
+                        <li><a th:href="@{/dashboard/admin2}" class="active">Dashboard</a></li>
+                        <li><a th:href="@{/admin/direcciones}">Direcciones</a></li>
+                        <li><a th:href="@{/logout}">Cerrar Sesión</a></li>
+                    </ul>
+                    <a class='menu-trigger'>
+                        <span>Menú</span>
+                    </a>
+                    <!-- ***** Menu End ***** -->
+                </nav>
+            </div>
+        </div>
+    </div>
+    </header>
+<!-- ***** Header Area End ***** -->
+
+<!-- ***** Main Banner Area Start ***** -->
+<div class="main-banner" id="top">
+    <video autoplay muted loop id="bg-video">
+        <source th:src="@{/assets/images/gym-video.mp4}" type="video/mp4" />
+    </video>
+
+    <div class="video-overlay header-text">
+        <div class="caption">
+            <h6>Panel de Control</h6>
+            <h2>Dashboard <em>Administrador</em> 2</h2>
+            <p>Centro de navegación a todos los módulos</p>
+            <div class="main-button scroll-to-section">
+                <a href="#dashboard-panel">Ver módulos</a>
+            </div>
+        </div>
+    </div>
+    </div>
+<!-- ***** Main Banner Area End ***** -->
+
+<!-- ***** Dashboard Section Start ***** -->
+<section class="section panel-management" id="dashboard-panel">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 offset-lg-3">
+                <div class="section-heading">
+                    <h2>Panel <em>Administrador</em></h2>
+                    <img th:src="@{/assets/images/line-dec.png}" alt="waves">
+                    <p>Navegá a cualquier módulo administrativo.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+                <div class="user-info">
+                    <h3>Bienvenido, <span th:text="${usuario.nombreUsuario}"></span></h3>
+                    <p>Rol: <strong th:text="${usuario.rol}"></strong></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="module-grid">
+                    <a class="module-card" th:href="@{/admin/usuarios}">
+                        <div class="icon"><i class="fa fa-users"></i></div>
+                        <div class="title">Gestión de Usuarios</div>
+                        <div class="desc">Administra cuentas y datos de socios desde un único lugar</div>
+                    </a>
+
+                    <a class="module-card" th:href="@{/admin/empresas}">
+                        <div class="icon"><i class="fa fa-building"></i></div>
+                        <div class="title">Empresas</div>
+                        <div class="desc">Gestión de empresas</div>
+                    </a>
+
+                    <a class="module-card" th:href="@{/admin/sucursales}">
+                        <div class="icon"><i class="fa fa-store"></i></div>
+                        <div class="title">Sucursales</div>
+                        <div class="desc">Asociadas a empresa y dirección existente</div>
+                    </a>
+
+                    <a class="module-card" th:href="@{/admin/direcciones}">
+                        <div class="icon"><i class="fa fa-map-marked"></i></div>
+                        <div class="title">Gestión Geográfica</div>
+                        <div class="desc">Países, provincias, departamentos, localidades y direcciones</div>
+                    </a>
+
+                    <a class="module-card" th:href="@{/admin/cuotas}">
+                        <div class="icon"><i class="fa fa-money"></i></div>
+                        <div class="title">Cuotas mensuales</div>
+                        <div class="desc">Crear, listar y actualizar estado</div>
+                    </a>
+
+                    <a class="module-card" th:href="@{/admin/valor-cuotas}">
+                        <div class="icon"><i class="fa fa-dollar"></i></div>
+                        <div class="title">Valores de cuota</div>
+                        <div class="desc">Definición del valor vigente e histórico</div>
+                    </a>
+                    <a class="module-card" th:href="@{/admin/facturas}">
+                        <div class="icon"><i class="fa fa-file-invoice"></i></div>
+                        <div class="title">Facturas</div>
+                        <div class="desc">Crear y buscar facturas</div>
+                    </a>
+                    <a class="module-card" th:href="@{/admin/mensajes}">
+                        <div class="icon"><i class="fa fa-envelope"></i></div>
+                        <div class="title">Mensajes & Promos</div>
+                        <div class="desc">Plantillas y campañas promocionales</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- ***** Dashboard Section End ***** -->
+
+<!-- ***** Footer Start ***** -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <p>&copy; 2024 Greedy Gym - Panel Administrador 2
+                <br>
+                Usuario: <span th:text="${usuario.nombreUsuario}"></span> | Rol: <span th:text="${usuario.rol}"></span>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script th:src="@{/assets/js/jquery-2.1.0.min.js}"></script>
+
+<!-- Bootstrap -->
+<script th:src="@{/assets/js/popper.js}"></script>
+<script th:src="@{/assets/js/bootstrap.min.js}"></script>
+
+<!-- Plugins -->
+<script th:src="@{/assets/js/scrollreveal.min.js}"></script>
+<script th:src="@{/assets/js/waypoints.min.js}"></script>
+<script th:src="@{/assets/js/jquery.counterup.min.js}"></script>
+<script th:src="@{/assets/js/imgfix.min.js}"></script>
+
+<!-- Global Init -->
+<script th:src="@{/assets/js/custom.js}"></script>
+
+</body>
+</html>

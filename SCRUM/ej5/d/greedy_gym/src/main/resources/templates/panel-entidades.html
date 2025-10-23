@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Greedy Gym | Panel de entidades</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Poppins:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" type="text/css" th:href="@{/assets/css/bootstrap.min.css}">
+  <link rel="stylesheet" type="text/css" th:href="@{/assets/css/font-awesome.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/templatemo-training-studio.css}">
+
+  <style th:inline="text">
+    /* Panel-specific styling to complement template styles */
+    .panel-management {
+      padding: 80px 0;
+      background-color: #fff;
+    }
+
+    .entity-switcher {
+      margin-bottom: 50px;
+    }
+
+    .entity-switcher ul {
+      padding: 0;
+      text-align: center;
+      margin: 0;
+    }
+
+    .entity-switcher ul li {
+      list-style: none;
+      display: inline;
+      cursor: pointer;
+      position: relative;
+      margin-right: 15px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #232d39;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 15px 25px;
+      background: #fff;
+      border-radius: 25px;
+      box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
+      transition: all 0.3s ease-in-out;
+      margin-bottom: 15px;
+    }
+
+    .entity-switcher ul li:after {
+      content: "";
+    }
+
+    .entity-switcher ul li:last-child {
+      margin-right: 0px;
+    }
+
+    .entity-switcher ul li.active,
+    .entity-switcher ul li:hover {
+      color: #fff;
+      background: linear-gradient(105deg, #ed563b 0%, #ff6b47 100%);
+      transform: translateY(-3px);
+      box-shadow: 0px 8px 25px rgba(237, 86, 59, 0.3);
+    }
+
+    .entity-switcher ul li i {
+      margin-right: 8px;
+      font-size: 14px;
+    }
+
+    .panel-controls {
+      background: #f8f9fa;
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 40px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+
+    .panel-label {
+      display: block;
+      font-size: 12px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #666;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .panel-control {
+      border-radius: 23px;
+      border: 2px solid #e0e0e0;
+      padding: 12px 20px;
+      font-size: 14px;
+      height: 50px;
+      transition: all 0.3s ease;
+      background: #fff;
+      position: relative;
+    }
+
+    .panel-control:focus {
+      border-color: #ed563b;
+      box-shadow: 0 0 0 0.2rem rgba(237, 86, 59, 0.25);
+      outline: none;
+      transform: translateY(-1px);
+    }
+
+    .panel-control::placeholder {
+      color: #999;
+      transition: color 0.3s ease;
+    }
+
+    .panel-control:focus::placeholder {
+      color: #ccc;
+    }
+
+    .main-button-panel {
+      background: linear-gradient(105deg, #ed563b 0%, #ff6b47 100%);
+      color: #fff;
+      border: none;
+      border-radius: 23px;
+      padding: 12px 25px;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .main-button-panel:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(237, 86, 59, 0.4);
+      color: #fff;
+    }
+
+    .panel-table {
+      background: #fff;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .panel-table table {
+      margin-bottom: 0;
+    }
+
+    .panel-table thead {
+      background: linear-gradient(105deg, #232a34 0%, #2a3441 100%);
+      color: #fff;
+    }
+
+    .panel-table thead th {
+      padding: 20px;
+      border: none;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .panel-table tbody td {
+      padding: 18px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      vertical-align: middle;
+    }
+
+    .panel-table tbody tr:hover {
+      background: rgba(237, 86, 59, 0.05);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .panel-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .panel-table .btn {
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 15px;
+      margin: 2px;
+    }
+
+    .panel-table .btn-sm {
+      padding: 4px 8px;
+      font-size: 11px;
+    }
+
+    .entity-empty {
+      text-align: center;
+      padding: 60px 30px;
+      background: #f8f9fa;
+      border-radius: 15px;
+      margin-top: 30px;
+    }
+
+    .entity-empty p {
+      color: #666;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    .entity-counter {
+      color: #999;
+      font-size: 13px;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .alert-panel {
+      border-radius: 15px;
+      border: none;
+      padding: 15px 20px;
+      margin-bottom: 30px;
+    }
+
+    /* Modal styling to match template */
+    .modal-content {
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    }
+
+    .modal-header {
+      border-bottom: 1px solid #e9ecef;
+      background: linear-gradient(105deg, #232a34 0%, #2a3441 100%);
+      color: #fff;
+      border-radius: 15px 15px 0 0;
+    }
+
+    .modal-title {
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 16px;
+    }
+
+    .modal-body {
+      padding: 30px;
+    }
+
+    .modal-footer {
+      border-top: 1px solid #e9ecef;
+      padding: 20px 30px;
+    }
+
+    .btn-outline-secondary {
+      border-radius: 23px;
+      padding: 10px 20px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    @media (max-width: 991px) {
+      .entity-switcher ul li {
+        display: block;
+        margin-right: 0;
+        margin-bottom: 10px;
+        text-align: center;
+      }
+
+      .panel-controls {
+        padding: 20px;
+      }
+
+      .panel-table {
+        font-size: 13px;
+      }
+
+      .panel-table thead th,
+      .panel-table tbody td {
+        padding: 12px 10px;
+      }
+    }
+
+    @media (max-width: 575px) {
+      .entity-switcher ul li {
+        font-size: 14px;
+        padding: 12px 20px;
+      }
+
+      .panel-controls .row [class*='col-'] {
+        margin-bottom: 20px;
+      }
+
+      .main-button-panel {
+        width: 100%;
+      }
+    }
+
+    @media (min-width: 992px) {
+      .entity-switcher ul {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+      }
+
+      .entity-switcher ul li {
+        flex: 1 1 calc(20% - 15px); /* Adjust width to fit 5 buttons per row */
+        max-width: 200px; /* Optional: Limit the maximum width of each button */
+      }
+    }
+
+    /* Animation enhancements */
+    .entity-switcher button,
+    .main-button-panel,
+    .panel-control,
+    .panel-table tbody tr {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .panel-controls {
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .panel-table {
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Loading states */
+    .loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 15px;
+      z-index: 10;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #ed563b;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+  </style>
+</head>
+
+<body th:data-context-path="@{/}">
+  <!-- ***** Preloader Start ***** -->
+  <div id="js-preloader" class="js-preloader">
+    <div class="preloader-inner">
+      <span class="dot"></span>
+      <div class="dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </div>
+  <!-- ***** Preloader End ***** -->
+
+  <!-- ***** Header Area Start ***** -->
+  <header class="header-area header-sticky">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <nav class="main-nav">
+            <!-- ***** Logo Start ***** -->
+            <a th:href="@{/}" class="logo">Greedy<em> Gym</em></a>
+            <!-- ***** Logo End ***** -->
+            <!-- ***** Menu Start ***** -->
+            <ul class="nav">
+              <li class="scroll-to-section"><a th:href="@{/}">Inicio</a></li>
+              <li class="scroll-to-section"><a href="#panel-entities" class="active">Panel</a></li>
+              <li class="main-button"><a href="#panel-entities">Gestionar</a></li>
+            </ul>
+            <a class='menu-trigger'>
+              <span>Menú</span>
+            </a>
+            <!-- ***** Menu End ***** -->
+          </nav>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- ***** Header Area End ***** -->
+
+  <!-- ***** Main Banner Area Start ***** -->
+  <div class="main-banner" id="top">
+    <video autoplay muted loop id="bg-video">
+      <source th:src="@{/assets/images/gym-video.mp4}" type="video/mp4" />
+    </video>
+
+    <div class="video-overlay header-text">
+      <div class="caption">
+        <h6>administración central</h6>
+        <h2 id="entity-title">panel de <em>entidades</em></h2>
+        <p id="entity-description">Seleccioná un módulo para administrarlo y gestionar la información de tu gimnasio.</p>
+        <div class="main-button scroll-to-section">
+          <a href="#panel-entities">Ver panel</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ***** Main Banner Area End ***** -->
+
+  <!-- ***** Panel Management Section Start ***** -->
+  <section class="section panel-management" id="panel-entities">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-6 offset-lg-3">
+          <div class="section-heading">
+            <h2>Gestión de <em>Entidades</em></h2>
+            <img th:src="@{/assets/images/line-dec.png}" alt="decorative line">
+            <p>Administrá eficientemente toda la información de tu gimnasio desde este panel centralizado.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-12">
+          <!-- Entity Switcher -->
+          <div class="entity-switcher" id="entity-switcher">
+            <ul>
+              <li class="active" data-entity="empresas">
+                <i class="fa fa-building"></i>Empresas
+              </li>
+              <li data-entity="sucursales">
+                <i class="fa fa-map-marker"></i>Sucursales
+              </li>
+              <li data-entity="empleados">
+                <i class="fa fa-users"></i>Empleados
+              </li>
+              <li data-entity="cuotas">
+                <i class="fa fa-credit-card"></i>Cuotas
+              </li>
+              <li data-entity="valorCuotas">
+                <i class="fa fa-dollar"></i>Valores de cuota
+              </li>
+              <li data-entity="direcciones">
+                <i class="fa fa-map-marker"></i>Direcciones
+              </li>
+              <li data-entity="paises">
+                <i class="fa fa-globe"></i>Países
+              </li>
+              <li data-entity="provincias">
+                <i class="fa fa-map"></i>Provincias
+              </li>
+              <li data-entity="departamentos">
+                <i class="fa fa-building-o"></i>Departamentos
+              </li>
+              <li data-entity="localidades">
+                <i class="fa fa-location-arrow"></i>Localidades
+              </li>
+              <li data-entity="usuarios">
+                <i class="fa fa-user"></i>Usuarios
+              </li>
+            </ul>
+          </div>
+
+          <!-- Alert Section -->
+          <div id="panel-alert" class="alert alert-panel d-none" role="alert"></div>
+
+          <!-- Controls Section -->
+          <div class="panel-controls">
+            <div class="row align-items-end">
+              <div class="col-lg-3 col-md-6 mb-3 mb-md-0">
+                <label class="panel-label" for="entity-search">Buscar</label>
+                <input type="search" id="entity-search" class="form-control panel-control" placeholder="Nombre, correo o referencia">
+              </div>
+              <div class="col-lg-2 col-md-6 mb-3 mb-md-0">
+                <label class="panel-label" for="entity-status">Estado</label>
+                <select id="entity-status" class="form-control panel-control">
+                  <option value="activos">Activos</option>
+                  <option value="inactivos">Dados de baja</option>
+                  <option value="todos">Todos</option>
+                </select>
+              </div>
+              <div class="col-lg-3 col-md-6 mb-3 mb-md-0" id="entity-subtype-container" style="display: none;">
+                <label class="panel-label" for="entity-subtype">Gestionar</label>
+                <select id="entity-subtype" class="form-control panel-control">
+                  <option value="direccionesData">Direcciones</option>
+                  <option value="localidades">Localidades</option>
+                  <option value="departamentos">Departamentos</option>
+                  <option value="provincias">Provincias</option>
+                  <option value="paises">Países</option>
+                </select>
+              </div>
+              <div class="col-lg-3 col-md-6 mt-3 mt-lg-0 ml-lg-auto text-md-right">
+                <button type="button" class="btn main-button-panel" id="entity-create">
+                  <i class="fa fa-plus"></i> <span id="entity-create-label">Nuevo registro</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Data Table -->
+          <div class="panel-table table-responsive">
+            <table class="table table-hover" id="entity-table">
+              <thead></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <!-- Empty State -->
+          <div id="entity-empty" class="entity-empty d-none">
+            <p class="mb-3">No encontramos registros para los filtros aplicados.</p>
+            <button type="button" class="btn main-button-panel" id="entity-empty-create">
+              <i class="fa fa-plus"></i> Crear registro
+            </button>
+          </div>
+
+          <!-- Counter -->
+          <p id="entity-counter" class="entity-counter mb-0"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ***** Panel Management Section End ***** -->
+
+  <!-- ***** Entity Modal Start ***** -->
+  <div class="modal fade" id="entityModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <form id="entity-form">
+          <div class="modal-header">
+            <h5 class="modal-title" id="entity-modal-title">Gestionar entidad</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div id="entity-form-alert" class="alert alert-danger d-none" role="alert"></div>
+            <div class="row" id="entity-form-fields"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn main-button-panel" id="entity-form-submit">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- ***** Entity Modal End ***** -->
+
+  <!-- ***** Footer Start ***** -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <p>Copyright &copy; 2024 Greedy Gym - Sistema de gestión integral para gimnasios</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <!-- ***** Footer End ***** -->
+
+  <!-- jQuery -->
+  <script th:src="@{/assets/js/jquery-2.1.0.min.js}"></script>
+
+  <!-- Bootstrap -->
+  <script th:src="@{/assets/js/popper.js}"></script>
+  <script th:src="@{/assets/js/bootstrap.min.js}"></script>
+
+  <!-- Plugins -->
+  <script th:src="@{/assets/js/scrollreveal.min.js}"></script>
+  <script th:src="@{/assets/js/waypoints.min.js}"></script>
+  <script th:src="@{/assets/js/jquery.counterup.min.js}"></script>
+  <script th:src="@{/assets/js/imgfix.min.js}"></script>
+  <script th:src="@{/assets/js/mixitup.js}"></script>
+  <script th:src="@{/assets/js/accordions.js}"></script>
+
+  <!-- Global Init -->
+  <script th:src="@{/assets/js/custom.js}"></script>
+  
+  <!-- Panel Specific -->
+  <script th:src="@{/assets/js/panel-entidades.js}"></script>
+</body>
+</html>

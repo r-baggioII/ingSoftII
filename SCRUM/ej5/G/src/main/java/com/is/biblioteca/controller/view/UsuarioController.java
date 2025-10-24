@@ -40,41 +40,41 @@ public class UsuarioController {
 		return "login.html";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-	@PostMapping("/inicio")
-	public String inicio(@RequestParam(value = "email") String email, @RequestParam(value = "password") String clave,
-			HttpSession session, ModelMap modelo) {
-
+	// Este método se ejecuta DESPUÉS del login exitoso de Spring Security
+	@GetMapping("/inicio")
+	public String inicio(HttpSession session, ModelMap modelo) {
 		try {
-
-			/*
-			 * El usuario se loguea mediante la clase UserDatail que se
-			 * implementa en el paquete biblioteca.security.
-			 * 
-				//Usuario usuario = usuarioService.login(email, clave);
-				//session.setAttribute("usuariosession", usuario);
-			 * 
-             */
+			// Obtener el email del usuario autenticado por Spring Security
+			org.springframework.security.core.Authentication auth = 
+				org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
 			
-			Usuario usuario = (Usuario)session.getAttribute("usuariosession");
-			
-			if (usuario.getRol().toString().equals("ADMIN")) {
-				return "redirect:/admin/dashboard";
+			if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
+				String email = auth.getName(); // Spring Security usa el email como username
+				
+				// Buscar el usuario completo en la base de datos
+				Usuario usuario = usuarioService.buscarUsuarioPorEmail(email);
+				
+				// Guardarlo en sesión para que las vistas puedan accederlo
+				session.setAttribute("usuariosession", usuario);
+				
+				// Verificar si es admin para redirigir
+				if (usuario != null && usuario.getRol().toString().equals("ADMIN")) {
+					return "redirect:/admin/dashboard";
+				}
 			}
-
+			
 			return "inicio.html";
-
 		} catch (Exception e) {
 			e.printStackTrace();
-			modelo.put("error", e.getMessage());
-			return "login.html";
+			modelo.put("error", "Error al cargar la página de inicio");
+			return "redirect:/usuario/login?error=true";
 		}
 	}
 
 	@GetMapping("/logout")
 	public String salir(HttpSession session) {
 		session.setAttribute("usuariosession", null);
-		return "index.html";
+		return "redirect:/usuario/login?logout=true";
 	}
 
 	//////////////////////////////////////////
@@ -170,42 +170,16 @@ public class UsuarioController {
 
 	}
 
-	@GetMapping("/inicio")
-	public String irInicio(HttpSession session, ModelMap modelo) {
-		try {
-			// Obtener el email del usuario autenticado por Spring Security
-			org.springframework.security.core.Authentication auth = 
-				org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-			
-			if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
-				String email = auth.getName(); // Spring Security usa el email como username
-				
-				// Buscar el usuario completo en la base de datos
-				Usuario usuario = usuarioService.buscarUsuarioPorEmail(email);
-				
-				// Guardarlo en sesión para que las vistas puedan accederlo
-				session.setAttribute("usuariosession", usuario);
-			}
-			
-			return "inicio.html";
-		} catch (Exception e) {
-			e.printStackTrace();
-			modelo.put("error", "Error al cargar la página de inicio");
-			return "redirect:/usuario/login";
-		}
-	}
-
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
-	@GetMapping("usuario/inicio")
-	public String irInicioAdmin(HttpSession session) {
+	@GetMapping("/panel")
+	public String irPanel(HttpSession session) {
 		Usuario logueado = (Usuario) session.getAttribute("usuariosession");
 		
-		if (logueado.getRol().toString().equals("ADMIN")) {
+		if (logueado != null && logueado.getRol().toString().equals("ADMIN")) {
 			return "redirect:/admin/dashboard";
 		} else {
 			return "inicio.html";
 		}
 	}
-
 
 }

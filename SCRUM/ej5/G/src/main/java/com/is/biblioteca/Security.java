@@ -41,18 +41,20 @@ public class Security {
             .authorizeHttpRequests(auth -> auth
                 // Recursos estáticos públicos
                 .requestMatchers(
-                    AntPathRequestMatcher.antMatcher("/css/**"),
-                    AntPathRequestMatcher.antMatcher("/js/**"),
-                    AntPathRequestMatcher.antMatcher("/images/**"),
-                    AntPathRequestMatcher.antMatcher("/img/**")
+                    new AntPathRequestMatcher("/css/**"),
+                    new AntPathRequestMatcher("/js/**"),
+                    new AntPathRequestMatcher("/images/**"),
+                    new AntPathRequestMatcher("/img/**"),
+                    new AntPathRequestMatcher("/"),
+                    new AntPathRequestMatcher("/h2-console/**")
                 ).permitAll()
                 // Páginas de autenticación/registro públicas
                 .requestMatchers(
-                    AntPathRequestMatcher.antMatcher("/usuario/login"),
-                    AntPathRequestMatcher.antMatcher("/login"),
-                    AntPathRequestMatcher.antMatcher("/logincheck"),
-                    AntPathRequestMatcher.antMatcher("/usuario/registrar"),
-                    AntPathRequestMatcher.antMatcher("/usuario/registro")
+                    new AntPathRequestMatcher("/usuario/login"),
+                    new AntPathRequestMatcher("/login"),
+                    new AntPathRequestMatcher("/logincheck"),
+                    new AntPathRequestMatcher("/usuario/registrar"),
+                    new AntPathRequestMatcher("/usuario/registro")
                 ).permitAll()
                 // El resto requiere autenticación
                 .anyRequest().authenticated()
@@ -65,16 +67,26 @@ public class Security {
                 // Deben coincidir con los name de los inputs del formulario
                 .usernameParameter("email")
                 .passwordParameter("password")
+                // Redirigir a /usuario/inicio después del login exitoso
                 .defaultSuccessUrl("/usuario/inicio", true)
+                // En caso de error, volver a login con parámetro error
                 .failureUrl("/usuario/login?error=true")
                 .permitAll()
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("/usuario/login")
+                .logoutSuccessUrl("/usuario/login?logout=true")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()
+            )
+            // Deshabilitar CSRF para la consola H2
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers(new AntPathRequestMatcher("/h2-console/**"))
+            )
+            // Permitir frames para la consola H2
+            .headers(headers -> headers
+                .frameOptions(frame -> frame.sameOrigin())
             );
 
         return http.build();

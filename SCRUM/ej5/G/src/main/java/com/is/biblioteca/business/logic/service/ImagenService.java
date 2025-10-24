@@ -3,7 +3,6 @@ package com.is.biblioteca.business.logic.service;
 import com.is.biblioteca.business.domain.entity.Imagen;
 import com.is.biblioteca.business.logic.error.ErrorServiceException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -12,7 +11,8 @@ import java.util.UUID;
 @Service
 public class ImagenService {
     
-    @Transactional
+    // NO usar @Transactional aquí porque solo crea objetos, no guarda en BD
+    // La transacción se maneja en el servicio que lo llama (UsuarioService)
     public Imagen crearImagen(MultipartFile archivo) throws ErrorServiceException {
         try {
             if (archivo != null && !archivo.isEmpty()) {
@@ -29,7 +29,7 @@ public class ImagenService {
         }
     }
     
-    @Transactional
+    // NO usar @Transactional aquí porque solo crea objetos, no guarda en BD
     public Imagen modificarImagen(String idImagen, MultipartFile archivo) throws ErrorServiceException {
         try {
             if (archivo != null && !archivo.isEmpty()) {

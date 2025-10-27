@@ -1,7 +1,7 @@
 package com.example.greedy_gym;
 
 import com.example.greedy_gym.config.LoginSuccessHandler;
-import com.example.greedy_gym.config.UsuarioDetailsService;
+import com.example.greedy_gym.servicios.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,43 +18,15 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
-public class SeguridadWeb {
+public class Security {
 
-    private final UsuarioDetailsService usuarioDetailsService;
+    private final CustomUserDetailsService customUserDetailsService;
     private final LoginSuccessHandler loginSuccessHandler;
 
-    public SeguridadWeb(UsuarioDetailsService usuarioDetailsService,
-                        LoginSuccessHandler loginSuccessHandler) {
-        this.usuarioDetailsService = usuarioDetailsService;
+    public Security(CustomUserDetailsService customUserDetailsService,
+                    LoginSuccessHandler loginSuccessHandler) {
+        this.customUserDetailsService = customUserDetailsService;
         this.loginSuccessHandler = loginSuccessHandler;
-    }
-
-    // Encoder para contraseñas - BCrypt para uso futuro
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    // PasswordEncoder actual - NoOp porque las contraseñas están en texto plano
-    // Cuando migres a BCrypt, cambia este bean a: return new BCryptPasswordEncoder()
-    @Bean
-    public PasswordEncoder actualPasswordEncoder() {
-        return NoOpPasswordEncoder.getInstance();
-    }
-
-    // AuthenticationProvider que usa el UsuarioDetailsService
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(usuarioDetailsService);
-        provider.setPasswordEncoder(actualPasswordEncoder());
-        return provider;
-    }
-
-    // AuthenticationManager requerido para la autenticación
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
     }
 
     // Configuración de seguridad usando Spring Security para el login
@@ -99,4 +71,26 @@ public class SeguridadWeb {
 
         return http.build();
     }
+
+    // Encoder para contraseñas - BCrypt
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    // AuthenticationProvider que usa el UsuarioDetailsService
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(customUserDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
+    }
+
+    // AuthenticationManager requerido para la autenticación
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
 }

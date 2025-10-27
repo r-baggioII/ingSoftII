@@ -2,6 +2,7 @@ package com.example.greedy_gym.servicios;
 
 import com.example.greedy_gym.entidades.CuotaMensual;
 import com.example.greedy_gym.entidades.DetalleFactura;
+import com.example.greedy_gym.entidades.EstadoCuota;
 import com.example.greedy_gym.entidades.EstadoFactura;
 import com.example.greedy_gym.entidades.Factura;
 import com.example.greedy_gym.entidades.FormaDePago;
@@ -140,6 +141,12 @@ public class FacturaServicio {
         CuotaMensual cuotaMensual = cuotaMensualRepositorio.findByIdAndEliminadoFalse(detalleFactura.getCuotaMensual().getId())
                 .orElseThrow(() -> new EntityNotFoundException("Cuota mensual no encontrada"));
 
+        if (cuotaMensual.getEstado() == EstadoCuota.PAGADA) {
+            throw new ValidationException("La cuota mensual " + cuotaMensual.getMes() + " " + cuotaMensual.getAnio() + " ya se encuentra pagada");
+        }
+        cuotaMensual.setEstado(EstadoCuota.PAGADA);
+        cuotaMensualRepositorio.save(cuotaMensual);
+
         DetalleFactura detalle = new DetalleFactura();
         detalle.setFactura(factura);
         detalle.setCuotaMensual(cuotaMensual);
@@ -170,6 +177,11 @@ public class FacturaServicio {
                     }
                     CuotaMensual cuotaMensual = cuotaMensualRepositorio.findByIdAndEliminadoFalse(detalle.getCuotaMensual().getId())
                             .orElseThrow(() -> new EntityNotFoundException("Cuota mensual no encontrada"));
+                    if (cuotaMensual.getEstado() == EstadoCuota.PAGADA) {
+                        throw new ValidationException("La cuota mensual " + cuotaMensual.getMes() + " " + cuotaMensual.getAnio() + " ya se encuentra pagada");
+                    }
+                    cuotaMensual.setEstado(EstadoCuota.PAGADA);
+                    cuotaMensualRepositorio.save(cuotaMensual);
                     DetalleFactura nuevo = new DetalleFactura();
                     nuevo.setFactura(factura);
                     nuevo.setCuotaMensual(cuotaMensual);

@@ -96,9 +96,6 @@ public class CuotaMensualControlador {
 
     @GetMapping("/deuda-por-socio/{idSocio}")
     public Collection<CuotaMensual> obtenerDeudaPorSocio(@PathVariable String idSocio) {
-    return service.listarCuotaMensualPorEstado(EstadoCuota.ADEUDADA)
-                .stream()
-                .filter(cuota -> idSocio.equals(cuota.getIdSocio()))
-                .toList();
+        return service.listarDeudaPorSocio(idSocio);
     }
 }

@@ -11,6 +11,7 @@ import jakarta.validation.ValidationException;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -133,6 +134,21 @@ public class CuotaMensualServicio {
     @Transactional(readOnly = true)
     public Collection<CuotaMensual> listarCuotaMensualPorEstado(EstadoCuota estado) {
         Collection<CuotaMensual> list = cuotaMensualRepositorio.findByEstadoAndEliminadoFalse(estado);
+        list.forEach(this::enriquecerConDatosSocio);
+        return list;
+    }
+
+    @Transactional(readOnly = true)
+    public Collection<CuotaMensual> listarDeudaPorSocio(String idSocio) {
+        if (idSocio == null || idSocio.isBlank()) {
+            throw new IllegalArgumentException("El id del socio no puede estar vacío");
+        }
+        List<EstadoCuota> estadosDeDeuda = List.of(
+                EstadoCuota.ADEUDADA,
+                EstadoCuota.PENDIENTE,
+                EstadoCuota.VENCIDA
+        );
+        List<CuotaMensual> list = cuotaMensualRepositorio.findByIdSocioAndEstadoInAndEliminadoFalse(idSocio, estadosDeDeuda);
         list.forEach(this::enriquecerConDatosSocio);
         return list;
     }

@@ -2,5 +2,9 @@
     "java.import.exclusions": [
         "**/RUP/ej4/videojuegos_ej4_OLD/**"
     ],
-    "liveServer.settings.port": 5501
+    "liveServer.settings.port": 5501,
+    "java.import.maven.enabled": true,
+    "java.configuration.updateBuildConfiguration": "automatic",
+    // Asegura que VS Code trate este repo como proyectos Maven
+    "java.project.importHint": false
 }

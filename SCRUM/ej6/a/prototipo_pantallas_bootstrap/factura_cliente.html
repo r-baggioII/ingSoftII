@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Factura Cliente - Prototipo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-light">
+    <div class="container mt-4">
+      <a href="index.html" class="btn btn-link">&larr; Volver</a>
+      <h2>Factura Cliente</h2>
+      <form class="row g-3 mt-2">
+        <div class="col-md-4">
+          <label class="form-label">Fecha</label>
+          <input type="date" class="form-control">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Número factura</label>
+          <input type="number" class="form-control" placeholder="0001">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Método de pago</label>
+          <select class="form-select">
+            <option>Contado</option>
+            <option>Tarjeta</option>
+            <option>Transferencia</option>
+            <option>Mercado Pago</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Cliente</label>
+          <select class="form-select">
+            <option>Juan Pérez (DNI 12345678)</option>
+            <option>María López (DNI 23456789)</option>
+            <option>Consumidor Final</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Documento / Referencia</label>
+          <input type="text" class="form-control" placeholder="Documento / email u otra referencia">
+        </div>
+
+        <div class="col-12">
+          <h5>Detalles</h5>
+          <table class="table">
+            <thead><tr><th>Producto (Plato)</th><th>Cantidad</th><th>Precio Unit.</th><th>Subtotal</th><th></th></tr></thead>
+            <tbody>
+              <tr>
+                <td>
+                  <select class="form-select">
+                    <option>Milanesa con guarnición - $1200</option>
+                    <option>Pizza Napolitana - $1500</option>
+                    <option>Empanadas x6 - $800</option>
+                    <option>Ensalada César - $900</option>
+                  </select>
+                </td>
+                <td><input type="number" class="form-control" value="1"></td>
+                <td><input type="number" class="form-control" value="1200"></td>
+                <td>$1200</td>
+                <td><button class="btn btn-sm btn-outline-danger">Eliminar</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <button class="btn btn-sm btn-outline-primary">Agregar detalle</button>
+        </div>
+
+        <div class="col-12 text-end">
+          <h4>Total: $<span id="total">100</span></h4>
+          <button class="btn btn-success">Guardar Factura</button>
+        </div>
+      </form>
+
+      <!-- Listado de facturas previas -->
+      <div class="mt-5">
+        <h4>Facturas previas</h4>
+        <table class="table table-striped">
+          <thead>
+            <tr><th>N°</th><th>Fecha</th><th>Cliente</th><th>Total</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0001</td>
+              <td>2025-10-01</td>
+              <td>Juan Pérez</td>
+              <td>$1.200</td>
+              <td><button class="btn btn-sm btn-outline-primary view-invoice" data-invoice='{"num":"0001","date":"2025-10-01","client":"Juan Pérez","total":"$1.200","items":"Milanesa x1 - $1.200"}'>Ver</button></td>
+            </tr>
+            <tr>
+              <td>0002</td>
+              <td>2025-10-05</td>
+              <td>María López</td>
+              <td>$2.300</td>
+              <td><button class="btn btn-sm btn-outline-primary view-invoice" data-invoice='{"num":"0002","date":"2025-10-05","client":"María López","total":"$2.300","items":"Pizza x2 - $2.300"}'>Ver</button></td>
+            </tr>
+            <tr>
+              <td>0003</td>
+              <td>2025-10-10</td>
+              <td>Consumidor Final</td>
+              <td>$800</td>
+              <td><button class="btn btn-sm btn-outline-primary view-invoice" data-invoice='{"num":"0003","date":"2025-10-10","client":"Consumidor Final","total":"$800","items":"Empanadas x6 - $800"}'>Ver</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Modal para ver factura -->
+      <div class="modal fade" id="invoiceModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Detalle de factura <span id="modalInvoiceNum"></span></h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p><strong>Fecha:</strong> <span id="modalInvoiceDate"></span></p>
+              <p><strong>Cliente:</strong> <span id="modalInvoiceClient"></span></p>
+              <p><strong>Items:</strong></p>
+              <pre id="modalInvoiceItems" class="bg-light p-2"></pre>
+              <p class="text-end"><strong>Total: </strong><span id="modalInvoiceTotal"></span></p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Maneja click en botones 'Ver' y muestra modal con datos
+      document.addEventListener('DOMContentLoaded', function () {
+        const invoiceModalEl = document.getElementById('invoiceModal');
+        const bsModal = new bootstrap.Modal(invoiceModalEl);
+        document.querySelectorAll('.view-invoice').forEach(btn => {
+          btn.addEventListener('click', () => {
+            try {
+              const data = JSON.parse(btn.getAttribute('data-invoice'));
+              document.getElementById('modalInvoiceNum').textContent = data.num || '';
+              document.getElementById('modalInvoiceDate').textContent = data.date || '';
+              document.getElementById('modalInvoiceClient').textContent = data.client || '';
+              document.getElementById('modalInvoiceItems').textContent = data.items || '';
+              document.getElementById('modalInvoiceTotal').textContent = data.total || '';
+              bsModal.show();
+            } catch (e) {
+              console.error('Error al parsear datos de factura', e);
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

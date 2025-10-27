@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Producto - Prototipo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-light">
+    <div class="container mt-4">
+      <a href="index.html" class="btn btn-link">&larr; Volver</a>
+      <h2>Producto</h2>
+      <form class="row g-3 mt-2">
+        <div class="col-md-6">
+          <label class="form-label">Nombre (Plato)</label>
+          <input type="text" class="form-control" placeholder="Nombre del plato, ej: Milanesa con guarnición">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Precio unitario</label>
+          <input type="number" class="form-control" placeholder="0">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Categoría</label>
+          <select class="form-select">
+            <option>Plato principal</option>
+            <option>Entrada</option>
+            <option>Postre</option>
+            <option>Bebida</option>
+          </select>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Descripción</label>
+          <textarea class="form-control" rows="3" placeholder="Ingredientes, alérgenos, observaciones..."></textarea>
+        </div>
+        <div class="col-12">
+          <button class="btn btn-primary">Guardar Producto (Plato)</button>
+        </div>
+      </form>
+
+      <hr>
+      <h5>Listado de platos (ejemplos)</h5>
+      <table class="table table-sm">
+        <thead><tr><th>Nombre</th><th>Precio</th><th>Categoría</th><th>Descripción</th><th>Acciones</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Milanesa con guarnición</td>
+            <td>$1200</td>
+            <td>Plato principal</td>
+            <td>Milanesa de ternera, papas fritas</td>
+            <td>
+              <a class="btn btn-sm btn-outline-primary" href="#">Editar</a>
+              <button class="btn btn-sm btn-outline-danger ms-1">Eliminar</button>
+            </td>
+          </tr>
+          <tr>
+            <td>Pizza Napolitana</td>
+            <td>$1500</td>
+            <td>Plato principal</td>
+            <td>Mozzarella, tomate, albahaca</td>
+            <td>
+              <a class="btn btn-sm btn-outline-primary" href="#">Editar</a>
+              <button class="btn btn-sm btn-outline-danger ms-1">Eliminar</button>
+            </td>
+          </tr>
+          <tr>
+            <td>Empanadas x6</td>
+            <td>$800</td>
+            <td>Entrada</td>
+            <td>Carne / jamón y queso</td>
+            <td>
+              <a class="btn btn-sm btn-outline-primary" href="#">Editar</a>
+              <button class="btn btn-sm btn-outline-danger ms-1">Eliminar</button>
+            </td>
+          </tr>
+          <tr>
+            <td>Ensalada César</td>
+            <td>$900</td>
+            <td>Entrada</td>
+            <td>Lechuga, pollo, aderezo César</td>
+            <td>
+              <a class="btn btn-sm btn-outline-primary" href="#">Editar</a>
+              <button class="btn btn-sm btn-outline-danger ms-1">Eliminar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

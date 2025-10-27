@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Factura Proveedor - Prototipo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-light">
+    <div class="container mt-4">
+      <a href="index.html" class="btn btn-link">&larr; Volver</a>
+      <h2>Factura Proveedor</h2>
+      <form class="row g-3 mt-2">
+        <div class="col-md-4">
+          <label class="form-label">Fecha</label>
+          <input type="date" class="form-control">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Número factura</label>
+          <input type="number" class="form-control" placeholder="000100">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Fecha de recepción</label>
+          <input type="date" class="form-control">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Proveedor</label>
+          <select class="form-select">
+            <option>La Huerta S.A.</option>
+            <option>Carnes del Sur SRL</option>
+            <option>Distribuidora Bebidas</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Contacto / Mail</label>
+          <input type="email" class="form-control" placeholder="proveedor@ejemplo.com">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Pagada</label>
+          <select class="form-select">
+            <option>Sí</option>
+            <option>No</option>
+          </select>
+        </div>
+
+        <div class="col-12">
+          <h5>Detalles</h5>
+          <table class="table">
+            <thead><tr><th>Producto (Plato)</th><th>Cantidad</th><th>Precio Unit.</th><th>Subtotal</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>
+                  <select class="form-select">
+                    <option>Milanesa con guarnición - $1200</option>
+                    <option>Pizza Napolitana - $1500</option>
+                    <option>Empanadas x6 - $800</option>
+                  </select>
+                </td>
+                <td>10</td>
+                <td>1200</td>
+                <td>$12.000</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="col-12 text-end">
+          <h4>Total: $<span id="totalProv">250</span></h4>
+          <button class="btn btn-success">Guardar Factura Proveedor</button>
+        </div>
+      </form>
+
+      <!-- Listado de facturas previas (Proveedor) -->
+      <div class="mt-5">
+        <h4>Facturas previas</h4>
+        <table class="table table-striped">
+          <thead>
+            <tr><th>N°</th><th>Fecha recepción</th><th>Proveedor</th><th>Total</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>000100</td>
+              <td>2025-09-20</td>
+              <td>La Huerta S.A.</td>
+              <td>$12.000</td>
+              <td><button class="btn btn-sm btn-outline-primary view-invoice" data-invoice='{"num":"000100","date":"2025-09-20","provider":"La Huerta S.A.","total":"$12.000","items":"Verduras x20 - $12.000"}'>Ver</button></td>
+            </tr>
+            <tr>
+              <td>000101</td>
+              <td>2025-10-02</td>
+              <td>Carnes del Sur SRL</td>
+              <td>$25.000</td>
+              <td><button class="btn btn-sm btn-outline-primary view-invoice" data-invoice='{"num":"000101","date":"2025-10-02","provider":"Carnes del Sur SRL","total":"$25.000","items":"Carne x50 - $25.000"}'>Ver</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Modal para ver factura proveedor -->
+      <div class="modal fade" id="invoiceModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Detalle de factura <span id="modalInvoiceNum"></span></h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p><strong>Fecha recepción:</strong> <span id="modalInvoiceDate"></span></p>
+              <p><strong>Proveedor:</strong> <span id="modalInvoiceProvider"></span></p>
+              <p><strong>Items:</strong></p>
+              <pre id="modalInvoiceItems" class="bg-light p-2"></pre>
+              <p class="text-end"><strong>Total: </strong><span id="modalInvoiceTotal"></span></p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Maneja click en botones 'Ver' (proveedor) y muestra modal con datos
+      document.addEventListener('DOMContentLoaded', function () {
+        const invoiceModalEl = document.getElementById('invoiceModal');
+        const bsModal = new bootstrap.Modal(invoiceModalEl);
+        document.querySelectorAll('.view-invoice').forEach(btn => {
+          btn.addEventListener('click', () => {
+            try {
+              const data = JSON.parse(btn.getAttribute('data-invoice'));
+              document.getElementById('modalInvoiceNum').textContent = data.num || '';
+              document.getElementById('modalInvoiceDate').textContent = data.date || '';
+              // provider vs client
+              if (data.provider) {
+                const el = document.getElementById('modalInvoiceProvider');
+                if (el) el.textContent = data.provider;
+              }
+              if (data.client) {
+                const el = document.getElementById('modalInvoiceClient');
+                if (el) el.textContent = data.client;
+              }
+              document.getElementById('modalInvoiceItems').textContent = data.items || '';
+              document.getElementById('modalInvoiceTotal').textContent = data.total || '';
+              bsModal.show();
+            } catch (e) {
+              console.error('Error al parsear datos de factura proveedor', e);
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

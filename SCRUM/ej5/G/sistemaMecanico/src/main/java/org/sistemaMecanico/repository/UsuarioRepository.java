@@ -7,6 +7,9 @@ import java.util.Optional;
 
 @Repository
 public interface UsuarioRepository extends BaseRepository<Usuario, String> {
-    // Método personalizado para buscar usuario por nombre de usuario
+    // Método para buscar usuario por nombre de usuario (ya lo tienes)
     Optional<Usuario> findByNombreUsuarioAndEliminadoIsFalse(String nombreUsuario);
+
+    // ✨ NUEVO: Verificar si existe un usuario
+    boolean existsByNombreUsuarioAndEliminadoIsFalse(String nombreUsuario);
 }

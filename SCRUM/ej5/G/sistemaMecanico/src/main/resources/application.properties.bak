@@ -1,0 +1,25 @@
+spring.application.name=sistemaMecanico
+spring.main.allow-bean-definition-overriding=true
+
+# MariaDB
+spring.datasource.url=jdbc:mariadb://localhost:3306/biblio_db?useUnicode=true&characterEncoding=utf8&serverTimezone=America/Argentina/Mendoza
+spring.datasource.username=root
+spring.datasource.password=adminAdmin
+# (opcional) driver explícito:
+spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
+
+# JPA/Hibernate
+spring.jpa.generate-ddl=true
+spring.jpa.show-sql=true
+spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+spring.jpa.hibernate.ddl-auto=update
+
+# Forzar dialecto MariaDB
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MariaDBDialect
+
+# Cambiar puerto para evitar conflicto cuando 8080 está ocupado
+server.port=8081
+
+# Debug de Spring Security para ver flujo de autenticación en consola
+logging.level.org.springframework.security=DEBUG
+server.error.include-message=always

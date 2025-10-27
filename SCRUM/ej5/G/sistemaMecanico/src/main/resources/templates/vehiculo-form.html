@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${titleEdit}">Gestión de Vehículo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css">
+    <link rel="stylesheet" href="/css/formulario.css">
+</head>
+<body>
+
+<!-- Navbar -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container-fluid m-5 contenedor">
+
+    <h2 class="mb-4" th:text="${titleEdit}">Gestión de Vehículo</h2>
+
+    <form class="formulario" th:action="@{/vehiculo/actualizar}" method="POST" th:object="${item}">
+
+        <!-- Campo oculto para el ID -->
+        <input type="hidden" th:field="*{id}">
+
+        <!-- Patente -->
+        <div class="form-group my-3">
+            <label class="mb-2">Patente</label>
+            <input type="text"
+                   class="form-control"
+                   th:field="*{patente}"
+                   th:disabled="${isDisabled}"
+                   placeholder="Ingrese la patente del vehículo (ej: ABC123)"
+                   maxlength="20"
+                   required>
+        </div>
+
+        <!-- Marca -->
+        <div class="form-group my-3">
+            <label class="mb-2">Marca</label>
+            <input type="text"
+                   class="form-control"
+                   th:field="*{marca}"
+                   th:disabled="${isDisabled}"
+                   placeholder="Ingrese la marca del vehículo (ej: Toyota, Ford)"
+                   maxlength="100"
+                   required>
+        </div>
+
+        <!-- Modelo -->
+        <div class="form-group my-3">
+            <label class="mb-2">Modelo</label>
+            <input type="text"
+                   class="form-control"
+                   th:field="*{modelo}"
+                   th:disabled="${isDisabled}"
+                   placeholder="Ingrese el modelo del vehículo (ej: Corolla, Focus)"
+                   maxlength="100"
+                   required>
+        </div>
+
+        <!-- Cliente (Propietario) -->
+        <div class="form-group my-3">
+            <label class="mb-2">Cliente (Propietario)</label>
+            <select class="form-control"
+                    th:field="*{cliente}"
+                    th:disabled="${isDisabled}">
+                <option value="">-- Seleccione un cliente --</option>
+                <option th:each="cliente : ${clientes}"
+                        th:value="${cliente.id}"
+                        th:text="${cliente.nombre + ' ' + cliente.apellido + ' (DNI: ' + cliente.documento + ')'}">
+                </option>
+            </select>
+            <small class="form-text text-muted">Seleccione el propietario del vehículo</small>
+        </div>
+
+        <!-- Botones -->
+        <div class="mt-4" th:if="${!isDisabled}">
+            <button type="submit" class="btn btn-primary botones">
+                <span th:if="${item.id == null}">Guardar</span>
+                <span th:if="${item.id != null}">Actualizar</span>
+            </button>
+            <a th:href="@{/vehiculo/cancelar}" class="btn btn-secondary botones ms-2">Cancelar</a>
+        </div>
+
+        <div class="mt-4" th:if="${isDisabled}">
+            <a th:href="@{/vehiculo/list}" class="btn btn-secondary botones">Volver</a>
+        </div>
+
+    </form>
+
+    <!-- Mensaje de éxito -->
+    <div th:if="${msgExito != null}" class="alert alert-success mt-3" role="alert">
+        <h5 class="alert-heading">¡Éxito! 👍</h5>
+        <p th:text="${msgExito}"></p>
+    </div>
+
+    <!-- Mensaje de error -->
+    <div th:if="${msgError != null}" class="alert alert-danger mt-3" role="alert">
+        <h5 class="alert-heading">Error 👎</h5>
+        <p th:text="${msgError}"></p>
+    </div>
+
+</div>
+
+<footer class="text-muted py-5">
+    <div class="container">
+        <p class="mb-1">Sistema Mecánico &copy; 2025</p>
+        <p class="float-end mb-1">
+            <a href="#" style="text-decoration:none"><span>⬆️</span> Volver arriba</a>
+        </p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

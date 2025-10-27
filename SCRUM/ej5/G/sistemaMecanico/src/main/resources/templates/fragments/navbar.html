@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navBar">
+    <div class="containerImg">
+        <a href="/" class="navbar-brand d-flex align-items-center">
+            <!--<img class="logo" src="/img/logo-mecanico.png" alt="Logo Sistema Mecánico"> -->
+        </a>
+    </div>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse elementosNav" id="navbarNavDropdown">
+        <ul class="navbar-nav ms-auto elementos">
+
+            <!-- Menú Mecánicos -->
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMecanicos" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Mecánicos
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdownMecanicos">
+                    <li><a class="dropdown-item" th:href="@{/mecanico/alta}">Nuevo Mecánico</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" th:href="@{/mecanico/list}">Listar Mecánicos</a></li>
+                </ul>
+            </li>
+
+            <!-- Menú Clientes -->
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownClientes" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Clientes
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdownClientes">
+                    <li><a class="dropdown-item" th:href="@{/cliente/alta}">Nuevo Cliente</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" th:href="@{/cliente/list}">Listar Clientes</a></li>
+                </ul>
+            </li>
+
+            <!-- Menú Vehículos -->
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownVehiculos" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Vehículos
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdownVehiculos">
+                    <li><a class="dropdown-item" th:href="@{/vehiculo/alta}">Nuevo Vehículo</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" th:href="@{/vehiculo/list}">Listar Vehículos</a></li>
+                </ul>
+            </li>
+
+            <!-- Menú Historial de Arreglos -->
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownHistorial" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Historial de Arreglos
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdownHistorial">
+                    <li><a class="dropdown-item" th:href="@{/historialarreglo/alta}">Nuevo Arreglo</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" th:href="@{/historialarreglo/list}">Listar Arreglos</a></li>
+                </ul>
+            </li>
+
+            <!-- Menú Usuario/Perfil -->
+            <li class="nav-item dropdown" th:if="${session.usuariosession != null}">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownPerfil" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-user"></i> Perfil
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdownPerfil">
+                    <li><a class="dropdown-item" th:href="@{/perfil}">Mi Perfil</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" th:href="@{/logout}">Cerrar Sesión</a></li>
+                </ul>
+            </li>
+
+            <!-- Links para usuarios no logueados -->
+            <li class="nav-item" th:if="${session.usuariosession == null}">
+                <a class="nav-link" th:href="@{/registrar}">
+                    Registrarse
+                </a>
+            </li>
+            <li class="nav-item" th:if="${session.usuariosession == null}">
+                <a class="nav-link" th:href="@{/login}">
+                    Iniciar Sesión
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
+</body>
+</html>

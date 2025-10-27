@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${titleEdit}">Gestión de Historial de Arreglo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/formulario.css">
+</head>
+<body>
+
+<!-- Navbar -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container-fluid m-5 contenedor">
+
+    <h2 class="mb-4" th:text="${titleEdit}">Gestión de Historial de Arreglo</h2>
+
+        <form th:action="@{/historialarreglo/actualizarPersonalizado}" method="post" th:object="${item}">
+        <input type="hidden" name="id" th:value="*{id}">
+        
+        <!-- Fecha de Arreglo -->
+        <div class="mb-3">
+            <label for="fechaArreglo" class="form-label">Fecha de Arreglo:</label>
+            <input type="date" 
+                   th:value="${item.fechaArreglo != null ? #dates.format(item.fechaArreglo, 'yyyy-MM-dd') : ''}" 
+                   name="fechaArreglo" 
+                   id="fechaArreglo" 
+                   class="form-control" 
+                   required>
+        </div>
+
+        <!-- Vehículo -->
+        <div class="form-group my-3">
+            <label class="mb-2">Vehículo</label>
+            <select class="form-control"
+                    th:field="*{vehiculo.id}"
+                    th:disabled="${isDisabled}"
+                    required>
+                <option value="">-- Seleccione un vehículo --</option>
+                <option th:each="vehiculo : ${vehiculos}"
+                        th:value="${vehiculo.id}"
+                        th:text="${vehiculo.patente + ' - ' + vehiculo.marca + ' ' + vehiculo.modelo}">
+                </option>
+            </select>
+        </div>
+
+        <!-- Detalle del Arreglo -->
+        <div class="form-group my-3">
+            <label class="mb-2">Detalle del Arreglo</label>
+            <textarea class="form-control"
+                      th:field="*{detalleArreglo}"
+                      th:disabled="${isDisabled}"
+                      placeholder="Describa el arreglo realizado"
+                      rows="5"
+                      required></textarea>
+        </div>
+
+        <!-- Mecánicos (selección múltiple) -->
+        <div class="form-group my-3" th:if="${!isDisabled}">
+            <label class="mb-2">Mecánicos Asignados (puede seleccionar varios)</label>
+            <select class="form-select" 
+                    name="mecanicosIds" 
+                    id="mecanicosIds"
+                    multiple 
+                    size="5">
+                <option th:each="mecanico : ${mecanicos}"
+                        th:value="${mecanico.id}"
+                        th:text="${mecanico.nombre + ' ' + mecanico.apellido + ' (' + mecanico.legajo + ')'}"
+                        th:selected="${item.mecanicos != null && #lists.contains(#lists.toList(item.mecanicos.![id]), mecanico.id)}">
+                </option>
+            </select>
+            <small class="form-text text-muted">Mantén presionado Ctrl (Windows/Linux) o Cmd (Mac) para seleccionar múltiples mecánicos.</small>
+        </div>
+
+        <!-- Mostrar mecánicos en modo consulta -->
+        <div class="form-group my-3" th:if="${isDisabled}">
+            <label class="mb-2">Mecánicos Asignados</label>
+            <div th:if="${item.mecanicos != null && !#lists.isEmpty(item.mecanicos)}">
+                <ul class="list-group">
+                    <li class="list-group-item" th:each="mecanico : ${item.mecanicos}"
+                        th:text="${mecanico.nombre + ' ' + mecanico.apellido + ' (' + mecanico.legajo + ')'}">
+                    </li>
+                </ul>
+            </div>
+            <div th:if="${item.mecanicos == null || #lists.isEmpty(item.mecanicos)}">
+                <p class="text-muted">No hay mecánicos asignados</p>
+            </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="mt-4" th:if="${!isDisabled}">
+            <button type="submit" class="btn btn-primary botones">
+                <span th:if="${item.id == null}">Guardar</span>
+                <span th:if="${item.id != null}">Actualizar</span>
+            </button>
+            <a th:href="@{/historialarreglo/cancelar}" class="btn btn-secondary botones ms-2">Cancelar</a>
+        </div>
+
+        <div class="mt-4" th:if="${isDisabled}">
+            <a th:href="@{/historialarreglo/list}" class="btn btn-secondary botones">Volver</a>
+        </div>
+
+    </form>
+
+    <!-- Mensaje de éxito -->
+    <div th:if="${msgExito != null}" class="alert alert-success mt-3" role="alert">
+        <h5 class="alert-heading">¡Éxito! 👍</h5>
+        <p th:text="${msgExito}"></p>
+    </div>
+
+    <!-- Mensaje de error -->
+    <div th:if="${msgError != null}" class="alert alert-danger mt-3" role="alert">
+        <h5 class="alert-heading">Error 👎</h5>
+        <p th:text="${msgError}"></p>
+    </div>
+
+</div>
+
+<footer class="text-muted py-5">
+    <div class="container">
+        <p class="mb-1">Sistema Mecánico &copy; 2025</p>
+        <p class="float-end mb-1">
+            <a href="#" style="text-decoration:none"><span>⬆️</span> Volver arriba</a>
+        </p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

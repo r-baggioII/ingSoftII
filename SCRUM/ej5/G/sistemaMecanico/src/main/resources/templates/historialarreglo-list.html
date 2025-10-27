@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${titleList}">Listado de Historial de Arreglos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css">
+    <link rel="stylesheet" href="/css/index.css">
+</head>
+<body>
+
+<!-- Navbar -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container m-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 th:text="${titleList}">Listado de Historial de Arreglos</h2>
+        <a th:href="@{/historialarreglo/alta}" class="btn btn-success">
+            <i class="fas fa-plus"></i> Nuevo Historial
+        </a>
+    </div>
+
+    <!-- Mensaje de éxito -->
+    <div th:if="${msgExito != null}" class="alert alert-success" role="alert">
+        <h5 class="alert-heading">¡Éxito! 👍</h5>
+        <p th:text="${msgExito}"></p>
+    </div>
+
+    <!-- Mensaje de error -->
+    <div th:if="${msgError != null}" class="alert alert-danger" role="alert">
+        <h5 class="alert-heading">Error 👎</h5>
+        <p th:text="${msgError}"></p>
+    </div>
+
+    <!-- Tabla de historial de arreglos -->
+    <table class="table table-dark table-striped table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Fecha</th>
+            <th scope="col">Vehículo</th>
+            <th scope="col">Detalle</th>
+            <th scope="col">Mecánicos</th>
+            <th scope="col" class="text-center">Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="historial : ${items}">
+            <td th:text="${#dates.format(historial.fechaArreglo, 'dd/MM/yyyy')}"></td>
+            <td th:text="${historial.vehiculo != null ? historial.vehiculo.patente + ' - ' + historial.vehiculo.marca : 'N/A'}"></td>
+            <td>
+                <span th:text="${#strings.length(historial.detalleArreglo) > 50 ? 
+                               #strings.substring(historial.detalleArreglo, 0, 50) + '...' : 
+                               historial.detalleArreglo}"></span>
+            </td>
+            <td>
+                <span th:if="${historial.mecanicos != null && !#lists.isEmpty(historial.mecanicos)}"
+                      th:text="${#lists.size(historial.mecanicos) + ' mecánico(s)'}"></span>
+                <span th:if="${historial.mecanicos == null || #lists.isEmpty(historial.mecanicos)}">
+                    Sin asignar
+                </span>
+            </td>
+            <td class="text-center">
+                <a th:href="@{/historialarreglo/consultar/{id}(id=${historial.id})}"
+                   class="btn btn-info btn-sm me-1"
+                   title="Ver">
+                    <i class="fas fa-eye"></i>
+                </a>
+                <a th:href="@{/historialarreglo/modificar/{id}(id=${historial.id})}"
+                   class="btn btn-warning btn-sm me-1"
+                   title="Editar">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a th:href="@{/historialarreglo/baja/{id}(id=${historial.id})}"
+                   class="btn btn-danger btn-sm"
+                   title="Eliminar"
+                   onclick="return confirm('¿Está seguro de eliminar este historial de arreglo?')">
+                    <i class="fas fa-trash"></i>
+                </a>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(items)}">
+            <td colspan="5" class="text-center">No hay historiales de arreglos registrados</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <section class="text-center mt-4">
+        <a th:href="@{/inicio}" class="btn btn-secondary">Volver al Inicio</a>
+    </section>
+
+</div>
+
+<footer class="text-muted py-5">
+    <div class="container">
+        <p class="mb-1">Sistema Mecánico &copy; 2025</p>
+        <p class="float-end mb-1">
+            <a href="#" style="text-decoration:none"><span>⬆️</span> Volver arriba</a>
+        </p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Admin | Facturas</title>
+  <link rel="stylesheet" type="text/css" th:href="@{/assets/css/bootstrap.min.css}">
+  <link rel="stylesheet" type="text/css" th:href="@{/assets/css/font-awesome.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/templatemo-training-studio.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/panel-shared.css}">
+</head>
+<body>
+<header class="header-area header-sticky">
+  <div class="container"><div class="row"><div class="col-12">
+    <nav class="main-nav">
+      <a th:href="@{/}" class="logo">Greedy<em> Gym</em></a>
+      <ul class="nav">
+        <li><a th:href="@{/dashboard/admin2}">Dashboard</a></li>
+  <li><a th:href="@{/admin/direcciones}">Direcciones</a></li>
+        <li><a th:href="@{/logout}">Cerrar Sesión</a></li>
+      </ul>
+      <a class='menu-trigger'><span>Menú</span></a>
+    </nav>
+  </div></div></div>
+  </header>
+
+<section class="section panel-management" style="padding: 80px 0; background: #fff;">
+  <div class="container facturas-page">
+    <div class="row">
+      <div class="col-lg-8 offset-lg-2">
+        <div class="section-heading">
+          <h2>Gestión de <em>Facturas</em></h2>
+          <img th:src="@{/assets/images/line-dec.png}" alt="waves">
+          <p>Crear facturas a partir de cuotas adeudadas y buscar facturas existentes.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-5">
+        <div class="panel-card">
+          <h5 class="panel-title"><i class="fa fa-plus-circle"></i> Nueva factura</h5>
+          <div class="panel-form">
+            <div class="mb-3">
+              <label class="panel-label">Socio</label>
+              <input type="text" id="socio-buscar" class="form-control panel-control" placeholder="Buscar socio por nombre o DNI">
+              <small class="text-muted">Seleccioná un socio para listar cuotas adeudadas</small>
+              <div class="list-group mt-2" id="socio-sugerencias" style="max-height:180px; overflow:auto;"></div>
+            </div>
+            <div class="mb-3">
+              <label class="panel-label">Forma de pago</label>
+              <select id="forma-pago" class="form-select panel-control"></select>
+            </div>
+            <div class="mb-3">
+              <label class="panel-label">Fecha</label>
+              <input type="date" id="fecha-factura" class="form-control panel-control">
+            </div>
+            <div class="mb-2">
+              <label class="panel-label">Cuotas adeudadas</label>
+              <div id="cuotas-contenedor" class="panel-table table-responsive" style="max-height:220px; overflow:auto;">
+                <table class="table table-sm">
+                  <thead><tr><th></th><th>Mes/Año</th><th>Vence</th><th class="text-end">Monto</th></tr></thead>
+                  <tbody id="cuotas-body"><tr><td colspan="4" class="text-muted text-center">Seleccione un socio…</td></tr></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>Total seleccionado: <strong id="total-seleccionado">$0,00</strong></div>
+              <button id="btn-crear-factura" class="btn main-button-panel" disabled>Crear factura</button>
+            </div>
+            <div id="crear-alert" class="alert d-none" role="alert"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-7">
+        <div class="panel-card">
+          <h5 class="panel-title"><i class="fa fa-search"></i> Buscar facturas</h5>
+          <div class="row g-2 mb-3">
+            <div class="col-md-4">
+              <label class="panel-label">N° Factura</label>
+              <input id="filtro-numero" type="number" class="form-control panel-control" placeholder="Ej: 1024">
+            </div>
+            <div class="col-md-4">
+              <label class="panel-label">Estado</label>
+              <select id="filtro-estado" class="form-select panel-control">
+                <option value="">Todos</option>
+                <option value="PAGADA">PAGADA</option>
+                <option value="ANULADA">ANULADA</option>
+                <option value="SIN_DEFINIR">SIN_DEFINIR</option>
+              </select>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+              <button id="btn-buscar" class="btn main-button-panel w-100">Buscar</button>
+            </div>
+          </div>
+          <div class="panel-table table-responsive">
+            <table class="table">
+              <thead>
+                <tr><th>N°</th><th>Fecha</th><th>Estado</th><th>Medio</th><th class="text-end">Total</th><th></th></tr>
+              </thead>
+              <tbody id="tabla-facturas">
+                <tr><td colspan="6" class="text-muted text-center">Sin resultados</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+ </section>
+
+<script th:src="@{/assets/js/jquery-2.1.0.min.js}"></script>
+<script th:src="@{/assets/js/bootstrap.min.js}"></script>
+<script th:src="@{/assets/js/admin/facturas.js}"></script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Admin | Valores de cuota</title>
+  <link rel="stylesheet" type="text/css" th:href="@{/assets/css/bootstrap.min.css}">
+  <link rel="stylesheet" type="text/css" th:href="@{/assets/css/font-awesome.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/templatemo-training-studio.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/panel-shared.css}">
+</head>
+<body th:data-context-path="@{/}">
+<header class="header-area header-sticky">
+  <div class="container"><div class="row"><div class="col-12">
+    <nav class="main-nav">
+      <a th:href="@{/}" class="logo">Greedy<em> Gym</em></a>
+      <ul class="nav">
+        <li><a th:href="@{/dashboard/admin2}">Dashboard</a></li>
+  <li><a th:href="@{/admin/valor-cuotas}">Valor Cuotas</a></li>
+        <li><a th:href="@{/logout}">Cerrar Sesión</a></li>
+      </ul>
+      <a class='menu-trigger'><span>Menú</span></a>
+    </nav>
+  </div></div></div>
+</header>
+
+<section class="section panel-management">
+  <div class="container">
+    <div class="row"><div class="col-lg-10 offset-lg-1">
+      <div class="section-heading">
+        <h2>Valores de cuota</h2>
+        <img th:src="@{/assets/images/line-dec.png}" alt="waves">
+        <p>Definí el valor vigente e histórico de la cuota mensual.</p>
+        <p class="text-muted">Relación: el Valor de cuota se referencia al generar Cuotas para los socios.</p>
+      </div>
+    </div></div>
+
+    <div class="row g-4">
+      <!-- Valor vigente -->
+      <div class="col-lg-6">
+        <div class="card" style="border:none; border-radius:14px; box-shadow:0 10px 28px rgba(0,0,0,.08);">
+          <div class="card-body">
+            <h5 class="card-title">Valor vigente</h5>
+            <div id="valor-vigente" class="d-flex align-items-center gap-3">
+              <!-- JS: GET /api/valor-cuotas/vigente -->
+              <div class="display-6 m-0">$ <span data-field="importe">-</span></div>
+              <div class="text-muted">desde <span data-field="vigenciaDesde">-</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Crear/Actualizar valor -->
+      <div class="col-lg-6">
+        <div class="card" style="border:none; border-radius:14px; box-shadow:0 10px 28px rgba(0,0,0,.08);">
+          <div class="card-body">
+            <h5 class="card-title">Definir nuevo valor</h5>
+            <form id="valor-form" class="row g-2">
+              <div class="col-6">
+                <label class="panel-label">Vigencia desde</label>
+                <input type="date" name="fechaDesde" class="form-control panel-control" required>
+              </div>
+              <div class="col-6">
+                <label class="panel-label">Vigencia hasta</label>
+                <input type="date" name="fechaHasta" class="form-control panel-control">
+                <div class="form-text">Opcional - dejar vacío para vigencia abierta</div>
+              </div>
+              <div class="col-12">
+                <label class="panel-label">Importe</label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input type="number" name="valorCuota" class="form-control panel-control" min="0" step="0.01" required>
+                </div>
+              </div>
+              <div class="col-12 d-flex gap-2 mt-2">
+                <button id="btn-crear-valor" class="btn main-button-panel" type="submit">Crear Valor</button>
+                <button id="valor-reset" class="btn btn-outline-secondary" type="button">Limpiar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Historial -->
+      <div class="col-12 col-lg-10 offset-lg-1">
+        <div class="card" style="border:none; border-radius:14px; box-shadow:0 10px 28px rgba(0,0,0,.08);">
+          <div class="card-body">
+            <h5 class="card-title">Historial de valores</h5>
+            <div class="panel-table table-responsive">
+              <table class="table table-hover align-middle">
+                <thead>
+                  <tr>
+                    <th>Monto</th>
+                    <th>Desde</th>
+                    <th>Hasta</th>
+                    <th>Estado</th>
+                    <th class="text-end">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="valor-table-body">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script th:src="@{/assets/js/jquery-2.1.0.min.js}"></script>
+<script th:src="@{/assets/js/bootstrap.min.js}"></script>
+<script th:src="@{/assets/js/admin/valor-cuotas.js}"></script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Admin | Mensajes y Promociones</title>
+  <link rel="stylesheet" type="text/css" th:href="@{/assets/css/bootstrap.min.css}">
+  <link rel="stylesheet" type="text/css" th:href="@{/assets/css/font-awesome.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/templatemo-training-studio.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/panel-shared.css}">
+  <style>
+    .textarea-auto { min-height: 140px; }
+    .badge-status { font-size: 12px; }
+    .destinatarios-box { max-height: 260px; overflow-y: auto; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; padding: 6px; background: #fff; }
+    .destinatarios-box select { border: none; width: 100%; height: 100%; min-height: 220px; }
+    .destinatarios-box select:focus { box-shadow: none; }
+  </style>
+</head>
+<body th:data-context-path="@{/}">
+<header class="header-area header-sticky">
+  <div class="container"><div class="row"><div class="col-12">
+    <nav class="main-nav">
+      <a th:href="@{/}" class="logo">Greedy<em> Gym</em></a>
+      <ul class="nav">
+        <li><a th:href="@{/dashboard/admin2}">Dashboard</a></li>
+  <li><a th:href="@{/admin/direcciones}">Direcciones</a></li>
+        <li><a th:href="@{/admin/mensajes}" class="active">Mensajes</a></li>
+        <li><a th:href="@{/logout}">Cerrar Sesión</a></li>
+      </ul>
+      <a class='menu-trigger'><span>Menú</span></a>
+    </nav>
+  </div></div></div>
+</header>
+
+<section class="section panel-management">
+  <div class="container">
+    <div class="row"><div class="col-xl-10 offset-xl-1">
+      <div class="section-heading">
+        <h2>Mensajes y Promociones</h2>
+        <img th:src="@{/assets/images/line-dec.png}" alt="waves">
+        <p>Gestioná plantillas de mensajes generales, saludos automáticos de cumpleaños y campañas promocionales.</p>
+      </div>
+    </div></div>
+
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
+          <div class="card-body">
+            <h5 class="card-title">Plantillas de Mensajes</h5>
+            <p class="text-muted small">Definí textos base para promociones, saludos de cumpleaños u otros envíos. Podés usar marcadores <code>{{nombre}}</code>, <code>{{apellido}}</code> y <code>{{nombre_completo}}</code>.</p>
+            <form id="mensaje-form">
+              <input type="hidden" name="id">
+              <div class="mb-3">
+                <label class="panel-label">Tipo de mensaje</label>
+                <select class="form-select panel-control" name="tipo" required>
+                  <option value="PROMOCION">Promoción</option>
+                  <option value="CUMPLEANOS">Cumpleaños</option>
+                  <option value="OTROS">Otros</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="panel-label">Título</label>
+                <input type="text" class="form-control panel-control" name="titulo" required>
+              </div>
+              <div class="mb-3">
+                <label class="panel-label">Texto</label>
+                <textarea class="form-control panel-control textarea-auto" name="texto" required></textarea>
+              </div>
+              <div class="d-flex gap-2">
+                <button type="submit" class="btn main-button-panel">Guardar</button>
+                <button type="button" class="btn btn-outline-secondary" data-action="mensaje-reset">Limpiar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
+          <div class="card-body">
+            <h5 class="card-title">Promociones Programadas</h5>
+            <p class="text-muted small">Programá envíos masivos en una fecha y hora determinados. Seleccioná destinatarios o dejalo vacío para enviar a todos los socios activos.</p>
+            <form id="promocion-form">
+              <input type="hidden" name="id">
+              <div class="mb-3">
+                <label class="panel-label">Título</label>
+                <input type="text" class="form-control panel-control" name="titulo" required>
+              </div>
+              <div class="mb-3">
+                <label class="panel-label">Texto</label>
+                <textarea class="form-control panel-control textarea-auto" name="texto" required></textarea>
+              </div>
+              <div class="mb-3">
+                <label class="panel-label">Fecha y hora de envío</label>
+                <input type="datetime-local" class="form-control panel-control" name="fechaEnvio" required>
+              </div>
+              <div class="mb-3">
+                <label class="panel-label">Destinatarios específicos</label>
+                <div class="destinatarios-box">
+                  <select class="form-select panel-control" name="destinatarios" multiple size="7"></select>
+                </div>
+                <div class="d-flex align-items-center gap-2 mt-2">
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="checkbox" id="promocion-enviar-todos" name="enviarTodos">
+                    <label class="form-check-label" for="promocion-enviar-todos">Enviar a todos los socios activos</label>
+                  </div>
+                </div>
+                <small class="text-muted">Seleccioná destinatarios específicos o marcá la opción para enviarlo a todos.</small>
+              </div>
+              <div class="d-flex flex-wrap gap-2">
+                <button type="submit" class="btn main-button-panel" data-action="planificar">Planificar</button>
+                <button type="submit" class="btn btn-outline-warning" data-action="enviar-ahora">Guardar y enviar ahora</button>
+                <button type="button" class="btn btn-outline-secondary" data-action="promocion-reset">Limpiar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
+          <div class="card-body">
+            <h5 class="card-title">Listado de Plantillas</h5>
+            <div class="panel-table table-responsive">
+              <table class="table table-hover align-middle">
+                <thead>
+                  <tr><th>Título</th><th>Tipo</th><th>Estado</th><th class="text-end">Acciones</th></tr>
+                </thead>
+                <tbody id="mensajes-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
+          <div class="card-body">
+            <h5 class="card-title">Historial de Promociones</h5>
+            <div class="panel-table table-responsive">
+              <table class="table table-hover align-middle">
+                <thead>
+                  <tr><th>Título</th><th>Programada</th><th>Destino</th><th>Estado</th><th>Enviados</th><th class="text-end">Acciones</th></tr>
+                </thead>
+                <tbody id="promociones-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script th:src="@{/assets/js/jquery-2.1.0.min.js}"></script>
+<script th:src="@{/assets/js/bootstrap.min.js}"></script>
+<script th:src="@{/assets/js/admin/mensajes.js}"></script>
+</body>
+</html>

@@ -24,10 +24,10 @@ public class Security {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        // Recursos públicos (CSS, JS, imágenes)
+                        // Recursos públicos
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", "/webjars/**").permitAll()
 
-                        // Páginas públicas
+                        // Páginas públicas - ✨ IMPORTANTE: Permitir GET y POST
                         .requestMatchers("/", "/login", "/registro", "/error").permitAll()
 
                         // Rutas protegidas por rol

@@ -26,12 +26,17 @@ public class AuthController {
     @GetMapping("/login")
     public String login(@RequestParam(required = false) String error,
                         @RequestParam(required = false) String logout,
+                        @RequestParam(required = false) String registro,  // ✅ AGREGADO
                         Model model) {
         if (error != null) {
             model.addAttribute("error", "Usuario o contraseña incorrectos");
         }
         if (logout != null) {
             model.addAttribute("mensaje", "Has cerrado sesión correctamente");
+        }
+        // ✅ AGREGADO: Mensaje de registro exitoso
+        if (registro != null) {
+            model.addAttribute("mensajeRegistro", "Registro exitoso. Ya puedes iniciar sesión");
         }
         return "auth/login";
     }
@@ -41,7 +46,9 @@ public class AuthController {
      */
     @GetMapping("/registro")
     public String mostrarFormularioRegistro(Model model) {
-        model.addAttribute("usuario", new Usuario());
+        Usuario usuario = new Usuario();
+        usuario.setRol(Usuario.Rol.MECANICO);  // ✅ Asignar rol por defecto
+        model.addAttribute("usuario", usuario);
         return "auth/registro";
     }
 
@@ -52,15 +59,19 @@ public class AuthController {
     public String registrarUsuario(@Valid @ModelAttribute("usuario") Usuario usuario,
                                    BindingResult result,
                                    Model model) {
+        // Si hay errores de validación
         if (result.hasErrors()) {
             return "auth/registro";
         }
 
         try {
+            // Asegurar que el rol sea MECANICO
+            usuario.setRol(Usuario.Rol.MECANICO);
             usuarioService.registrarUsuario(usuario);
             return "redirect:/login?registro=exitoso";
         } catch (ErrorServiceException e) {
             model.addAttribute("error", e.getMessage());
+            model.addAttribute("usuario", usuario);  // 🔥 IMPORTANTE: Devolver el objeto
             return "auth/registro";
         }
     }

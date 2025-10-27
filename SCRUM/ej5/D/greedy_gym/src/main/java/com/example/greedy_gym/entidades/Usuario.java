@@ -104,4 +104,8 @@ public class Usuario {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+
+    public boolean getEliminado() {
+        return eliminado;
+    }
 }

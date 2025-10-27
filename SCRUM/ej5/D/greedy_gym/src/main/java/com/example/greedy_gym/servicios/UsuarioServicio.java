@@ -9,6 +9,7 @@ import com.example.greedy_gym.repositorios.UsuarioRepositorio;
 import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -21,20 +22,25 @@ public class UsuarioServicio {
     private final UsuarioRepositorio repository;
     private final SocioServicio socioServicio;
     private final EmpleadoServicio empleadoServicio;
+    private final PasswordEncoder passwordEncoder;
 
     public UsuarioServicio(UsuarioRepositorio repository,
                            SocioServicio socioServicio,
-                           EmpleadoServicio empleadoServicio) {
+                           EmpleadoServicio empleadoServicio,
+                           PasswordEncoder passwordEncoder) {
         this.repository = repository;
         this.socioServicio = socioServicio;
         this.empleadoServicio = empleadoServicio;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public Usuario crearUsuario(@NotBlank String nombreUsuario, 
                                @NotBlank String clave, 
                                @NotNull RolUsuario rol) {
         validar(nombreUsuario, clave, rol);
-        Usuario usuario = new Usuario(nombreUsuario, clave, rol);
+        // Encriptar la contraseña antes de guardar
+        String claveEncriptada = passwordEncoder.encode(clave);
+        Usuario usuario = new Usuario(nombreUsuario, claveEncriptada, rol);
         return repository.save(usuario);
     }
 
@@ -117,7 +123,9 @@ public class UsuarioServicio {
             validar(nombreUsuario, clave, rol);
             actual.setNombreUsuario(nombreUsuario);
         }
-        actual.setClave(clave);
+        // Encriptar la nueva contraseña antes de guardar
+        String claveEncriptada = passwordEncoder.encode(clave);
+        actual.setClave(claveEncriptada);
         actual.setRol(rol);
         repository.save(actual);
     }
@@ -152,7 +160,8 @@ public class UsuarioServicio {
         Usuario usuario = repository.findByNombreUsuarioIgnoreCase(nombreUsuario)
                 .filter(u -> !u.isEliminado())
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado: " + nombreUsuario));
-        if (!usuario.getClave().equals(clave)) {
+        // Usar passwordEncoder para verificar la contraseña
+        if (!passwordEncoder.matches(clave, usuario.getClave())) {
             throw new ValidationException("Clave incorrecta");
         }
         return usuario;
@@ -160,13 +169,16 @@ public class UsuarioServicio {
 
     public void modificarClave(String id, String claveActual, String nuevaClave, String confirmarClave) {
         Usuario actual = buscarUsuario(id);
-        if (!actual.getClave().equals(claveActual)) {
+        // Verificar la clave actual con passwordEncoder
+        if (!passwordEncoder.matches(claveActual, actual.getClave())) {
             throw new ValidationException("Clave actual incorrecta");
         }
         if (!nuevaClave.equals(confirmarClave)) {
             throw new ValidationException("La nueva clave y la confirmación no coinciden");
         }
-        actual.setClave(nuevaClave);
+        // Encriptar la nueva contraseña
+        String claveEncriptada = passwordEncoder.encode(nuevaClave);
+        actual.setClave(claveEncriptada);
         repository.save(actual);
     }
 

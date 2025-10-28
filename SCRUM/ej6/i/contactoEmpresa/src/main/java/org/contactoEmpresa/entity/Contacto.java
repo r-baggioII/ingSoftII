@@ -1,7 +1,6 @@
 package org.contactoEmpresa.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import lombok.Getter;
@@ -9,28 +8,33 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import org.contactoEmpresa.enums.TipoContacto;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @ToString(callSuper = true)
 @Entity
-@Table(name = "empresa")
+@Table(name = "contacto")
 @Inheritance(strategy = InheritanceType.JOINED)
-public class Empresa extends BaseEntity<String> {
+public abstract class Contacto extends BaseEntity<String> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false, length = 36)
     private String id;
 
-    @NotBlank
-    @Size(max = 120)
-    @Column(name = "nombre", nullable = false, length = 120)
-    private String nombre;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_contacto", nullable = false, length = 20)
+    private TipoContacto tipoContacto;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "contacto_id", referencedColumnName = "id")
-    private Contacto contacto;
+    @Size(max = 300)
+    @Column(name = "observacion", length = 300)
+    private String observacion;
+
+    @ManyToOne
+    @JoinColumn(name = "persona_id")
+    private Persona persona;
 
     @Override
     public String getId() {
@@ -42,3 +46,4 @@ public class Empresa extends BaseEntity<String> {
         this.id = id;
     }
 }
+

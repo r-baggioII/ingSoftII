@@ -15,9 +15,13 @@ public class EmpresaService extends BaseService<Empresa, String> {
     }
 
     @Override
-    protected void actualizarEntidad( entidadExistente,  entidadNueva) {
+    protected void actualizarEntidad(Empresa entidadExistente, Empresa entidadNueva) {
         if (entidadNueva.getNombre() != null) {
             entidadExistente.setNombre(entidadNueva.getNombre());
         }
+        if (entidadNueva.getContacto() != null) {
+            entidadExistente.setContacto(entidadNueva.getContacto());
+        }
     }
 }
+

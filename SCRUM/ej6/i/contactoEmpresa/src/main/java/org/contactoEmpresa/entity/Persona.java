@@ -11,6 +11,9 @@ import lombok.ToString;
 
 import org.hibernate.annotations.Where;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -36,5 +39,19 @@ public class Persona extends BaseEntity<String> {
     @Size(max = 120)
     @Column(name = "apellido", nullable = false, length = 120)
     private String apellido;
+
+    @OneToMany(mappedBy = "persona", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Contacto> contactos = new ArrayList<>();
+
+    // Métodos de conveniencia para la relación bidireccional
+    public void addContacto(Contacto contacto) {
+        contactos.add(contacto);
+        contacto.setPersona(this);
+    }
+
+    public void removeContacto(Contacto contacto) {
+        contactos.remove(contacto);
+        contacto.setPersona(null);
+    }
 
 }

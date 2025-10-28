@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Alta de Correo Electrónico</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css">
+    <link rel="stylesheet" href="/css/formulario.css">
+</head>
+<body>
+
+<!-- Navbar -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container mt-5 contenedor">
+    <h2 class="mb-4 text-center" th:text="${titleEdit}">Gestión de Correos Electrónicos</h2>
+
+    <!-- Formulario de alta de correo -->
+    <form class="formulario" th:action="@{/correo/actualizar}" method="POST" th:object="${item}">
+
+        <!-- ID oculto (para modificaciones) -->
+        <input type="hidden" th:field="*{id}">
+
+        <!-- Correo Electrónico -->
+        <div class="form-group my-3">
+            <label for="mail" class="mb-2">Correo Electrónico</label>
+            <input type="email"
+                   id="mail"
+                   class="form-control"
+                   th:field="*{mail}"
+                   th:disabled="${isDisabled}"
+                   placeholder="ejemplo@correo.com"
+                   required>
+        </div>
+
+        <!-- Tipo de Contacto -->
+        <div class="form-group my-3">
+            <label for="tipoContacto" class="mb-2">Tipo de Contacto</label>
+            <select id="tipoContacto"
+                    class="form-select"
+                    th:field="*{tipoContacto}"
+                    th:disabled="${isDisabled}"
+                    required>
+                <option value="">Seleccione un tipo</option>
+                <option th:each="tipo : ${tiposContacto}"
+                        th:value="${tipo}"
+                        th:text="${tipo}">
+                </option>
+            </select>
+        </div>
+
+        <!-- Observación -->
+        <div class="form-group my-3">
+            <label for="observacion" class="mb-2">Observación (opcional)</label>
+            <textarea id="observacion"
+                      class="form-control"
+                      th:field="*{observacion}"
+                      th:disabled="${isDisabled}"
+                      rows="3"
+                      placeholder="Ingrese observaciones adicionales"></textarea>
+        </div>
+
+        <!-- Botones -->
+        <div class="mt-4 text-center">
+            <button type="submit" class="btn btn-primary px-4" th:if="${!isDisabled}">Guardar</button>
+            <a th:href="@{/correo/list}" class="btn btn-secondary ms-2 px-4">
+                <span th:text="${isDisabled ? 'Volver' : 'Cancelar'}">Cancelar</span>
+            </a>
+        </div>
+
+    </form>
+
+    <!-- Mensajes de éxito o error -->
+    <div th:if="${msgExito != null}" class="alert alert-success mt-4" role="alert">
+        <i class="fas fa-check-circle"></i> <span th:text="${msgExito}"></span>
+    </div>
+
+    <div th:if="${msgError != null}" class="alert alert-danger mt-4" role="alert">
+        <i class="fas fa-exclamation-circle"></i> <span th:text="${msgError}"></span>
+    </div>
+</div>
+
+<footer class="text-muted py-5">
+    <div class="container text-center">
+        <p class="mb-1">Gestión de Correos Electrónicos &copy; 2025</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${titleList}">Listado de Personas</title>
+    <title th:text="${titleList}">Listado de Teléfonos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css">
     <link rel="stylesheet" href="/css/index.css">
@@ -15,9 +15,9 @@
 <div class="container m-5">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 th:text="${titleList}">Listado de Personas</h2>
-        <a th:href="@{/persona/alta}" class="btn btn-success">
-            <i class="fas fa-plus"></i> Nuevo
+        <h2 th:text="${titleList}">Listado de Contactos Telefónicos</h2>
+        <a th:href="@{/contactotelefonico/alta}" class="btn btn-success">
+            <i class="fas fa-plus"></i> Nuevo Teléfono
         </a>
     </div>
 
@@ -33,56 +33,54 @@
         <p th:text="${msgError}"></p>
     </div>
 
-    <!-- Tabla de personas -->
+    <!-- Tabla de teléfonos -->
     <table class="table table-dark table-striped table-hover">
         <thead>
         <tr>
-            <th scope="col">Nombre</th>
-            <th scope="col">Apellido</th>
-            <th scope="col">Contactos</th>
+            <th scope="col">Teléfono</th>
+            <th scope="col">Tipo</th>
+            <th scope="col">Tipo Contacto</th>
+            <th scope="col">Observación</th>
             <th scope="col" class="text-center">Acciones</th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="item : ${items}">
-            <td th:text="${item.nombre}">Nombre</td>
-            <td th:text="${item.apellido}">Apellido</td>
+            <td th:text="${item.telefono}">123456789</td>
             <td>
-                <span th:if="${item.contactos == null || item.contactos.isEmpty()}" class="text-muted">
-                    Sin contactos
+                <span th:if="${item.tipoTelefono.name() == 'FIJO'}" class="badge bg-info">
+                    <i class="fas fa-phone"></i> Fijo
                 </span>
-                <div th:unless="${item.contactos == null || item.contactos.isEmpty()}">
-                    <span th:each="contacto, iterStat : ${item.contactos}" class="badge bg-info me-1">
-                        <span th:if="${contacto.getClass().getSimpleName() == 'ContactoCorreoElectronico'}">
-                            <i class="fas fa-envelope"></i> <span th:text="${contacto.mail}"></span>
-                        </span>
-                        <span th:if="${contacto.getClass().getSimpleName() == 'ContactoTelefonico'}">
-                            <i class="fas fa-phone"></i> <span th:text="${contacto.telefono}"></span>
-                        </span>
-                    </span>
-                </div>
+                <span th:if="${item.tipoTelefono.name() == 'CELULAR'}" class="badge bg-success">
+                    <i class="fas fa-mobile-alt"></i> Celular
+                </span>
             </td>
+            <td>
+                <span th:if="${item.tipoContacto.name() == 'PERSONAL'}" class="badge bg-primary">Personal</span>
+                <span th:if="${item.tipoContacto.name() == 'LABORAL'}" class="badge bg-secondary">Laboral</span>
+            </td>
+            <td th:text="${item.observacion ?: '-'}">-</td>
             <td class="text-center">
-                <a th:href="@{/persona/consultar/{id}(id=${item.id})}"
+                <a th:href="@{/contactotelefonico/consultar/{id}(id=${item.id})}"
                    class="btn btn-info btn-sm me-1"
                    title="Ver">
                     <i class="fas fa-eye"></i>
                 </a>
-                <a th:href="@{/persona/modificar/{id}(id=${item.id})}"
+                <a th:href="@{/contactotelefonico/modificar/{id}(id=${item.id})}"
                    class="btn btn-warning btn-sm me-1"
                    title="Editar">
                     <i class="fas fa-edit"></i>
                 </a>
-                <a th:href="@{/persona/baja/{id}(id=${item.id})}"
+                <a th:href="@{/contactotelefonico/baja/{id}(id=${item.id})}"
                    class="btn btn-danger btn-sm"
                    title="Eliminar"
-                   onclick="return confirm('¿Está seguro de eliminar esta persona?')">
+                   onclick="return confirm('¿Está seguro de eliminar este teléfono?')">
                     <i class="fas fa-trash"></i>
                 </a>
             </td>
         </tr>
         <tr th:if="${#lists.isEmpty(items)}">
-            <td colspan="4" class="text-center">No hay personas registradas</td>
+            <td colspan="5" class="text-center">No hay teléfonos registrados</td>
         </tr>
         </tbody>
     </table>
@@ -95,10 +93,7 @@
 
 <footer class="text-muted py-5">
     <div class="container">
-        <p class="mb-1">Sistema Mecánico &copy; 2025</p>
-        <p class="float-end mb-1">
-            <a href="#" style="text-decoration:none"><span>⬆️</span> Volver arriba</a>
-        </p>
+        <p class="mb-1">Gestión de Contactos Telefónicos &copy; 2025</p>
     </div>
 </footer>
 

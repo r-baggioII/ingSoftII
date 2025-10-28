@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # El nombre del servicio coincide con spring.application.name (valor por defecto: greedy_gym)
+  greedy_gym:
+    build:
+      context: .
+    image: greedy_gym:latest
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # Nombre de la app
+      - SPRING_APPLICATION_NAME=greedy_gym
+      # Datos de conexión (apunta al servicio de DB definido abajo)
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://greedy_gym_db:3306/greedy_gym?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=adminAdmin
+      # Opcionales: añade aquí otros secrets (tokens) vía archivo .env o secretos de la plataforma
+      - MERCADOPAGO_ACCESS_TOKEN=${MERCADOPAGO_ACCESS_TOKEN}
+    depends_on:
+      - greedy_gym_db
+
+  # Servicio de base de datos (MariaDB — el pom usa mariadb-java-client)
+  greedy_gym_db:
+    image: mariadb:10.6
+    restart: unless-stopped
+    environment:
+      - MARIADB_ROOT_PASSWORD=adminAdmin
+      - MARIADB_DATABASE=greedy_gym
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
+    driver: local

@@ -99,4 +99,19 @@
         </plugins>
     </build>
 
+    <!-- Perfil para ejecutar localmente con Tomcat embebido sin cambiar el empaquetado WAR -->
+    <profiles>
+        <profile>
+            <id>local-run</id>
+            <dependencies>
+                <!-- Re-introduce Tomcat embebido en el classpath de ejecución -->
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                    <!-- sin scope "provided" -->
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+
 </project>

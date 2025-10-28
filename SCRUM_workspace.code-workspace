@@ -3,6 +3,10 @@
 		{
 			"name": "SCRUM - Videojuegos (Active)",
 			"path": "SCRUM/ej4/B/videojuegos_ej4/videojuegos"
+		},
+		{
+			"name": "SCRUM - ej7/B - tinder_mascotas",
+			"path": "SCRUM/ej7/B/tinder_mascotas"
 		}
 	],
 	"settings": {

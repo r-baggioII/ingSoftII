@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="bb571b24-83a7-4cc2-bb06-239f5078c9fc" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/contactoEmpresa/ContactoEmpresa.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/contactoEmpresa/Security.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/contactoEmpresa/config/DataInitializer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/contactoEmpresa/controller/AuthController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/contactoEmpresa/controller/BaseController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/contactoEmpresa/controller/InicioController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/contactoEmpresa/controller/PersonaController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/contactoEmpresa/entity/BaseEntity.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/contactoEmpresa/entity/Persona.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/contactoEmpresa/entity/Usuario.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/contactoEmpresa/enums/BaseUseCaseController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/contactoEmpresa/enums/BaseUseCaseService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/contactoEmpresa/exception/ErrorServiceException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/contactoEmpresa/repository/BaseRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/contactoEmpresa/repository/PersonaRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/contactoEmpresa/repository/UsuarioRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/contactoEmpresa/service/BaseService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/contactoEmpresa/service/CustomUserDetailsService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/contactoEmpresa/service/PersonaService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/contactoEmpresa/service/UsuarioService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/static/css/formulario.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/static/css/index.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/static/css/inicio.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/acceso-denegado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/auth/login.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/auth/registro.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/fragments/head.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/fragments/navbar.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/inicio.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/persona-form.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/persona-list.html" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../../.." />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
+  <component name="ProjectId" id="34fiTplLjUDG51QnEg0faC00TOE" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/rocio/Documentos/GitHub/ingSoftII/SCRUM/ej5/G/contactoEmpresa/src/main/java/org/contactoEmpresa&quot;,
+    &quot;onboarding.tips.debug.path&quot;: &quot;/home/rocio/Documentos/GitHub/ingSoftII/SCRUM/ej5/G/contactoEmpresa/src/main/java/org/example/Main.java&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/main/java/org/contactoEmpresa" />
+      <recent name="$PROJECT_DIR$/src/main/java/org/contactoEmpresa/controller" />
+      <recent name="$PROJECT_DIR$/src/main/resources" />
+      <recent name="$PROJECT_DIR$/src/main/java/org/contactoEmpresa/repository" />
+      <recent name="$PROJECT_DIR$/src/main/java/org/contactoEmpresa/service" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.27397.103" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="bb571b24-83a7-4cc2-bb06-239f5078c9fc" name="Changes" comment="" />
+      <created>1761611039853</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1761611039853</updated>
+    </task>
+    <servers />
+  </component>
+</project>

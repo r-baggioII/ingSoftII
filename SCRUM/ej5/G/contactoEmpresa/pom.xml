@@ -13,9 +13,9 @@
     </parent>
 
     <groupId>com.is</groupId>
-    <artifactId>sistemaMecanico</artifactId>
+    <artifactId>contactoEmpresa</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>sistemaMecanico</name>
+    <name>contactos empresa</name>
     <description>Proyecto Ingenieria de Software 2</description>
 
     <properties>

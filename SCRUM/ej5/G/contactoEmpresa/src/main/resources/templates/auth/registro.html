@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Gestión de empresas y contactos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .register-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .error {
+            color: #c33;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .alert-error {
+            background: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border: 1px solid #90caf9;
+            color: #1565c0;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="register-container">
+    <h2>🔧 Registro de Mecánico</h2>
+
+    <div class="info-box">
+        ℹ️ Todos los usuarios se registran como mecánicos
+    </div>
+
+    <!-- Mensaje de error -->
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <!-- ✨ Formulario simplificado: solo nombreUsuario y clave -->
+    <form th:action="@{/registro}" th:object="${usuario}" method="post">
+
+        <!-- Nombre de Usuario -->
+        <div class="form-group">
+            <label for="nombreUsuario">Nombre de Usuario</label>
+            <input type="text"
+                   id="nombreUsuario"
+                   th:field="*{nombreUsuario}"
+                   required
+                   minlength="4"
+                   maxlength="50"
+                   autofocus
+                   placeholder="Ingresa tu nombre de usuario">
+            <div class="error" th:if="${#fields.hasErrors('nombreUsuario')}" th:errors="*{nombreUsuario}"></div>
+        </div>
+
+        <!-- Contraseña -->
+        <div class="form-group">
+            <label for="clave">Contraseña</label>
+            <input type="password"
+                   id="clave"
+                   th:field="*{clave}"
+                   required
+                   minlength="6"
+                   placeholder="Ingresa tu contraseña">
+            <div class="error" th:if="${#fields.hasErrors('clave')}" th:errors="*{clave}"></div>
+        </div>
+
+        <!-- Campo oculto para el rol (siempre MECANICO) -->
+        <input type="hidden" th:field="*{rol}" value="ADMIN">
+
+        <!-- Botón de Registro -->
+        <button type="submit">Registrarse</button>
+    </form>
+
+    <!-- Link al login -->
+    <div class="login-link">
+        ¿Ya tienes cuenta? <a th:href="@{/login}">Inicia sesión aquí</a>
+    </div>
+</div>
+</body>
+</html>

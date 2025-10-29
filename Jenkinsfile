@@ -21,113 +21,74 @@ pipeline {
     SKIP_TESTS = 'true'
     IMAGE_TAG = "${env.BRANCH_NAME ?: 'local'}-${env.BUILD_NUMBER ?: '0'}"
     DEFAULT_PORT = '8080' // default port mapping when nothing else provided
+    // Use exact absolute path provided by the user. Can be overridden in job config.
+    MODULE_PATH = "/root/ingSoftII/SCRUM/ej5/D/greedy_gym"
   }
 
   stages {
-    stage('Checkout') {
+    stage('Build & Deploy greedy_gym') {
       steps {
+        // Ensure repository is checked out into the Jenkins workspace so paths like
+        // $WORKSPACE/SCRUM/ej5/D/greedy_gym exist and are accessible to the jenkins user.
         checkout scm
-      }
-    }
-
-    stage('Build (Maven)') {
-      steps {
         script {
           sh '''
-          set -euo pipefail
-          echo "Building all Maven modules..."
-          if [ "${SKIP_TESTS}" = 'true' ]; then
-            mvn -B -U -DskipTests package
+          set -eu
+
+          # Use the exact path provided by the user (MODULE_PATH). Do not try multiple candidates.
+          module_dir="${MODULE_PATH}"
+
+          if [ ! -d "${module_dir}" ]; then
+            echo "ERROR: requested MODULE_PATH does not exist or is not accessible: ${module_dir}"
+            echo "Check permissions: the jenkins user may not have access to /root."
+            echo "Requested path listing (if accessible):"
+            ls -la "${module_dir}" || true
+            echo "JENKINS WORKSPACE env: ${WORKSPACE:-<unset>}"
+            echo "Current working directory: $(pwd)"
+            echo "Workspace root listing (for debugging):"
+            ls -la || true
+            exit 2
+          fi
+
+          echo "Entering ${module_dir}"
+          cd "${module_dir}"
+
+          echo "Pulling latest changes (if any)"
+          git pull || true
+
+          echo "Building with Maven..."
+          # Ensure Java 17 is available for Maven
+          export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+          export PATH="$JAVA_HOME/bin:$PATH"
+          mvn -B -U -DskipTests package
+
+          echo "Building docker image..."
+          img_name="greedy_gym"
+          if [ -n "${DOCKER_REGISTRY}" ]; then
+            full_image="${DOCKER_REGISTRY}/${img_name}:${IMAGE_TAG}"
           else
-            mvn -B -U package
-          fi
-          '''
-        }
-      }
-    }
-
-    stage('Build Docker images and deploy') {
-      steps {
-        script {
-          // We run a shell loop to find artifacts and build images.
-          sh '''
-          set -euo pipefail
-          echo "Searching for built artifacts (jar/war) under **/target ..."
-
-          # find all jar/war files in targets (exclude -sources and -javadoc if any)
-          artifacts=$(find . -type f \( -name "*.jar" -o -name "*.war" \) -path "*/target/*" ! -name "*-sources.*" ! -name "*-javadoc.*" || true)
-
-          if [ -z "${artifacts}" ]; then
-            echo "No artifacts found. Exiting stage.";
-            exit 0
+            full_image="${img_name}:${IMAGE_TAG}"
           fi
 
-          echo "Found artifacts:";
-          echo "${artifacts}"
+          docker build -t "${full_image}" .
 
-          # Iterate over artifacts
-          echo "Processing artifacts..."
-          IFS=$'\n'
-          for artifact in ${artifacts}; do
-            echo "---- artifact: ${artifact}"
-            # module dir = path before /target/
-            module_dir=$(dirname "${artifact%/target/*}")
-            # In case artifact path is like ./module/target/app.jar
-            module_dir=$(echo "${artifact}" | sed -E 's#(.*)/target/.*#\1#')
+          if [ -n "${DOCKER_REGISTRY}" ] && [ -n "${DOCKER_REG_CREDENTIALS}" ]; then
+            echo "Pushing ${full_image} to registry..."
+            docker push "${full_image}"
+          fi
 
-            # derive a safe image name from module_dir
-            img_name=$(echo "${module_dir}" | sed -E 's#^\./##; s#/#-#g; s/[^a-zA-Z0-9_.-]/_/g')
-            if [ -n "${DOCKER_REGISTRY}" ]; then
-              full_image="${DOCKER_REGISTRY}/${img_name}:${IMAGE_TAG}"
-            else
-              full_image="${img_name}:${IMAGE_TAG}"
-            fi
+          echo "Restarting container ${img_name}"
+          docker rm -f "${img_name}" || true
 
-            echo "Module dir: ${module_dir}, image: ${full_image}"
+          if [ -n "${PORT_MAPS:-}" ]; then
+            port_args=""
+            IFS=','; for pm in ${PORT_MAPS}; do port_args+=" -p ${pm}"; done
+          else
+            port_args=" -p ${DEFAULT_PORT}:${DEFAULT_PORT}"
+          fi
 
-            # If module has its own Dockerfile, use it as build context
-            if [ -f "${module_dir}/Dockerfile" ]; then
-              echo "Found Dockerfile in ${module_dir}, building image..."
-              docker build -t "${full_image}" "${module_dir}"
-            else
-              # create temp build context
-              tmpdir=$(mktemp -d)
-              echo "Creating temp docker context ${tmpdir}"
-              cp "${artifact}" "${tmpdir}/app.jar"
-              cat > "${tmpdir}/Dockerfile" <<'DOCK'
-              FROM eclipse-temurin:17-jre-jammy
-              COPY app.jar /app/app.jar
-              WORKDIR /app
-              ENTRYPOINT ["java","-jar","/app/app.jar"]
-DOCK
-              echo "Building image from generic Dockerfile..."
-              docker build -t "${full_image}" "${tmpdir}"
-              rm -rf "${tmpdir}"
-            fi
-
-            # Optionally push to registry if configured
-            if [ -n "${DOCKER_REGISTRY}" ] && [ -n "${DOCKER_REG_CREDENTIALS}" ]; then
-              echo "Pushing ${full_image} to registry..."
-              docker push "${full_image}"
-            fi
-
-            # Run the container: container name = img_name (sanitized)
-            container_name=$(echo "${img_name}" | sed -E 's/[^a-zA-Z0-9_.-]/_/g')
-            echo "Stopping existing container (if any) named ${container_name}..."
-            docker rm -f "${container_name}" || true
-
-            # Default port mapping; allow overriding with env var PORT_MAPS (e.g. "8080:8080,9000:9000")
-            if [ -n "${PORT_MAPS:-}" ]; then
-              port_args=""
-              IFS=','; for pm in ${PORT_MAPS}; do port_args+=" -p ${pm}"; done
-            else
-              port_args=" -p ${DEFAULT_PORT}:${DEFAULT_PORT}"
-            fi
-
-            echo "Running container ${container_name} from image ${full_image}"
-            # shellcheck disable=SC2086
-            docker run -d --restart unless-stopped --name "${container_name}" ${port_args} "${full_image}"
-          done
+          # shellcheck disable=SC2086
+          docker run -d --restart unless-stopped --name "${img_name}" ${port_args} "${full_image}"
           '''
         }
       }

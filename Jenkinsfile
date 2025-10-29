@@ -21,8 +21,9 @@ pipeline {
     SKIP_TESTS = 'true'
     IMAGE_TAG = "${env.BRANCH_NAME ?: 'local'}-${env.BUILD_NUMBER ?: '0'}"
     DEFAULT_PORT = '8080' // default port mapping when nothing else provided
-    // Use exact absolute path provided by the user. Can be overridden in job config.
-    MODULE_PATH = "/root/ingSoftII/SCRUM/ej5/D/greedy_gym"
+    // Optional: set MODULE_PATH in the job if you want to point to a custom location.
+    // By default we will use the checked-out workspace copy under $WORKSPACE.
+    MODULE_PATH = ""
   }
 
   stages {
@@ -35,12 +36,20 @@ pipeline {
           sh '''
           set -eu
 
-          # Use the exact path provided by the user (MODULE_PATH). Do not try multiple candidates.
-          module_dir="${MODULE_PATH}"
+          # Determine module_dir: prefer MODULE_PATH if explicitly set in the job,
+          # otherwise use the checked-out repository under $WORKSPACE.
+          if [ -n "${MODULE_PATH}" ]; then
+            module_dir="${MODULE_PATH}"
+          else
+            module_dir="$WORKSPACE/SCRUM/ej5/D/greedy_gym"
+          fi
 
           if [ ! -d "${module_dir}" ]; then
-            echo "ERROR: requested MODULE_PATH does not exist or is not accessible: ${module_dir}"
-            echo "Check permissions: the jenkins user may not have access to /root."
+            echo "ERROR: module directory does not exist or is not accessible: ${module_dir}"
+            if [ -n "${MODULE_PATH}" ]; then
+              echo "You provided MODULE_PATH=${MODULE_PATH}. If this is under /root, the jenkins user may not have permission to access it."
+            fi
+            echo "Attempted path: ${module_dir}"
             echo "Requested path listing (if accessible):"
             ls -la "${module_dir}" || true
             echo "JENKINS WORKSPACE env: ${WORKSPACE:-<unset>}"

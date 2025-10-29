@@ -6,6 +6,14 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css">
     <link rel="stylesheet" href="/css/formulario.css">
+    <style>
+        body {
+            background: #f5f7fa;
+        }
+        .contenedor {
+            min-height: 70vh;
+        }
+    </style>
 </head>
 <body>
 
@@ -13,17 +21,23 @@
 <div th:replace="~{fragments/navbar :: navbar}"></div>
 
 <div class="container mt-5 contenedor">
-    <h2 class="mb-4 text-center" th:text="${titleEdit}">Gestión de Persona</h2>
 
     <!-- Formulario de alta -->
     <form class="formulario" th:action="@{/persona/actualizar}" method="POST" th:object="${item}">
+        
+        <div class="text-center mb-4">
+            <i class="fas fa-user-circle fa-4x mb-3" style="color: #1e3a8a;"></i>
+            <h2 th:text="${titleEdit}">Gestión de Persona</h2>
+        </div>
 
         <!-- ID oculto (para modificaciones) -->
         <input type="hidden" th:field="*{id}">
 
         <!-- Nombre -->
         <div class="form-group my-3">
-            <label for="nombre" class="mb-2">Nombre</label>
+            <label for="nombre" class="form-label">
+                <i class="fas fa-user me-2"></i>Nombre
+            </label>
             <input type="text"
                    id="nombre"
                    class="form-control"
@@ -35,7 +49,9 @@
 
         <!-- Apellido -->
         <div class="form-group my-3">
-            <label for="apellido" class="mb-2">Apellido</label>
+            <label for="apellido" class="form-label">
+                <i class="fas fa-user-tag me-2"></i>Apellido
+            </label>
             <input type="text"
                    id="apellido"
                    class="form-control"
@@ -47,14 +63,16 @@
 
         <!-- Contactos (selección múltiple) -->
         <div class="form-group my-3">
-            <label for="contactoIds" class="mb-2">Contactos</label>
+            <label for="contactoIds" class="form-label">
+                <i class="fas fa-address-book me-2"></i>Contactos
+            </label>
             <select id="contactoIds" 
                     name="contactoIds" 
                     class="form-select" 
                     multiple
                     size="6"
                     th:disabled="${isDisabled}">
-                <optgroup label="Correos Electrónicos">
+                <optgroup label="📧 Correos Electrónicos">
                     <option th:each="contacto : ${contactosDisponibles}"
                             th:if="${contacto.getClass().getSimpleName() == 'ContactoCorreoElectronico'}"
                             th:value="${contacto.id}"
@@ -62,7 +80,7 @@
                             th:selected="${item.contactos != null && #lists.contains(#lists.toList(item.contactos.![id]), contacto.id)}">
                     </option>
                 </optgroup>
-                <optgroup label="Teléfonos">
+                <optgroup label="📞 Teléfonos">
                     <option th:each="contacto : ${contactosDisponibles}"
                             th:if="${contacto.getClass().getSimpleName() == 'ContactoTelefonico'}"
                             th:value="${contacto.id}"
@@ -72,14 +90,17 @@
                 </optgroup>
             </select>
             <small class="form-text text-muted">
-                Mantenga presionada la tecla Ctrl (o Cmd en Mac) para seleccionar múltiples contactos
+                <i class="fas fa-info-circle me-1"></i>Mantenga presionada la tecla Ctrl (o Cmd en Mac) para seleccionar múltiples contactos
             </small>
         </div>
 
         <!-- Botones -->
         <div class="mt-4 text-center">
-            <button type="submit" class="btn btn-primary px-4" th:if="${!isDisabled}">Guardar</button>
-            <a th:href="@{/persona/list}" class="btn btn-secondary ms-2 px-4">
+            <button type="submit" class="btn btn-primary btn-lg px-5 botones" th:if="${!isDisabled}">
+                <i class="fas fa-save me-2"></i>Guardar
+            </button>
+            <a th:href="@{/persona/list}" class="btn btn-secondary btn-lg ms-2 px-5">
+                <i class="fas fa-arrow-left me-2"></i>
                 <span th:text="${isDisabled ? 'Volver' : 'Cancelar'}">Cancelar</span>
             </a>
         </div>
@@ -87,18 +108,20 @@
     </form>
 
     <!-- Mensajes de éxito o error -->
-    <div th:if="${msgExito != null}" class="alert alert-success mt-4" role="alert">
-        <i class="fas fa-check-circle"></i> <span th:text="${msgExito}"></span>
+    <div th:if="${msgExito != null}" class="alert alert-success mt-4 mensajeExito" role="alert">
+        <i class="fas fa-check-circle me-2"></i><span th:text="${msgExito}"></span>
     </div>
 
-    <div th:if="${msgError != null}" class="alert alert-danger mt-4" role="alert">
-        <i class="fas fa-exclamation-circle"></i> <span th:text="${msgError}"></span>
+    <div th:if="${msgError != null}" class="alert alert-danger mt-4 mensajeError" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i><span th:text="${msgError}"></span>
     </div>
 </div>
 
-<footer class="text-muted py-5">
-    <div class="container text-center">
-        <p class="mb-1">Sistema Mecánico &copy; 2025</p>
+<footer class="text-center py-4 mt-5" style="background: #2c3e50; color: white;">
+    <div class="container">
+        <p class="mb-1">
+            <i class="fas fa-copyright me-2"></i>Sistema de Contactos Empresariales 2025
+        </p>
     </div>
 </footer>
 

@@ -3,13 +3,13 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Factura Proveedor - Prototipo</title>
+  <title>Movimiento de Dinero (Compra) - Prototipo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   </head>
   <body class="bg-light">
     <div class="container mt-4">
       <a href="index.html" class="btn btn-link">&larr; Volver</a>
-      <h2>Factura Proveedor</h2>
+      <h2>Movimiento de Dinero — Compra</h2>
       <form class="row g-3 mt-2">
         <div class="col-md-4">
           <label class="form-label">Fecha</label>
@@ -20,12 +20,19 @@
           <input type="number" class="form-control" placeholder="000100">
         </div>
         <div class="col-md-4">
+          <label class="form-label">Sucursal</label>
+          <select class="form-select">
+            <option>Sucursal Centro</option>
+            <option>Sucursal Norte</option>
+          </select>
+        </div>
+        <div class="col-md-4">
           <label class="form-label">Fecha de recepción</label>
           <input type="date" class="form-control">
         </div>
 
         <div class="col-md-6">
-          <label class="form-label">Proveedor</label>
+          <label class="form-label">Persona (Proveedor)</label>
           <select class="form-select">
             <option>La Huerta S.A.</option>
             <option>Carnes del Sur SRL</option>
@@ -48,27 +55,30 @@
         <div class="col-12">
           <h5>Detalles</h5>
           <table class="table">
-            <thead><tr><th>Producto (Plato)</th><th>Cantidad</th><th>Precio Unit.</th><th>Subtotal</th></tr></thead>
-            <tbody>
-              <tr>
+            <thead><tr><th>Producto</th><th>Stock previo</th><th>Cantidad</th><th>Precio Unit.</th><th>Subtotal</th><th></th></tr></thead>
+            <tbody id="detallesBodyProv">
+              <tr class="detalle-row-prov">
                 <td>
-                  <select class="form-select">
-                    <option>Milanesa con guarnición - $1200</option>
-                    <option>Pizza Napolitana - $1500</option>
-                    <option>Empanadas x6 - $800</option>
+                  <select class="form-select product-select">
+                    <option value="1200">Milanesa con guarnición - $1200</option>
+                    <option value="1500">Pizza Napolitana - $1500</option>
+                    <option value="800">Empanadas x6 - $800</option>
                   </select>
                 </td>
-                <td>10</td>
-                <td>1200</td>
-                <td>$12.000</td>
+                <td><span class="badge bg-secondary stock-badge">50</span></td>
+                <td><input type="number" class="form-control qty-input" value="10" min="1"></td>
+                <td><input type="number" class="form-control price-input" value="1200" min="0"></td>
+                <td class="subtotal-cell">$12.000</td>
+                <td><button type="button" class="btn btn-sm btn-outline-danger remove-detail">Eliminar</button></td>
               </tr>
             </tbody>
           </table>
+          <button type="button" id="addDetailBtnProv" class="btn btn-sm btn-outline-primary">Agregar detalle</button>
         </div>
 
         <div class="col-12 text-end">
           <h4>Total: $<span id="totalProv">250</span></h4>
-          <button class="btn btn-success">Guardar Factura Proveedor</button>
+          <button class="btn btn-success">Guardar Movimiento (Compra)</button>
         </div>
       </form>
 
@@ -151,6 +161,72 @@
             }
           });
         });
+
+        // --- Funcionalidad dinámica de Detalle y cálculo (Proveedor) ---
+        const detallesBodyProv = document.getElementById('detallesBodyProv');
+        const addDetailBtnProv = document.getElementById('addDetailBtnProv');
+        const totalProvEl = document.getElementById('totalProv');
+
+        function parseNumber(v){
+          const n = Number(String(v).replace(/[^0-9.-]+/g, ''));
+          return isNaN(n) ? 0 : n;
+        }
+
+        function updateLineSubtotalProv(row){
+          const qty = parseNumber(row.querySelector('.qty-input').value);
+          const price = parseNumber(row.querySelector('.price-input').value);
+          const sub = qty * price;
+          row.querySelector('.subtotal-cell').textContent = '$' + sub.toLocaleString();
+          return sub;
+        }
+
+        function calcularTotalProv(){
+          let total = 0;
+          detallesBodyProv.querySelectorAll('.detalle-row-prov').forEach(r => {
+            total += updateLineSubtotalProv(r);
+          });
+          totalProvEl.textContent = total.toLocaleString();
+        }
+
+        function createDetailRowProv(){
+          const tr = document.createElement('tr');
+          tr.className = 'detalle-row-prov';
+          tr.innerHTML = `
+            <td>
+              <select class="form-select product-select">
+                <option value="1200">Milanesa con guarnición - $1200</option>
+                <option value="1500">Pizza Napolitana - $1500</option>
+                <option value="800">Empanadas x6 - $800</option>
+              </select>
+            </td>
+            <td><span class="badge bg-secondary stock-badge">--</span></td>
+            <td><input type="number" class="form-control qty-input" value="1" min="1"></td>
+            <td><input type="number" class="form-control price-input" value="0" min="0"></td>
+            <td class="subtotal-cell">$0</td>
+            <td><button type="button" class="btn btn-sm btn-outline-danger remove-detail">Eliminar</button></td>
+          `;
+          tr.querySelector('.product-select').addEventListener('change', (e) => { tr.querySelector('.price-input').value = parseNumber(e.target.value); updateLineSubtotalProv(tr); calcularTotalProv(); });
+          tr.querySelector('.qty-input').addEventListener('input', () => { updateLineSubtotalProv(tr); calcularTotalProv(); });
+          tr.querySelector('.price-input').addEventListener('input', () => { updateLineSubtotalProv(tr); calcularTotalProv(); });
+          tr.querySelector('.remove-detail').addEventListener('click', () => { tr.remove(); calcularTotalProv(); });
+          return tr;
+        }
+
+        // enlazar fila inicial
+        detallesBodyProv.querySelectorAll('.detalle-row-prov').forEach(r => {
+          const prod = r.querySelector('.product-select');
+          if(prod){ prod.addEventListener('change', (e)=>{ r.querySelector('.price-input').value = parseNumber(e.target.value); updateLineSubtotalProv(r); calcularTotalProv(); }); }
+          const qty = r.querySelector('.qty-input');
+          const price = r.querySelector('.price-input');
+          const remove = r.querySelector('.remove-detail');
+          if(qty) qty.addEventListener('input', ()=>{ updateLineSubtotalProv(r); calcularTotalProv(); });
+          if(price) price.addEventListener('input', ()=>{ updateLineSubtotalProv(r); calcularTotalProv(); });
+          if(remove) remove.addEventListener('click', ()=>{ r.remove(); calcularTotalProv(); });
+        });
+
+        addDetailBtnProv.addEventListener('click', () => { const row = createDetailRowProv(); detallesBodyProv.appendChild(row); calcularTotalProv(); });
+
+        calcularTotalProv();
       });
     </script>
   </body>

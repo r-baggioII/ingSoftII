@@ -9,7 +9,7 @@
   <body class="bg-light">
     <div class="container mt-4">
       <a href="index.html" class="btn btn-link">&larr; Volver</a>
-      <h2>Factura Cliente</h2>
+        <h2>Movimiento de Dinero — Venta</h2>
       <form class="row g-3 mt-2">
         <div class="col-md-4">
           <label class="form-label">Fecha</label>
@@ -19,6 +19,10 @@
           <label class="form-label">Número factura</label>
           <input type="number" class="form-control" placeholder="0001">
         </div>
+            <div class="col-md-4">
+              <label class="form-label">Sucursal (asociada al usuario)</label>
+              <input type="text" class="form-control" value="Sucursal Centro" disabled>
+            </div>
         <div class="col-md-4">
           <label class="form-label">Método de pago</label>
           <select class="form-select">
@@ -37,38 +41,63 @@
             <option>Consumidor Final</option>
           </select>
         </div>
-        <div class="col-md-6">
-          <label class="form-label">Documento / Referencia</label>
-          <input type="text" class="form-control" placeholder="Documento / email u otra referencia">
-        </div>
+          <div class="col-md-4">
+            <label class="form-label">Persona (Cliente)</label>
+            <select class="form-select">
+              <option>Juan Pérez (DNI 12345678)</option>
+              <option>María López (DNI 23456789)</option>
+              <option>Consumidor Final</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Caja</label>
+            <select class="form-select">
+              <option>Caja 001 - Centro</option>
+              <option>Caja 002 - Norte</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Documento / Referencia</label>
+            <input type="text" class="form-control" placeholder="Documento / email u otra referencia">
+          </div>
+
 
         <div class="col-12">
           <h5>Detalles</h5>
           <table class="table">
-            <thead><tr><th>Producto (Plato)</th><th>Cantidad</th><th>Precio Unit.</th><th>Subtotal</th><th></th></tr></thead>
-            <tbody>
-              <tr>
+              <thead><tr><th>Producto</th><th>Stock</th><th>Cantidad</th><th>Precio Unit.</th><th>Subtotal</th><th></th></tr></thead>
+            <tbody id="detallesBody">
+              <tr class="detalle-row">
                 <td>
-                  <select class="form-select">
-                    <option>Milanesa con guarnición - $1200</option>
-                    <option>Pizza Napolitana - $1500</option>
-                    <option>Empanadas x6 - $800</option>
-                    <option>Ensalada César - $900</option>
+                  <select class="form-select product-select">
+                    <option value="1200">Milanesa con guarnición - $1200</option>
+                    <option value="1500">Pizza Napolitana - $1500</option>
+                    <option value="800">Empanadas x6 - $800</option>
+                    <option value="900">Ensalada César - $900</option>
                   </select>
                 </td>
-                <td><input type="number" class="form-control" value="1"></td>
-                <td><input type="number" class="form-control" value="1200"></td>
-                <td>$1200</td>
-                <td><button class="btn btn-sm btn-outline-danger">Eliminar</button></td>
+                  <td><span class="badge bg-secondary stock-badge">10</span></td>
+                <td><input type="number" class="form-control qty-input" value="1" min="1"></td>
+                <td><input type="number" class="form-control price-input" value="1200" min="0"></td>
+                <td class="subtotal-cell">$1200</td>
+                <td><button type="button" class="btn btn-sm btn-outline-danger remove-detail">Eliminar</button></td>
               </tr>
             </tbody>
           </table>
-          <button class="btn btn-sm btn-outline-primary">Agregar detalle</button>
+          <button type="button" id="addDetailBtn" class="btn btn-sm btn-outline-primary">Agregar detalle</button>
         </div>
 
+        <div class="col-md-4">
+          <label class="form-label">Monto pagado</label>
+          <input type="number" id="montoPagado" class="form-control" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Cambio entregado</label>
+          <input type="text" id="cambioEntregado" class="form-control" value="$0" disabled>
+        </div>
         <div class="col-12 text-end">
           <h4>Total: $<span id="total">100</span></h4>
-          <button class="btn btn-success">Guardar Factura</button>
+            <button class="btn btn-success">Guardar Movimiento (Venta)</button>
         </div>
       </form>
 
@@ -149,6 +178,99 @@
             }
           });
         });
+
+  // --- Funcionalidad dinámica de Detalle y cálculo de totales ---
+  const detallesBody = document.getElementById('detallesBody');
+  const addDetailBtn = document.getElementById('addDetailBtn');
+  const totalEl = document.getElementById('total');
+  const montoPagadoEl = document.getElementById('montoPagado');
+  const cambioEntregadoEl = document.getElementById('cambioEntregado');
+
+        function parseNumber(v){
+          const n = Number(String(v).replace(/[^0-9.-]+/g, ''));
+          return isNaN(n) ? 0 : n;
+        }
+
+        function updateLineSubtotal(row){
+          const qty = parseNumber(row.querySelector('.qty-input').value);
+          const price = parseNumber(row.querySelector('.price-input').value);
+          const sub = qty * price;
+          row.querySelector('.subtotal-cell').textContent = '$' + sub.toLocaleString();
+          return sub;
+        }
+
+        function calcularTotal(){
+          let total = 0;
+          detallesBody.querySelectorAll('.detalle-row').forEach(r => {
+            total += updateLineSubtotal(r);
+          });
+          totalEl.textContent = total.toLocaleString();
+          // calcular cambio (venta): montoPagado - total
+          if(montoPagadoEl){
+            const pago = parseNumber(montoPagadoEl.value || 0);
+            const cambio = pago - total;
+            cambioEntregadoEl.value = '$' + (isNaN(cambio) ? '0' : cambio.toLocaleString());
+          }
+        }
+
+        function createDetailRow(){
+          const tr = document.createElement('tr');
+          tr.className = 'detalle-row';
+          tr.innerHTML = `
+            <td>
+              <select class="form-select product-select">
+                <option value="1200">Milanesa con guarnición - $1200</option>
+                <option value="1500">Pizza Napolitana - $1500</option>
+                <option value="800">Empanadas x6 - $800</option>
+                <option value="900">Ensalada César - $900</option>
+              </select>
+            </td>
+            <td><span class="badge bg-secondary stock-badge">--</span></td>
+            <td><input type="number" class="form-control qty-input" value="1" min="1"></td>
+            <td><input type="number" class="form-control price-input" value="0" min="0"></td>
+            <td class="subtotal-cell">$0</td>
+            <td><button type="button" class="btn btn-sm btn-outline-danger remove-detail">Eliminar</button></td>
+          `;
+          // eventos
+          tr.querySelector('.product-select').addEventListener('change', (e) => {
+            const v = parseNumber(e.target.value);
+            tr.querySelector('.price-input').value = v;
+            updateLineSubtotal(tr);
+            calcularTotal();
+          });
+          tr.querySelector('.qty-input').addEventListener('input', () => { updateLineSubtotal(tr); calcularTotal(); });
+          tr.querySelector('.price-input').addEventListener('input', () => { updateLineSubtotal(tr); calcularTotal(); });
+          tr.querySelector('.remove-detail').addEventListener('click', () => { tr.remove(); calcularTotal(); });
+          return tr;
+        }
+
+        // enlazar botones existentes en la fila inicial
+        detallesBody.querySelectorAll('.detalle-row').forEach(r => {
+          const prod = r.querySelector('.product-select');
+          if(prod){
+            prod.addEventListener('change', (e)=>{ r.querySelector('.price-input').value = parseNumber(e.target.value); updateLineSubtotal(r); calcularTotal(); });
+          }
+          const qty = r.querySelector('.qty-input');
+          const price = r.querySelector('.price-input');
+          const remove = r.querySelector('.remove-detail');
+          if(qty) qty.addEventListener('input', ()=>{ updateLineSubtotal(r); calcularTotal(); });
+          if(price) price.addEventListener('input', ()=>{ updateLineSubtotal(r); calcularTotal(); });
+          if(remove) remove.addEventListener('click', ()=>{ r.remove(); calcularTotal(); });
+        });
+
+        addDetailBtn.addEventListener('click', () => {
+          const row = createDetailRow();
+          detallesBody.appendChild(row);
+          calcularTotal();
+        });
+
+        // recalc when user escribe monto pagado
+        if(montoPagadoEl){
+          montoPagadoEl.addEventListener('input', () => { calcularTotal(); });
+        }
+
+        // calcular total inicial
+        calcularTotal();
       });
     </script>
   </body>

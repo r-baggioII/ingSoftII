@@ -1,0 +1,159 @@
+/* Navbar moderno */
+.navBar{
+    background: #1e3a8a !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.elementosNav{
+    display: flex;
+    width: 30%;
+    justify-content: space-around;
+    color: white;
+    font-weight: 700;
+}
+
+.elementos{
+    margin-right: 50px;
+}
+
+.containerImg{
+    width: 20%;
+}
+
+.logo{
+    width: 40%;
+    margin: auto;
+}
+
+/* Mensajes mejorados */
+.mensajeExito{
+    width: 50%;
+    margin: 2rem auto;
+    text-align: center;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.mensajeError{
+    width: 50%;
+    margin: 2rem auto;
+    text-align: center;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Formularios modernos */
+.formulario{
+    width: 60%;
+    max-width: 800px;
+    margin: 3rem auto;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    padding: 2.5rem;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.formulario .form-label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.formulario .form-control,
+.formulario .form-select {
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.formulario .form-control:focus,
+.formulario .form-select:focus {
+    border-color: #1e3a8a;
+    box-shadow: 0 0 0 0.2rem rgba(30, 58, 138, 0.25);
+}
+
+.formulario h2 {
+    color: #333;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: #1e3a8a;
+}
+
+.divVolver{
+    width: 60%;
+    max-width: 800px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 2rem auto;
+}
+
+.botonVolver{
+    width: 70%;
+    max-width: 300px;
+}
+
+/* Botones modernos */
+.botones, .btn-primary, .btn-success {
+    background: #1e3a8a;
+    border: none;
+    color: white;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(30, 58, 138, 0.4);
+}
+
+.botones:hover, .btn-primary:hover, .btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(30, 58, 138, 0.6);
+    background: #1e40af;
+}
+
+.botones:active, .btn-primary:active, .btn-success:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #757f9a 0%, #d7dde8 100%);
+    border: none;
+    color: #333;
+    font-weight: 600;
+    padding: 12px 30px;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.containerFooter{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+/* Animaciones suaves */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.formulario {
+    animation: fadeIn 0.5s ease;
+}

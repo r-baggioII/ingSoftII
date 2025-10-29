@@ -71,33 +71,10 @@ pipeline {
           export PATH="$JAVA_HOME/bin:$PATH"
           mvn -B -U -DskipTests package
 
-          echo "Building docker image..."
-          img_name="greedy_gym"
-          if [ -n "${DOCKER_REGISTRY}" ]; then
-            full_image="${DOCKER_REGISTRY}/${img_name}:${IMAGE_TAG}"
-          else
-            full_image="${img_name}:${IMAGE_TAG}"
-          fi
-
-          docker build -t "${full_image}" .
-
-          if [ -n "${DOCKER_REGISTRY}" ] && [ -n "${DOCKER_REG_CREDENTIALS}" ]; then
-            echo "Pushing ${full_image} to registry..."
-            docker push "${full_image}"
-          fi
-
-          echo "Restarting container ${img_name}"
-          docker rm -f "${img_name}" || true
-
-          if [ -n "${PORT_MAPS:-}" ]; then
-            port_args=""
-            IFS=','; for pm in ${PORT_MAPS}; do port_args+=" -p ${pm}"; done
-          else
-            port_args=" -p ${DEFAULT_PORT}:${DEFAULT_PORT}"
-          fi
-
-          # shellcheck disable=SC2086
-          docker run -d --restart unless-stopped --name "${img_name}" ${port_args} "${full_image}"
+          echo "Building and starting containers with docker compose..."
+          # Run the exact commands you provided: build and bring up containers.
+          docker compose build
+          docker compose up -d
           '''
         }
       }

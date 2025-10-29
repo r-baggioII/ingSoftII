@@ -38,7 +38,7 @@ pipeline {
 
           # Determine module_dir: prefer MODULE_PATH if explicitly set in the job,
           # otherwise use the checked-out repository under $WORKSPACE.
-          if [ -n "${MODULE_PATH}" ]; then
+          if [ -n "${MODULE_PATH:-}" ]; then
             module_dir="${MODULE_PATH}"
           else
             module_dir="$WORKSPACE/SCRUM/ej5/D/greedy_gym"
@@ -46,8 +46,8 @@ pipeline {
 
           if [ ! -d "${module_dir}" ]; then
             echo "ERROR: module directory does not exist or is not accessible: ${module_dir}"
-            if [ -n "${MODULE_PATH}" ]; then
-              echo "You provided MODULE_PATH=${MODULE_PATH}. If this is under /root, the jenkins user may not have permission to access it."
+            if [ -n "${MODULE_PATH:-}" ]; then
+              echo "You provided MODULE_PATH=${MODULE_PATH:-}. If this is under /root, the jenkins user may not have permission to access it."
             fi
             echo "Attempted path: ${module_dir}"
             echo "Requested path listing (if accessible):"

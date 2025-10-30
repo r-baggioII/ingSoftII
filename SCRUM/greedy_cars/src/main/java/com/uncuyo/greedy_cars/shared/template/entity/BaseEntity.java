@@ -3,13 +3,6 @@ package com.uncuyo.greedy_cars.shared.template.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 
-/**
- * Base entity that provides soft-delete support and forces concrete entities
- * to expose their identifier. Designed to be extended when applying template
- * hooks across the project.
- *
- * @param <ID> identifier type
- */
 @MappedSuperclass
 public abstract class BaseEntity<ID> {
 

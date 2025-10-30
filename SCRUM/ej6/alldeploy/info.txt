@@ -1,0 +1,1 @@
+http://66.97.42.246:8080/ es la IP, el dominio se encuentra en trámite, y en SCRUM/ej5/D está todo lo necesario del deploy

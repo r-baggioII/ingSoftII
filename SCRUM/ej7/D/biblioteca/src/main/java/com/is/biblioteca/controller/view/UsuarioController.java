@@ -177,18 +177,75 @@ public class UsuarioController {
 			org.springframework.security.core.Authentication auth = 
 				org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
 			
+			System.out.println("=== DEBUG AUTH0 ===");
+			System.out.println("Authentication: " + auth);
+			System.out.println("Principal: " + auth.getPrincipal());
+			System.out.println("Principal class: " + auth.getPrincipal().getClass().getName());
+			
 			if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
-				String email = auth.getName(); // Spring Security usa el email como username
+				String email = null;
 				
-				// Buscar el usuario completo en la base de datos
-				Usuario usuario = usuarioService.buscarUsuarioPorEmail(email);
-				
-				// Guardarlo en sesión para que las vistas puedan accederlo
-				session.setAttribute("usuariosession", usuario);
+				// Verificar si es un usuario OAuth2 (Auth0)
+				if (auth.getPrincipal() instanceof org.springframework.security.oauth2.core.user.OAuth2User) {
+					org.springframework.security.oauth2.core.user.OAuth2User oauth2User = 
+						(org.springframework.security.oauth2.core.user.OAuth2User) auth.getPrincipal();
+					
+					System.out.println("=== Usuario OAuth2 detectado ===");
+					System.out.println("Attributes: " + oauth2User.getAttributes());
+					
+					// Obtener información del usuario de Auth0
+					email = oauth2User.getAttribute("email");
+					String name = oauth2User.getAttribute("name");
+					String sub = oauth2User.getAttribute("sub");
+					
+					System.out.println("Email: " + email);
+					System.out.println("Name: " + name);
+					System.out.println("Sub: " + sub);
+					
+					// Intentar buscar el usuario en la base de datos
+					Usuario usuario = null;
+					try {
+						usuario = usuarioService.buscarUsuarioPorEmail(email);
+						System.out.println("Usuario encontrado en BD: " + usuario.getNombre() + " - Rol: " + usuario.getRol());
+					} catch (Exception e) {
+						// El usuario no existe en la base de datos local
+						// Crear uno temporal para la sesión con rol USER por defecto
+						System.out.println("Usuario NO encontrado en BD, creando temporal");
+						usuario = new Usuario();
+						usuario.setId(sub != null ? sub : email);
+						usuario.setEmail(email);
+						usuario.setNombre(name != null ? name : email);
+						usuario.setRol(com.is.biblioteca.business.domain.enumeration.Rol.USER);
+						System.out.println("Usuario temporal creado: " + usuario.getNombre() + " - Rol: " + usuario.getRol());
+					}
+					
+					session.setAttribute("usuariosession", usuario);
+					session.setAttribute("auth0User", true);
+					modelo.put("oauth2User", oauth2User);
+					
+					System.out.println("Usuario guardado en sesión con rol: " + usuario.getRol());
+					
+				} else {
+					// Usuario local (form login)
+					System.out.println("=== Usuario local detectado ===");
+					email = auth.getName(); // Spring Security usa el email como username
+					
+					// Buscar el usuario completo en la base de datos
+					Usuario usuario = usuarioService.buscarUsuarioPorEmail(email);
+					
+					System.out.println("Usuario local: " + usuario.getNombre() + " - Rol: " + usuario.getRol());
+					
+					// Guardarlo en sesión para que las vistas puedan accederlo
+					session.setAttribute("usuariosession", usuario);
+					session.setAttribute("auth0User", false);
+				}
 			}
+			
+			System.out.println("=== FIN DEBUG AUTH0 ===");
 			
 			return "inicio.html";
 		} catch (Exception e) {
+			System.err.println("Error en irInicio: " + e.getMessage());
 			e.printStackTrace();
 			modelo.put("error", "Error al cargar la página de inicio");
 			return "redirect:/usuario/login";

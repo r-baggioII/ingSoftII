@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro de Cliente - Greedy Cars</title>
+
+  <!--vendor css ================================================== -->
+  <link rel="stylesheet" type="text/css" href="css/vendor.css" />
+
+  <!-- Link Swiper's CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css" />
+
+  <!--Bootstrap ================================================== -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous" />
+
+  <!-- Style Sheet ================================================== -->
+  <link rel="stylesheet" type="text/css" href="style.css" />
+
+  <!-- Google Fonts ================================================== -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet" />
+
+  <!-- script ================================================== -->
+  <script src="js/modernizr.js"></script>
+</head>
+
+<body data-bs-spy="scroll" data-bs-target="#header-nav" tabindex="0">
+
+  <nav class="navbar navbar-expand-lg navbar-light container-fluid py-3 position-fixed">
+    <div class="container">
+      <a class="navbar-brand" href="index.html"><img src="images/logo.png" alt="logo" /></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
+        aria-controls="offcanvasNavbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+        <div class="offcanvas-header">
+          <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menu</h5>
+          <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+          <ul class="navbar-nav align-items-center justify-content-end flex-grow-1 pe-3">
+            <li class="nav-item">
+              <a class="nav-link px-3" href="index.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-3" href="gestion-vehiculos.html">Gestión Vehículos</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-3" href="registro-alquiler.html">Nuevo Alquiler</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-3" href="reportes-alquileres.html">Reportes</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-3" href="gestion-promociones.html">Promociones</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-3" href="gestion-usuarios.html">Usuarios</a>
+            </li>
+            <li class="nav-item">
+              <a class="btn btn-outline-primary px-3" href="login.html">Cerrar Sesión</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- hero section start  -->
+  <section id="banner"
+  class="position-relative overflow-hidden jarallax"
+  style="
+    background-image: url(images/Bg.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+  "
+>
+  <div class="container text-center py-5 mt-5">
+    <div class="row my-5">
+      <div
+        class="d-flex flex-wrap flex-column justify-content-center align-items-center text-white"
+      >
+        <h2 class="page-title display-3 mt-5">Registro de Cliente</h2>
+        <nav class="breadcrumb ">
+          <a class="breadcrumb-item text-white" href="index.html">Home</a>
+          <span class="breadcrumb-item text-white active" aria-current="page"
+            >Nuevo Cliente</span
+          >
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+  <section class="contact-us-wrap py-5">
+    <div class="container">
+      <div class="row ">
+        <div class="inquiry-item offset-md-2 col-md-8">
+          <h2 class=" text-center my-5">Registro de <span class="text-primary">Cliente</span> </h2>
+
+          <p>Complete el formulario para registrar un nuevo cliente en el sistema.</p>
+          
+          <!-- Opciones de registro -->
+          <div class="card mb-4">
+            <div class="card-body text-center">
+              <h5 class="mb-3">Registrarse con:</h5>
+              <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                <button class="btn btn-primary">
+                  <iconify-icon icon="ri:facebook-fill"></iconify-icon> Facebook
+                </button>
+                <button class="btn btn-danger">
+                  <iconify-icon icon="ri:google-fill"></iconify-icon> Google
+                </button>
+                <button class="btn btn-info">
+                  <iconify-icon icon="ri:twitter-fill"></iconify-icon> Twitter
+                </button>
+              </div>
+              <hr class="my-4">
+              <p class="mb-0">O complete el formulario manualmente</p>
+            </div>
+          </div>
+
+          <form id="form" class="form-group flex-wrap" enctype="multipart/form-data">
+            
+            <div class="form-input col-lg-12 d-flex mb-3">
+              <div class="col me-3">
+                <label for="nombre" class="form-label fw-medium">Nombre *</label>
+                <input type="text" id="nombre" name="nombre" placeholder="Juan" 
+                       class="form-control p-3" required>
+              </div>
+              <div class="col">
+                <label for="apellido" class="form-label fw-medium">Apellido *</label>
+                <input type="text" id="apellido" name="apellido" placeholder="Pérez" 
+                       class="form-control p-3" required>
+              </div>
+            </div>
+
+            <div class="form-input col-lg-12 d-flex mb-3">
+              <div class="col me-3">
+                <label for="tipo_documento" class="form-label fw-medium">Tipo de Documento *</label>
+                <select id="tipo_documento" class="form-select form-control p-3" required>
+                  <option value="">Seleccione</option>
+                  <option value="dni">DNI</option>
+                  <option value="pasaporte">Pasaporte</option>
+                  <option value="cedula">Cédula</option>
+                </select>
+              </div>
+              <div class="col">
+                <label for="documento" class="form-label fw-medium">Número de Documento *</label>
+                <input type="text" id="documento" name="documento" placeholder="12345678" 
+                       class="form-control p-3" required>
+              </div>
+            </div>
+
+            <div class="form-input col-lg-12 d-flex mb-3">
+              <div class="col me-3">
+                <label for="fecha_nacimiento" class="form-label fw-medium">Fecha de Nacimiento *</label>
+                <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" 
+                       class="form-control p-3" required>
+              </div>
+              <div class="col">
+                <label for="nacionalidad" class="form-label fw-medium">Nacionalidad *</label>
+                <input type="text" id="nacionalidad" name="nacionalidad" 
+                       placeholder="Argentina" class="form-control p-3" required>
+              </div>
+            </div>
+
+            <div class="form-input col-lg-12 d-flex mb-3">
+              <div class="col me-3">
+                <label for="email" class="form-label fw-medium">Correo Electrónico *</label>
+                <input type="email" id="email" name="email" 
+                       placeholder="cliente@email.com" class="form-control p-3" required>
+              </div>
+              <div class="col">
+                <label for="telefono" class="form-label fw-medium">Teléfono / WhatsApp *</label>
+                <input type="tel" id="telefono" name="telefono" 
+                       placeholder="+54 9 11 1234-5678" class="form-control p-3" required>
+              </div>
+            </div>
+
+            <div class="col-lg-12 mb-3">
+              <label for="direccion_personal" class="form-label fw-medium">Dirección Personal *</label>
+              <input type="text" id="direccion_personal" name="direccion_personal" 
+                     placeholder="Calle, Número, Piso, Depto, Ciudad" class="form-control p-3" required>
+            </div>
+
+            <div class="form-input col-lg-12 d-flex mb-3">
+              <div class="col me-3">
+                <label for="ciudad" class="form-label fw-medium">Ciudad *</label>
+                <input type="text" id="ciudad" name="ciudad" class="form-control p-3" required>
+              </div>
+              <div class="col">
+                <label for="codigo_postal" class="form-label fw-medium">Código Postal</label>
+                <input type="text" id="codigo_postal" name="codigo_postal" 
+                       class="form-control p-3">
+              </div>
+            </div>
+
+            <div class="col-lg-12 mb-3">
+              <label for="foto_cliente" class="form-label fw-medium">Foto del Cliente *</label>
+              <input type="file" id="foto_cliente" name="foto_cliente" 
+                     class="form-control p-3" accept="image/png, image/jpeg, image/jpg" required>
+              <small class="text-muted">Formatos aceptados: JPG, JPEG, PNG. Tamaño máximo: 5MB</small>
+            </div>
+
+            <div class="col-lg-12 mb-3">
+              <label for="password" class="form-label fw-medium">Contraseña *</label>
+              <input type="password" id="password" name="password" 
+                     class="form-control p-3" required>
+              <small class="text-muted">Mínimo 8 caracteres, incluir mayúsculas, minúsculas y números</small>
+            </div>
+
+            <div class="col-lg-12 mb-3">
+              <label for="password_confirm" class="form-label fw-medium">Confirmar Contraseña *</label>
+              <input type="password" id="password_confirm" name="password_confirm" 
+                     class="form-control p-3" required>
+            </div>
+
+            <div class="col-lg-12 mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="acepta_terminos" name="acepta_terminos" required>
+                <label class="form-check-label" for="acepta_terminos">
+                  Acepto los <a href="#" class="text-primary">términos y condiciones</a> *
+                </label>
+              </div>
+            </div>
+
+            <div class="col-lg-12 mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="acepta_newsletter" name="acepta_newsletter">
+                <label class="form-check-label" for="acepta_newsletter">
+                  Deseo recibir promociones y ofertas por correo electrónico
+                </label>
+              </div>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <a href="registro-alquiler.html" class="btn btn-outline-secondary btn-lg text-uppercase btn-rounded-none me-2">
+                Cancelar
+              </a>
+              <button type="submit" class="btn btn-primary btn-lg text-uppercase btn-rounded-none">
+                Registrar Cliente
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="footer" class="bg-dark padding-medium">
+    <div class="container">
+      <footer class="row row-cols-1 row-cols-sm-2 row-cols-md-5">
+
+        <div class="col-md-4">
+          <h4 class="text-uppercase">About</h4>
+          <p class="py-3">
+              Vel non nibh vestibulum massa ullam corper bib endum ultrices venenatis, id id sed mass.
+          </p>
+          <div class="d-flex align-items-center">
+              <p>Follow us</p>
+              <ul class="list-unstyled d-flex m-0 ps-3">
+                  <li class="pe-3">
+                      <a href="#">
+                        <iconify-icon class="social-icon text-primary" icon="ri:facebook-fill"></iconify-icon>
+                      </a>
+                  </li>
+                  <li class="pe-3">
+                      <a href="#">
+                        <iconify-icon class="social-icon text-primary" icon="ri:twitter-fill"></iconify-icon>
+                      </a>
+                  </li>
+                  <li class="pe-3">
+                      <a href="#">
+                        <iconify-icon class="social-icon text-primary" icon="ri:pinterest-fill"></iconify-icon>
+                      </a>
+                  </li>
+                  <li class="pe-3">
+                      <a href="#">
+                        <iconify-icon class="social-icon text-primary" icon="ri:instagram-fill"></iconify-icon>
+                      </a>
+                  </li>
+                  <li class="pe-3">
+                      <a href="#">
+                        <iconify-icon class="social-icon text-primary" icon="ri:youtube-fill"></iconify-icon>
+                      </a>
+                  </li>
+              </ul>
+          </div>
+      </div>
+
+        <div class="col-md-2">
+          <h4 class="text-uppercase">Quick Links</h4>
+          <ul class="list-unstyled">
+              <li class="my-3">
+                  <a href="#" class="footer-link text-white">Home</a>
+              </li>
+              <li class="my-3">
+                  <a href="#" class="footer-link text-white">About</a>
+              </li>
+              <li class="my-3">
+                  <a href="#" class="footer-link text-white">Services</a>
+              </li>
+              <li class="my-3">
+                  <a href="#" class="footer-link text-white">Cars</a>
+              </li>
+          </ul>
+      </div>
+
+        <div class="col-md-2">
+          <h4 class="text-uppercase">Help</h4>
+          <ul class="list-unstyled">
+              <li class="my-3">
+                  <a href="#" class="footer-link text-white">Privacy Policy</a>
+              </li>
+              <li class="my-3">
+                  <a href="#" class="footer-link text-white">Shipping Details</a>
+              </li>
+              <li class="my-3">
+                  <a href="#" class="footer-link text-white">Offer & Kits</a>
+              </li>
+              <li class="my-3">
+                  <a href="#" class="footer-link text-white">Terms & Conditions</a>
+              </li>
+          </ul>
+      </div>
+
+        <div class="col-md-4">
+          <h4 class="text-uppercase">Subscribe our Newsletter</h4>
+          <p class="py-3">
+              Vel non nibh vestibulum massa ullam corper bib endum ultrices venenatis, id id sed mass.
+          </p>
+          <div class="d-flex align-items-center">
+              <form class="w-100">
+                  <div class="row">
+                      <div class="col-sm-12">
+                          <div class="input-group  border-bottom">
+                              <input type="email" class="form-control fst-italic bg-dark text-white border-0" placeholder="Enter your email">
+                              <span class="input-group-btn">
+                                <button class="btn text-white" type="submit">Subscribe</button>
+                            </span>
+                          </div>
+                        </div>
+                  </div>
+              </form>
+          </div>
+      </div>
+      
+      </footer>
+    </div>
+
+    <footer class="d-flex flex-wrap justify-content-between align-items-center border-top"></footer>
+
+    <div class="container">
+      <footer class="d-flex flex-wrap justify-content-between align-items-center py-2 pt-4">
+        <div class="col-md-6 d-flex align-items-center">
+          <p>©Greedy Cars, All rights reserved</p>
+        </div>
+        <div class="col-md-6 d-flex align-items-center justify-content-end">
+          <ul class="footer-nav list-unstyled ">
+            <li class="nav-item me-2">
+                <a class="nav-link pe-3 text-white " href="#">Home</a>
+            </li>
+            <li class="nav-item me-2 mb-3">
+                <a class="nav-link pe-3 text-white " href="#">Booking</a>
+            </li>
+            <li class="nav-item me-2 mb-3">
+                <a class="nav-link pe-3 text-white " href="#">About</a>
+            </li>
+            <li class="nav-item me-2 mb-3">
+                <a class="nav-link pe-3 text-white " href="#">Cars</a>
+            </li>
+            <li class="nav-item me-2 mb-3">
+                <a class="nav-link pe-3 text-white " href="#">Contact</a>
+            </li>
+        </ul>
+        </div>
+      </footer>
+    </div>
+  </section>
+
+  <!-- script ================================================== -->
+  <script src="js/jquery-1.11.0.min.js"></script>
+  <script src="js/plugins.js"></script>
+  <script src="js/script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+    crossorigin="anonymous"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Dashboard - Greedy Cars</title>
+  <link rel="stylesheet" type="text/css" href="css/vendor.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" type="text/css" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light container-fluid py-3 position-fixed">
+    <div class="container">
+      <a class="navbar-brand" href="index.html"><img src="images/logo.png" alt="logo" /></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar">
+        <div class="offcanvas-header">
+          <h5 class="offcanvas-title">Menu</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+          <ul class="navbar-nav align-items-center justify-content-end flex-grow-1 pe-3">
+            <li class="nav-item"><a class="nav-link px-3" href="index.html">Home</a></li>
+            <li class="nav-item"><a class="nav-link px-3" href="cars.html">Vehículos</a></li>
+            <li class="nav-item"><a class="nav-link active px-3" href="dashboard-cliente.html">Mi Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link px-3" href="booking.html">Nueva Reserva</a></li>
+            <li class="nav-item"><a class="btn btn-outline-primary px-3" href="login.html">Cerrar Sesión</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <section id="banner" class="position-relative overflow-hidden" style="background-image: url(images/Bg.jpg); background-size: cover; margin-top: 80px;">
+    <div class="container text-center py-5">
+      <h2 class="page-title display-3 text-white">Mi Dashboard</h2>
+    </div>
+  </section>
+
+  <section class="py-5">
+    <div class="container">
+      <div class="row">
+        <!-- Información del usuario -->
+        <div class="col-md-3">
+          <div class="card mb-4">
+            <div class="card-body text-center">
+              <img src="images/team1.jpg" class="rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover;" alt="Usuario">
+              <h5>Juan Pérez</h5>
+              <p class="text-muted mb-2">juan.perez@email.com</p>
+              <span class="badge bg-success">Cliente Verificado</span>
+              <hr>
+              <div class="d-grid gap-2">
+                <button class="btn btn-outline-primary btn-sm">Editar Perfil</button>
+                <button class="btn btn-outline-secondary btn-sm">Cambiar Contraseña</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel principal -->
+        <div class="col-md-9">
+          <h3 class="mb-4">Bienvenido, <span class="text-primary">Juan</span></h3>
+          
+          <!-- Estadísticas rápidas -->
+          <div class="row mb-4">
+            <div class="col-md-4">
+              <div class="card text-center">
+                <div class="card-body">
+                  <h4 class="text-primary">12</h4>
+                  <p class="mb-0">Alquileres Totales</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card text-center">
+                <div class="card-body">
+                  <h4 class="text-success">$3,240</h4>
+                  <p class="mb-0">Total Gastado</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card text-center">
+                <div class="card-body">
+                  <h4 class="text-warning">1</h4>
+                  <p class="mb-0">Alquiler Activo</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Alquiler activo -->
+          <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+              <h5 class="mb-0">Alquiler en Curso</h5>
+            </div>
+            <div class="card-body">
+              <div class="row align-items-center">
+                <div class="col-md-3">
+                  <img src="images/product1.jpg" class="img-fluid rounded" alt="BMW X3">
+                </div>
+                <div class="col-md-6">
+                  <h5>BMW X3 - 2024</h5>
+                  <p class="mb-1"><strong>Fecha de alquiler:</strong> 01/10/2024</p>
+                  <p class="mb-1"><strong>Fecha de devolución:</strong> 08/10/2024</p>
+                  <p class="mb-0"><strong>Días restantes:</strong> <span class="badge bg-warning">1 día</span></p>
+                </div>
+                <div class="col-md-3 text-end">
+                  <h4 class="text-primary">$595.00</h4>
+                  <button class="btn btn-outline-primary btn-sm">Ver Detalles</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Historial de alquileres -->
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">Historial de Alquileres</h5>
+              <button class="btn btn-outline-primary btn-sm">Ver Todo</button>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Vehículo</th>
+                      <th>Período</th>
+                      <th>Monto</th>
+                      <th>Estado</th>
+                      <th>Factura</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <img src="images/product1.jpg" style="width: 60px; height: 40px; object-fit: cover;" class="me-2 rounded">
+                          <span>BMW X3</span>
+                        </div>
+                      </td>
+                      <td>01/10/2024 - 08/10/2024<br><small class="text-muted">7 días</small></td>
+                      <td><strong>$595.00</strong></td>
+                      <td><span class="badge bg-warning">En curso</span></td>
+                      <td>
+                        <button class="btn btn-sm btn-outline-secondary" disabled>
+                          <iconify-icon icon="material-symbols:download"></iconify-icon> Pendiente
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <img src="images/product2.jpg" style="width: 60px; height: 40px; object-fit: cover;" class="me-2 rounded">
+                          <span>Mercedes C200</span>
+                        </div>
+                      </td>
+                      <td>15/09/2024 - 20/09/2024<br><small class="text-muted">5 días</small></td>
+                      <td><strong>$475.00</strong></td>
+                      <td><span class="badge bg-success">Completado</span></td>
+                      <td>
+                        <button class="btn btn-sm btn-success">
+                          <iconify-icon icon="material-symbols:download"></iconify-icon> Descargar
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <img src="images/product4.jpg" style="width: 60px; height: 40px; object-fit: cover;" class="me-2 rounded">
+                          <span>Tesla Model 3</span>
+                        </div>
+                      </td>
+                      <td>01/08/2024 - 05/08/2024<br><small class="text-muted">4 días</small></td>
+                      <td><strong>$480.00</strong></td>
+                      <td><span class="badge bg-success">Completado</span></td>
+                      <td>
+                        <button class="btn btn-sm btn-success">
+                          <iconify-icon icon="material-symbols:download"></iconify-icon> Descargar
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <img src="images/product1.jpg" style="width: 60px; height: 40px; object-fit: cover;" class="me-2 rounded">
+                          <span>BMW X3</span>
+                        </div>
+                      </td>
+                      <td>10/07/2024 - 17/07/2024<br><small class="text-muted">7 días</small></td>
+                      <td><strong>$595.00</strong></td>
+                      <td><span class="badge bg-success">Completado</span></td>
+                      <td>
+                        <button class="btn btn-sm btn-success">
+                          <iconify-icon icon="material-symbols:download"></iconify-icon> Descargar
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección de pago con billetera virtual -->
+          <div class="card mt-4">
+            <div class="card-header bg-success text-white">
+              <h5 class="mb-0">Billetera Virtual</h5>
+            </div>
+            <div class="card-body">
+              <div class="row align-items-center">
+                <div class="col-md-8">
+                  <h6>Métodos de Pago Vinculados</h6>
+                  <div class="d-flex gap-2 mb-3">
+                    <span class="badge bg-primary">MercadoPago</span>
+                    <span class="badge bg-info">PayPal</span>
+                  </div>
+                  <p class="mb-0">Paga tus reservas de forma rápida y segura con tu billetera virtual preferida.</p>
+                </div>
+                <div class="col-md-4 text-end">
+                  <button class="btn btn-success">
+                    <iconify-icon icon="material-symbols:add"></iconify-icon> Agregar Método de Pago
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="footer" class="bg-dark padding-medium">
+    <div class="container">
+      <footer class="row row-cols-1 row-cols-sm-2 row-cols-md-5">
+        <div class="col-md-4">
+          <h4 class="text-uppercase">About</h4>
+          <p class="py-3">Vel non nibh vestibulum massa ullam corper bib endum ultrices venenatis, id id sed mass.</p>
+          <div class="d-flex align-items-center">
+            <p>Follow us</p>
+            <ul class="list-unstyled d-flex m-0 ps-3">
+              <li class="pe-3"><a href="#"><iconify-icon class="social-icon text-primary" icon="ri:facebook-fill"></iconify-icon></a></li>
+              <li class="pe-3"><a href="#"><iconify-icon class="social-icon text-primary" icon="ri:twitter-fill"></iconify-icon></a></li>
+              <li class="pe-3"><a href="#"><iconify-icon class="social-icon text-primary" icon="ri:instagram-fill"></iconify-icon></a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <h4 class="text-uppercase">Quick Links</h4>
+          <ul class="list-unstyled">
+            <li class="my-3"><a href="#" class="footer-link text-white">Home</a></li>
+            <li class="my-3"><a href="#" class="footer-link text-white">About</a></li>
+            <li class="my-3"><a href="#" class="footer-link text-white">Cars</a></li>
+          </ul>
+        </div>
+        <div class="col-md-2">
+          <h4 class="text-uppercase">Help</h4>
+          <ul class="list-unstyled">
+            <li class="my-3"><a href="#" class="footer-link text-white">Privacy Policy</a></li>
+            <li class="my-3"><a href="#" class="footer-link text-white">Terms & Conditions</a></li>
+          </ul>
+        </div>
+        <div class="col-md-4">
+          <h4 class="text-uppercase">Subscribe our Newsletter</h4>
+          <p class="py-3">Vel non nibh vestibulum massa ullam corper bib endum ultrices venenatis.</p>
+          <div class="d-flex align-items-center">
+            <form class="w-100">
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="input-group border-bottom">
+                    <input type="email" class="form-control fst-italic bg-dark text-white border-0" placeholder="Enter your email">
+                    <span class="input-group-btn">
+                      <button class="btn text-white" type="submit">Subscribe</button>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <div class="container">
+      <footer class="d-flex flex-wrap justify-content-between align-items-center py-2 pt-4 border-top">
+        <div class="col-md-6"><p class="text-white">©Greedy Cars, All rights reserved</p></div>
+        <div class="col-md-6 d-flex align-items-center justify-content-end">
+          <ul class="footer-nav list-unstyled">
+            <li class="nav-item me-2"><a class="nav-link pe-3 text-white" href="#">Home</a></li>
+            <li class="nav-item me-2"><a class="nav-link pe-3 text-white" href="#">Cars</a></li>
+            <li class="nav-item me-2"><a class="nav-link pe-3 text-white" href="#">Contact</a></li>
+          </ul>
+        </div>
+      </footer>
+    </div>
+  </section>
+
+  <script src="js/jquery-1.11.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+</body>
+</html>

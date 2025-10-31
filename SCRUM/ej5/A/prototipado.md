@@ -1,0 +1,1 @@
+https://www.figma.com/make/UZKMouemxK7lGonmC0WuwI/Software-para-colegios?node-id=0-1&t=aMACr4Cg1rQnk16U-1

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Personal Administrativo - Greedy Cars</title>
+
+  <!--vendor css ================================================== -->
+  <link rel="stylesheet" type="text/css" href="css/vendor.css" />
+
+  <!--Bootstrap ================================================== -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous" />
+
+  <!-- Style Sheet ================================================== -->
+  <link rel="stylesheet" type="text/css" href="style.css" />
+
+  <!-- Google Fonts ================================================== -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet" />
+
+  <script src="js/modernizr.js"></script>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light container-fluid py-3 position-fixed">
+    <div class="container">
+      <a class="navbar-brand" href="index.html"><img src="images/logo.png" alt="logo" /></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
+        aria-controls="offcanvasNavbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+        <div class="offcanvas-header">
+          <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menu</h5>
+          <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+          <ul class="navbar-nav align-items-center justify-content-end flex-grow-1 pe-3">
+            <li class="nav-item">
+              <a class="nav-link px-3" href="index.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-3" href="cars.html">Vehículos</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-3" href="dashboard-gestion.html">Panel de Gestión</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-3" href="reportes-alquileres.html">Reportes</a>
+            </li>
+            <li class="nav-item">
+              <a class="btn btn-outline-primary px-3" href="login.html">Cerrar Sesión</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <section id="banner" class="position-relative overflow-hidden jarallax"
+    style="background-image: url(images/Bg.jpg); background-repeat: no-repeat; background-size: cover; background-position: center;">
+    <div class="container text-center py-5 mt-5">
+      <div class="row my-5">
+        <div class="d-flex flex-wrap flex-column justify-content-center align-items-center text-white">
+          <h2 class="page-title display-3 mt-5">Personal Administrativo</h2>
+          <nav class="breadcrumb">
+            <a class="breadcrumb-item text-white" href="index.html">Home</a>
+            <a class="breadcrumb-item text-white" href="dashboard-gestion.html">Panel de Gestión</a>
+            <span class="breadcrumb-item text-white active" aria-current="page">Personal Administrativo</span>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="gestion-dashboard py-5">
+    <div class="container-fluid">
+      <div class="row g-4">
+        <div class="col-lg-3 col-xl-2">
+          <aside class="gestion-sidebar card border-0 h-100 shadow-sm">
+            <div class="card-header bg-white border-0 pb-0">
+              <h5 class="mb-1">Panel de Gestión</h5>
+              <p class="text-muted small mb-0">Funcionalidades habilitadas por rol.</p>
+            </div>
+            <nav class="list-group list-group-flush gestion-menu">
+              <a class="list-group-item list-group-item-action d-flex align-items-center" href="dashboard-gestion.html">
+                <span class="badge rounded-pill me-2">PG</span>
+                Panel General
+              </a>
+              <a class="list-group-item list-group-item-action d-flex align-items-center active" href="dashboard-gestion-personal.html">
+                <span class="badge rounded-pill me-2">PA</span>
+                Personal Administrativo
+              </a>
+              <a class="list-group-item list-group-item-action d-flex align-items-center" href="dashboard-gestion-jefe.html">
+                <span class="badge rounded-pill me-2">JA</span>
+                Jefe Administrativo
+              </a>
+              <div class="gestion-menu-divider">Accesos habilitados</div>
+              <a class="list-group-item list-group-item-action d-flex align-items-center" href="gestion-vehiculos.html">
+                <span class="badge rounded-pill me-2">VH</span>
+                Gestión de Vehículos
+              </a>
+              <a class="list-group-item list-group-item-action d-flex align-items-center" href="gestion-alquiler.html">
+                <span class="badge rounded-pill me-2">AL</span>
+                Gestión de Alquileres
+              </a>
+              <a class="list-group-item list-group-item-action d-flex align-items-center" href="gestion-factura.html">
+                <span class="badge rounded-pill me-2">FC</span>
+                Gestión de Facturas
+              </a>
+              <a class="list-group-item list-group-item-action d-flex align-items-center" href="gestion-promociones.html">
+                <span class="badge rounded-pill me-2">PR</span>
+                Gestión de Promociones
+              </a>
+            </nav>
+          </aside>
+        </div>
+        <div class="col-lg-9 col-xl-10">
+          <div class="gestion-content">
+            <div class="row g-4">
+              <div class="col-12 col-xl-4">
+                <div class="card shadow-sm border-0 gestion-profile-card h-100">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center mb-4">
+                      <div class="gestion-avatar me-3">
+                        <img src="images/team3.jpg" alt="Marta Rivas" />
+                      </div>
+                      <div>
+                        <h5 class="mb-1">Marta Rivas</h5>
+                        <span class="badge bg-success text-white fw-semibold">Personal Administrativo</span>
+                      </div>
+                    </div>
+                    <ul class="list-unstyled gestion-profile-list mb-4">
+                      <li><span>Legajo</span><strong>PA-2311</strong></li>
+                      <li><span>Email</span><strong>marta.rivas@greedycars.com</strong></li>
+                      <li><span>Teléfono</span><strong>+54 11 4020 9988</strong></li>
+                      <li><span>Turno</span><strong>Lunes a Viernes &middot; 9 a 17 hs</strong></li>
+                    </ul>
+                    <h6 class="text-muted text-uppercase fw-semibold small mb-3">Soportes frecuentes</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                      <span class="info-chip">Flota &middot; interno 145</span>
+                      <span class="info-chip">Caja &middot; interno 208</span>
+                      <span class="info-chip">Comercial &middot; comercial@greedycars.com</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+</body>
+
+</html>

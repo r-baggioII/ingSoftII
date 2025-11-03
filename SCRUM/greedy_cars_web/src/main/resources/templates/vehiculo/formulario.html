@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo}">Formulario de Vehículo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-car"></i> Greedy Cars
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/vehiculos">Vehículos</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="/vehiculos">Vehículos</a></li>
+                <li class="breadcrumb-item active" aria-current="page" 
+                    th:text="${accion == 'crear'} ? 'Nuevo' : 'Editar'">
+                    Formulario
+                </li>
+            </ol>
+        </nav>
+
+        <!-- Mensajes de error -->
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Formulario -->
+        <div class="card">
+            <div class="card-header" th:classappend="${accion == 'crear'} ? 'bg-primary' : 'bg-warning'">
+                <h3 class="mb-0 text-white" th:if="${accion == 'crear'}">
+                    <i class="fas fa-plus-circle"></i> Crear Nuevo Vehículo
+                </h3>
+                <h3 class="mb-0 text-white" th:if="${accion == 'editar'}">
+                    <i class="fas fa-edit"></i> Editar Vehículo
+                </h3>
+            </div>
+            <div class="card-body form-section">
+                <form th:action="${accion == 'crear'} ? @{/vehiculos/crear} : @{/vehiculos/actualizar/{id}(id=${vehiculo.id})}" 
+                      th:object="${vehiculo}" 
+                      method="post">
+                    
+                    <!-- ID (solo mostrar en modo edición) -->
+                    <div class="mb-3" th:if="${accion == 'editar'}">
+                        <label class="form-label">ID del Vehículo:</label>
+                        <input type="text" class="form-control" th:value="${vehiculo.id}" disabled>
+                        <small class="form-text text-muted">El ID no se puede modificar</small>
+                    </div>
+
+                    <!-- Patente -->
+                    <div class="mb-3">
+                        <label for="patente" class="form-label">
+                            Patente <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="patente" 
+                               th:field="*{patente}" 
+                               placeholder="Ej: ABC123, AA123BB"
+                               required
+                               minlength="6"
+                               maxlength="20">
+                        <div class="form-text">
+                            Ingrese la patente del vehículo (6-20 caracteres)
+                        </div>
+                    </div>
+
+                    <!-- Estado del Vehículo -->
+                    <div class="mb-3">
+                        <label for="estadoVehiculo" class="form-label">
+                            Estado del Vehículo <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" 
+                                id="estadoVehiculo" 
+                                th:field="*{estadoVehiculo}" 
+                                required>
+                            <option value="">Seleccione un estado...</option>
+                            <option value="DISPONIBLE">Disponible</option>
+                            <option value="RESERVADO">Reservado</option>
+                            <option value="VENDIDO">Vendido</option>
+                            <option value="EN_MANTENIMIENTO">En Mantenimiento</option>
+                            <option value="FUERA_DE_SERVICIO">Fuera de Servicio</option>
+                        </select>
+                        <div class="form-text">
+                            Seleccione el estado actual del vehículo
+                        </div>
+                    </div>
+
+                    <!-- Información de auditoría (solo en modo edición) -->
+                    <div th:if="${accion == 'editar' && vehiculo.fechaCreacion != null}" class="alert alert-info">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-info-circle"></i> Información de Auditoría
+                        </h6>
+                        <p class="mb-1">
+                            <strong>Fecha de Creación:</strong> 
+                            <span th:text="${#temporals.format(vehiculo.fechaCreacion, 'dd/MM/yyyy HH:mm:ss')}"></span>
+                        </p>
+                        <p class="mb-0" th:if="${vehiculo.fechaModificacion != null}">
+                            <strong>Última Modificación:</strong> 
+                            <span th:text="${#temporals.format(vehiculo.fechaModificacion, 'dd/MM/yyyy HH:mm:ss')}"></span>
+                        </p>
+                    </div>
+
+                    <hr>
+
+                    <!-- Botones de acción -->
+                    <div class="d-flex justify-content-between">
+                        <a th:href="@{/vehiculos}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn" 
+                                th:classappend="${accion == 'crear'} ? 'btn-primary' : 'btn-warning'">
+                            <i class="fas" th:classappend="${accion == 'crear'} ? 'fa-save' : 'fa-edit'"></i>
+                            <span th:text="${accion == 'crear'} ? 'Guardar' : 'Actualizar'">Guardar</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Ayuda -->
+        <div class="card mt-4 bg-light">
+            <div class="card-body">
+                <h6><i class="fas fa-question-circle"></i> Ayuda</h6>
+                <ul class="mb-0">
+                    <li>Todos los campos marcados con <span class="text-danger">*</span> son obligatorios</li>
+                    <li>La patente debe tener entre 6 y 20 caracteres</li>
+                    <li th:if="${accion == 'crear'}">
+                        Al guardar, se enviará una petición POST a 
+                        <code>http://localhost:9000/api/v1/vehiculos</code>
+                    </li>
+                    <li th:if="${accion == 'editar'}">
+                        Al actualizar, se enviará una petición PUT a 
+                        <code th:text="'http://localhost:9000/api/v1/vehiculos/' + ${vehiculo.id}"></code>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Script para convertir patente a mayúsculas automáticamente -->
+    <script>
+        document.getElementById('patente').addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+    </script>
+</body>
+</html>

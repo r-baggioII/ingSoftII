@@ -43,130 +43,33 @@
  <symbol id="comment" viewBox="0 0 256 256"><path fill="currentColor" d="M128 24a104 104 0 0 0-91.82 152.88l-11.35 34.05a16 16 0 0 0 20.24 20.24l34.05-11.35A104 104 0 1 0 128 24m0 192a87.87 87.87 0 0 1-44.06-11.81a8 8 0 0 0-6.54-.67L40 216l12.47-37.4a8 8 0 0 0-.66-6.54A88 88 0 1 1 128 216"/></symbol>
 </svg> 
 <body data-bs-spy="scroll" data-bs-target="#header-nav" tabindex="0">
-  <nav class="navbar navbar-expand-lg navbar-light container-fluid py-3 position-fixed">
-    <div class="container">
-      <a class="navbar-brand" href="index.html"><img src="images/logo.png" alt="logo" /></a>
-      <button class="navbar-toggler me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
-        aria-controls="offcanvasNavbar">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
-        <div class="offcanvas-header">
-          <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menú</h5>
-          <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body">
-          <ul class="navbar-nav align-items-center justify-content-end flex-grow-1 pe-3">
-            <li class="nav-item">
-              <a class="nav-link active px-3" aria-current="page" href="#">Inicio</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link px-3" href="#rental">Reserva</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link px-3" href="#pricing">Acerca de</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link px-3" href="#services">Autos</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link px-3" href="#blog">Blog</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link px-3" href="#action">Contacto</a>
-            </li>
-            <li class="nav-item dropdown text-center">
-              <a class="nav-link px-3 dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button"
-                aria-expanded="false" href="#">Páginas
-                <iconify-icon icon="material-symbols:arrow-drop-down"></iconify-icon></a>
-              <ul class="dropdown-menu">
-                <li>
-                  <a href="about.html" class="dropdown-item text-uppercase">Acerca de <span
-                      class="badge bg-secondary">Pro</span></a>
-                </li>
-                <li>
-                  <a href="blog.html" class="dropdown-item text-uppercase">Blog <span
-                      class="badge bg-secondary">Pro</span></a>
-                </li>
-                <li>
-                  <a href="single-post.html" class="dropdown-item text-uppercase">publicación-individual
-                    <span class="badge bg-secondary">Pro</span></a>
-                </li>
-                <li>
-                  <a href="cars.html" class="dropdown-item text-uppercase">Autos <span
-                      class="badge bg-secondary">Pro</span></a>
-                </li>
-                <li>
-                  <a href="car-single.html" class="dropdown-item text-uppercase">Auto-Individual <span
-                      class="badge bg-secondary">Pro</span></a>
-                </li>
-                <li>
-                  <a href="booking.html" class="dropdown-item text-uppercase">Reserva <span
-                      class="badge bg-secondary">Pro</span></a>
-                </li>
-                <li>
-                  <a href="services.html" class="dropdown-item text-uppercase">Servicios <span
-                      class="badge bg-secondary">Pro</span></a>
-                </li>
-                <li>
-                  <a href="pricing.html" class="dropdown-item text-uppercase">Precios <span
-                      class="badge bg-secondary">Pro</span></a>
-                </li>
-                <li>
-                  <a href="contact.html" class="dropdown-item text-uppercase">Contacto <span
-                      class="badge bg-secondary">Pro</span></a>
-                </li>
-                <li>
-                  <a href="team.html" class="dropdown-item text-uppercase">Equipo <span
-                      class="badge bg-secondary">Pro</span></a>
-                </li>
-                <li>
-                  <a href="review.html" class="dropdown-item text-uppercase">Reseñas <span
-                      class="badge bg-secondary">Pro</span></a>
-                </li>
-                <li>
-                  <a href="faq.html" class="dropdown-item text-uppercase">Preguntas Frecuentes <span
-                      class="badge bg-secondary">Pro</span></a>
-                </li>
-              </ul>
-            </li>
-            <a class="fw-bold text-capitalize fs-5 px-3 py-2" target="_blank"
-              href="https://templatesjungle.gumroad.com/l/limo-limousine-and-car-rental-free-html-website-template">Obtener Pro</a>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </nav>
-
+  
   <!-- hero section start  -->
-  <section id="hero" class="position-relative jarallax" style="
+  <section id="hero" class="position-relative d-flex align-items-center justify-content-center" style="
         background-image: url(images/Bg.jpg);
         background-repeat: no-repeat;
         background-size: cover;
         background-position: center;
+        min-height: 100vh;
       ">
-    <div class="container-fluid">
-      <div class="hero-content container justify-content-center text-center">
-        <div class="row">
-          <div class="detail mb-4">
-            <h1 class="text-white">Encuentra tu Vehículo y Limusina</h1>
-            <p class="hero-paragraph text-white">
-              Tenemos muchas mejores colecciones de alquiler de autos.
-            </p>
-          </div>
-        </div>
+    
+    <div class="container position-relative" style="z-index: 2;">
+      <!-- Hero Title -->
+      <div class="hero-content text-center mb-4 mb-md-5">
+        <h1 class="text-white display-4 fw-bold mb-3">Encuentra tu Vehículo y Limusina</h1>
+        <p class="hero-paragraph text-white fs-5">
+          Tenemos muchas mejores colecciones de alquiler de autos.
+        </p>
       </div>
-    </div>
 
-    <!-- search section start  -->
-    <section id="search position-absolute top-50 start-50 translate-middle">
-      <div class="container search-block p-5">
-        <form class="row">
-          <div class="col-12 col-md-6 col-lg-3 mt-4 mt-lg-0">
-            <label for="vehicle" class="label-style text-capitalize form-label text-white">Tipo de vehículo</label>
-            <div class="input-group date">
+      <!-- Search Form -->
+      <div class="search-block p-3 p-md-4 p-lg-5" style="background-color: rgba(0, 0, 0, 0.7); border-radius: 8px; max-width: 1200px; margin: 0 auto;">
+        <form class="row g-3">
+          <div class="col-12 col-md-6 col-lg-3">
+            <label for="vehicle" class="label-style text-capitalize form-label text-white mb-2">Tipo de vehículo</label>
+            <div class="input-group position-relative">
               <select class="form-select form-control p-3" id="vehicle" aria-label="Default select example"
-                style="background-image: none">
+                style="background-image: none; padding-left: 45px !important;">
                 <option selected>Seleccionar Tipo de Vehículo</option>
                 <option value="1">BMW x3</option>
                 <option value="2">BMW M2</option>
@@ -176,52 +79,45 @@
                 <option value="6">Auto deportivo</option>
                 <option value="7">Tesla</option>
               </select>
-              <span class="search-icon-position position-absolute p-3">
-                <iconify-icon class="search-icons" icon="solar:bus-outline"></iconify-icon>
+              <span class="position-absolute top-50 start-0 translate-middle-y ps-3" style="z-index: 10; pointer-events: none;">
+                <iconify-icon class="search-icons text-secondary" icon="solar:bus-outline"></iconify-icon>
               </span>
             </div>
           </div>
-          <div class="col-12 col-md-6 col-lg-3 mt-4 mt-lg-0">
-            <label for="location" class="label-style text-capitalize form-label text-white">Ubicación de recogida</label>
-            
-            <div class="input-group location text-dark">
-              <input type="text" class="form-control p-3 position-relative" placeholder="Aeropuerto o cualquier lugar" id="location">
-              <span class="search-icon-position position-absolute p-3">
-                <iconify-icon class="search-icons" icon="solar:map-arrow-square-outline"></iconify-icon>
+          <div class="col-12 col-md-6 col-lg-3">
+            <label for="location" class="label-style text-capitalize form-label text-white mb-2">Ubicación de recogida</label>
+            <div class="input-group position-relative">
+              <input type="text" class="form-control p-3" placeholder="Aeropuerto o cualquier lugar" id="location" style="padding-left: 45px !important;">
+              <span class="position-absolute top-50 start-0 translate-middle-y ps-3" style="z-index: 10; pointer-events: none;">
+                <iconify-icon class="search-icons text-secondary" icon="solar:map-arrow-square-outline"></iconify-icon>
               </span>
             </div>
           </div>
-          <div class="col-12 col-md-6 col-lg-3 mt-4 mt-lg-0">
-            <label for="pick-up-date" class="label-style text-capitalize form-label text-white">Fecha de recogida</label>
-            <div class="input-group date" id="datepicker1">
-              <input type="text" class="form-control p-3" id="pick-up-date" />
-
-              <span class="input-group-append">
-                <span class="search-icon-position position-absolute p-3">
-                  <iconify-icon class="search-icons" icon="solar:calendar-broken"></iconify-icon>
-                </span>
+          <div class="col-12 col-md-6 col-lg-3">
+            <label for="pick-up-date" class="label-style text-capitalize form-label text-white mb-2">Fecha de recogida</label>
+            <div class="position-relative">
+              <input type="text" class="form-control p-3" id="pick-up-date" placeholder="dd/mm/yyyy" style="padding-left: 45px !important;" readonly />
+              <span class="position-absolute top-50 start-0 translate-middle-y ps-3" style="z-index: 10; pointer-events: none;">
+                <iconify-icon class="search-icons text-secondary" icon="solar:calendar-broken"></iconify-icon>
               </span>
             </div>
           </div>
-          <div class="col-12 col-md-6 col-lg-3 mt-4 mt-lg-0">
-            <label for="return-date" class="label-style text-capitalize form-label text-white">Fecha de devolución</label>
-            <div class="input-group date" id="datepicker2">
-              <input type="text" class="form-control p-3" id="return-date" />
-
-              <span class="input-group-append">
-                <span class="search-icon-position position-absolute p-3">
-                  <iconify-icon class="search-icons" icon="solar:calendar-broken"></iconify-icon>
-                </span>
+          <div class="col-12 col-md-6 col-lg-3">
+            <label for="return-date" class="label-style text-capitalize form-label text-white mb-2">Fecha de devolución</label>
+            <div class="position-relative">
+              <input type="text" class="form-control p-3" id="return-date" placeholder="dd/mm/yyyy" style="padding-left: 45px !important;" readonly />
+              <span class="position-absolute top-50 start-0 translate-middle-y ps-3" style="z-index: 10; pointer-events: none;">
+                <iconify-icon class="search-icons text-secondary" icon="solar:calendar-broken"></iconify-icon>
               </span>
             </div>
           </div>
         </form>
 
         <div class="d-grid gap-2 mt-4">
-          <button class="btn btn-primary" type="button">Encuentra tu auto</button>
+          <button class="btn btn-primary p-3 fw-bold fs-5" type="button">Encuentra tu auto</button>
         </div>
       </div>
-    </section>
+    </div>
   </section>
   <!-- process section start  -->
   <section id="process"  class="padding-small">
@@ -549,7 +445,7 @@
       }
     }
 
-    // Function to update weather (placeholder - could be connected to a weather API)
+    // Function to update weather
     function updateWeather() {
       // Fetch weather data from Open-Meteo API for Mendoza, Argentina (lat: -32.89, lon: -68.83)
       fetch('https://api.open-meteo.com/v1/forecast?latitude=-32.89&longitude=-68.83&current_weather=true')
@@ -591,10 +487,32 @@
         });
     }
 
+    // Initialize datepickers
+    function initializeDatepickers() {
+      if (typeof $.fn.datepicker !== 'undefined') {
+        $('#pick-up-date').datepicker({
+          format: 'dd/mm/yyyy',
+          autoclose: true,
+          startDate: new Date(),
+          language: 'es',
+          todayHighlight: true
+        });
+        
+        $('#return-date').datepicker({
+          format: 'dd/mm/yyyy',
+          autoclose: true,
+          startDate: new Date(),
+          language: 'es',
+          todayHighlight: true
+        });
+      }
+    }
+
     // Load data when page loads
     document.addEventListener('DOMContentLoaded', function() {
       fetchExchangeRate();
       updateWeather();
+      initializeDatepickers();
       
       // Update exchange rate every 5 minutes
       setInterval(fetchExchangeRate, 300000);

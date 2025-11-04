@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de Alquileres - Greedy Cars</title>
+
+  <!--vendor css ================================================== -->
+  <link rel="stylesheet" type="text/css" href="css/vendor.css" />
+
+  <!-- Link Swiper's CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css" />
+
+  <!--Bootstrap ================================================== -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous" />
+
+  <!-- Style Sheet ================================================== -->
+  <link rel="stylesheet" type="text/css" href="style.css" />
+
+  <!-- Google Fonts ================================================== -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet" />
+
+  <script src="js/modernizr.js"></script>
+</head>
+
+<body data-bs-spy="scroll" data-bs-target="#header-nav" tabindex="0">
+
+  <nav class="navbar navbar-expand-lg navbar-light container-fluid py-3 position-fixed">
+    <div class="container">
+      <a class="navbar-brand" href="index.html"><img src="images/logo.png" alt="logo" /></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
+        aria-controls="offcanvasNavbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+        <div class="offcanvas-header">
+          <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menu</h5>
+          <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+          <ul class="navbar-nav align-items-center justify-content-end flex-grow-1 pe-3">
+            <li class="nav-item">
+              <a class="nav-link px-3" href="index.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-3" href="gestion-usuarios.html">Usuarios</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-3" href="gestion-vehiculos.html">Gestión Vehículos</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active px-3" href="gestion-alquiler.html">Gestión Alquileres</a>
+            </li>
+            <li class="nav-item">
+              <a class="btn btn-outline-primary px-3" href="login.html">Cerrar Sesión</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- hero section start  -->
+  <section id="banner" class="position-relative overflow-hidden jarallax" style="background-image: url(images/Bg.jpg); background-repeat: no-repeat; background-size: cover; background-position: center;">
+    <div class="container text-center py-5 mt-5">
+      <div class="row my-5">
+        <div class="d-flex flex-wrap flex-column justify-content-center align-items-center text-white">
+          <h2 class="page-title display-3 mt-5">Gestión de Alquileres</h2>
+          <nav class="breadcrumb ">
+            <a class="breadcrumb-item text-white" href="index.html">Home</a>
+            <a class="breadcrumb-item text-white" href="gestion-vehiculos.html">Administración</a>
+            <span class="breadcrumb-item text-white active" aria-current="page">Alquileres</span>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact-us-wrap py-5">
+    <div class="container">
+      <div class="row">
+        <div class="inquiry-item offset-md-1 col-md-10">
+          <h2 class="text-center my-4">Administrar <span class="text-primary">Alquileres</span></h2>
+
+          <div class="row g-4">
+            <div class="col-12">
+              <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
+                <div class="card-body">
+                  <h5 class="card-title">Crear / Editar Alquiler</h5>
+                  <form id="alquiler-form">
+                    <div class="row g-3">
+                      <div class="col-md-3">
+                        <label class="panel-label">Fecha Desde</label>
+                        <input type="date" class="form-control panel-control" id="alquilerFechaDesde" required>
+                      </div>
+                      <div class="col-md-3">
+                        <label class="panel-label">Fecha Hasta</label>
+                        <input type="date" class="form-control panel-control" id="alquilerFechaHasta" required>
+                      </div>
+                      <div class="col-md-3">
+                        <label class="panel-label">ID Cliente</label>
+                        <input type="text" class="form-control panel-control" id="alquilerIdCliente" placeholder="ID del cliente (tipo cliente)" required>
+                      </div>
+                      <div class="col-md-3">
+                        <label class="panel-label">ID Vehículo</label>
+                        <input type="text" class="form-control panel-control" id="alquilerIdVehiculo" placeholder="ID del vehículo" required>
+                      </div>
+                    </div>
+
+                    <input type="hidden" id="alquilerId" value="">
+
+                    <div class="d-flex gap-2 mt-3">
+                      <button type="submit" class="btn main-button-panel">Guardar Alquiler</button>
+                      <button type="button" class="btn btn-outline-secondary" id="alquiler-reset">Limpiar</button>
+                      <a href="gestion-costos.html" class="btn btn-outline-primary">Gestionar Costos</a>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <!-- Documentacion block (inside gestion-alquiler) -->
+            <div class="col-12 mt-3">
+              <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.03);">
+                <div class="card-body">
+                  <h6>Documentación asociada</h6>
+                  <form id="documento-form">
+                    <div class="row g-3">
+                      <div class="col-md-4">
+                        <label class="panel-label">Tipo Documentación</label>
+                        <select id="docTipo" class="form-select panel-control">
+                          <option value="DOCUMENTO_IDENTIDAD">DOCUMENTO_IDENTIDAD</option>
+                          <option value="CARNET_DE_CONDUCRI">CARNET_DE_CONDUCRI</option>
+                        </select>
+                      </div>
+                      <div class="col-md-4">
+                        <label class="panel-label">Archivo</label>
+                        <input type="file" id="docFile" class="form-control panel-control" accept="*/*">
+                      </div>
+                      <div class="col-md-4">
+                        <label class="panel-label">Nombre Archivo</label>
+                        <input type="text" id="docNombre" class="form-control panel-control" placeholder="Nombre del archivo">
+                      </div>
+                    </div>
+                    <div class="row g-3 mt-2">
+                      <div class="col-md-12">
+                        <label class="panel-label">Observación</label>
+                        <textarea id="docObservacion" class="form-control panel-control" rows="2" placeholder="Observaciones"></textarea>
+                      </div>
+                    </div>
+                    <input type="hidden" id="docId" value="">
+                    <div class="d-flex gap-2 mt-3">
+                      <button type="submit" class="btn main-button-panel">Agregar Documento</button>
+                      <button type="button" id="doc-reset" class="btn btn-outline-secondary">Limpiar</button>
+                    </div>
+                  </form>
+
+                  <!-- Document table removed per request: only one table (Alquileres) will be shown on this page. -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Alquiler table -->
+            <div class="col-12">
+              <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
+                <div class="card-body">
+                  <h5 class="card-title">Alquileres</h5>
+                  <div class="row g-2 mb-3">
+                    <div class="col-md-8"><input type="text" class="form-control panel-control" id="alquiler-search" placeholder="Buscar por cliente o vehículo"></div>
+                    <div class="col-md-4"><button class="btn main-button-panel w-100" id="alquiler-refresh">Buscar</button></div>
+                  </div>
+                  <div class="panel-table table-responsive">
+                    <table class="table table-hover align-middle">
+                      <thead>
+                        <tr>
+                          <th>ID</th>
+                          <th>Fecha Desde</th>
+                          <th>Fecha Hasta</th>
+                          <th>ID Cliente</th>
+                          <th>ID Vehículo</th>
+                          <th>Eliminado</th>
+                          <th class="text-end">Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody id="alquiler-table-body">
+                        <tr>
+                          <td>ALQ-001</td>
+                          <td>2025-10-10</td>
+                          <td>2025-10-12</td>
+                          <td>CLI-001</td>
+                          <td>CAR-001</td>
+                          <td><span class="badge bg-success">No</span></td>
+                          <td class="text-end"><button class="btn btn-sm btn-outline-primary">Editar</button> <button class="btn btn-sm btn-outline-danger">Eliminar</button></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="footer" class="bg-dark padding-medium">
+    <div class="container">
+      <footer class="row row-cols-1 row-cols-sm-2 row-cols-md-5">
+        <div class="col-md-4">
+          <h4 class="text-uppercase">About</h4>
+          <p class="py-3">Vel non nibh vestibulum massa ullam corper bib endum ultrices venenatis, id id sed mass.</p>
+          <div class="d-flex align-items-center">
+            <p>Follow us</p>
+            <ul class="list-unstyled d-flex m-0 ps-3">
+              <li class="pe-3"><a href="#"><iconify-icon class="social-icon text-primary" icon="ri:facebook-fill"></iconify-icon></a></li>
+              <li class="pe-3"><a href="#"><iconify-icon class="social-icon text-primary" icon="ri:twitter-fill"></iconify-icon></a></li>
+              <li class="pe-3"><a href="#"><iconify-icon class="social-icon text-primary" icon="ri:pinterest-fill"></iconify-icon></a></li>
+              <li class="pe-3"><a href="#"><iconify-icon class="social-icon text-primary" icon="ri:instagram-fill"></iconify-icon></a></li>
+              <li class="pe-3"><a href="#"><iconify-icon class="social-icon text-primary" icon="ri:youtube-fill"></iconify-icon></a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <h4 class="text-uppercase">Quick Links</h4>
+          <ul class="list-unstyled">
+            <li class="my-3"><a href="#" class="footer-link text-white">Home</a></li>
+            <li class="my-3"><a href="#" class="footer-link text-white">About</a></li>
+            <li class="my-3"><a href="#" class="footer-link text-white">Services</a></li>
+            <li class="my-3"><a href="#" class="footer-link text-white">Cars</a></li>
+          </ul>
+        </div>
+        <div class="col-md-2">
+          <h4 class="text-uppercase">Help</h4>
+          <ul class="list-unstyled">
+            <li class="my-3"><a href="#" class="footer-link text-white">Privacy Policy</a></li>
+            <li class="my-3"><a href="#" class="footer-link text-white">Shipping Details</a></li>
+            <li class="my-3"><a href="#" class="footer-link text-white">Offer & Kits</a></li>
+            <li class="my-3"><a href="#" class="footer-link text-white">Terms & Conditions</a></li>
+          </ul>
+        </div>
+        <div class="col-md-4">
+          <h4 class="text-uppercase">Subscribe our Newsletter</h4>
+          <p class="py-3">Vel non nibh vestibulum massa ullam corper bib endum ultrices venenatis, id id sed mass.</p>
+          <div class="d-flex align-items-center">
+            <form class="w-100">
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="input-group  border-bottom">
+                    <input type="email" class="form-control fst-italic bg-dark text-white border-0" placeholder="Enter your email">
+                    <span class="input-group-btn">
+                      <button class="btn text-white" type="submit">Subscribe</button>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <footer class="d-flex flex-wrap justify-content-between align-items-center border-top"></footer>
+
+    <div class="container">
+      <footer class="d-flex flex-wrap justify-content-between align-items-center py-2 pt-4">
+        <div class="col-md-6 d-flex align-items-center">
+          <p>©Greedy Cars, All rights reserved</p>
+        </div>
+        <div class="col-md-6 d-flex align-items-center justify-content-end">
+          <ul class="footer-nav list-unstyled ">
+            <li class="nav-item me-2"><a class="nav-link pe-3 text-white " href="#">Home</a></li>
+            <li class="nav-item me-2 mb-3"><a class="nav-link pe-3 text-white " href="#">Booking</a></li>
+            <li class="nav-item me-2 mb-3"><a class="nav-link pe-3 text-white " href="#">About</a></li>
+            <li class="nav-item me-2 mb-3"><a class="nav-link pe-3 text-white " href="#">Cars</a></li>
+            <li class="nav-item me-2 mb-3"><a class="nav-link pe-3 text-white " href="#">Contact</a></li>
+          </ul>
+        </div>
+      </footer>
+    </div>
+  </section>
+
+  <!-- script ================================================== -->
+  <script src="js/jquery-1.11.0.min.js"></script>
+  <script src="js/plugins.js"></script>
+  <script src="js/script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+  <script src="js/gestion-usuarios.js"></script>
+  <script src="js/gestion-nacionalidades.js"></script>
+
+  <script>
+    (function(){
+      // In-memory stores
+      const alquileres = [];
+      const documentaciones = [];
+
+      function generateId(prefix){ return prefix + '-' + Math.random().toString(36).slice(2,9); }
+
+      // Alquiler model
+      function Alquiler({id, fechaDesde, fechaHasta, idCliente, idVehiculo, eliminado}){
+        this.id = id || generateId('ALQ');
+        this.fechaDesde = fechaDesde || null;
+        this.fechaHasta = fechaHasta || null;
+        this.idCliente = idCliente || null;
+        this.idVehiculo = idVehiculo || null;
+        this.eliminado = !!eliminado;
+        this.documentos = []; // associated document ids
+      }
+
+      // Documentacion model
+      const TipoDocumentacion = {
+        DOCUMENTO_IDENTIDAD: 'DOCUMENTO_IDENTIDAD',
+        CARNET_DE_CONDUCRI: 'CARNET_DE_CONDUCRI'
+      };
+
+      function Documentacion({id, tipoDocumentacion, observacion, pathArchivo, nombreArchivo, eliminado}){
+        this.id = id || generateId('DOC');
+        this.tipoDocumentacion = tipoDocumentacion || TipoDocumentacion.DOCUMENTO_IDENTIDAD;
+        this.observacion = observacion || '';
+        this.pathArchivo = pathArchivo || ''; // data URL or file name
+        this.nombreArchivo = nombreArchivo || '';
+        this.eliminado = !!eliminado;
+      }
+
+      // --- Alquiler API ---
+      window.validarAlquiler = function(fechaDesde, fechaHasta, idCliente, idVehiculo){
+        if(!fechaDesde || !fechaHasta) throw new Error('Fechas obligatorias');
+        const dDesde = Date.parse(fechaDesde);
+        const dHasta = Date.parse(fechaHasta);
+        if(isNaN(dDesde) || isNaN(dHasta)) throw new Error('Fechas inválidas');
+        if(dDesde > dHasta) throw new Error('FechaDesde debe ser <= FechaHasta');
+        if(!idCliente || String(idCliente).trim().length===0) throw new Error('ID Cliente requerido');
+        if(!idVehiculo || String(idVehiculo).trim().length===0) throw new Error('ID Vehículo requerido');
+      };
+
+      window.crearAlquiler = function(fechaDesde, fechaHasta, idCliente, idVehiculo){
+        window.validarAlquiler(fechaDesde, fechaHasta, idCliente, idVehiculo);
+        const a = new Alquiler({fechaDesde, fechaHasta, idCliente, idVehiculo});
+        alquileres.push(a);
+        renderAlquilerRow(a);
+        // Automatically create a factura and one detalleFactura for this alquiler
+        try{
+          const detalle = window.crearDetalleFactura(a.id);
+          // create factura with one detalle, default formaDePago EFECTIVO and estado SIN_DEFINIR
+          const numero = Date.now();
+          const fechaFactura = new Date().toISOString().slice(0,10);
+          const total = Number(detalle.subtotal) || 0;
+          const forma = window.crearFormaDePago('EFECTIVO','Creada automáticamente al crear alquiler');
+          window.crearFactura(numero, fechaFactura, total, 'SIN_DEFINIR', [detalle], forma);
+        }catch(e){ console.warn('No se pudo crear factura automática:', e); }
+
+        return a;
+      };
+
+      window.modificarAlquiler = function(id, fechaDesde, fechaHasta, idCliente, idVehiculo){
+        const a = window.buscarAlquiler(id);
+        if(!a) throw new Error('Alquiler no encontrado');
+        window.validarAlquiler(fechaDesde, fechaHasta, idCliente, idVehiculo);
+        a.fechaDesde = fechaDesde; a.fechaHasta = fechaHasta; a.idCliente = idCliente; a.idVehiculo = idVehiculo;
+        reRenderAlquilerTable();
+        return a;
+      };
+
+      window.buscarAlquiler = function(id){ return alquileres.find(x=>x.id===id) || null; };
+
+      // keep both spellings for eliminar/listar per your spec (typos included)
+      window.eliminarAlquiler = function(id){ const a = window.buscarAlquiler(id); if(!a) throw new Error('No encontrado'); a.eliminado = true; reRenderAlquilerTable(); };
+      window.eliminarAlquier = window.eliminarAlquiler; // alias for typo
+
+      window.listarAlquiler = function(){ return alquileres.slice(); };
+      window.listarAlquierActivo = function(){ return alquileres.filter(x=>!x.eliminado); };
+      window.listarAlquilerActivo = window.listarAlquierActivo; // correct spelling alias
+
+      // --- Documentacion API ---
+      window.validarDocumentacion = function(tipoDocumentacion, pathArchivo, nombreArchivo, observacion){
+        if(!tipoDocumentacion) throw new Error('Tipo de documentación requerido');
+        if(!nombreArchivo || String(nombreArchivo).trim().length===0) throw new Error('Nombre de archivo requerido');
+        // pathArchivo may be a filename or data URL; in browser it's optional, but we store if provided
+      };
+
+      window.crearDocumentacion = function(tipoDocumentacion, pathArchivo, nombreArchivo, observacion){
+        window.validarDocumentacion(tipoDocumentacion, pathArchivo, nombreArchivo, observacion);
+        const d = new Documentacion({tipoDocumentacion, pathArchivo, nombreArchivo, observacion});
+        documentaciones.push(d);
+        renderDocumentoRow(d);
+        return d;
+      };
+
+      window.modificarDocumentacion = function(id, tipoDocumentacion, pathArchivo, nombreArchivo, observacion){
+        const d = window.buscarDocumentacion(id);
+        if(!d) throw new Error('Documentación no encontrada');
+        window.validarDocumentacion(tipoDocumentacion, pathArchivo, nombreArchivo, observacion);
+        d.tipoDocumentacion = tipoDocumentacion; d.pathArchivo = pathArchivo; d.nombreArchivo = nombreArchivo; d.observacion = observacion;
+        reRenderDocumentoTable();
+        return d;
+      };
+
+      window.buscarDocumentacion = function(id){ return documentaciones.find(x=>x.id===id) || null; };
+
+      window.eliminarDocumentacion = function(id){ const d = window.buscarDocumentacion(id); if(!d) throw new Error('No encontrado'); d.eliminado = true; reRenderDocumentoTable(); };
+      window.eliminarDocumentacionSting = window.eliminarDocumentacion; // support typo if used
+
+      window.listarDocumentacion = function(){ return documentaciones.slice(); };
+      window.listarDocumentacionActivo = function(){ return documentaciones.filter(x=>!x.eliminado); };
+
+      // --- DetalleFactura, Factura and FormaDePago models & API ---
+      function DetalleFactura({id, idAlquiler, cantidad, subtotal, eliminado}){
+        this.id = id || generateId('DF');
+        this.idAlquiler = idAlquiler || null;
+        this.cantidad = Number(cantidad) || 1;
+        this.subtotal = Number(subtotal) || 0.0;
+        this.eliminado = !!eliminado;
+      }
+
+      function Factura({id, numeroFactura, fechaFactura, totalPagado, estado, detalles, formaDePago, eliminado}){
+        this.id = id || generateId('FA');
+        this.numeroFactura = Number(numeroFactura) || 0;
+        this.fechaFactura = fechaFactura || null;
+        this.totalPagado = Number(totalPagado) || 0.0;
+        this.estado = estado || 'SIN_DEFINIR';
+        this.detalles = Array.isArray(detalles) ? detalles : [];
+        this.formaDePago = formaDePago || null;
+        this.eliminado = !!eliminado;
+      }
+
+      function FormaDePago({id, tipoPago, observacion, eliminado}){
+        this.id = id || generateId('FP');
+        this.tipoPago = tipoPago || 'EFECTIVO';
+        this.observacion = observacion || '';
+        this.eliminado = !!eliminado;
+      }
+
+      const detallesFacturaStore = [];
+      const facturaStore = [];
+      const formaPagoStore = [];
+
+      // FormaDePago API
+      window.crearFormaDePago = function(tipoPago, observacion){
+        const f = new FormaDePago({tipoPago, observacion});
+        formaPagoStore.push(f);
+        return f;
+      };
+      window.modificarFormaDePago = function(id, tipoPago, observacion){
+        const f = formaPagoStore.find(x=>x.id===id); if(!f) throw new Error('FormaDePago no encontrada');
+        f.tipoPago = tipoPago; f.observacion = observacion; return f;
+      };
+      window.eliminarValorCuota = function(id){ const f = formaPagoStore.find(x=>x.id===id); if(f) f.eliminado = true; };
+
+      // DetalleFactura API
+      window.crearDetalleFactura = function(idAlquiler){
+        // For demo: create a simple detalle with cantidad=1 and subtotal=0 (could be computed from cost)
+        const d = new DetalleFactura({idAlquiler, cantidad:1, subtotal:0});
+        detallesFacturaStore.push(d);
+        return d;
+      };
+      window.buscarDetalleFactura = function(id){ return detallesFacturaStore.find(x=>x.id===id) || null; };
+      window.modificarDetalleFactura = function(idDetalle, idAlquiler){ const d = window.buscarDetalleFactura(idDetalle); if(!d) throw new Error('Detalle no encontrado'); d.idAlquiler = idAlquiler; return d; };
+      window.eliminarDetalleFactura = function(id){ const d = window.buscarDetalleFactura(id); if(!d) throw new Error('Detalle no encontrado'); d.eliminado = true; };
+
+      // Factura API
+      window.validarFactura = function(numeroFactura, fechaFactura, totalPagado, estado, detallesCollection, formaDePago){
+        if(typeof numeroFactura === 'undefined' || isNaN(Number(numeroFactura))) throw new Error('Numero de factura inválido');
+        if(!fechaFactura || isNaN(Date.parse(fechaFactura))) throw new Error('Fecha factura inválida');
+        if(typeof totalPagado === 'undefined' || isNaN(Number(totalPagado))) throw new Error('Total pagado inválido');
+        if(!Array.isArray(detallesCollection) || detallesCollection.length===0) throw new Error('Debe proveer al menos un detalle');
+        if(!formaDePago) throw new Error('Forma de pago requerida');
+      };
+
+      window.crearFactura = function(numeroFactura, fechaFactura, totalPagado, estado, detallesCollection, formaDePago){
+        window.validarFactura(numeroFactura, fechaFactura, totalPagado, estado, detallesCollection, formaDePago);
+        // ensure detalles are DetalleFactura objects (if passed as plain objects, convert)
+        const detalles = detallesCollection.map(d=> typeof d.id !== 'undefined' ? d : new DetalleFactura(d));
+        detalles.forEach(dt=>{ if(!detallesFacturaStore.find(x=>x.id===dt.id)) detallesFacturaStore.push(dt); });
+        const f = new Factura({numeroFactura, fechaFactura, totalPagado, estado, detalles, formaDePago});
+        facturaStore.push(f);
+        renderFacturaRow && typeof renderFacturaRow === 'function' && renderFacturaRow(f);
+        return f;
+      };
+
+      window.modificarFactura = function(id, numeroFactura, fechaFactura, totalPagado, estado, detallesCollection){
+        const f = facturaStore.find(x=>x.id===id); if(!f) throw new Error('Factura no encontrada');
+        window.validarFactura(numeroFactura, fechaFactura, totalPagado, estado, detallesCollection, f.formaDePago);
+        f.numeroFactura = Number(numeroFactura); f.fechaFactura = fechaFactura; f.totalPagado = Number(totalPagado); f.estado = estado; f.detalles = detallesCollection;
+        reRenderFacturaTable && typeof reRenderFacturaTable === 'function' && reRenderFacturaTable();
+        return f;
+      };
+
+      window.buscarFactura = function(id){ return facturaStore.find(x=>x.id===id) || null; };
+      window.eliminarFactura = function(id){ const f = window.buscarFactura(id); if(!f) throw new Error('Factura no encontrada'); f.eliminado = true; reRenderFacturaTable && typeof reRenderFacturaTable === 'function' && reRenderFacturaTable(); };
+      window.listarFactura = function(){ return facturaStore.slice(); };
+      window.listarFacturaActivo = function(){ return facturaStore.filter(x=>!x.eliminado); };
+      window.listarFacturaPorEstado = function(estado){ return facturaStore.filter(x=>x.estado===estado); };
+
+      // UI wiring - Alquiler
+      const alquilerForm = document.getElementById('alquiler-form');
+      const alquilerTbody = document.getElementById('alquiler-table-body');
+
+      if(alquilerForm && alquilerTbody){
+        alquilerForm.addEventListener('submit', function(e){
+          e.preventDefault();
+          const idHidden = document.getElementById('alquilerId').value || '';
+          const desde = document.getElementById('alquilerFechaDesde').value;
+          const hasta = document.getElementById('alquilerFechaHasta').value;
+          const idCli = document.getElementById('alquilerIdCliente').value;
+          const idVeh = document.getElementById('alquilerIdVehiculo').value;
+          try{
+            if(!idHidden){ window.crearAlquiler(desde, hasta, idCli, idVeh); }
+            else { window.modificarAlquiler(idHidden, desde, hasta, idCli, idVeh); }
+            alquilerForm.reset(); document.getElementById('alquilerId').value='';
+          }catch(err){ alert('Error: ' + err.message); }
+        });
+        document.getElementById('alquiler-reset').addEventListener('click', function(){ alquilerForm.reset(); document.getElementById('alquilerId').value=''; });
+      }
+
+      function renderAlquilerRow(a){
+        const tr = document.createElement('tr');
+        tr.dataset.id = a.id;
+        tr.innerHTML = '<td>' + escapeHtml(a.id) + '</td>' +
+                       '<td>' + escapeHtml(a.fechaDesde) + '</td>' +
+                       '<td>' + escapeHtml(a.fechaHasta) + '</td>' +
+                       '<td>' + escapeHtml(a.idCliente) + '</td>' +
+                       '<td>' + escapeHtml(a.idVehiculo) + '</td>' +
+                       '<td>' + (a.eliminado ? '<span class="badge bg-danger">Sí</span>' : '<span class="badge bg-success">No</span>') + '</td>' +
+                       '<td class="text-end"><button class="btn btn-sm btn-outline-primary btn-edit" data-id="'+a.id+'">Editar</button> <button class="btn btn-sm btn-outline-danger btn-delete" data-id="'+a.id+'">Eliminar</button></td>';
+        alquilerTbody.prepend(tr);
+      }
+
+      function reRenderAlquilerTable(){ alquilerTbody.innerHTML = ''; window.listarAlquiler().forEach(renderAlquilerRow); }
+
+      // UI wiring - Documentacion (form-only: table removed per user request)
+      const docForm = document.getElementById('documento-form');
+      const docFileInput = document.getElementById('docFile');
+
+      if(docForm){
+        docForm.addEventListener('submit', function(e){
+          e.preventDefault();
+          const idHidden = document.getElementById('docId').value || '';
+          const tipo = document.getElementById('docTipo').value;
+          const nombre = document.getElementById('docNombre').value || '';
+          const observ = document.getElementById('docObservacion').value || '';
+
+          // read file (pathArchivo) as data URL optionally
+          const f = docFileInput && docFileInput.files && docFileInput.files[0];
+          if(f){
+            const reader = new FileReader();
+            reader.onload = function(ev){
+              const path = ev.target.result; // data URL
+              try{
+                if(!idHidden) window.crearDocumentacion(tipo, path, nombre, observ);
+                else window.modificarDocumentacion(idHidden, tipo, path, nombre, observ);
+                docForm.reset(); document.getElementById('docId').value='';
+              }catch(err){ alert('Error: '+err.message); }
+            };
+            reader.readAsDataURL(f);
+          } else {
+            // no file selected - store empty path but keep name
+            try{
+              if(!idHidden) window.crearDocumentacion(tipo, '', nombre, observ);
+              else window.modificarDocumentacion(idHidden, tipo, '', nombre, observ);
+              docForm.reset(); document.getElementById('docId').value='';
+            }catch(err){ alert('Error: '+err.message); }
+          }
+        });
+        document.getElementById('doc-reset').addEventListener('click', function(){ docForm.reset(); document.getElementById('docId').value=''; });
+      }
+
+      function renderDocumentoRow(d){
+        // table was removed; this function kept for API compatibility but is a no-op when no table exists
+        const docTbody = document.getElementById('documento-table-body');
+        if(!docTbody) return; // no-op
+        const tr = document.createElement('tr');
+        tr.dataset.id = d.id;
+        tr.innerHTML = '<td>' + escapeHtml(d.id) + '</td>' +
+                       '<td>' + escapeHtml(d.tipoDocumentacion) + '</td>' +
+                       '<td>' + escapeHtml(d.nombreArchivo) + '</td>' +
+                       '<td>' + escapeHtml(d.observacion) + '</td>' +
+                       '<td>' + (d.eliminado ? '<span class="badge bg-danger">Sí</span>' : '<span class="badge bg-success">No</span>') + '</td>' +
+                       '<td class="text-end"><button class="btn btn-sm btn-outline-primary btn-edit-doc" data-id="'+d.id+'">Editar</button> <button class="btn btn-sm btn-outline-danger btn-delete-doc" data-id="'+d.id+'">Eliminar</button></td>';
+        docTbody.prepend(tr);
+      }
+
+      function reRenderDocumentoTable(){
+        const docTbody = document.getElementById('documento-table-body');
+        if(!docTbody) return; // nothing to render
+        docTbody.innerHTML = '';
+        window.listarDocumentacion().forEach(renderDocumentoRow);
+      }
+
+      function escapeHtml(s){ return String(s||'').replace(/[&<>'\"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+      // row actions
+      document.addEventListener('click', function(e){
+        // alquiler actions
+        if(e.target.matches('.btn-delete')){
+          const id = e.target.dataset.id; try{ window.eliminarAlquiler(id); }catch(err){ console.warn(err); }
+        }
+        if(e.target.matches('.btn-edit') && !e.target.classList.contains('btn-edit-doc')){
+          const id = e.target.dataset.id; const a = window.buscarAlquiler(id); if(!a) return;
+          document.getElementById('alquilerId').value = a.id;
+          document.getElementById('alquilerFechaDesde').value = a.fechaDesde;
+          document.getElementById('alquilerFechaHasta').value = a.fechaHasta;
+          document.getElementById('alquilerIdCliente').value = a.idCliente;
+          document.getElementById('alquilerIdVehiculo').value = a.idVehiculo;
+          window.scrollTo({top:0,behavior:'smooth'});
+        }
+
+        // documentacion actions
+        if(e.target.matches('.btn-delete-doc')){
+          const id = e.target.dataset.id; try{ window.eliminarDocumentacion(id); }catch(err){ console.warn(err); }
+        }
+        if(e.target.matches('.btn-edit-doc')){
+          const id = e.target.dataset.id; const d = window.buscarDocumentacion(id); if(!d) return;
+          document.getElementById('docId').value = d.id;
+          document.getElementById('docTipo').value = d.tipoDocumentacion;
+          document.getElementById('docNombre').value = d.nombreArchivo;
+          document.getElementById('docObservacion').value = d.observacion;
+          window.scrollTo({top:0,behavior:'smooth'});
+        }
+      });
+
+      // seed sample data from the static table rows (only alquiler rows remain in HTML)
+      (function seedFromHtml(){
+        const rowsAlq = Array.from(document.querySelectorAll('#alquiler-table-body tr'));
+        rowsAlq.forEach(r=>{
+          try{
+            const id = r.children[0] && r.children[0].textContent.trim();
+            const desde = r.children[1] && r.children[1].textContent.trim();
+            const hasta = r.children[2] && r.children[2].textContent.trim();
+            const idCli = r.children[3] && r.children[3].textContent.trim();
+            const idVeh = r.children[4] && r.children[4].textContent.trim();
+            const eliminado = (r.children[5] && r.children[5].textContent.trim().toLowerCase() === 'sí') || false;
+            const a = new Alquiler({id, fechaDesde: desde, fechaHasta: hasta, idCliente: idCli, idVehiculo: idVeh, eliminado});
+            alquileres.push(a);
+          }catch(e){ /*ignore*/ }
+        });
+
+        reRenderAlquilerTable();
+      })();
+
+    })();
+  </script>
+
+</body>
+
+</html>

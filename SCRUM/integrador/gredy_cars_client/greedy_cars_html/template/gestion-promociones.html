@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de Promociones - Greedy Cars</title>
+  <link rel="stylesheet" type="text/css" href="css/vendor.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" type="text/css" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light container-fluid py-3 position-fixed">
+    <div class="container">
+      <a class="navbar-brand" href="index.html"><img src="images/logo.png" alt="logo" /></a>
+      <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar">
+        <div class="offcanvas-body">
+          <ul class="navbar-nav align-items-center justify-content-end flex-grow-1 pe-3">
+            <li class="nav-item"><a class="nav-link px-3" href="gestion-vehiculos.html">Gestión Vehículos</a></li>
+            <li class="nav-item"><a class="nav-link active px-3" href="gestion-promociones.html">Promociones</a></li>
+            <li class="nav-item"><a class="nav-link px-3" href="reportes-alquileres.html">Reportes</a></li>
+            <li class="nav-item"><a class="btn btn-outline-primary px-3" href="login.html">Cerrar Sesión</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <section id="banner" class="position-relative overflow-hidden" style="background-image: url(images/Bg.jpg); background-size: cover; margin-top: 80px;">
+    <div class="container text-center py-5">
+      <h2 class="page-title display-3 text-white">Gestión de Promociones</h2>
+    </div>
+  </section>
+
+  <section class="py-5">
+    <div class="container">
+      <div class="row mb-4">
+        <div class="col-md-6"><h2>Promociones <span class="text-primary">Activas</span></h2></div>
+        <div class="col-md-6 text-end">
+          <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#modalNuevaPromo">
+            <iconify-icon icon="material-symbols:add"></iconify-icon> Nueva Promoción
+          </button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead class="table-dark">
+            <tr>
+              <th>Código</th>
+              <th>Descripción</th>
+              <th>Descuento</th>
+              <th>Fecha Inicio</th>
+              <th>Fecha Fin</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>VERANO2024</strong></td>
+              <td>Descuento de verano</td>
+              <td>15%</td>
+              <td>01/01/2024</td>
+              <td>31/03/2024</td>
+              <td><span class="badge bg-success">Activa</span></td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary">Editar</button>
+                <button class="btn btn-sm btn-outline-success">Enviar por Email</button>
+                <button class="btn btn-sm btn-outline-danger">Desactivar</button>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>PRIMERAVEZ</strong></td>
+              <td>Primera reserva</td>
+              <td>20%</td>
+              <td>01/10/2023</td>
+              <td>31/12/2024</td>
+              <td><span class="badge bg-success">Activa</span></td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary">Editar</button>
+                <button class="btn btn-sm btn-outline-success">Enviar por Email</button>
+                <button class="btn btn-sm btn-outline-danger">Desactivar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal Nueva Promoción -->
+  <div class="modal fade" id="modalNuevaPromo" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Nueva Promoción</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label class="form-label">Código de Promoción *</label>
+              <input type="text" class="form-control" placeholder="VERANO2024" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Descripción *</label>
+              <input type="text" class="form-control" placeholder="Descuento de verano" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Porcentaje de Descuento (%) *</label>
+              <input type="number" class="form-control" min="1" max="100" placeholder="15" required>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Fecha Inicio *</label>
+                <input type="date" class="form-control" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Fecha Fin *</label>
+                <input type="date" class="form-control" required>
+              </div>
+            </div>
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" id="enviar_email">
+              <label class="form-check-label" for="enviar_email">
+                Enviar promoción a todos los clientes por email
+              </label>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary">Crear Promoción</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section id="footer" class="bg-dark padding-medium">
+    <div class="container">
+      <footer class="py-2 pt-4">
+        <p class="text-white">©Greedy Cars, All rights reserved</p>
+      </footer>
+    </div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+</body>
+</html>

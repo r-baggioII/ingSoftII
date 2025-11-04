@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de Empresas - Greedy Cars</title>
+
+  <!--vendor css ================================================== -->
+  <link rel="stylesheet" type="text/css" href="css/vendor.css" />
+
+  <!-- Link Swiper's CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css" />
+
+  <!--Bootstrap ================================================== -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous" />
+
+  <!-- Style Sheet ================================================== -->
+  <link rel="stylesheet" type="text/css" href="style.css" />
+
+  <!-- Google Fonts ================================================== -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet" />
+
+  <script src="js/modernizr.js"></script>
+</head>
+
+<body data-bs-spy="scroll" data-bs-target="#header-nav" tabindex="0">
+
+  <nav class="navbar navbar-expand-lg navbar-light container-fluid py-3 position-fixed">
+    <div class="container">
+      <a class="navbar-brand" href="index.html"><img src="images/logo.png" alt="logo" /></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
+        aria-controls="offcanvasNavbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+        <div class="offcanvas-header">
+          <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menu</h5>
+          <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+          <ul class="navbar-nav align-items-center justify-content-end flex-grow-1 pe-3">
+            <li class="nav-item">
+              <a class="nav-link px-3" href="index.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-3" href="gestion-vehiculos.html">Gestión Vehículos</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-3" href="registro-alquiler.html">Nuevo Alquiler</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-3" href="reportes-alquileres.html">Reportes</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-3" href="gestion-promociones.html">Promociones</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-3" href="gestion-usuarios.html">Usuarios</a>
+            </li>
+            <li class="nav-item">
+              <a class="btn btn-outline-primary px-3" href="login.html">Cerrar Sesión</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- hero section start  -->
+  <section id="banner"
+    class="position-relative overflow-hidden jarallax"
+    style="background-image: url(images/Bg.jpg); background-repeat: no-repeat; background-size: cover; background-position: center;">
+    <div class="container text-center py-5 mt-5">
+      <div class="row my-5">
+        <div class="d-flex flex-wrap flex-column justify-content-center align-items-center text-white">
+          <h2 class="page-title display-3 mt-5">Gestión de Empresas</h2>
+          <nav class="breadcrumb ">
+            <a class="breadcrumb-item text-white" href="index.html">Home</a>
+            <a class="breadcrumb-item text-white" href="gestion-vehiculos.html">Administración</a>
+            <span class="breadcrumb-item text-white active" aria-current="page">Empresas</span>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact-us-wrap py-5">
+    <div class="container">
+      <div class="row">
+        <div class="inquiry-item offset-md-1 col-md-10">
+          <h2 class="text-center my-4">Administrar <span class="text-primary">Empresas</span></h2>
+
+          <div class="row g-4">
+            <div class="col-12">
+              <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
+                <div class="card-body">
+                  <h5 class="card-title">Crear / Editar Empresa</h5>
+                  <form id="empresa-form">
+                    <div class="row g-3">
+                      <div class="col-md-4">
+                        <label class="panel-label">Nombre</label>
+                        <input type="text" class="form-control panel-control" id="empresaNombre" name="nombre" required>
+                      </div>
+                      <div class="col-md-4">
+                        <label class="panel-label">Teléfono</label>
+                        <input type="text" class="form-control panel-control" id="empresaTelefono" name="telefono">
+                      </div>
+                      <div class="col-md-4">
+                        <label class="panel-label">Correo electrónico</label>
+                        <input type="email" class="form-control panel-control" id="empresaCorreo" name="correo">
+                      </div>
+                    </div>
+
+                    <div class="row g-3 mt-2">
+                      <div class="col-md-6">
+                        <label class="panel-label">Dirección</label>
+                        <select class="form-select panel-control" id="empresaDireccionSelect" name="direccionId">
+                          <option value="">Seleccione una dirección...</option>
+                        </select>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="panel-label">Estado</label>
+                        <select class="form-select panel-control" id="empresaEstado">
+                          <option value="ACTIVO">Activo</option>
+                          <option value="INACTIVO">Inactivo</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="nueva-direccion-panel d-none mt-3" id="nueva-direccion-form">
+                      <div class="card card-body">
+                        <h6 class="mb-3">Nueva Dirección</h6>
+                        <div class="row g-3">
+                          <div class="col-md-8"><input type="text" class="form-control panel-control" id="nuevaDireccionCalle" name="nuevaDireccionCalle" placeholder="Calle"></div>
+                          <div class="col-md-4"><input type="text" class="form-control panel-control" id="nuevaDireccionNumeracion" name="nuevaDireccionNumeracion" placeholder="Altura"></div>
+                          <div class="col-md-3"><select class="form-select panel-control" id="nuevaDireccionPais" name="nuevaDireccionPais"><option value="">País</option></select></div>
+                          <div class="col-md-3"><select class="form-select panel-control" id="nuevaDireccionProvincia" name="nuevaDireccionProvincia"><option value="">Provincia</option></select></div>
+                          <div class="col-md-3"><select class="form-select panel-control" id="nuevaDireccionDepartamento" name="nuevaDireccionDepartamento"><option value="">Departamento</option></select></div>
+                          <div class="col-md-3"><select class="form-select panel-control" id="nuevaDireccionLocalidad" name="nuevaDireccionLocalidad"><option value="">Localidad</option></select></div>
+                          <div class="col-md-4"><input type="text" class="form-control panel-control" id="nuevaDireccionBarrio" name="nuevaDireccionBarrio" placeholder="Barrio"></div>
+                          <div class="col-md-4"><input type="text" class="form-control panel-control" id="nuevaDireccionManzana" name="nuevaDireccionManzana" placeholder="Manzana/Piso"></div>
+                          <div class="col-md-4"><input type="text" class="form-control panel-control" id="nuevaDireccionCasa" name="nuevaDireccionCasa" placeholder="Casa/Departamento"></div>
+                          <div class="col-12"><textarea class="form-control panel-control" id="nuevaDireccionReferencia" name="nuevaDireccionReferencia" rows="2" placeholder="Referencia"></textarea></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <hr>
+                    <h6>Contactos</h6>
+                    <div id="contactos-list" class="mb-3">
+                      <!-- contactos will be rendered here -->
+                    </div>
+
+                    <div class="card card-body mb-3">
+                      <div class="row g-2 align-items-end">
+                        <div class="col-md-3">
+                          <label class="form-label">Clase</label>
+                          <select id="newContactoKind" class="form-select panel-control">
+                            <option value="EMAIL">Correo</option>
+                            <option value="PHONE">Teléfono</option>
+                          </select>
+                        </div>
+                        <div class="col-md-3">
+                          <label class="form-label">Tipo</label>
+                          <select id="newContactoTipo" class="form-select panel-control">
+                            <option value="PERSONAL">PERSONAL</option>
+                            <option value="LABORAL">LABORAL</option>
+                            <option value="EMPRESA">EMPRESA</option>
+                          </select>
+                        </div>
+                        <div class="col-md-3" id="col-tipo-telefono" style="display:none;">
+                          <label class="form-label">Tipo Teléfono</label>
+                          <select id="newContactoTipoTelefono" class="form-select panel-control">
+                            <option value="MOVIL">MÓVIL</option>
+                            <option value="FIJO">FIJO</option>
+                            <option value="OTRO">OTRO</option>
+                          </select>
+                        </div>
+                        <div class="col-md-3">
+                          <label class="form-label">Valor</label>
+                          <input id="newContactoValor" type="text" class="form-control panel-control" placeholder="email o teléfono u otro">
+                        </div>
+                        <div class="col-md-12 mt-2">
+                          <label class="form-label">Observación</label>
+                          <input id="newContactoObservacion" type="text" class="form-control panel-control">
+                        </div>
+                        <div class="col-md-12 text-end mt-2">
+                          <button id="btnAddContacto" type="button" class="btn main-button-panel">Agregar Contacto</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                      <button type="submit" class="btn main-button-panel">Guardar</button>
+                      <button type="button" class="btn btn-outline-secondary" id="empresa-reset">Limpiar</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
+                <div class="card-body">
+                  <h5 class="card-title">Búsqueda y acciones</h5>
+                  <div class="row g-2 mb-3">
+                    <div class="col-md-8"><input type="text" class="form-control panel-control" id="empresa-search" placeholder="Buscar por nombre"></div>
+                    <div class="col-md-4"><button class="btn main-button-panel w-100" id="empresa-refresh">Buscar</button></div>
+                  </div>
+                  <div class="panel-table table-responsive">
+                    <table class="table table-hover align-middle">
+                      <thead>
+                        <tr><th>Nombre</th><th>Teléfono</th><th>Correo</th><th>Dirección</th><th>Estado</th><th class="text-end">Acciones</th></tr>
+                      </thead>
+                      <tbody id="empresa-table-body">
+                        <!-- JS: filas -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Empresa Modal (Bootstrap) -->
+  <div class="modal fade" id="empresaModal" tabindex="-1" aria-labelledby="empresaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="empresaModalTitle">Crear Empresa</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="empresaForm" class="row g-3">
+            <div class="col-md-4">
+              <label for="empresaId" class="form-label">ID</label>
+              <input id="empresaId" type="text" class="form-control" readonly>
+            </div>
+            <div class="col-md-8">
+              <label for="empresaNombre" class="form-label">Nombre</label>
+              <input id="empresaNombre" type="text" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+              <label for="empresaTelefono" class="form-label">Teléfono</label>
+              <input id="empresaTelefono" type="text" class="form-control">
+            </div>
+            <div class="col-md-6">
+              <label for="empresaCorreo" class="form-label">Correo Electrónico</label>
+              <input id="empresaCorreo" type="email" class="form-control">
+            </div>
+            <div class="col-12">
+              <label for="empresaDireccionSelect" class="form-label">Dirección</label>
+              <div class="input-group">
+                <select id="empresaDireccionSelect" class="form-select"></select>
+                <button id="btnNewDireccion" type="button" class="btn btn-outline-secondary">Crear Dirección</button>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button id="btnSaveEmpresa" type="button" class="btn btn-primary">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Direccion Modal (Bootstrap) -->
+  <div class="modal fade" id="direccionModal" tabindex="-1" aria-labelledby="direccionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Crear Dirección</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form class="row g-3" id="direccionForm">
+            <div class="col-md-6"><label for="dirPais" class="form-label">Pais</label><input id="dirPais" class="form-control"></div>
+            <div class="col-md-6"><label for="dirProvincia" class="form-label">Provincia</label><input id="dirProvincia" class="form-control"></div>
+            <div class="col-md-6"><label for="dirDepartamento" class="form-label">Departamento</label><input id="dirDepartamento" class="form-control"></div>
+            <div class="col-md-6"><label for="dirLocalidad" class="form-label">Localidad</label><input id="dirLocalidad" class="form-control"></div>
+            <div class="col-md-8"><label for="dirCalle" class="form-label">Calle</label><input id="dirCalle" class="form-control"></div>
+            <div class="col-md-4"><label for="dirNumero" class="form-label">Número</label><input id="dirNumero" class="form-control"></div>
+            <div class="col-md-6"><label for="dirCP" class="form-label">Código Postal</label><input id="dirCP" class="form-control"></div>
+            <div class="col-md-6"><label for="dirReferencia" class="form-label">Referencia</label><input id="dirReferencia" class="form-control"></div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button id="btnSaveDireccion" type="button" class="btn btn-primary">Guardar Dirección</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section id="footer" class="bg-dark padding-medium">
+    <div class="container">
+      <footer class="row row-cols-1 row-cols-sm-2 row-cols-md-5">
+        <!-- ...existing footer content is reused from template... -->
+        <div class="col-md-4">
+          <h4 class="text-uppercase">About</h4>
+          <p class="py-3">Vel non nibh vestibulum massa ullam corper bib endum ultrices venenatis, id id sed mass.</p>
+          <div class="d-flex align-items-center">
+            <p>Follow us</p>
+            <ul class="list-unstyled d-flex m-0 ps-3">
+              <li class="pe-3"><a href="#"><iconify-icon class="social-icon text-primary" icon="ri:facebook-fill"></iconify-icon></a></li>
+              <li class="pe-3"><a href="#"><iconify-icon class="social-icon text-primary" icon="ri:twitter-fill"></iconify-icon></a></li>
+              <li class="pe-3"><a href="#"><iconify-icon class="social-icon text-primary" icon="ri:pinterest-fill"></iconify-icon></a></li>
+              <li class="pe-3"><a href="#"><iconify-icon class="social-icon text-primary" icon="ri:instagram-fill"></iconify-icon></a></li>
+              <li class="pe-3"><a href="#"><iconify-icon class="social-icon text-primary" icon="ri:youtube-fill"></iconify-icon></a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <h4 class="text-uppercase">Quick Links</h4>
+          <ul class="list-unstyled">
+            <li class="my-3"><a href="#" class="footer-link text-white">Home</a></li>
+            <li class="my-3"><a href="#" class="footer-link text-white">About</a></li>
+            <li class="my-3"><a href="#" class="footer-link text-white">Services</a></li>
+            <li class="my-3"><a href="#" class="footer-link text-white">Cars</a></li>
+          </ul>
+        </div>
+        <div class="col-md-2">
+          <h4 class="text-uppercase">Help</h4>
+          <ul class="list-unstyled">
+            <li class="my-3"><a href="#" class="footer-link text-white">Privacy Policy</a></li>
+            <li class="my-3"><a href="#" class="footer-link text-white">Shipping Details</a></li>
+            <li class="my-3"><a href="#" class="footer-link text-white">Offer & Kits</a></li>
+            <li class="my-3"><a href="#" class="footer-link text-white">Terms & Conditions</a></li>
+          </ul>
+        </div>
+        <div class="col-md-4">
+          <h4 class="text-uppercase">Subscribe our Newsletter</h4>
+          <p class="py-3">Vel non nibh vestibulum massa ullam corper bib endum ultrices venenatis, id id sed mass.</p>
+          <div class="d-flex align-items-center">
+            <form class="w-100">
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="input-group  border-bottom">
+                    <input type="email" class="form-control fst-italic bg-dark text-white border-0" placeholder="Enter your email">
+                    <span class="input-group-btn">
+                      <button class="btn text-white" type="submit">Subscribe</button>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <footer class="d-flex flex-wrap justify-content-between align-items-center border-top"></footer>
+
+    <div class="container">
+      <footer class="d-flex flex-wrap justify-content-between align-items-center py-2 pt-4">
+        <div class="col-md-6 d-flex align-items-center">
+          <p>©Greedy Cars, All rights reserved</p>
+        </div>
+        <div class="col-md-6 d-flex align-items-center justify-content-end">
+          <ul class="footer-nav list-unstyled ">
+            <li class="nav-item me-2"><a class="nav-link pe-3 text-white " href="#">Home</a></li>
+            <li class="nav-item me-2 mb-3"><a class="nav-link pe-3 text-white " href="#">Booking</a></li>
+            <li class="nav-item me-2 mb-3"><a class="nav-link pe-3 text-white " href="#">About</a></li>
+            <li class="nav-item me-2 mb-3"><a class="nav-link pe-3 text-white " href="#">Cars</a></li>
+            <li class="nav-item me-2 mb-3"><a class="nav-link pe-3 text-white " href="#">Contact</a></li>
+          </ul>
+        </div>
+      </footer>
+    </div>
+  </section>
+
+  <!-- script ================================================== -->
+  <script src="js/jquery-1.11.0.min.js"></script>
+  <script src="js/plugins.js"></script>
+  <script src="js/script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+  <script src="js/gestion-empresas.js"></script>
+
+</body>
+
+</html>

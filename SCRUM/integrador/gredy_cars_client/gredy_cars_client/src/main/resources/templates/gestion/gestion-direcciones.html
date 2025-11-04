@@ -1,208 +1,276 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gestión de Direcciones - Greedy Cars</title>
-    <meta name="_csrf" th:content="${_csrf.token}">
-    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de Direcciones - Greedy Cars</title>
+  <meta name="_csrf" th:if="${_csrf}" th:content="${_csrf.token}">
+  <meta name="_csrf_header" th:if="${_csrf}" th:content="${_csrf.headerName}">
+  <meta name="app-context" th:content="@{/}" />
 
-  <!--vendor css ================================================== -->
   <link rel="stylesheet" type="text/css" th:href="@{/css/vendor.css}" />
-
-  <!--Bootstrap ================================================== -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous" />
-
-  <!-- Style Sheet ================================================== -->
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous" />
   <link rel="stylesheet" type="text/css" th:href="@{/style.css}" />
-
   <script th:src="@{/js/modernizr.js}"></script>
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-lg navbar-light container-fluid py-3 position-fixed">
-    <div class="container">
-      <a class="navbar-brand" href="index.html"><img th:src="@{/images/logo.png}" alt="logo" /></a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
-        aria-controls="offcanvasNavbar">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
-        <div class="offcanvas-header">
-          <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menu</h5>
-          <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+<nav class="navbar navbar-expand-lg navbar-light container-fluid py-3 position-fixed">
+  <div class="container">
+    <a class="navbar-brand" href="index.html"><img th:src="@{/images/logo.png}" alt="logo" /></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
+            aria-controls="offcanvasNavbar">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menu</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <ul class="navbar-nav align-items-center justify-content-end flex-grow-1 pe-3">
+          <li class="nav-item"><a class="nav-link px-3" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link px-3" href="gestion-vehiculos.html">Gestión Vehículos</a></li>
+          <li class="nav-item"><a class="nav-link px-3" href="gestion-empresas.html">Empresas</a></li>
+          <li class="nav-item"><a class="btn btn-outline-primary px-3" href="login.html">Cerrar Sesión</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<section id="banner" class="position-relative overflow-hidden jarallax"
+         th:style="|background-image: url(@{/images/Bg.jpg}); background-repeat: no-repeat; background-size: cover; background-position: center;|">
+  <div class="container text-center py-5 mt-5">
+    <div class="row my-5">
+      <div class="d-flex flex-wrap flex-column justify-content-center align-items-center text-white">
+        <h2 class="page-title display-3 mt-5">Gestión Geográfica</h2>
+        <nav class="breadcrumb ">
+          <a class="breadcrumb-item text-white" href="index.html">Home</a>
+          <span class="breadcrumb-item text-white active" aria-current="page">Direcciones</span>
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="contact-us-wrap py-5">
+  <div class="container">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <div class="section-heading text-center mb-4">
+      <h2>Gestión Geográfica</h2>
+      <p>CRUD de Países, Provincias, Departamentos, Localidades y Direcciones.</p>
+      <p class="text-muted">Dependencias: País → Provincia → Departamento → Localidad → Dirección.</p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
+          <div class="card-body">
+            <h5 class="card-title">Países</h5>
+            <form th:object="${paisForm}" th:action="@{/gestion/direcciones/paises}" method="post" class="mb-3">
+              <input type="hidden" th:field="*{id}" />
+              <label class="panel-label">Nombre del país</label>
+              <input type="text" th:field="*{nombre}" class="form-control panel-control" required>
+              <div class="mt-2"><button class="btn main-button-panel" type="submit">Guardar País</button></div>
+            </form>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead><tr><th>Nombre</th><th class="text-end">Acciones</th></tr></thead>
+                <tbody>
+                <tr th:each="p : ${paises}">
+                  <td th:text="${p.nombre}">Nombre</td>
+                  <td class="text-end">
+                    <a class="btn btn-sm btn-outline-secondary" th:href="@{/gestion/direcciones(editPais=${p.id})}">Editar</a>
+                    <form th:action="@{/gestion/direcciones/paises/{id}/eliminar(id=${p.id})}" method="post" class="d-inline">
+                      <button class="btn btn-sm btn-outline-danger ms-1" type="submit">Eliminar</button>
+                    </form>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-        <div class="offcanvas-body">
-          <ul class="navbar-nav align-items-center justify-content-end flex-grow-1 pe-3">
-            <li class="nav-item"><a class="nav-link px-3" href="index.html">Home</a></li>
-            <li class="nav-item"><a class="nav-link px-3" href="gestion-vehiculos.html">Gestión Vehículos</a></li>
-            <li class="nav-item"><a class="nav-link px-3" href="gestion-empresas.html">Empresas</a></li>
-            <li class="nav-item"><a class="btn btn-outline-primary px-3" href="login.html">Cerrar Sesión</a></li>
-          </ul>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
+          <div class="card-body">
+            <h5 class="card-title">Provincias</h5>
+            <form th:object="${provinciaForm}" th:action="@{/gestion/direcciones/provincias}" method="post" class="mb-3">
+              <input type="hidden" th:field="*{id}" />
+              <div class="row g-2">
+                <div class="col-7"><input type="text" th:field="*{nombre}" class="form-control panel-control" placeholder="Nombre" required></div>
+                <div class="col-5">
+                  <select th:field="*{pais.id}" class="form-select panel-control" required>
+                    <option value="">País...</option>
+                    <option th:each="pa : ${paises}" th:value="${pa.id}" th:text="${pa.nombre}">País</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mt-2"><button class="btn main-button-panel" type="submit">Guardar Provincia</button></div>
+            </form>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead><tr><th>Provincia</th><th>País</th><th class="text-end">Acciones</th></tr></thead>
+                <tbody>
+                <tr th:each="pr : ${provincias}">
+                  <td th:text="${pr.nombre}">Prov</td>
+                  <td th:text="${pr.pais != null ? pr.pais.nombre : ''}">País</td>
+                  <td class="text-end">
+                    <a class="btn btn-sm btn-outline-secondary" th:href="@{/gestion/direcciones(editProvincia=${pr.id})}">Editar</a>
+                    <form th:action="@{/gestion/direcciones/provincias/{id}/eliminar(id=${pr.id})}" method="post" class="d-inline">
+                      <button class="btn btn-sm btn-outline-danger ms-1" type="submit">Eliminar</button>
+                    </form>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08); margin-top: -8px;">
+          <div class="card-body">
+            <h5 class="card-title">Departamentos</h5>
+            <form th:object="${departamentoForm}" th:action="@{/gestion/direcciones/departamentos}" method="post" class="mb-3">
+              <input type="hidden" th:field="*{id}" />
+              <div class="row g-2">
+                <div class="col-7"><input type="text" th:field="*{nombre}" class="form-control panel-control" placeholder="Nombre" required></div>
+                <div class="col-5">
+                  <select th:field="*{provincia.id}" class="form-select panel-control" required>
+                    <option value="">Provincia...</option>
+                    <option th:each="pv : ${provincias}" th:value="${pv.id}" th:text="${pv.nombre}">Provincia</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mt-2"><button class="btn main-button-panel" type="submit">Guardar Departamento</button></div>
+            </form>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead><tr><th>Departamento</th><th>Provincia</th><th class="text-end">Acciones</th></tr></thead>
+                <tbody>
+                <tr th:each="dp : ${departamentos}">
+                  <td th:text="${dp.nombre}">Depto</td>
+                  <td th:text="${dp.provincia != null ? dp.provincia.nombre : ''}">Prov</td>
+                  <td class="text-end">
+                    <a class="btn btn-sm btn-outline-secondary" th:href="@{/gestion/direcciones(editDepartamento=${dp.id})}">Editar</a>
+                    <form th:action="@{/gestion/direcciones/departamentos/{id}/eliminar(id=${dp.id})}" method="post" class="d-inline">
+                      <button class="btn btn-sm btn-outline-danger ms-1" type="submit">Eliminar</button>
+                    </form>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08); margin-top: -8px;">
+          <div class="card-body">
+            <h5 class="card-title">Localidades</h5>
+            <form th:object="${localidadForm}" th:action="@{/gestion/direcciones/localidades}" method="post" class="mb-3">
+              <input type="hidden" th:field="*{id}" />
+              <div class="row g-2">
+                <div class="col-5"><input type="text" th:field="*{nombre}" class="form-control panel-control" placeholder="Nombre" required></div>
+                <div class="col-4"><input type="text" th:field="*{codigoPostal}" class="form-control panel-control" placeholder="CP"></div>
+                <div class="col-3">
+                  <select th:field="*{departamento.id}" class="form-select panel-control" required>
+                    <option value="">Depto...</option>
+                    <option th:each="dd : ${departamentos}" th:value="${dd.id}" th:text="${dd.nombre}">Depto</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mt-2"><button class="btn main-button-panel" type="submit">Guardar Localidad</button></div>
+            </form>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead><tr><th>Localidad</th><th>Depto</th><th>Provincia</th><th>País</th><th class="text-end">Acciones</th></tr></thead>
+                <tbody>
+                <tr th:each="lc : ${localidades}">
+                  <td th:text="${lc.nombre}">Loc</td>
+                  <td th:text="${lc.departamento != null ? lc.departamento.nombre : ''}">Depto</td>
+                  <td th:text="${lc.departamento != null && lc.departamento.provincia != null ? lc.departamento.provincia.nombre : ''}">Prov</td>
+                  <td th:text="${lc.departamento != null && lc.departamento.provincia != null && lc.departamento.provincia.pais != null ? lc.departamento.provincia.pais.nombre : ''}">País</td>
+                  <td class="text-end">
+                    <a class="btn btn-sm btn-outline-secondary" th:href="@{/gestion/direcciones(editLocalidad=${lc.id})}">Editar</a>
+                    <form th:action="@{/gestion/direcciones/localidades/{id}/eliminar(id=${lc.id})}" method="post" class="d-inline">
+                      <button class="btn btn-sm btn-outline-danger ms-1" type="submit">Eliminar</button>
+                    </form>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-12">
+        <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
+          <div class="card-body">
+            <h5 class="card-title">Direcciones</h5>
+            <form th:object="${direccionForm}" th:action="@{/gestion/direcciones/direcciones}" method="post" class="mb-3">
+              <input type="hidden" th:field="*{id}" />
+              <div class="row g-3">
+                <div class="col-md-8"><input type="text" th:field="*{calle}" class="form-control panel-control" placeholder="Calle" required></div>
+                <div class="col-md-4"><input type="text" th:field="*{numeracion}" class="form-control panel-control" placeholder="Altura" required></div>
+                <div class="col-md-3"><input type="text" th:field="*{barrio}" class="form-control panel-control" placeholder="Barrio" required></div>
+                <div class="col-md-3"><input type="text" th:field="*{puertaManzana}" class="form-control panel-control" placeholder="Puerta/Manzana" required></div>
+                <div class="col-md-3"><input type="text" th:field="*{pisoCasa}" class="form-control panel-control" placeholder="Piso/Casa" required></div>
+                <div class="col-md-3">
+                  <select th:field="*{localidad.id}" class="form-select panel-control" required>
+                    <option value="">Localidad</option>
+                    <option th:each="lo : ${localidades}" th:value="${lo.id}" th:text="${lo.nombre}">Localidad</option>
+                  </select>
+                </div>
+                <div class="col-12"><textarea th:field="*{observacion}" class="form-control panel-control" rows="2" placeholder="Referencia"></textarea></div>
+              </div>
+              <div class="mt-2"><button class="btn main-button-panel" type="submit">Guardar Dirección</button></div>
+            </form>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead><tr><th>Calle</th><th>Localidad</th><th>Departamento</th><th>Provincia</th><th>País</th><th class="text-end">Acciones</th></tr></thead>
+                <tbody>
+                <tr th:each="d : ${direcciones}">
+                  <td>
+                    <div class="fw-medium" th:text="${d.calle} + ' ' + ${d.numeracion}">Calle</div>
+                    <small class="text-muted" th:text="${d.barrio}">Barrio</small>
+                  </td>
+                  <td th:text="${d.localidad != null ? d.localidad.nombre : ''}">Loc</td>
+                  <td th:text="${d.localidad != null && d.localidad.departamento != null ? d.localidad.departamento.nombre : ''}">Dep</td>
+                  <td th:text="${d.localidad != null && d.localidad.departamento != null && d.localidad.departamento.provincia != null ? d.localidad.departamento.provincia.nombre : ''}">Prov</td>
+                  <td th:text="${d.localidad != null && d.localidad.departamento != null && d.localidad.departamento.provincia != null && d.localidad.departamento.provincia.pais != null ? d.localidad.departamento.provincia.pais.nombre : ''}">País</td>
+                  <td class="text-end">
+                    <a class="btn btn-sm btn-outline-secondary" th:href="@{/gestion/direcciones(editDireccion=${d.id})}">Editar</a>
+                    <form th:action="@{/gestion/direcciones/direcciones/{id}/eliminar(id=${d.id})}" method="post" class="d-inline">
+                      <button class="btn btn-sm btn-outline-danger ms-1" type="submit">Eliminar</button>
+                    </form>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </nav>
+  </div>
+</section>
 
-  <section id="banner" class="position-relative overflow-hidden jarallax"
-           th:style="'background-image: url(' + @{/images/Bg.jpg} + '); background-repeat: no-repeat; background-size: cover; background-position: center;'">
-    <div class="container text-center py-5 mt-5">
-      <div class="row my-5">
-        <div class="d-flex flex-wrap flex-column justify-content-center align-items-center text-white">
-          <h2 class="page-title display-3 mt-5">Gestión Geográfica</h2>
-          <nav class="breadcrumb ">
-            <a class="breadcrumb-item text-white" href="index.html">Home</a>
-            <span class="breadcrumb-item text-white active" aria-current="page">Direcciones</span>
-          </nav>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="contact-us-wrap py-5">
-    <div class="container">
-      <div class="section-heading text-center mb-4">
-        <h2>Gestión Geográfica</h2>
-        <p>CRUD de Países, Provincias, Departamentos, Localidades y Direcciones.</p>
-        <p class="text-muted">Dependencias: País → Provincia → Departamento → Localidad → Dirección.</p>
-      </div>
-
-      <div class="row g-4">
-        <div class="col-lg-6">
-          <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
-            <div class="card-body">
-              <h5 class="card-title">Países</h5>
-              <form id="pais-form" class="mb-3">
-                <input type="hidden" id="pais-id" name="id" />
-                <label class="panel-label">Nombre del país</label>
-                <input type="text" name="nombre" class="form-control panel-control" required>
-                <div class="mt-2"><button class="btn main-button-panel" type="submit">Guardar País</button></div>
-              </form>
-              <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                  <thead><tr><th>Nombre</th><th class="text-end">Acciones</th></tr></thead>
-                  <tbody id="pais-table"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-lg-6">
-          <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
-            <div class="card-body">
-              <h5 class="card-title">Provincias</h5>
-              <form id="provincia-form" class="mb-3">
-                <input type="hidden" id="provincia-id" name="id" />
-                <div class="row g-2">
-                  <div class="col-7"><input type="text" name="nombre" class="form-control panel-control" placeholder="Nombre" required></div>
-                  <div class="col-5">
-                    <select name="idPais" id="provincia-pais-select" class="form-select panel-control" required><option value="">País...</option></select>
-                  </div>
-                </div>
-                <div class="mt-2"><button class="btn main-button-panel" type="submit">Guardar Provincia</button></div>
-              </form>
-              <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                  <thead><tr><th>Provincia</th><th>País</th><th class="text-end">Acciones</th></tr></thead>
-                  <tbody id="provincia-table"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-lg-6">
-          <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08); margin-top: -8px;">
-            <div class="card-body">
-              <h5 class="card-title">Departamentos</h5>
-              <form id="departamento-form" class="mb-3">
-                <input type="hidden" id="departamento-id" name="id" />
-                <div class="row g-2">
-                  <div class="col-7"><input type="text" name="nombre" class="form-control panel-control" placeholder="Nombre" required></div>
-                  <div class="col-5">
-                    <select name="idProvincia" id="departamento-provincia-select" class="form-select panel-control" required><option value="">Provincia...</option></select>
-                  </div>
-                </div>
-                <div class="mt-2"><button class="btn main-button-panel" type="submit">Guardar Departamento</button></div>
-              </form>
-              <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                  <thead><tr><th>Departamento</th><th>Provincia</th><th class="text-end">Acciones</th></tr></thead>
-                  <tbody id="departamento-table"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-lg-6">
-          <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08); margin-top: -8px;">
-            <div class="card-body">
-              <h5 class="card-title">Localidades</h5>
-              <form id="localidad-form" class="mb-3">
-                <input type="hidden" id="localidad-id" name="id" />
-                <div class="row g-2">
-                  <div class="col-5"><input type="text" name="nombre" id="localidad-nombre" class="form-control panel-control" placeholder="Nombre" required></div>
-                  <div class="col-4"><input type="text" name="codigoPostal" id="localidad-cp" class="form-control panel-control" placeholder="CP"></div>
-                  <div class="col-3">
-                    <select name="idDepartamento" id="localidad-departamento-select" class="form-select panel-control" required><option value="">Depto...</option></select>
-                  </div>
-                </div>
-                <div class="mt-2"><button class="btn main-button-panel" type="submit">Guardar Localidad</button></div>
-              </form>
-              <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                  <thead><tr><th>Localidad</th><th>Depto</th><th>Provincia</th><th>País</th><th class="text-end">Acciones</th></tr></thead>
-                  <tbody id="localidad-table"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-lg-12">
-          <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
-            <div class="card-body">
-              <h5 class="card-title">Direcciones</h5>
-              <form id="direccion-form" class="mb-3">
-                <input type="hidden" id="direccion-id" name="id" />
-                <div class="row g-3">
-                  <div class="col-md-8"><input type="text" name="calle" id="direccion-calle" class="form-control panel-control" placeholder="Calle" required></div>
-                  <div class="col-md-4"><input type="text" name="numeracion" id="direccion-numeracion" class="form-control panel-control" placeholder="Altura" required></div>
-                  <div class="col-md-3"><select name="idPais" id="direccion-pais" class="form-select panel-control" required><option value="">País</option></select></div>
-                  <div class="col-md-3"><select name="idProvincia" id="direccion-provincia" class="form-select panel-control" required><option value="">Provincia</option></select></div>
-                  <div class="col-md-3"><select name="idDepartamento" id="direccion-departamento" class="form-select panel-control" required><option value="">Departamento</option></select></div>
-                  <div class="col-md-3"><select name="idLocalidad" id="direccion-localidad" class="form-select panel-control" required><option value="">Localidad</option></select></div>
-                  <div class="col-md-4"><input type="text" name="barrio" id="direccion-barrio" class="form-control panel-control" placeholder="Barrio"></div>
-                  <div class="col-md-4"><input type="text" name="manzanaPiso" id="direccion-manzana" class="form-control panel-control" placeholder="Manzana/Piso"></div>
-                  <div class="col-md-4"><input type="text" name="casaDepartamento" id="direccion-casa" class="form-control panel-control" placeholder="Casa/Departamento"></div>
-                  <div class="col-12"><textarea name="referencia" id="direccion-referencia" class="form-control panel-control" rows="2" placeholder="Referencia"></textarea></div>
-                </div>
-                <div class="mt-2"><button class="btn main-button-panel" type="submit">Guardar Dirección</button></div>
-              </form>
-              <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                  <thead><tr><th>Calle</th><th>Localidad</th><th>Departamento</th><th>Provincia</th><th>País</th><th class="text-end">Acciones</th></tr></thead>
-                  <tbody id="direccion-table"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <script th:src="@{/js/jquery-1.11.0.min.js}"></script>
-  <script th:src="@{/js/plugins.js}"></script>
-  <script th:src="@{/js/script.js}"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
-
-  <script th:src="@{/js/gestion-direcciones.app.js}"></script>
+<script th:src="@{/js/jquery-1.11.0.min.js}"></script>
+<script th:src="@{/js/plugins.js}"></script>
+<script th:src="@{/js/script.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
 </body>
 
 </html>

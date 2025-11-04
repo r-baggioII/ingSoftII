@@ -7,9 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-/**
- * Empleado ahora hereda de Persona. Se usa JOINED inheritance en Persona.
- */
+
 @Entity
 @Table(name = "empleados")
 @DiscriminatorValue("EMPLEADO")

@@ -34,7 +34,14 @@ public class Vehiculo extends BaseEntity<String> {
     @Column(name = "estado_vehiculo", nullable = false, length = 20)
     private EstadoVehiculo estadoVehiculo;
 
-    // --- MÉTODOS HEREDADOS DE BaseEntity ---
-    // Lombok se encarga de generar los métodos getId() y setId(String id)
-    // que satisfacen los requerimientos abstractos de BaseEntity<String>.
+    // Implementación explícita de métodos abstractos de BaseEntity
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(String id) {
+        this.id = id;
+    }
 }

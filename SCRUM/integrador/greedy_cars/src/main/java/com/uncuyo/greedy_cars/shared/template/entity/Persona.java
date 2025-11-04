@@ -59,6 +59,14 @@ public class Persona extends BaseEntity<String> {
     @OneToMany(mappedBy = "persona", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Contacto> contactos = new ArrayList<>();
 
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+        name = "persona_direccion",
+        joinColumns = @JoinColumn(name = "persona_id"),
+        inverseJoinColumns = @JoinColumn(name = "direccion_id")
+    )
+    private List<Direccion> direcciones = new ArrayList<>();
+
     // Implementación de métodos abstractos de BaseEntity
     @Override
     public String getId() {
@@ -79,6 +87,15 @@ public class Persona extends BaseEntity<String> {
     public void removeContacto(Contacto contacto) {
         contactos.remove(contacto);
         contacto.setPersona(null);
+    }
+
+    // Métodos de conveniencia para direcciones
+    public void addDireccion(Direccion direccion) {
+        direcciones.add(direccion);
+    }
+
+    public void removeDireccion(Direccion direccion) {
+        direcciones.remove(direccion);
     }
 
 }

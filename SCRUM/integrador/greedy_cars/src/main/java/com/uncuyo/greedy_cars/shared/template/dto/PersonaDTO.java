@@ -1,0 +1,62 @@
+package com.uncuyo.greedy_cars.shared.template.dto;
+
+import com.uncuyo.greedy_cars.shared.template.enums.TipoDocumento;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * DTO para la entidad Persona.
+ * Extiende de BaseDTO para heredar propiedades comunes como id y eliminado.
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+public class PersonaDTO extends BaseDTO<String> {
+    
+    @NotBlank(message = "El nombre es obligatorio")
+    @Size(max = 120, message = "El nombre no puede exceder los 120 caracteres")
+    private String nombre;
+    
+    @NotBlank(message = "El apellido es obligatorio")
+    @Size(max = 120, message = "El apellido no puede exceder los 120 caracteres")
+    private String apellido;
+    
+    @NotNull(message = "La fecha de nacimiento es obligatoria")
+    @Past(message = "La fecha de nacimiento debe ser en el pasado")
+    private LocalDate fechaNacimiento;
+    
+    @NotNull(message = "El tipo de documento es obligatorio")
+    private TipoDocumento tipoDocumento;
+    
+    @NotBlank(message = "El número de documento es obligatorio")
+    @Size(max = 20, message = "El número de documento no puede exceder los 20 caracteres")
+    private String numeroDocumento;
+    
+    // IDs de las direcciones asociadas - al menos una dirección es obligatoria
+    @NotEmpty(message = "La persona debe tener al menos una dirección asociada")
+    private List<Long> direccionIds = new ArrayList<>();
+    
+    @Override
+    public String getId() {
+        return super.id;
+    }
+    
+    @Override
+    public void setId(String id) {
+        super.id = id;
+    }
+}

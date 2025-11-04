@@ -41,14 +41,6 @@ public class Direccion extends BaseEntity<Long> {
     @Column(name = "puerta_manzana", length = 20)
     private String puertaManzana;
 
-    @Size(max = 50)
-    @Column(name = "ubicacion_coordenada_x", length = 50)
-    private String ubicacionCoordenadaX;
-
-    @Size(max = 50)
-    @Column(name = "ubicacion_coordenada_y", length = 50)
-    private String ubicacionCoordenadaY;
-
     @Size(max = 500)
     @Column(name = "observacion", length = 500)
     private String observacion;

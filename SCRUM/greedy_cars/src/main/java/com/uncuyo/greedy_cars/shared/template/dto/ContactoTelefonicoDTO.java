@@ -38,6 +38,9 @@ public class ContactoTelefonicoDTO extends BaseDTO<String> {
     // ID de la persona asociada (opcional)
     private String personaId;
     
+    // ID de la empresa asociada (opcional)
+    private String empresaId;
+    
     @Override
     public String getId() {
         return super.id;

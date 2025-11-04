@@ -36,6 +36,10 @@ public abstract class Contacto extends BaseEntity<String> {
     @JoinColumn(name = "persona_id")
     private Persona persona;
 
+    @ManyToOne
+    @JoinColumn(name = "empresa_id")
+    private Empresa empresa;
+
     @Override
     public String getId() {
         return id;

@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,6 +31,17 @@ public class Empresa extends BaseEntity<String> {
     @Column(name = "nombre", nullable = false, length = 120)
     private String nombre;
 
+    @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Contacto> contactos = new ArrayList<>();
+
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+        name = "empresa_direccion",
+        joinColumns = @JoinColumn(name = "empresa_id"),
+        inverseJoinColumns = @JoinColumn(name = "direccion_id")
+    )
+    private List<Direccion> direcciones = new ArrayList<>();
+
     // Implementación de métodos abstractos de BaseEntity
     @Override
     public String getId() {
@@ -39,10 +53,23 @@ public class Empresa extends BaseEntity<String> {
         this.id = id;
     }
 
-    /*
-     *@OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "contacto_id", referencedColumnName = "id")
-    private Contacto contacto;
-     */
-    
+    // Métodos de conveniencia para la relación bidireccional con contactos
+    public void addContacto(Contacto contacto) {
+        contactos.add(contacto);
+        contacto.setEmpresa(this);
+    }
+
+    public void removeContacto(Contacto contacto) {
+        contactos.remove(contacto);
+        contacto.setEmpresa(null);
+    }
+
+    // Métodos de conveniencia para la relación con direcciones
+    public void addDireccion(Direccion direccion) {
+        direcciones.add(direccion);
+    }
+
+    public void removeDireccion(Direccion direccion) {
+        direcciones.remove(direccion);
+    }
 }

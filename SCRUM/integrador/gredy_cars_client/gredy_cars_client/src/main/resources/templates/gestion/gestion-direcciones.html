@@ -17,29 +17,7 @@
 </head>
 
 <body>
-<nav class="navbar navbar-expand-lg navbar-light container-fluid py-3 position-fixed">
-  <div class="container">
-    <a class="navbar-brand" href="index.html"><img th:src="@{/images/logo.png}" alt="logo" /></a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
-            aria-controls="offcanvasNavbar">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
-      <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menu</h5>
-        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-      </div>
-      <div class="offcanvas-body">
-        <ul class="navbar-nav align-items-center justify-content-end flex-grow-1 pe-3">
-          <li class="nav-item"><a class="nav-link px-3" href="index.html">Home</a></li>
-          <li class="nav-item"><a class="nav-link px-3" href="gestion-vehiculos.html">Gestión Vehículos</a></li>
-          <li class="nav-item"><a class="nav-link px-3" href="gestion-empresas.html">Empresas</a></li>
-          <li class="nav-item"><a class="btn btn-outline-primary px-3" href="login.html">Cerrar Sesión</a></li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</nav>
+<div th:replace="fragments/navbar :: navbar"></div>
 
 <section id="banner" class="position-relative overflow-hidden jarallax"
          th:style="|background-image: url(@{/images/Bg.jpg}); background-repeat: no-repeat; background-size: cover; background-position: center;|">

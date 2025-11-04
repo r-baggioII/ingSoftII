@@ -197,25 +197,31 @@ $(".search-popup-trigger").on("click", function (b) {
   $(document).ready(function() {  
     
     initJarallax();
-    // product single page
-    var thumb_slider = new Swiper(".product-thumbnail-slider", {
-      autoplay: true,
-      loop: true,
-      spaceBetween: 8,
-      slidesPerView: 4,
-      freeMode: true,
-      watchSlidesProgress: true,
-    });
+    // Initialize Swiper carousels only if library is present and containers exist
+    if (window.Swiper) {
+      var hasThumb = document.querySelector('.product-thumbnail-slider');
+      var hasLarge = document.querySelector('.product-large-slider');
+      if (hasThumb || hasLarge) {
+        var thumb_slider = new Swiper('.product-thumbnail-slider', {
+          autoplay: true,
+          loop: true,
+          spaceBetween: 8,
+          slidesPerView: 4,
+          freeMode: true,
+          watchSlidesProgress: true,
+        });
 
-    var large_slider = new Swiper(".product-large-slider", {
-      autoplay: true,
-      loop: true,
-      spaceBetween: 10,
-      effect: 'fade',
-      thumbs: {
-        swiper: thumb_slider,
-      },
-    });
+        var large_slider = new Swiper('.product-large-slider', {
+          autoplay: true,
+          loop: true,
+          spaceBetween: 10,
+          effect: 'fade',
+          thumbs: {
+            swiper: thumb_slider,
+          },
+        });
+      }
+    }
 
 //switch javascript
 

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Departamentos</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<section>
+    <h1>Gestión de Departamentos</h1>
+
+    <article th:if="${success}" class="alert alert-success" th:text="${success}"></article>
+    <article th:if="${error}" class="alert alert-danger" th:text="${error}"></article>
+
+    <p>
+        <a th:href="@{/departamentos/nuevo}">Crear nuevo departamento</a>
+    </p>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Provincia</th>
+            <th>País</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="departamento : ${departamentos}">
+            <td th:text="${departamento.id}">1</td>
+            <td th:text="${departamento.nombre}">Capital</td>
+            <td th:text="${departamento.provincia != null ? departamento.provincia.nombre : 'Sin provincia'}">Mendoza</td>
+            <td th:text="${departamento.provincia != null && departamento.provincia.pais != null ? departamento.provincia.pais.nombre : 'Sin país'}">Argentina</td>
+            <td>
+                <a th:href="@{/departamentos/{id}/editar(id=${departamento.id})}">Editar</a>
+                <form th:action="@{/departamentos/{id}/eliminar(id=${departamento.id})}" method="post" style="display:inline">
+                    <button type="submit" onclick="return confirm('¿Eliminar departamento?');">Eliminar</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div th:if="${#lists.isEmpty(departamentos)}">
+        <p>No hay departamentos registrados.</p>
+    </div>
+</section>
+</body>
+</html>

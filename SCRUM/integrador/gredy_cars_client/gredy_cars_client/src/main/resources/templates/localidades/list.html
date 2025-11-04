@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Localidades</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<section>
+    <h1>Gestión de Localidades</h1>
+
+    <article th:if="${success}" class="alert alert-success" th:text="${success}"></article>
+    <article th:if="${error}" class="alert alert-danger" th:text="${error}"></article>
+
+    <p>
+        <a th:href="@{/localidades/nuevo}">Crear nueva localidad</a>
+    </p>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Código Postal</th>
+            <th>Departamento</th>
+            <th>Provincia</th>
+            <th>País</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="localidad : ${localidades}">
+            <td th:text="${localidad.id}">1</td>
+            <td th:text="${localidad.nombre}">Ciudad</td>
+            <td th:text="${localidad.codigoPostal}">5500</td>
+            <td th:text="${localidad.departamento != null ? localidad.departamento.nombre : 'Sin departamento'}">Capital</td>
+            <td th:text="${localidad.departamento != null && localidad.departamento.provincia != null ? localidad.departamento.provincia.nombre : 'Sin provincia'}">Mendoza</td>
+            <td th:text="${localidad.departamento != null && localidad.departamento.provincia != null && localidad.departamento.provincia.pais != null ? localidad.departamento.provincia.pais.nombre : 'Sin país'}">Argentina</td>
+            <td>
+                <a th:href="@{/localidades/{id}/editar(id=${localidad.id})}">Editar</a>
+                <form th:action="@{/localidades/{id}/eliminar(id=${localidad.id})}" method="post" style="display:inline">
+                    <button type="submit" onclick="return confirm('¿Eliminar localidad?');">Eliminar</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div th:if="${#lists.isEmpty(localidades)}">
+        <p>No hay localidades registradas.</p>
+    </div>
+</section>
+</body>
+</html>

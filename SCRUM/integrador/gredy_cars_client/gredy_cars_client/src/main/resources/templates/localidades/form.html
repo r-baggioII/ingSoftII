@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${localidad.id} != null ? 'Editar Localidad' : 'Crear Localidad'">Formulario Localidad</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<section>
+    <h1 th:text="${localidad.id} != null ? 'Editar Localidad' : 'Crear Localidad'">Formulario Localidad</h1>
+
+    <article th:if="${error}" class="alert alert-danger" th:text="${error}"></article>
+
+    <form th:object="${localidad}"
+          th:action="${localidad.id} != null ? @{/localidades/{id}(id=${localidad.id})} : @{/localidades}"
+          method="post">
+        <div>
+            <label for="nombre">Nombre</label>
+            <input id="nombre" type="text" th:field="*{nombre}" placeholder="Ingrese la localidad"/>
+        </div>
+
+        <div>
+            <label for="codigoPostal">Código Postal</label>
+            <input id="codigoPostal" type="text" th:field="*{codigoPostal}" placeholder="Ingrese el código postal"/>
+        </div>
+
+        <div>
+            <label for="departamento">Departamento</label>
+            <select id="departamento" th:field="*{departamento.id}">
+                <option value="">Seleccione un departamento</option>
+                <option th:each="departamento : ${departamentos}"
+                        th:value="${departamento.id}"
+                        th:text="${departamento.nombre + ' - ' + (departamento.provincia != null ? departamento.provincia.nombre : 'Sin provincia')}">
+                    Capital
+                </option>
+            </select>
+        </div>
+
+        <div>
+            <button type="submit" th:text="${localidad.id} != null ? 'Actualizar' : 'Guardar'">Guardar</button>
+            <a th:href="@{/localidades}">Volver</a>
+        </div>
+    </form>
+</section>
+</body>
+</html>

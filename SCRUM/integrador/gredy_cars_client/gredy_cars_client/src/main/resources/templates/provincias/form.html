@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${provincia.id} != null ? 'Editar Provincia' : 'Crear Provincia'">Formulario Provincia</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<section>
+    <h1 th:text="${provincia.id} != null ? 'Editar Provincia' : 'Crear Provincia'">Formulario Provincia</h1>
+
+    <article th:if="${error}" class="alert alert-danger" th:text="${error}"></article>
+
+    <form th:object="${provincia}"
+          th:action="${provincia.id} != null ? @{/provincias/{id}(id=${provincia.id})} : @{/provincias}"
+          method="post">
+        <div>
+            <label for="nombre">Nombre</label>
+            <input id="nombre" type="text" th:field="*{nombre}" placeholder="Ingrese la provincia"/>
+        </div>
+
+        <div>
+            <label for="pais">País</label>
+            <select id="pais" th:field="*{pais.id}">
+                <option value="">Seleccione un país</option>
+                <option th:each="pais : ${paises}" th:value="${pais.id}" th:text="${pais.nombre}">Argentina</option>
+            </select>
+        </div>
+
+        <div>
+            <button type="submit" th:text="${provincia.id} != null ? 'Actualizar' : 'Guardar'">Guardar</button>
+            <a th:href="@{/provincias}">Volver</a>
+        </div>
+    </form>
+</section>
+</body>
+</html>

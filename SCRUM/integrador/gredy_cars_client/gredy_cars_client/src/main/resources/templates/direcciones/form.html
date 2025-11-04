@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${direccion.id} != null ? 'Editar Dirección' : 'Crear Dirección'">Formulario Dirección</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<section>
+    <h1 th:text="${direccion.id} != null ? 'Editar Dirección' : 'Crear Dirección'">Formulario Dirección</h1>
+
+    <article th:if="${error}" class="alert alert-danger" th:text="${error}"></article>
+
+    <form th:object="${direccion}"
+          th:action="${direccion.id} != null ? @{/direcciones/{id}(id=${direccion.id})} : @{/direcciones}"
+          method="post">
+        <div>
+            <label for="calle">Calle</label>
+            <input id="calle" type="text" th:field="*{calle}" placeholder="Ingrese la calle"/>
+        </div>
+
+        <div>
+            <label for="numeracion">Numeración</label>
+            <input id="numeracion" type="text" th:field="*{numeracion}" placeholder="Ingrese la numeración"/>
+        </div>
+
+        <div>
+            <label for="barrio">Barrio</label>
+            <input id="barrio" type="text" th:field="*{barrio}" placeholder="Ingrese el barrio"/>
+        </div>
+
+        <div>
+            <label for="pisoCasa">Piso / Casa</label>
+            <input id="pisoCasa" type="text" th:field="*{pisoCasa}" placeholder="Ingrese el piso o casa"/>
+        </div>
+
+        <div>
+            <label for="puertaManzana">Puerta / Manzana</label>
+            <input id="puertaManzana" type="text" th:field="*{puertaManzana}" placeholder="Ingrese la puerta o manzana"/>
+        </div>
+
+        <div>
+            <label for="observacion">Observación</label>
+            <textarea id="observacion" th:field="*{observacion}" placeholder="Ingrese observaciones (opcional)"></textarea>
+        </div>
+
+        <div>
+            <label for="localidad">Localidad</label>
+            <select id="localidad" th:field="*{localidad.id}">
+                <option value="">Seleccione una localidad</option>
+                <option th:each="localidad : ${localidades}"
+                        th:value="${localidad.id}"
+                        th:text="${localidad.nombre + ' - ' + (localidad.departamento != null ? localidad.departamento.nombre : 'Sin departamento')}">
+                    Godoy Cruz
+                </option>
+            </select>
+        </div>
+
+        <div>
+            <button type="submit" th:text="${direccion.id} != null ? 'Actualizar' : 'Guardar'">Guardar</button>
+            <a th:href="@{/direcciones}">Volver</a>
+        </div>
+    </form>
+</section>
+</body>
+</html>

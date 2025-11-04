@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Provincias</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<section>
+    <h1>Gestión de Provincias</h1>
+
+    <article th:if="${success}" class="alert alert-success" th:text="${success}"></article>
+    <article th:if="${error}" class="alert alert-danger" th:text="${error}"></article>
+
+    <p>
+        <a th:href="@{/provincias/nuevo}">Crear nueva provincia</a>
+    </p>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>País</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="provincia : ${provincias}">
+            <td th:text="${provincia.id}">1</td>
+            <td th:text="${provincia.nombre}">Buenos Aires</td>
+            <td th:text="${provincia.pais != null ? provincia.pais.nombre : 'Sin país'}">Argentina</td>
+            <td>
+                <a th:href="@{/provincias/{id}/editar(id=${provincia.id})}">Editar</a>
+                <form th:action="@{/provincias/{id}/eliminar(id=${provincia.id})}" method="post" style="display:inline">
+                    <button type="submit" onclick="return confirm('¿Eliminar provincia?');">Eliminar</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div th:if="${#lists.isEmpty(provincias)}">
+        <p>No hay provincias registradas.</p>
+    </div>
+</section>
+</body>
+</html>

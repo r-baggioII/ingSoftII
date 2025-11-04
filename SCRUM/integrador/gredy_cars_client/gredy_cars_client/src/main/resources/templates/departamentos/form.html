@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${departamento.id} != null ? 'Editar Departamento' : 'Crear Departamento'">Formulario Departamento</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<section>
+    <h1 th:text="${departamento.id} != null ? 'Editar Departamento' : 'Crear Departamento'">Formulario Departamento</h1>
+
+    <article th:if="${error}" class="alert alert-danger" th:text="${error}"></article>
+
+    <form th:object="${departamento}"
+          th:action="${departamento.id} != null ? @{/departamentos/{id}(id=${departamento.id})} : @{/departamentos}"
+          method="post">
+        <div>
+            <label for="nombre">Nombre</label>
+            <input id="nombre" type="text" th:field="*{nombre}" placeholder="Ingrese el departamento"/>
+        </div>
+
+        <div>
+            <label for="provincia">Provincia</label>
+            <select id="provincia" th:field="*{provincia.id}">
+                <option value="">Seleccione una provincia</option>
+                <option th:each="provincia : ${provincias}"
+                        th:value="${provincia.id}"
+                        th:text="${provincia.nombre + ' (' + (provincia.pais != null ? provincia.pais.nombre : 'Sin país') + ')'}">
+                    Mendoza
+                </option>
+            </select>
+        </div>
+
+        <div>
+            <button type="submit" th:text="${departamento.id} != null ? 'Actualizar' : 'Guardar'">Guardar</button>
+            <a th:href="@{/departamentos}">Volver</a>
+        </div>
+    </form>
+</section>
+</body>
+</html>

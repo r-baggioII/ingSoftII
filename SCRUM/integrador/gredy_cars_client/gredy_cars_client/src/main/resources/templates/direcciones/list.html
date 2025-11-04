@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Direcciones</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<section>
+    <h1>Gestión de Direcciones</h1>
+
+    <article th:if="${success}" class="alert alert-success" th:text="${success}"></article>
+    <article th:if="${error}" class="alert alert-danger" th:text="${error}"></article>
+
+    <p>
+        <a th:href="@{/direcciones/nuevo}">Crear nueva dirección</a>
+    </p>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Calle</th>
+            <th>Numeración</th>
+            <th>Barrio</th>
+            <th>Piso/Casa</th>
+            <th>Puerta/Manzana</th>
+            <th>Localidad</th>
+            <th>Departamento</th>
+            <th>Provincia</th>
+            <th>País</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="direccion : ${direcciones}">
+            <td th:text="${direccion.id}">1</td>
+            <td th:text="${direccion.calle}">San Martín</td>
+            <td th:text="${direccion.numeracion}">100</td>
+            <td th:text="${direccion.barrio}">Centro</td>
+            <td th:text="${direccion.pisoCasa}">1</td>
+            <td th:text="${direccion.puertaManzana}">A</td>
+            <td th:text="${direccion.localidad != null ? direccion.localidad.nombre : 'Sin localidad'}">Godoy Cruz</td>
+            <td th:text="${direccion.localidad != null && direccion.localidad.departamento != null ? direccion.localidad.departamento.nombre : 'Sin departamento'}">Capital</td>
+            <td th:text="${direccion.localidad != null && direccion.localidad.departamento != null && direccion.localidad.departamento.provincia != null ? direccion.localidad.departamento.provincia.nombre : 'Sin provincia'}">Mendoza</td>
+            <td th:text="${direccion.localidad != null && direccion.localidad.departamento != null && direccion.localidad.departamento.provincia != null && direccion.localidad.departamento.provincia.pais != null ? direccion.localidad.departamento.provincia.pais.nombre : 'Sin país'}">Argentina</td>
+            <td>
+                <a th:href="@{/direcciones/{id}/editar(id=${direccion.id})}">Editar</a>
+                <form th:action="@{/direcciones/{id}/eliminar(id=${direccion.id})}" method="post" style="display:inline">
+                    <button type="submit" onclick="return confirm('¿Eliminar dirección?');">Eliminar</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div th:if="${#lists.isEmpty(direcciones)}">
+        <p>No hay direcciones registradas.</p>
+    </div>
+</section>
+</body>
+</html>

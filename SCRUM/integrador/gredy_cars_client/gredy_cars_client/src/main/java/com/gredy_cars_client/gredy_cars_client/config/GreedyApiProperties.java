@@ -14,6 +14,16 @@ public class GreedyApiProperties {
      */
     private String baseUrl = "http://localhost:8080/api";
 
+    /**
+     * Username for Basic Authentication
+     */
+    private String username = "admin";
+
+    /**
+     * Password for Basic Authentication
+     */
+    private String password = "GreedyAdmin123!";
+
     public String getBaseUrl() {
         return baseUrl;
     }
@@ -21,5 +31,20 @@ public class GreedyApiProperties {
     public void setBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
     }
-}
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+}

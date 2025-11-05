@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.uncuyo.greedy_cars.shared.template.entity.Documentacion;
-import com.uncuyo.greedy_cars.shared.template.entity.TipoDocumentacion;
+import com.uncuyo.greedy_cars.shared.template.enums.TipoDocumentacion;
 
 import java.util.List;
 

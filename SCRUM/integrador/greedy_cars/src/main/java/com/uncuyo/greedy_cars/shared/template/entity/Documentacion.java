@@ -1,5 +1,6 @@
 package com.uncuyo.greedy_cars.shared.template.entity;
 
+import com.uncuyo.greedy_cars.shared.template.enums.TipoDocumentacion;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

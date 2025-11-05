@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.uncuyo.greedy_cars.shared.template.dto.DocumentacionDTO;
-import com.uncuyo.greedy_cars.shared.template.entity.TipoDocumentacion;
+import com.uncuyo.greedy_cars.shared.template.enums.TipoDocumentacion;
 import com.uncuyo.greedy_cars.shared.template.exception.ErrorServiceException;
 import com.uncuyo.greedy_cars.shared.template.service.DocumentacionService;
 

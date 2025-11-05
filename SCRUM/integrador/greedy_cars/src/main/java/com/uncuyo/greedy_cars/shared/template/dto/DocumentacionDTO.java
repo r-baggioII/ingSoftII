@@ -1,6 +1,6 @@
 package com.uncuyo.greedy_cars.shared.template.dto;
 
-import com.uncuyo.greedy_cars.shared.template.entity.TipoDocumentacion;
+import com.uncuyo.greedy_cars.shared.template.enums.TipoDocumentacion;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

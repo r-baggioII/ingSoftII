@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.uncuyo.greedy_cars.shared.template.dto.DocumentacionDTO;
 import com.uncuyo.greedy_cars.shared.template.entity.Documentacion;
-import com.uncuyo.greedy_cars.shared.template.entity.TipoDocumentacion;
+import com.uncuyo.greedy_cars.shared.template.enums.TipoDocumentacion;
 import com.uncuyo.greedy_cars.shared.template.enums.BaseUseCaseService;
 import com.uncuyo.greedy_cars.shared.template.exception.ErrorServiceException;
 import com.uncuyo.greedy_cars.shared.template.mapper.DocumentacionMapper;

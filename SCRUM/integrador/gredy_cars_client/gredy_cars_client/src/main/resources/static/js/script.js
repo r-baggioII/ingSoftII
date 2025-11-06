@@ -274,10 +274,12 @@ if (switchInput) {
 
 
 //date picker
-$("#datepicker1, #datepicker2").datepicker({
-  autoclose: true,
-  todayHighlight: true,
-}).datepicker('update', new Date());
+if ($.fn.datepicker) {
+  $("#datepicker1, #datepicker2").datepicker({
+    autoclose: true,
+    todayHighlight: true,
+  }).datepicker('update', new Date());
+}
 
 
 

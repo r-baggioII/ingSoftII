@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 
 <head>
   <meta charset="UTF-8" />
@@ -8,14 +8,14 @@
   <title>Login - Greedy Cars</title>
 
   <!--vendor css ================================================== -->
-  <link rel="stylesheet" type="text/css" href="css/vendor.css" />
+  <link rel="stylesheet" type="text/css" th:href="@{/css/vendor.css}" />
 
   <!--Bootstrap ================================================== -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous" />
 
   <!-- Style Sheet ================================================== -->
-  <link rel="stylesheet" type="text/css" href="style.css" />
+  <link rel="stylesheet" type="text/css" th:href="@{/style.css}" />
 
   <!-- Google Fonts ================================================== -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -25,14 +25,14 @@
     rel="stylesheet" />
 
   <!-- script ================================================== -->
-  <script src="js/modernizr.js"></script>
+  <script th:src="@{/js/modernizr.js}"></script>
 </head>
 
 <body data-bs-spy="scroll" data-bs-target="#header-nav" tabindex="0">
 
   <nav class="navbar navbar-expand-lg navbar-light container-fluid py-3 position-fixed">
     <div class="container">
-      <a class="navbar-brand" href="index.html"><img src="images/logo.png" alt="logo" /></a>
+      <a class="navbar-brand" th:href="@{/index}"><img th:src="@{/images/logo.png}" alt="logo" /></a>
       <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
         aria-controls="offcanvasNavbar">
         <span class="navbar-toggler-icon"></span>
@@ -45,7 +45,7 @@
         <div class="offcanvas-body">
           <ul class="navbar-nav align-items-center justify-content-end flex-grow-1 pe-3">
             <li class="nav-item">
-              <a class="nav-link px-3" href="index.html">Home</a>
+              <a class="nav-link px-3" th:href="@{/index}">Home</a>
             </li>
             <li class="nav-item">
               <a class="nav-link px-3" href="cars.html">Vehículos</a>
@@ -69,7 +69,7 @@
   <section id="banner"
   class="position-relative overflow-hidden jarallax"
   style="
-    background-image: url(images/Bg.jpg);
+    background-image: url(/gredy_cars_client/images/Bg.jpg);
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
@@ -82,7 +82,7 @@
       >
         <h2 class="page-title display-3 mt-5">Iniciar Sesión</h2>
         <nav class="breadcrumb ">
-          <a class="breadcrumb-item text-white" href="index.html">Home</a>
+          <a class="breadcrumb-item text-white" th:href="@{/index}">Home</a>
           <span class="breadcrumb-item text-white active" aria-current="page"
             >Login</span
           >
@@ -118,23 +118,44 @@
             </div>
           </div>
 
-          <form id="loginForm" class="form-group flex-wrap">
+          <form id="loginForm" class="form-group flex-wrap" method="post" th:action="@{/login}">
             
+            <!-- Mensaje de error si el login falla -->
+            <div class="col-lg-12 mb-3" th:if="${param.error}">
+              <div class="alert alert-danger" role="alert">
+                Usuario o contraseña incorrectos. Por favor, intenta de nuevo.
+              </div>
+            </div>
+
+            <!-- Mensaje de error personalizado -->
+            <div class="col-lg-12 mb-3" th:if="${error}">
+              <div class="alert alert-danger" role="alert" th:text="${error}">
+                Error al procesar la solicitud.
+              </div>
+            </div>
+
+            <!-- Mensaje de logout exitoso -->
+            <div class="col-lg-12 mb-3" th:if="${param.logout}">
+              <div class="alert alert-success" role="alert">
+                Has cerrado sesión correctamente.
+              </div>
+            </div>
+
             <div class="col-lg-12 mb-3">
-              <label for="email" class="form-label fw-medium">Correo Electrónico / Usuario</label>
-              <input type="text" id="email" name="email" placeholder="usuario@email.com" 
+              <label for="nombreUsuario" class="form-label fw-medium">Usuario</label>
+              <input type="text" id="nombreUsuario" name="nombreUsuario" placeholder="Ingrese su usuario" 
                      class="form-control p-3" required>
             </div>
 
             <div class="col-lg-12 mb-3">
-              <label for="password" class="form-label fw-medium">Contraseña</label>
-              <input type="password" id="password" name="password" 
+              <label for="clave" class="form-label fw-medium">Contraseña</label>
+              <input type="password" id="clave" name="clave" 
                      class="form-control p-3" required>
             </div>
 
             <div class="col-lg-12 mb-3 d-flex justify-content-between">
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="remember_me" name="remember_me">
+                <input class="form-check-input" type="checkbox" id="remember_me" name="remember-me">
                 <label class="form-check-label" for="remember_me">
                   Recordarme
                 </label>
@@ -332,9 +353,9 @@
   </section>
 
   <!-- script ================================================== -->
-  <script src="js/jquery-1.11.0.min.js"></script>
-  <script src="js/plugins.js"></script>
-  <script src="js/script.js"></script>
+  <script th:src="@{/js/jquery-1.11.0.min.js}"></script>
+  <script th:src="@{/js/plugins.js}"></script>
+  <script th:src="@{/js/script.js}"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
     crossorigin="anonymous"></script>

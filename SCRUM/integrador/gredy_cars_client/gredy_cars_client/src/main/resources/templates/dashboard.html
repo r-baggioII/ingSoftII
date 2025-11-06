@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Greedy Cars</title>
+
+  <!--Bootstrap ================================================== -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous" />
+
+  <!-- Style Sheet ================================================== -->
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+
+  <!-- Google Fonts ================================================== -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet" />
+</head>
+
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
+    <div class="container">
+      <a class="navbar-brand" th:href="@{/}">
+        <img src="/images/logo.png" alt="logo" style="height: 40px;" />
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto align-items-center">
+          <li class="nav-item">
+            <a class="nav-link" th:href="@{/dashboard}">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" th:href="@{/usuarios}">Usuarios</a>
+          </li>
+          <li class="nav-item">
+            <form th:action="@{/logout}" method="post" class="d-inline">
+              <button type="submit" class="btn btn-outline-light btn-sm ms-2">
+                Cerrar Sesión
+              </button>
+            </form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container py-5">
+    <div class="row">
+      <div class="col-12">
+        <h1 class="display-4 mb-4">Bienvenido al Dashboard</h1>
+        <div class="alert alert-success" role="alert">
+          <h4 class="alert-heading">¡Autenticación exitosa!</h4>
+          <p>Has iniciado sesión correctamente. Esta es una página protegida que solo puede ser vista por usuarios autenticados.</p>
+          <hr>
+          <p class="mb-0">El sistema utiliza JWT en cookies HttpOnly para mantener tu sesión segura.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-md-4 mb-3">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">
+              <iconify-icon icon="mdi:account-group" class="text-primary"></iconify-icon>
+              Gestión de Usuarios
+            </h5>
+            <p class="card-text">Administra los usuarios del sistema.</p>
+            <a th:href="@{/usuarios}" class="btn btn-primary">Ver Usuarios</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">
+              <iconify-icon icon="mdi:car" class="text-primary"></iconify-icon>
+              Vehículos
+            </h5>
+            <p class="card-text">Gestiona el catálogo de vehículos.</p>
+            <a href="#" class="btn btn-primary">Ver Vehículos</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">
+              <iconify-icon icon="mdi:calendar-clock" class="text-primary"></iconify-icon>
+              Reservas
+            </h5>
+            <p class="card-text">Administra las reservas de clientes.</p>
+            <a href="#" class="btn btn-primary">Ver Reservas</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Información del Sistema</h5>
+          </div>
+          <div class="card-body">
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item">
+                <strong>Cliente:</strong> Aplicación Spring Boot MVC con Thymeleaf
+              </li>
+              <li class="list-group-item">
+                <strong>Backend API:</strong> <span th:text="${backendUrl}">http://localhost:18082/greedy_cars/api</span>
+              </li>
+              <li class="list-group-item">
+                <strong>Autenticación:</strong> JWT en cookies HttpOnly
+              </li>
+              <li class="list-group-item">
+                <strong>Protección de rutas:</strong> AuthCheckInterceptor + Backend verification
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="alert alert-info" role="alert">
+          <h5>
+            <iconify-icon icon="mdi:information" class="me-2"></iconify-icon>
+            Cómo funciona
+          </h5>
+          <ol class="mb-0">
+            <li>El usuario se autentica en <code>/login</code></li>
+            <li>El controlador MVC envía las credenciales al backend</li>
+            <li>El backend valida y devuelve un JWT en cookie HttpOnly (Set-Cookie)</li>
+            <li>El cliente copia el header Set-Cookie al response para que el navegador guarde la cookie</li>
+            <li>Para cada ruta protegida, el AuthCheckInterceptor valida la cookie con el backend</li>
+            <li>Los servicios del cliente copian la cookie en cada petición al backend</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-dark text-white py-4 mt-5">
+    <div class="container text-center">
+      <p class="mb-0">© Greedy Cars 2025 - Todos los derechos reservados</p>
+    </div>
+  </footer>
+
+  <!-- Scripts ================================================== -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+
+</body>
+
+</html>

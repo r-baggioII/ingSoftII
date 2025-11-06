@@ -1,0 +1,39 @@
+package com.greedy_cars_institucional.institucional.config;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
+
+/**
+ * Duplicates the REST client setup from the existing Greedy Cars client to
+ * guarantee identical authentication and timeout behaviour.
+ */
+@Configuration
+@EnableConfigurationProperties(GreedyApiProperties.class)
+public class ApiClientConfig {
+
+    @Bean
+    public RestTemplate restTemplate(
+        RestTemplateBuilder builder,
+        GreedyApiProperties properties,
+        HttpComponentsClientHttpRequestFactory httpRequestFactory
+    ) {
+        return builder
+            .defaultHeader(HttpHeaders.AUTHORIZATION, createBasicAuthHeader(properties))
+            .requestFactory(() -> httpRequestFactory)
+            .build();
+    }
+
+    private String createBasicAuthHeader(GreedyApiProperties properties) {
+        String auth = properties.getUsername() + ":" + properties.getPassword();
+        byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(StandardCharsets.UTF_8));
+        return "Basic " + new String(encodedAuth, StandardCharsets.UTF_8);
+    }
+}

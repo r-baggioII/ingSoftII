@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class GreedyCarsApplication {
 
 	public static void main(String[] args) {
+		// TODO: habilitar @EnableAsync y @EnableScheduling cuando se activen los jobs de correo.
 		SpringApplication.run(GreedyCarsApplication.class, args);
 	}
 

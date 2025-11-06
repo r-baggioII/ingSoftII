@@ -48,6 +48,10 @@ public class SecurityConfig {
                     "/api/pagos/mp/failure",
                     "/api/pagos/mp/pending"
                 ).permitAll()
+                .requestMatchers(
+                    "/api/configuracion-correo/**",
+                    "/api/correos/**"
+                ).permitAll()
                 // Temporalmente: TODA la API es pública para pruebas
                 // Puedes ir protegiendo rutas gradualmente según necesites
                 .requestMatchers("/api/**").permitAll()

@@ -1,9 +1,21 @@
 package com.uncuyo.greedy_cars.shared.template.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,6 +40,17 @@ public class Empresa extends BaseEntity<String> {
     @Column(name = "nombre", nullable = false, length = 120)
     private String nombre;
 
+    @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ConfiguracionCorreoAutomatico> configuracionesCorreo = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "direccion_id")
+    private Direccion direccion;
+
+    @ManyToOne
+    @JoinColumn(name = "contacto_id")
+    private Contacto contacto;
+
     // Implementación de métodos abstractos de BaseEntity
     @Override
     public String getId() {
@@ -38,11 +61,5 @@ public class Empresa extends BaseEntity<String> {
     public void setId(String id) {
         this.id = id;
     }
-
-    /*
-     *@OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "contacto_id", referencedColumnName = "id")
-    private Contacto contacto;
-     */
     
 }

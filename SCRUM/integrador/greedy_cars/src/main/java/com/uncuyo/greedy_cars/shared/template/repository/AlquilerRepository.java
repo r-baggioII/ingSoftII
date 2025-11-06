@@ -1,6 +1,7 @@
 package com.uncuyo.greedy_cars.shared.template.repository;
 
 import com.uncuyo.greedy_cars.shared.template.entity.Alquiler;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -14,4 +15,6 @@ public interface AlquilerRepository extends BaseRepository<Alquiler, String> {
     boolean existeTraslapeParaVehiculo(@Param("vehiculoId") String vehiculoId,
                                        @Param("fechaDesde") java.time.LocalDate fechaDesde,
                                        @Param("fechaHasta") java.time.LocalDate fechaHasta);
+
+    Optional<Alquiler> findFirstByVehiculoIdAndEliminadoIsFalseOrderByFechaHastaDesc(String vehiculoId);
 }

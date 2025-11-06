@@ -4,7 +4,6 @@ import com.uncuyo.greedy_cars.shared.template.enums.EstadoVehiculo;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -33,6 +32,10 @@ public class Vehiculo extends BaseEntity<String> {
     @Enumerated(EnumType.STRING)
     @Column(name = "estado_vehiculo", nullable = false, length = 20)
     private EstadoVehiculo estadoVehiculo;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "caracteristica_vehiculo_id")
+    private CaracteristicaVehiculo caracteristicaVehiculo;
 
     // Implementación explícita de métodos abstractos de BaseEntity
     @Override

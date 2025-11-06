@@ -22,6 +22,11 @@ public class VehiculoService extends BaseService<Vehiculo, String> {
         if (entidadNueva.getPatente() != null) {
             entidadExistente.setPatente(entidadNueva.getPatente());
         }
-        
+        if (entidadNueva.getEstadoVehiculo() != null) {
+            entidadExistente.setEstadoVehiculo(entidadNueva.getEstadoVehiculo());
+        }
+        if (entidadNueva.getCaracteristicaVehiculo() != null) {
+            entidadExistente.setCaracteristicaVehiculo(entidadNueva.getCaracteristicaVehiculo());
+        }
     }
 }

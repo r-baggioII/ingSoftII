@@ -1,6 +1,5 @@
 package com.uncuyo.greedy_cars.config;
 
-import com.uncuyo.greedy_cars.config.security.JwtAuthenticationFilter;
 import com.uncuyo.greedy_cars.shared.template.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -43,6 +42,12 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authorize -> authorize
+                .requestMatchers(
+                    "/api/pagos/mp/preferencia",
+                    "/api/pagos/mp/success",
+                    "/api/pagos/mp/failure",
+                    "/api/pagos/mp/pending"
+                ).permitAll()
                 // Temporalmente: TODA la API es pública para pruebas
                 // Puedes ir protegiendo rutas gradualmente según necesites
                 .requestMatchers("/api/**").permitAll()

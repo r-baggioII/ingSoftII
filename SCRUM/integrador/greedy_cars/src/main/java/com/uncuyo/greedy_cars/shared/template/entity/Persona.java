@@ -67,6 +67,10 @@ public class Persona extends BaseEntity<String> {
     )
     private List<Direccion> direcciones = new ArrayList<>();
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "persona_id")
+    private List<Imagen> imagenes = new ArrayList<>();
+
     // Implementación de métodos abstractos de BaseEntity
     @Override
     public String getId() {
@@ -96,6 +100,16 @@ public class Persona extends BaseEntity<String> {
 
     public void removeDireccion(Direccion direccion) {
         direcciones.remove(direccion);
+    }
+
+    // Métodos para imágenes
+    public void addImagen(Imagen imagen) {
+        imagenes.add(imagen);
+        imagen.setTipoImagen(com.uncuyo.greedy_cars.shared.template.enums.TipoImagen.PERSONA);
+    }
+
+    public void removeImagen(Imagen imagen) {
+        imagenes.remove(imagen);
     }
 
 }

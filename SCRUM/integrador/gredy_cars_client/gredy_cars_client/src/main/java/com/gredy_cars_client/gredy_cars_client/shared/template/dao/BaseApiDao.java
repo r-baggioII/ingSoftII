@@ -32,8 +32,8 @@ public abstract class BaseApiDao<T, ID> {
 
     private static final Logger log = LoggerFactory.getLogger(BaseApiDao.class);
 
-    private final RestTemplate restTemplate;
-    private final String baseUrl;
+    protected final RestTemplate restTemplate;
+    protected final String baseUrl;
 
     protected BaseApiDao(RestTemplate restTemplate, GreedyApiProperties properties) {
         this.restTemplate = restTemplate;
@@ -82,6 +82,9 @@ public abstract class BaseApiDao<T, ID> {
     }
 
     public Optional<T> findById(ID id) throws ErrorServiceException {
+        if (id == null || id.toString().trim().isEmpty()) {
+            return Optional.empty();
+        }
         try {
             ResponseEntity<T> response = restTemplate.exchange(
                 entityUrl(id),
@@ -116,6 +119,9 @@ public abstract class BaseApiDao<T, ID> {
     }
 
     public Optional<T> update(ID id, T payload) throws ErrorServiceException {
+        if (id == null || id.toString().trim().isEmpty()) {
+            throw new ErrorServiceException("El ID del recurso no puede estar vacío para actualizar");
+        }
         try {
             ResponseEntity<T> response = restTemplate.exchange(
                 entityUrl(id),
@@ -134,6 +140,9 @@ public abstract class BaseApiDao<T, ID> {
     }
 
     public void delete(ID id) throws ErrorServiceException {
+        if (id == null || id.toString().trim().isEmpty()) {
+            throw new ErrorServiceException("El ID del recurso no puede estar vacío para eliminar");
+        }
         try {
             restTemplate.exchange(
                 entityUrl(id),
@@ -148,7 +157,7 @@ public abstract class BaseApiDao<T, ID> {
         }
     }
 
-    private ErrorServiceException translateException(String operation, RestClientResponseException e) {
+    protected ErrorServiceException translateException(String operation, RestClientResponseException e) {
         log.error("Error al {}. Status: {}, body: {}", operation, e.getRawStatusCode(), e.getResponseBodyAsString());
         String message = e.getResponseBodyAsString();
         if (message == null || message.isBlank()) {

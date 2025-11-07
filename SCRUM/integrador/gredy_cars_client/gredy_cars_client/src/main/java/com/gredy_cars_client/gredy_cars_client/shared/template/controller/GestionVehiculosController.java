@@ -1,9 +1,12 @@
 package com.gredy_cars_client.gredy_cars_client.shared.template.controller;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,6 +30,9 @@ import com.gredy_cars_client.gredy_cars_client.shared.template.enums.EstadoVehic
 @Controller
 @RequestMapping("/gestion")
 public class GestionVehiculosController {
+
+    private static final Pattern UUID_PATTERN = Pattern.compile(
+            "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
 
     private final VehiculoService vehiculoService;
     private final CaracteristicaVehiculoService caracteristicaService;
@@ -69,6 +75,7 @@ public class GestionVehiculosController {
     public String guardarVehiculo(@ModelAttribute("vehiculoForm") VehiculoDTO vehiculo,
                           @ModelAttribute("caracteristicaForm") CaracteristicaVehiculoDTO caracteristica,
                           @RequestParam(value = "caracteristicaExistente", required = false) String caracteristicaExistente,
+                          @RequestParam(value = "imagenId", required = false) String imagenId,
                           RedirectAttributes ra) {
         try {
             sanitizeVehiculo(vehiculo);
@@ -76,6 +83,11 @@ public class GestionVehiculosController {
             if (vehiculo.getEstadoVehiculo() == null) {
                 vehiculo.setEstadoVehiculo(EstadoVehiculo.DISPONIBLE);
             }
+
+            String vehiculoId = sanitizeIdentifier(vehiculo.getId());
+            vehiculo.setId(vehiculoId);
+            boolean isNewVehicle = (vehiculoId == null || vehiculoId.isEmpty());
+            VehiculoDTO vehiculoPersistente = null;
 
             String caracId;
 
@@ -90,6 +102,25 @@ public class GestionVehiculosController {
                 normalizeCaracteristica(caracteristica);
                 String caracteristicaId = sanitizeIdentifier(caracteristica.getId());
                 caracteristica.setId(caracteristicaId);
+                boolean needsCaracteristicaFallback = caracteristicaId == null
+                        || (vehiculoId != null && vehiculoId.equals(caracteristicaId));
+
+                if (!isNewVehicle && needsCaracteristicaFallback) {
+                    vehiculoPersistente = vehiculoService.obtener(vehiculoId).orElse(null);
+                }
+
+                // When the form lost the characteristic ID (or accidentally sent the vehicle ID),
+                // fall back to the characteristic already associated with the vehicle being edited.
+                if (needsCaracteristicaFallback
+                        && vehiculoPersistente != null
+                        && vehiculoPersistente.getCaracteristicaVehiculoId() != null) {
+                    caracteristicaId = sanitizeIdentifier(vehiculoPersistente.getCaracteristicaVehiculoId());
+                    caracteristica.setId(caracteristicaId);
+                }
+
+                List<String> imagenIds = resolveImagenIdsForSave(imagenId, caracteristicaId);
+                caracteristica.setImagenIds(imagenIds);
+
                 if (caracteristicaId == null || caracteristicaId.isEmpty()) {
                     caracteristica.setCantidadVehiculoAlquilado(0); // Always start with 0 rented
                     if (caracteristica.getCantidadTotalVehiculo() == 0) {
@@ -112,10 +143,6 @@ public class GestionVehiculosController {
             }
 
             // Guardar/actualizar el vehículo
-            String vehiculoId = sanitizeIdentifier(vehiculo.getId());
-            vehiculo.setId(vehiculoId);
-            boolean isNewVehicle = (vehiculoId == null || vehiculoId.isEmpty());
-
             if (isNewVehicle) {
                 vehiculoService.alta(vehiculo);
                 // Update characteristic count when new vehicle is added
@@ -265,11 +292,19 @@ public class GestionVehiculosController {
         if (rawId == null) {
             return null;
         }
-        String cleaned = rawId.trim();
-        if (cleaned.isEmpty()) {
+
+        String trimmed = rawId.trim();
+        if (trimmed.isEmpty()) {
             return null;
         }
-        cleaned = cleaned.replaceAll("[^0-9a-fA-F\\-]", "");
+
+        // When multiple IDs arrive (e.g. "id1,id2"), keep the first well-formed UUID only.
+        Matcher matcher = UUID_PATTERN.matcher(trimmed);
+        if (matcher.find()) {
+            return matcher.group();
+        }
+
+        String cleaned = trimmed.replaceAll("[^0-9a-fA-F\\-]", "");
         return cleaned.isEmpty() ? null : cleaned;
     }
 
@@ -343,6 +378,28 @@ public class GestionVehiculosController {
         } catch (ErrorServiceException e) {
             // Log error but don't fail the main operation
             System.err.println("Error sincronizando conteos de características: " + e.getMessage());
+        }
+    }
+
+    private List<String> resolveImagenIdsForSave(String rawImagenId, String caracteristicaId) {
+        String sanitizedImageId = sanitizeIdentifier(rawImagenId);
+        if (sanitizedImageId != null) {
+            return new ArrayList<>(List.of(sanitizedImageId));
+        }
+
+        if (caracteristicaId == null || caracteristicaId.isBlank()) {
+            return new ArrayList<>();
+        }
+
+        try {
+            return caracteristicaService.obtener(caracteristicaId)
+                    .map(CaracteristicaVehiculoDTO::getImagenIds)
+                    .map(ArrayList::new)
+                    .orElseGet(ArrayList::new);
+        } catch (ErrorServiceException e) {
+            System.err.println("No se pudieron cargar las imágenes existentes de la característica "
+                    + caracteristicaId + ": " + e.getMessage());
+            return new ArrayList<>();
         }
     }
 }

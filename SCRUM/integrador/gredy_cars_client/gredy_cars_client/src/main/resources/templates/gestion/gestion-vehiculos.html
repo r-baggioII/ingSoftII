@@ -130,6 +130,29 @@
                 </div>
               </div>
 
+              <div class="row g-3 mt-3" id="image-upload-section">
+                <div class="col-md-12">
+                  <label class="panel-label">Imagen del Vehículo</label>
+                  <input type="file" id="imagen-vehiculo" name="imagen" accept="image/*" class="form-control panel-control">
+                  <div id="imagen-preview" class="mt-2" style="display: none;">
+                    <img id="imagen-preview-img" src="" alt="Vista previa" style="max-width: 200px; max-height: 150px; border-radius: 8px;">
+                    <button type="button" id="eliminar-imagen" class="btn btn-sm btn-outline-danger ms-2">
+                      <i class="bi bi-trash"></i> Eliminar
+                    </button>
+                  </div>
+                  <small class="text-muted">Formatos permitidos: JPG, PNG, GIF. Tamaño máximo: 5MB</small>
+                </div>
+              </div>
+
+              <div class="row g-3 mt-3" id="imagenes-existentes" style="display: none;">
+                <div class="col-md-12">
+                  <label class="panel-label">Imágenes Actuales</label>
+                  <div id="lista-imagenes" class="row g-2">
+                    <!-- Las imágenes existentes se cargarán aquí -->
+                  </div>
+                </div>
+              </div>
+
               <div class="d-flex gap-2 mt-4">
                 <button type="submit" class="btn main-button-panel">Guardar Vehículo</button>
                 <a th:href="@{/gestion/vehiculos}" class="btn btn-outline-secondary">Cancelar</a>
@@ -160,9 +183,9 @@
                 <tbody>
                   <tr th:each="v : ${vehiculos}">
                     <td class="fw-bold" th:text="${v.patente}">ABC123</td>
-                    <td th:text="${v.caracteristica != null ? v.caracteristica.marca : '-'}">Toyota</td>
-                    <td th:text="${v.caracteristica != null ? v.caracteristica.modelo : '-'}">Corolla</td>
-                    <td th:text="${v.caracteristica != null ? v.caracteristica.anio : '-'}">2024</td>
+                    <td th:text="${v.caracteristica != null ? v.caracteristica.marca : 'S/D'}">Toyota</td>
+                    <td th:text="${v.caracteristica != null ? v.caracteristica.modelo : 'S/D'}">Corolla</td>
+                    <td th:text="${v.caracteristica != null ? v.caracteristica.anio : 'S/D'}">2024</td>
                     <td>
                       <span class="badge"
                             th:classappend="${v.estadoVehiculo == 'DISPONIBLE' ? 'bg-success' : 'bg-warning'}"
@@ -214,11 +237,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const anioInput = document.getElementById('anio-input');
     const puertasInput = document.getElementById('puertas-input');
     const asientosInput = document.getElementById('asientos-input');
+    const imagenInput = document.getElementById('imagen-vehiculo');
+    const imagenPreview = document.getElementById('imagen-preview');
+    const imagenPreviewImg = document.getElementById('imagen-preview-img');
+    const eliminarImagenBtn = document.getElementById('eliminar-imagen');
+    const imagenesExistentes = document.getElementById('imagenes-existentes');
+    const listaImagenes = document.getElementById('lista-imagenes');
 
     const characteristicInputs = [marcaInput, modeloInput, anioInput, puertasInput, asientosInput];
 
     // Store the characteristics data from the server
     const characteristics = /*[[${caracteristicasExistentes}]]*/ [];
+
+    // Image handling variables
+    let selectedImageFile = null;
+    let currentCaracteristicaId = null;
 
     function toggleCharacteristicFields(disabled) {
         characteristicInputs.forEach(input => {
@@ -306,9 +339,242 @@ document.addEventListener('DOMContentLoaded', function() {
                 populateCharacteristicFields(selected);
                 toggleCharacteristicFields(true);
                 updateVehicleCount(selectedOption);
+                currentCaracteristicaId = selected.id;
+                loadExistingImages(selected.id);
             }
         }
     }
+
+    // Image handling functions
+    function initializeImageHandlers() {
+        if (imagenInput) {
+            imagenInput.addEventListener('change', handleImageSelect);
+        }
+
+        if (eliminarImagenBtn) {
+            eliminarImagenBtn.addEventListener('click', handleImageRemove);
+        }
+    }
+
+    function handleImageSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // Validate file size (5MB max)
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxSize) {
+            alert('El archivo es demasiado grande. El tamaño máximo permitido es 5MB.');
+            event.target.value = '';
+            return;
+        }
+
+        // Validate file type
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        if (!allowedTypes.includes(file.type)) {
+            alert('Tipo de archivo no permitido. Solo se aceptan imágenes JPG, PNG o GIF.');
+            event.target.value = '';
+            return;
+        }
+
+        selectedImageFile = file;
+        displayImagePreview(file);
+    }
+
+    function displayImagePreview(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            imagenPreviewImg.src = e.target.result;
+            imagenPreview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function handleImageRemove() {
+        selectedImageFile = null;
+        imagenInput.value = '';
+        imagenPreview.style.display = 'none';
+        imagenPreviewImg.src = '';
+    }
+
+    function loadExistingImages(caracteristicaId) {
+        if (!caracteristicaId) return;
+
+        // For now, we'll simulate loading existing images
+        // In a real implementation, you would call an API endpoint
+        fetch(`/gredy_cars_client/imagenes/vehiculos/${caracteristicaId}`)
+            .then(response => response.json())
+            .then(images => {
+                if (images && images.length > 0) {
+                    displayExistingImages(images);
+                } else {
+                    // Hide existing images section if no images
+                    imagenesExistentes.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading existing images:', error);
+                imagenesExistentes.style.display = 'none';
+            });
+    }
+
+    function displayExistingImages(images) {
+        listaImagenes.innerHTML = '';
+
+        images.forEach(image => {
+            const imageCol = document.createElement('div');
+            imageCol.className = 'col-md-3 col-sm-4 col-6';
+
+            imageCol.innerHTML = `
+                <div class="card">
+                    <img src="/gredy_cars_client/imagenes/${image.id}/contenido"
+                         alt="${image.nombre}"
+                         class="card-img-top"
+                         style="height: 100px; object-fit: cover;"
+                         onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns=\'http://www.w3.org/2000/svg\'%20width=\'100\'%20height=\'100\'%3E%3Crect%20width=\'100\'%20height=\'100\'%20fill=\'%23f8f9fa\'/%3E%3Ctext%20x=\'50%25\'%20y=\'50%25\'%20dominant-baseline=\'middle\'%20text-anchor=\'middle\'%20fill=\'%23999\'%20font-size=\'12\'%20font-family=\'Arial\'%3EError%3C/text%3E%3C/svg%3E'">
+                    <div class="card-body p-2">
+                        <button type="button"
+                                class="btn btn-sm btn-outline-danger w-100"
+                                onclick="eliminarImagenExistente('${image.id}')">
+                            <i class="bi bi-trash"></i> Eliminar
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            listaImagenes.appendChild(imageCol);
+        });
+
+        if (images.length > 0) {
+            imagenesExistentes.style.display = 'block';
+        }
+    }
+
+    function eliminarImagenExistente(imageId) {
+        if (confirm('¿Está seguro de eliminar esta imagen?')) {
+            fetch(`/gredy_cars_client/imagenes/${imageId}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (response.ok) {
+                    loadExistingImages(currentCaracteristicaId);
+                } else {
+                    alert('Error al eliminar la imagen');
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting image:', error);
+                alert('Error al eliminar la imagen');
+            });
+        }
+    }
+
+    // Add form submission handler for image
+    function handleFormSubmission() {
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                if (selectedImageFile) {
+                    event.preventDefault();
+                    uploadImageAndSubmitForm();
+                }
+            });
+        }
+    }
+
+    function uploadImageAndSubmitForm() {
+        if (!selectedImageFile) {
+            alert('Error: No hay imagen seleccionada');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('imagen', selectedImageFile);
+        formData.append('nombre', selectedImageFile.name);
+        formData.append('tipoImagen', 'VEHICULO');
+
+        // Show loading state
+        const submitButton = document.querySelector('button[type="submit"]');
+        const originalText = submitButton.textContent;
+        submitButton.textContent = 'Subiendo imagen...';
+        submitButton.disabled = true;
+
+        fetch('/gredy_cars_client/imagenes', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+
+            if (response.ok) {
+                return response.json().then(data => {
+                    console.log('Response data:', data);
+                    return data;
+                }).catch(jsonError => {
+                    console.log('JSON parse error:', jsonError);
+                    return response.text().then(text => {
+                        console.log('Response text:', text);
+                        throw new Error(text || 'Error del servidor');
+                    });
+                });
+            } else {
+                return response.text().then(text => {
+                    console.log('Error response:', text);
+                    throw new Error(text || 'Error del servidor');
+                });
+            }
+        })
+        .then(imageData => {
+            // Add image ID to form hidden field or characteristic
+            const imageIdInput = document.createElement('input');
+            imageIdInput.type = 'hidden';
+            imageIdInput.name = 'imagenId';
+            imageIdInput.value = imageData.id || 'unknown';
+
+            const form = document.querySelector('form');
+            form.appendChild(imageIdInput);
+
+            // Submit the form without the image
+            form.submit();
+        })
+        .catch(error => {
+            console.error('Error uploading image:', error);
+
+            // Parse JSON error if possible
+            let errorMessage = 'Error al subir la imagen';
+            try {
+                const errorData = JSON.parse(error.message);
+                if (errorData.message) {
+                    errorMessage = errorData.message;
+                } else if (errorData.error) {
+                    errorMessage = 'Error del servidor al procesar la imagen';
+                }
+            } catch (parseError) {
+                // Handle non-JSON errors
+                if (error.message.includes('No se ha seleccionado')) {
+                    errorMessage = 'Por favor seleccione una imagen';
+                } else if (error.message.includes('tamaño máximo')) {
+                    errorMessage = 'La imagen excede el tamaño máximo de 5MB';
+                } else if (error.message.includes('no es una imagen válida')) {
+                    errorMessage = 'El archivo seleccionado no es una imagen válida';
+                } else if (error.message.includes('api/api/imagenes')) {
+                    errorMessage = 'Error: Error de configuración en la ruta del servidor';
+                } else if (error.message) {
+                    errorMessage = 'Error: ' + error.message;
+                }
+            }
+
+            alert(errorMessage);
+
+            // Restore button state
+            submitButton.textContent = originalText;
+            submitButton.disabled = false;
+        });
+    }
+
+    // Initialize everything
+    initializeImageHandlers();
+    handleFormSubmission();
 });
 </script>
 

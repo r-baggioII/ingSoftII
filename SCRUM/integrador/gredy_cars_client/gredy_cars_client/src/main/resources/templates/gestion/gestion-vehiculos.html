@@ -60,47 +60,73 @@
 
               <!-- Hidden fields for IDs -->
               <input type="hidden" th:field="${vehiculoForm.id}" name="vehiculoForm.id" />
-              <input type="hidden" th:field="${vehiculoForm.estadoVehiculo}" name="vehiculoForm.estadoVehiculo" value="DISPONIBLE" />
               <input type="hidden" th:field="${caracteristicaForm.id}" name="caracteristicaForm.id" />
               <input type="hidden" th:field="${caracteristicaForm.cantidadVehiculoAlquilado}" name="caracteristicaForm.cantidadVehiculoAlquilado" value="0" />
               <input type="hidden" th:field="${caracteristicaForm.cantidadTotalVehiculo}" name="caracteristicaForm.cantidadTotalVehiculo" value="1" />
 
               <div class="row g-3">
-                <div class="col-md-12">
+                <div class="col-md-6">
                   <label class="panel-label">Patente/Matrícula *</label>
                   <input type="text" th:field="${vehiculoForm.patente}" name="vehiculoForm.patente"
                          class="form-control panel-control" placeholder="Ej: ABC123" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="panel-label">Estado *</label>
+                  <select class="form-select panel-control" th:field="${vehiculoForm.estadoVehiculo}" name="vehiculoForm.estadoVehiculo">
+                    <option value="DISPONIBLE">Disponible</option>
+                    <option value="ALQUILADO">Alquilado</option>
+                  </select>
                 </div>
               </div>
 
               <hr class="my-4">
               <h6>Características del vehículo</h6>
+              <div class="row g-3 mb-3">
+                <div class="col-md-12">
+                  <label class="panel-label">Seleccionar Característica Existente (opcional)</label>
+                  <select class="form-select panel-control" id="caracteristicaExistente" name="caracteristicaExistente">
+                    <option value="">-- Crear nueva característica --</option>
+                    <option th:each="carac : ${caracteristicasExistentes}"
+                            th:value="${carac.id}"
+                            th:data-vehiculos="${carac.cantidadTotalVehiculo}"
+                            th:data-disponibles="${carac.cantidadTotalVehiculo - carac.cantidadVehiculoAlquilado}"
+                            th:text="'[' + ${carac.marca} + '] ' + ${carac.modelo} + ' (' + ${carac.anio} + ') - ' + ${carac.cantidadPuerta} + ' puertas, ' + ${carac.cantidadAsiento} + ' asientos'">Tesla 3 (2000) - 30 puertas, 3 asientos</option>
+                  </select>
+                  <small class="text-muted">
+                    Seleccione una característica existente o deje vacío para crear una nueva
+                    <span id="vehiculos-count" class="badge bg-secondary ms-2" style="display: none;"></span>
+                  </small>
+                </div>
+              </div>
+              <div class="alert alert-info alert-sm mb-3" id="caracteristica-help" style="display: none;">
+                <i class="bi bi-info-circle"></i> <strong>Campos deshabilitados:</strong> Usando la característica seleccionada. Los campos se han llenado automáticamente.
+              </div>
               <div class="row g-3">
                 <div class="col-md-4">
                   <label class="panel-label">Marca *</label>
                   <input type="text" th:field="${caracteristicaForm.marca}" name="caracteristicaForm.marca"
-                         class="form-control panel-control" placeholder="Ej: Toyota" required>
+                         class="form-control panel-control" placeholder="Ej: Toyota" id="marca-input">
                 </div>
                 <div class="col-md-4">
                   <label class="panel-label">Modelo *</label>
                   <input type="text" th:field="${caracteristicaForm.modelo}" name="caracteristicaForm.modelo"
-                         class="form-control panel-control" placeholder="Ej: Corolla" required>
+                         class="form-control panel-control" placeholder="Ej: Corolla" id="modelo-input">
                 </div>
                 <div class="col-md-4">
                   <label class="panel-label">Año *</label>
                   <input type="number" th:field="${caracteristicaForm.anio}" name="caracteristicaForm.anio"
-                         class="form-control panel-control" placeholder="Ej: 2024" required>
+                         class="form-control panel-control" placeholder="Ej: 2024" id="anio-input">
                 </div>
 
                 <div class="col-md-3">
                   <label class="panel-label">Puertas *</label>
                   <input type="number" th:field="${caracteristicaForm.cantidadPuerta}" name="caracteristicaForm.cantidadPuerta"
-                         class="form-control panel-control" placeholder="Ej: 4" required>
+                         class="form-control panel-control" placeholder="Ej: 4" id="puertas-input">
                 </div>
                 <div class="col-md-3">
                   <label class="panel-label">Asientos *</label>
                   <input type="number" th:field="${caracteristicaForm.cantidadAsiento}" name="caracteristicaForm.cantidadAsiento"
-                         class="form-control panel-control" placeholder="Ej: 5" required>
+                         class="form-control panel-control" placeholder="Ej: 5" id="asientos-input">
                 </div>
               </div>
 
@@ -177,6 +203,115 @@
 <script th:src="@{/js/script.js}"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const caracteristicaSelect = document.getElementById('caracteristicaExistente');
+    const helpAlert = document.getElementById('caracteristica-help');
+    const vehiculosCount = document.getElementById('vehiculos-count');
+    const marcaInput = document.getElementById('marca-input');
+    const modeloInput = document.getElementById('modelo-input');
+    const anioInput = document.getElementById('anio-input');
+    const puertasInput = document.getElementById('puertas-input');
+    const asientosInput = document.getElementById('asientos-input');
+
+    const characteristicInputs = [marcaInput, modeloInput, anioInput, puertasInput, asientosInput];
+
+    // Store the characteristics data from the server
+    const characteristics = /*[[${caracteristicasExistentes}]]*/ [];
+
+    function toggleCharacteristicFields(disabled) {
+        characteristicInputs.forEach(input => {
+            if (input) {
+                input.disabled = disabled;
+                input.required = !disabled;
+                if (disabled) {
+                    input.style.backgroundColor = '#f8f9fa';
+                    input.removeAttribute('required');
+                } else {
+                    input.style.backgroundColor = '';
+                    input.setAttribute('required', 'required');
+                }
+            }
+        });
+
+        // Show/hide help message
+        if (helpAlert) {
+            helpAlert.style.display = disabled ? 'block' : 'none';
+        }
+    }
+
+    function updateVehicleCount(selectedOption) {
+        if (selectedOption && vehiculosCount) {
+            const total = selectedOption.getAttribute('data-vehiculos');
+            const disponibles = selectedOption.getAttribute('data-disponibles');
+
+            if (total && disponibles) {
+                vehiculosCount.textContent = `${disponibles} de ${total} vehículos`;
+                vehiculosCount.style.display = 'inline-block';
+                vehiculosCount.className = 'badge bg-info ms-2';
+            } else {
+                vehiculosCount.style.display = 'none';
+            }
+        } else if (vehiculosCount) {
+            vehiculosCount.style.display = 'none';
+        }
+    }
+
+    function populateCharacteristicFields(characteristic) {
+        if (characteristic && marcaInput) {
+            marcaInput.value = characteristic.marca || '';
+            modeloInput.value = characteristic.modelo || '';
+            anioInput.value = characteristic.anio || '';
+            puertasInput.value = characteristic.cantidadPuerta || '';
+            asientosInput.value = characteristic.cantidadAsiento || '';
+        }
+    }
+
+    function clearCharacteristicFields() {
+        characteristicInputs.forEach(input => {
+            if (input) {
+                input.value = '';
+            }
+        });
+    }
+
+    if (caracteristicaSelect) {
+        caracteristicaSelect.addEventListener('change', function() {
+            const selectedId = this.value;
+            const selectedOption = this.options[this.selectedIndex];
+
+            if (selectedId) {
+                // Find the characteristic data
+                const selected = characteristics.find(c => c.id === selectedId);
+
+                if (selected) {
+                    populateCharacteristicFields(selected);
+                    toggleCharacteristicFields(true);
+                    updateVehicleCount(selectedOption);
+                }
+            } else {
+                // Clear fields and enable them for new characteristic creation
+                clearCharacteristicFields();
+                toggleCharacteristicFields(false);
+                updateVehicleCount(null);
+            }
+        });
+
+        // Initialize form state
+        if (caracteristicaSelect.value) {
+            const selected = characteristics.find(c => c.id === caracteristicaSelect.value);
+            const selectedOption = caracteristicaSelect.options[caracteristicaSelect.selectedIndex];
+            if (selected) {
+                populateCharacteristicFields(selected);
+                toggleCharacteristicFields(true);
+                updateVehicleCount(selectedOption);
+            }
+        }
+    }
+});
+</script>
+
 </body>
 
 </html>

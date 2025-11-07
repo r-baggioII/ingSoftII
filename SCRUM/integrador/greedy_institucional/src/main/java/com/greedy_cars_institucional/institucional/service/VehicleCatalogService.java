@@ -14,8 +14,10 @@ import com.greedy_cars_institucional.institucional.config.GreedyApiProperties;
 import com.greedy_cars_institucional.institucional.model.CatalogStats;
 import com.greedy_cars_institucional.institucional.model.VehicleCardView;
 import com.greedy_cars_institucional.institucional.model.VehicleCatalogData;
+import com.greedy_cars_institucional.institucional.shared.template.dao.VehiculoDao;
 import com.greedy_cars_institucional.institucional.shared.template.dto.CaracteristicaVehiculoDTO;
 import com.greedy_cars_institucional.institucional.shared.template.dto.CostoVehiculoDTO;
+import com.greedy_cars_institucional.institucional.shared.template.dto.VehiculoDTO;
 import com.greedy_cars_institucional.institucional.shared.template.exception.ErrorServiceException;
 import com.greedy_cars_institucional.institucional.shared.template.service.CaracteristicaVehiculoService;
 import com.greedy_cars_institucional.institucional.shared.template.service.CostoVehiculoService;
@@ -30,15 +32,18 @@ public class VehicleCatalogService {
     private final CaracteristicaVehiculoService caracteristicaVehiculoService;
     private final CostoVehiculoService costoVehiculoService;
     private final GreedyApiProperties apiProperties;
+    private final VehiculoDao vehiculoDao;
 
     public VehicleCatalogService(
         CaracteristicaVehiculoService caracteristicaVehiculoService,
         CostoVehiculoService costoVehiculoService,
-        GreedyApiProperties apiProperties
+        GreedyApiProperties apiProperties,
+        VehiculoDao vehiculoDao
     ) {
         this.caracteristicaVehiculoService = caracteristicaVehiculoService;
         this.costoVehiculoService = costoVehiculoService;
         this.apiProperties = apiProperties;
+        this.vehiculoDao = vehiculoDao;
     }
 
     public VehicleCatalogData fetchCatalog() throws ErrorServiceException {
@@ -67,7 +72,23 @@ public class VehicleCatalogService {
             log.warn("No se pudo obtener el costo vigente para {}", feature.getId(), e);
         }
 
-        int availableUnits = Math.max(feature.getCantidadTotalVehiculo() - feature.getCantidadVehiculoAlquilado(), 0);
+        // Count actual vehicles instead of using stored characteristic counts
+        long totalUnits = 0;
+        long availableUnits = 0;
+        long rentedUnits = 0;
+
+        try {
+            totalUnits = vehiculoDao.countByCaracteristicaId(feature.getId());
+            rentedUnits = vehiculoDao.countByCaracteristicaIdAndEstado(feature.getId(), "ALQUILADO");
+            availableUnits = totalUnits - rentedUnits;
+        } catch (Exception e) {
+            log.warn("Error counting vehicles for characteristic {}, using stored values", feature.getId(), e);
+            // Fallback to stored values if counting fails
+            totalUnits = feature.getCantidadTotalVehiculo();
+            availableUnits = Math.max(feature.getCantidadTotalVehiculo() - feature.getCantidadVehiculoAlquilado(), 0);
+            rentedUnits = feature.getCantidadVehiculoAlquilado();
+        }
+
         String imageUrl = CollectionUtils.isEmpty(feature.getImagenIds()) ? null
             : apiProperties.buildImageContentUrl(feature.getImagenIds().get(0));
 
@@ -78,8 +99,8 @@ public class VehicleCatalogService {
             feature.getAnio(),
             feature.getCantidadAsiento(),
             feature.getCantidadPuerta(),
-            feature.getCantidadTotalVehiculo(),
-            availableUnits,
+            (int) totalUnits,
+            (int) availableUnits,
             currentCost,
             imageUrl,
             resolveCategory(feature));

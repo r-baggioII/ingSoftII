@@ -1,7 +1,9 @@
 package com.gredy_cars_client.gredy_cars_client.shared.template.controller;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -47,7 +49,11 @@ public class GestionVehiculosController {
         @RequestParam(value = "editId", required = false) String editId,
         Model model
     ) {
+        // Always synchronize characteristic counts with actual vehicle counts
+        sincronizarConteosCaracteristicas();
+
         model.addAttribute("vehiculos", cargarVehiculos(model));
+        model.addAttribute("caracteristicasExistentes", cargarCaracteristicasExistentes(model));
         VehiculoDTO vehiculoForm = cargarVehiculoForm(editId, model);
         if (vehiculoForm.getEstadoVehiculo() == null) {
             vehiculoForm.setEstadoVehiculo(EstadoVehiculo.DISPONIBLE);
@@ -62,44 +68,58 @@ public class GestionVehiculosController {
     @PostMapping("/vehiculos")
     public String guardarVehiculo(@ModelAttribute("vehiculoForm") VehiculoDTO vehiculo,
                           @ModelAttribute("caracteristicaForm") CaracteristicaVehiculoDTO caracteristica,
+                          @RequestParam(value = "caracteristicaExistente", required = false) String caracteristicaExistente,
                           RedirectAttributes ra) {
         try {
             sanitizeVehiculo(vehiculo);
-            normalizeCaracteristica(caracteristica);
 
             if (vehiculo.getEstadoVehiculo() == null) {
                 vehiculo.setEstadoVehiculo(EstadoVehiculo.DISPONIBLE);
             }
-            // Set default values for characteristic when creating new vehicle
-            String caracteristicaId = sanitizeIdentifier(caracteristica.getId());
-            caracteristica.setId(caracteristicaId);
-            if (caracteristicaId == null) {
-                caracteristica.setCantidadVehiculoAlquilado(0); // Always start with 0 rented
-                if (caracteristica.getCantidadTotalVehiculo() == 0) {
-                    caracteristica.setCantidadTotalVehiculo(1); // Default to 1 vehicle
-                }
-            }
 
-            // Primero guardar/actualizar la característica
             String caracId;
-            // Properly check if characteristic ID is null, empty, or just whitespace
-            if (caracteristicaId == null) {
-                CaracteristicaVehiculoDTO saved = caracteristicaService.alta(caracteristica);
-                caracId = saved.getId();
-                caracteristica.setId(caracId);
-            } else {
-                caracteristicaService.modificar(caracteristicaId, caracteristica);
-                caracId = caracteristicaId;
-            }
 
-            // Asociar la característica al vehículo
-            vehiculo.setCaracteristicaVehiculoId(caracId);
+            // Check if user selected an existing characteristic
+            String caracteristicaExistenteId = sanitizeIdentifier(caracteristicaExistente);
+            if (caracteristicaExistenteId != null && !caracteristicaExistenteId.isEmpty()) {
+                // Use existing characteristic - ignore the form fields
+                caracId = caracteristicaExistenteId;
+                vehiculo.setCaracteristicaVehiculoId(caracId);
+            } else {
+                // Create or update characteristic - only if no existing characteristic was selected
+                normalizeCaracteristica(caracteristica);
+                String caracteristicaId = sanitizeIdentifier(caracteristica.getId());
+                caracteristica.setId(caracteristicaId);
+                if (caracteristicaId == null || caracteristicaId.isEmpty()) {
+                    caracteristica.setCantidadVehiculoAlquilado(0); // Always start with 0 rented
+                    if (caracteristica.getCantidadTotalVehiculo() == 0) {
+                        caracteristica.setCantidadTotalVehiculo(1); // Default to 1 vehicle
+                    }
+                }
+
+                // Primero guardar/actualizar la característica
+                if (caracteristicaId == null || caracteristicaId.isEmpty()) {
+                    CaracteristicaVehiculoDTO saved = caracteristicaService.alta(caracteristica);
+                    caracId = saved.getId();
+                    caracteristica.setId(caracId);
+                } else {
+                    caracteristicaService.modificar(caracteristicaId, caracteristica);
+                    caracId = caracteristicaId;
+                }
+
+                // Asociar la característica al vehículo
+                vehiculo.setCaracteristicaVehiculoId(caracId);
+            }
 
             // Guardar/actualizar el vehículo
             String vehiculoId = sanitizeIdentifier(vehiculo.getId());
             vehiculo.setId(vehiculoId);
-            if (vehiculoId == null) {
+            boolean isNewVehicle = (vehiculoId == null || vehiculoId.isEmpty());
+
+            if (isNewVehicle) {
                 vehiculoService.alta(vehiculo);
+                // Update characteristic count when new vehicle is added
+                actualizarConteoCaracteristica(caracId, 1, 0);
             } else {
                 vehiculoService.modificar(vehiculoId, vehiculo);
             }
@@ -114,7 +134,21 @@ public class GestionVehiculosController {
     @PostMapping("/vehiculos/{id}/eliminar")
     public String eliminarVehiculo(@PathVariable String id, RedirectAttributes ra) {
         try {
+            // Get vehicle info before deletion to update characteristic count
+            VehiculoDTO vehiculoAEliminar = vehiculoService.obtener(id).orElse(null);
+            String caracteristicaId = null;
+
+            if (vehiculoAEliminar != null && vehiculoAEliminar.getCaracteristica() != null) {
+                caracteristicaId = vehiculoAEliminar.getCaracteristica().getId();
+            }
+
             vehiculoService.baja(id);
+
+            // Update characteristic count when vehicle is deleted
+            if (caracteristicaId != null) {
+                actualizarConteoCaracteristica(caracteristicaId, -1, 0);
+            }
+
             ra.addFlashAttribute("success", "Vehículo eliminado");
         } catch (ErrorServiceException e) {
             ra.addFlashAttribute("error", e.getMessage());
@@ -145,6 +179,15 @@ public class GestionVehiculosController {
             return vehiculoService.listarActivos();
         } catch (ErrorServiceException e) {
             appendError(model, "No se pudo cargar la lista de vehículos: " + e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    private List<CaracteristicaVehiculoDTO> cargarCaracteristicasExistentes(Model model) {
+        try {
+            return caracteristicaService.listarActivos();
+        } catch (ErrorServiceException e) {
+            appendError(model, "No se pudo cargar la lista de características: " + e.getMessage());
             return Collections.emptyList();
         }
     }
@@ -180,9 +223,10 @@ public class GestionVehiculosController {
         if (vehiculo.getPatente() != null) {
             vehiculo.setPatente(vehiculo.getPatente().trim().toUpperCase());
         }
-        String caracteristicaId = sanitizeIdentifier(vehiculo.getCaracteristicaVehiculoId());
-        vehiculo.setCaracteristicaVehiculoId(caracteristicaId);
-        if (vehiculo.getCaracteristica() != null) {
+        // Don't override the characteristic ID from the form
+        // The characteristic ID should come from the caracteristicaForm, not from vehiculo
+        if (vehiculo.getCaracteristica() != null && vehiculo.getCaracteristica().getId() != null) {
+            String caracteristicaId = sanitizeIdentifier(vehiculo.getCaracteristica().getId());
             vehiculo.getCaracteristica().setId(caracteristicaId);
         }
     }
@@ -227,5 +271,78 @@ public class GestionVehiculosController {
         }
         cleaned = cleaned.replaceAll("[^0-9a-fA-F\\-]", "");
         return cleaned.isEmpty() ? null : cleaned;
+    }
+
+    private void actualizarConteoCaracteristica(String caracteristicaId, int cambioTotal, int cambioAlquilado) {
+        try {
+            // Get current characteristic
+            CaracteristicaVehiculoDTO caracteristica = caracteristicaService.obtener(caracteristicaId).orElse(null);
+            if (caracteristica != null) {
+                // Update counts
+                int nuevoTotal = Math.max(0, caracteristica.getCantidadTotalVehiculo() + cambioTotal);
+                int nuevoAlquilado = Math.max(0, Math.min(nuevoTotal, caracteristica.getCantidadVehiculoAlquilado() + cambioAlquilado));
+
+                caracteristica.setCantidadTotalVehiculo(nuevoTotal);
+                caracteristica.setCantidadVehiculoAlquilado(nuevoAlquilado);
+
+                // Save updated characteristic
+                caracteristicaService.modificar(caracteristicaId, caracteristica);
+            }
+        } catch (ErrorServiceException e) {
+            // Log error but don't fail the main operation
+            System.err.println("Error actualizando conteo de característica: " + e.getMessage());
+        }
+    }
+
+    private void sincronizarConteosCaracteristicas() {
+        try {
+            // Get all vehicles and characteristics
+            List<VehiculoDTO> vehiculos = vehiculoService.listarActivos();
+            List<CaracteristicaVehiculoDTO> caracteristicas = caracteristicaService.listarActivos();
+
+            // Count vehicles per characteristic
+            Map<String, Integer> conteoPorCaracteristica = new HashMap<>();
+            Map<String, Integer> alquiladosPorCaracteristica = new HashMap<>();
+
+            // Initialize counts
+            for (CaracteristicaVehiculoDTO carac : caracteristicas) {
+                conteoPorCaracteristica.put(carac.getId(), 0);
+                alquiladosPorCaracteristica.put(carac.getId(), 0);
+            }
+
+            // Count actual vehicles
+            for (VehiculoDTO vehiculo : vehiculos) {
+                String caracteristicaId = vehiculo.getCaracteristicaVehiculoId();
+                if (caracteristicaId != null && conteoPorCaracteristica.containsKey(caracteristicaId)) {
+                    int currentCount = conteoPorCaracteristica.get(caracteristicaId);
+                    conteoPorCaracteristica.put(caracteristicaId, currentCount + 1);
+
+                    // Count rented vehicles
+                    if ("ALQUILADO".equals(vehiculo.getEstadoVehiculo().name())) {
+                        int currentAlquilados = alquiladosPorCaracteristica.get(caracteristicaId);
+                        alquiladosPorCaracteristica.put(caracteristicaId, currentAlquilados + 1);
+                    }
+                }
+            }
+
+            // Update characteristics with correct counts
+            for (CaracteristicaVehiculoDTO carac : caracteristicas) {
+                String id = carac.getId();
+                int nuevoTotal = conteoPorCaracteristica.getOrDefault(id, 0);
+                int nuevoAlquilado = alquiladosPorCaracteristica.getOrDefault(id, 0);
+
+                // Only update if counts are different
+                if (carac.getCantidadTotalVehiculo() != nuevoTotal ||
+                    carac.getCantidadVehiculoAlquilado() != nuevoAlquilado) {
+
+                    carac.setCantidadTotalVehiculo(nuevoTotal);
+                    carac.setCantidadVehiculoAlquilado(nuevoAlquilado);
+                    caracteristicaService.modificar(id, carac);
+                }
+            }
+        } catch (ErrorServiceException e) {
+            // Log error but don't fail the main operation
+            System.err.println("Error sincronizando conteos de características: " + e.getMessage());
+        }
     }
 }

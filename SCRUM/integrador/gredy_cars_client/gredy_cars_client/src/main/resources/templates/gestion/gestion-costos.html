@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de Costos - Greedy Cars</title>
+  <meta name="_csrf" th:if="${_csrf}" th:content="${_csrf.token}">
+  <meta name="_csrf_header" th:if="${_csrf}" th:content="${_csrf.headerName}">
+  <meta name="app-context" th:content="@{/}" />
+
+  <link rel="stylesheet" type="text/css" th:href="@{/css/vendor.css}" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous" />
+  <link rel="stylesheet" type="text/css" th:href="@{/style.css}" />
+  <script th:src="@{/js/modernizr.js}"></script>
+</head>
+
+<body>
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<section id="banner" class="position-relative overflow-hidden jarallax"
+         th:style="|background-image: url(@{/images/Bg.jpg}); background-repeat: no-repeat; background-size: cover; background-position: center;|">
+  <div class="container text-center py-5 mt-5">
+    <div class="row my-5">
+      <div class="d-flex flex-wrap flex-column justify-content-center align-items-center text-white">
+        <h2 class="page-title display-3 mt-5">Gestión de Costos</h2>
+        <nav class="breadcrumb">
+          <a class="breadcrumb-item text-white" th:href="@{/}">Home</a>
+          <a class="breadcrumb-item text-white" th:href="@{/gestion/vehiculos}">Administración</a>
+          <span class="breadcrumb-item text-white active" aria-current="page">Costos</span>
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="contact-us-wrap py-5">
+  <div class="container">
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" th:text="${success}">
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" th:text="${error}">
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="section-heading text-center mb-4">
+      <h2>Administrar <span class="text-primary">Costos</span></h2>
+      <p>Define los valores diarios y periodos vigentes para cada característica de vehículo.</p>
+    </div>
+
+    <div class="row g-4">
+      <!-- Formulario -->
+      <div class="col-lg-10 offset-lg-1">
+        <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
+          <div class="card-body">
+            <h5 class="card-title" th:text="${editMode} ? 'Editar costo vigente' : 'Crear / Editar costo'">Crear / Editar costo</h5>
+            <p class="text-muted">Cada registro define un precio por día para una característica de vehículo dentro de un rango de fechas.</p>
+
+            <div th:if="${editMode}" class="alert alert-warning py-2">
+              <i class="bi bi-pencil-square"></i>
+              Estás editando el costo con ID <strong th:text="${costoForm.id}">ID</strong>.
+              <a th:href="@{/gestion/costos}" class="ms-2 text-decoration-none">Crear uno nuevo</a>
+            </div>
+
+            <div th:if="${#lists.isEmpty(caracteristicas)}" class="alert alert-info">
+              <i class="bi bi-info-circle"></i>
+              Aún no hay características disponibles. Crea vehículos o características desde
+              <a th:href="@{/gestion/vehiculos}" class="fw-semibold text-decoration-none">Gestión de Vehículos</a>
+              para poder asignar costos.
+            </div>
+
+            <form th:action="@{/gestion/costos}" th:object="${costoForm}" method="post" class="mb-3">
+              <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+              <input type="hidden" th:field="*{id}" />
+
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="panel-label">Fecha Desde *</label>
+                  <input type="date" class="form-control panel-control" th:field="*{fechaDesde}" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="panel-label">Fecha Hasta *</label>
+                  <input type="date" class="form-control panel-control" th:field="*{fechaHasta}" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="panel-label">Costo diario *</label>
+                  <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input type="number" step="0.01" min="0.01" class="form-control panel-control" th:field="*{costo}" required>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row g-3 mt-2">
+                <div class="col-md-6">
+                  <label class="panel-label">Característica del vehículo *</label>
+                  <select class="form-select panel-control" th:field="*{idCaracteristicaVehiculo}"
+                          th:disabled="${#lists.isEmpty(caracteristicas)}" id="costo-caracteristica" required>
+                    <option value="" th:if="${#lists.isEmpty(caracteristicas)}">No hay características disponibles</option>
+                    <option value="" th:unless="${#lists.isEmpty(caracteristicas)}" disabled
+                            th:selected="${costoForm.idCaracteristicaVehiculo == null}">Seleccione una característica</option>
+                    <option th:each="carac : ${caracteristicas}"
+                            th:value="${carac.id}"
+                            th:attr="data-marca=${carac.marca},data-modelo=${carac.modelo},data-anio=${carac.anio},
+                                     data-puertas=${carac.cantidadPuerta},data-asientos=${carac.cantidadAsiento}"
+                            th:text="${carac.marca + ' ' + carac.modelo + ' (' + carac.anio + ') - ' + carac.cantidadPuerta + ' puertas / ' + carac.cantidadAsiento + ' asientos'}">
+                      Toyota Corolla
+                    </option>
+                  </select>
+                  <p class="small text-muted mt-2" id="resumen-caracteristica">
+                    Seleccione una característica para ver sus detalles.
+                  </p>
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                  <div class="d-flex gap-2 w-100">
+                    <button type="submit" class="btn main-button-panel w-100"
+                            th:text="${editMode} ? 'Actualizar costo' : 'Guardar costo'">Guardar costo</button>
+                    <a th:href="@{/gestion/costos}" class="btn btn-outline-secondary w-100">Limpiar</a>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla y búsqueda -->
+      <div class="col-lg-10 offset-lg-1">
+        <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
+          <div class="card-body">
+            <h5 class="card-title">Búsqueda y acciones</h5>
+            <form class="row g-2 mb-3" th:action="@{/gestion/costos}" method="get">
+              <div class="col-md-6">
+                <input type="text" class="form-control panel-control" name="search"
+                       placeholder="Buscar por ID de característica, marca o fecha"
+                       th:value="${search}">
+              </div>
+              <div class="col-md-3">
+                <button class="btn main-button-panel w-100" type="submit">Buscar</button>
+              </div>
+              <div class="col-md-3">
+                <a th:href="@{/gestion/vehiculos}" class="btn btn-outline-primary w-100">Volver a Vehículos</a>
+              </div>
+              <div class="col-12 text-end" th:if="${search}">
+                <a th:href="@{/gestion/costos}" class="btn btn-sm btn-link">Limpiar búsqueda</a>
+              </div>
+            </form>
+
+            
+<div class="table-responsive panel-table">
+              <table class="table table-hover align-middle">
+                <thead>
+                  <tr>
+                    <th>ID Costo</th>
+                    <th>Fecha Desde</th>
+                    <th>Fecha Hasta</th>
+                    <th>Monto diario</th>
+                    <th>Característica</th>
+                    <th>Eliminado</th>
+                    <th class="text-end">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody th:with="dateFormatter=${T(java.time.format.DateTimeFormatter).ofPattern('dd/MM/yyyy')}">
+                  <tr th:each="costo : ${costos}" th:if="${costo != null}">
+                    <td class="fw-semibold" th:text="${costo.id}">costo-id</td>
+                    <td th:text="${costo.fechaDesde != null ? dateFormatter.format(costo.fechaDesde) : 'S/D'}">01/01/2024</td>
+                    <td th:text="${costo.fechaHasta != null ? dateFormatter.format(costo.fechaHasta) : 'S/D'}">31/01/2024</td>
+                    <td th:text="${T(java.lang.String).format('$ %.2f', costo.costo)}">$ 150.00</td>
+                    <td>
+                      <div class="fw-semibold"
+                           th:text="${costo.caracteristica != null ? costo.caracteristica.marca + ' ' + costo.caracteristica.modelo : 'Sin datos'}">
+                        Toyota Corolla
+                      </div>
+                      <small class="text-muted" th:text="|ID: ${costo.idCaracteristicaVehiculo != null ? costo.idCaracteristicaVehiculo : 'S/D'}|">
+                        ID: CAR-001
+                      </small>
+                    </td>
+                    <td>
+                      <span class="badge" th:classappend="${costo.eliminado} ? 'bg-danger' : 'bg-success'"
+                            th:text="${costo.eliminado ? 'Sí' : 'No'}">No</span>
+                    </td>
+                    <td class="text-end">
+                      <a class="btn btn-sm btn-outline-primary"
+                         th:href="@{/gestion/costos(editId=${costo.id})}">
+                        <i class="bi bi-pencil"></i> Editar
+                      </a>
+                      <form th:action="@{/gestion/costos/{id}/eliminar(id=${costo.id})}" method="post" class="d-inline"
+                            onsubmit="return confirm('¿Eliminar este costo?');">
+                        <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <button class="btn btn-sm btn-outline-danger ms-1" type="submit">
+                          <i class="bi bi-trash"></i> Eliminar
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                  <tr th:if="${costos == null or #lists.isEmpty(costos)}">
+                    <td colspan="7" class="text-center text-muted py-4">
+                      <i class="bi bi-currency-dollar"></i> No hay costos registrados.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script th:src="@{/js/jquery-1.11.0.min.js}"></script>
+<script th:src="@{/js/plugins.js}"></script>
+<script th:src="@{/js/script.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+<script th:src="@{/js/gestion-costos.js}"></script>
+
+
+</body>
+</html>

@@ -20,7 +20,7 @@ import com.gredy_cars_client.gredy_cars_client.shared.template.exception.ErrorSe
  */
 public abstract class BaseClientService<T extends BaseDTO<ID>, ID> {
 
-    private static final Logger log = LoggerFactory.getLogger(BaseClientService.class);
+    protected static final Logger log = LoggerFactory.getLogger(BaseClientService.class);
 
     protected final BaseApiDao<T, ID> dao;
 
@@ -43,11 +43,22 @@ public abstract class BaseClientService<T extends BaseDTO<ID>, ID> {
     protected void postBaja(ID id) throws ErrorServiceException {}
 
     public List<T> listarActivos() throws ErrorServiceException {
+        System.err.println("=== INICIO BaseClientService.listarActivos ===");
         try {
-            return dao.findAll();
+            System.err.println("Llamando a dao.findAll()...");
+            List<T> result = dao.findAll();
+            System.err.println("dao.findAll() retornó: " + (result != null ? result.size() : "null") + " elementos");
+            if (result != null) {
+                result.forEach(item -> System.err.println("  - Elemento: " + item));
+            }
+            System.err.println("=== FIN BaseClientService.listarActivos ===");
+            return result;
         } catch (ErrorServiceException e) {
+            System.err.println("ErrorServiceException en listarActivos: " + e.getMessage());
             throw e;
         } catch (Exception e) {
+            System.err.println("Exception inesperada en listarActivos: " + e.getMessage());
+            e.printStackTrace();
             log.error("Error inesperado al listar DTOs", e);
             throw new ErrorServiceException("Error de sistema al listar", e);
         }

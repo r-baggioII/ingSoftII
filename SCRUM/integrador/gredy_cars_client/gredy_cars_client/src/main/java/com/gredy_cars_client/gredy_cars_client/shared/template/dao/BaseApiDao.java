@@ -47,7 +47,10 @@ public abstract class BaseApiDao<T, ID> {
     protected abstract ParameterizedTypeReference<List<T>> getListTypeReference();
 
     protected String collectionUrl() {
-        return baseUrl + getResourcePath();
+        String path = getResourcePath();
+        String url = baseUrl + path;
+        System.err.println("BaseApiDao.collectionUrl() -> " + url + " (baseUrl=" + baseUrl + ", path=" + path + ")");
+        return url;
     }
 
     protected String entityUrl(ID id) {
@@ -58,6 +61,9 @@ public abstract class BaseApiDao<T, ID> {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        System.err.println("Headers construidos - ContentType: " + headers.getContentType() +
+                          ", Accept: " + headers.getAccept() +
+                          ", Authorization: " + (headers.getFirst(HttpHeaders.AUTHORIZATION) != null ? "PRESENT" : "MISSING"));
         return headers;
     }
 
@@ -66,18 +72,40 @@ public abstract class BaseApiDao<T, ID> {
     }
 
     public List<T> findAll() throws ErrorServiceException {
+        System.err.println("=== INICIO BaseApiDao.findAll ===");
+        String url = collectionUrl();
+        System.err.println("URL a llamar: " + url);
         try {
+            System.err.println("Construyendo headers...");
+            HttpHeaders headers = buildHeaders();
+            System.err.println("Headers: " + headers);
+
+            System.err.println("Haciendo llamada REST...");
             ResponseEntity<List<T>> response = restTemplate.exchange(
-                collectionUrl(),
+                url,
                 HttpMethod.GET,
-                new HttpEntity<>(null, buildHeaders()),
+                new HttpEntity<>(null, headers),
                 getListTypeReference()
             );
-            return Optional.ofNullable(response.getBody()).orElse(Collections.emptyList());
+
+            System.err.println("Respuesta recibida. Status: " + response.getStatusCode());
+            System.err.println("Response body: " + response.getBody());
+
+            List<T> result = Optional.ofNullable(response.getBody()).orElse(Collections.emptyList());
+            System.err.println("Resultado final: " + result.size() + " elementos");
+            System.err.println("=== FIN BaseApiDao.findAll ===");
+            return result;
         } catch (RestClientResponseException e) {
+            System.err.println("RestClientResponseException en findAll: " + e.getRawStatusCode() + " - " + e.getResponseBodyAsString());
             throw translateException("listar recursos", e);
         } catch (RestClientException e) {
+            System.err.println("RestClientException en findAll: " + e.getMessage());
+            e.printStackTrace();
             throw new ErrorServiceException("Error de comunicación al listar recursos", e);
+        } catch (Exception e) {
+            System.err.println("Exception general en findAll: " + e.getMessage());
+            e.printStackTrace();
+            throw new ErrorServiceException("Error general al listar recursos", e);
         }
     }
 

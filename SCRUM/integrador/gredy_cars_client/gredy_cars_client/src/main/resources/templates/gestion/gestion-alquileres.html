@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de Alquileres - Greedy Cars</title>
+  <meta name="_csrf" th:if="${_csrf}" th:content="${_csrf.token}">
+  <meta name="_csrf_header" th:if="${_csrf}" th:content="${_csrf.headerName}">
+  <meta name="app-context" th:content="@{/}" />
+
+  <link rel="stylesheet" type="text/css" th:href="@{/css/vendor.css}" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous" />
+  <link rel="stylesheet" type="text/css" th:href="@{/style.css}" />
+  <script th:src="@{/js/modernizr.js}"></script>
+</head>
+
+<body>
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<section id="banner" class="position-relative overflow-hidden jarallax"
+         th:style="|background-image: url(@{/images/Bg.jpg}); background-repeat: no-repeat; background-size: cover; background-position: center;|">
+  <div class="container text-center py-5 mt-5">
+    <div class="row my-5">
+      <div class="d-flex flex-wrap flex-column justify-content-center align-items-center text-white">
+        <h2 class="page-title display-3 mt-5">Gestión de Alquileres</h2>
+        <nav class="breadcrumb ">
+          <a class="breadcrumb-item text-white" href="index.html">Home</a>
+          <span class="breadcrumb-item text-white active" aria-current="page">Alquileres</span>
+        </nav>
+      </div>
+    </div>
+  </div>
+  </section>
+
+<section class="contact-us-wrap py-5">
+  <div class="container">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <div class="section-heading text-center mb-4">
+      <h2>Administrar Alquileres</h2>
+      <p>CRUD de Alquileres.</p>
+    </div>
+
+    <div class="row g-4">
+      <!-- Formulario -->
+      <div class="col-lg-6">
+        <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
+          <div class="card-body">
+            <h5 class="card-title">Nuevo/Editar Alquiler</h5>
+            <form th:object="${alquilerForm}" th:action="@{/gestion/alquileres}" method="post" class="mb-3">
+              <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+              <input type="hidden" th:field="*{id}" />
+
+              <div class="mb-3">
+                <label class="panel-label">Fecha de inicio</label>
+                <input type="date" th:field="*{fechaDesde}" class="form-control panel-control" required>
+              </div>
+
+              <div class="mb-3">
+                <label class="panel-label">Fecha de fin</label>
+                <input type="date" th:field="*{fechaHasta}" class="form-control panel-control" required>
+              </div>
+
+              <div class="mb-3">
+                <label class="panel-label">Cliente</label>
+                <select th:field="*{idCliente}" class="form-control panel-control" required>
+                  <option value="">Seleccione un cliente</option>
+                  <option th:each="cliente : ${clientes}"
+                          th:value="${cliente.id}"
+                          th:text="${cliente.numeroDocumento + ' - ' + cliente.nombre + ' ' + cliente.apellido}">
+                    Cliente
+                  </option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="panel-label">Vehículo</label>
+                <select th:field="*{idVehiculo}" class="form-control panel-control" required>
+                  <option value="">Seleccione un vehículo</option>
+                  <option th:each="vehiculo : ${vehiculos}"
+                          th:value="${vehiculo.id}"
+                          th:text="${vehiculo.patente + ' - ' + (vehiculo.caracteristicaVehiculo?.marca ?: 'N/A') + ' ' + (vehiculo.caracteristicaVehiculo?.modelo ?: 'N/A')}">
+                    Vehículo
+                  </option>
+                </select>
+              </div>
+
+              <div class="mt-2"><button class="btn main-button-panel" type="submit">Guardar</button></div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de alquileres -->
+      <div class="col-lg-6">
+        <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
+          <div class="card-body">
+            <h5 class="card-title">Lista de Alquileres</h5>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead>
+                  <tr>
+                    <th>Cliente (Documento - Nombre)</th>
+                    <th>Vehículo (Patente - Marca Modelo)</th>
+                    <th>Fecha Inicio</th>
+                    <th>Fecha Fin</th>
+                    <th class="text-end">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                <tr th:each="a : ${alquileres}">
+                  <td>
+                    <!-- Find client by ID and display info -->
+                    <th:block th:with="clienteEncontrado=${false}">
+                      <span th:each="cliente : ${clientes}"
+                            th:if="${cliente.id == a.idCliente}"
+                            th:text="${cliente.numeroDocumento + ' - ' + cliente.nombre + ' ' + cliente.apellido}"
+                            th:with="clienteEncontrado=${true}">
+                        Cliente
+                      </span>
+                      <span th:if="${#lists.isEmpty(clientes)}"
+                            th:text="${a.idCliente}"
+                            class="text-muted">
+                        ID Cliente
+                      </span>
+                    </th:block>
+                  </td>
+                  <td>
+                    <!-- Find vehicle by ID and display info -->
+                    <th:block th:with="vehiculoEncontrado=${false}">
+                      <span th:each="vehiculo : ${vehiculos}"
+                            th:if="${vehiculo.id == a.idVehiculo}"
+                            th:text="${vehiculo.patente + ' - ' + (vehiculo.caracteristicaVehiculo?.marca ?: 'N/A') + ' ' + (vehiculo.caracteristicaVehiculo?.modelo ?: 'N/A')}">
+                        Vehículo
+                      </span>
+                      <span th:if="${#lists.isEmpty(vehiculos)}"
+                            th:text="${a.idVehiculo}"
+                            class="text-muted">
+                        ID Vehículo
+                      </span>
+                    </th:block>
+                  </td>
+                  <td th:text="${#temporals.format(a.fechaDesde, 'dd/MM/yyyy')}">Fecha Inicio</td>
+                  <td th:text="${#temporals.format(a.fechaHasta, 'dd/MM/yyyy')}">Fecha Fin</td>
+                  <td class="text-end">
+                    <a class="btn btn-sm btn-outline-secondary" th:href="@{/gestion/alquileres(editId=${a.id})}">Editar</a>
+                    <form th:action="@{/gestion/alquileres/{id}/eliminar(id=${a.id})}" method="post" class="d-inline">
+                      <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                      <button class="btn btn-sm btn-outline-danger ms-1" type="submit">Eliminar</button>
+                    </form>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script th:src="@{/js/jquery-1.11.0.min.js}"></script>
+<script th:src="@{/js/plugins.js}"></script>
+<script th:src="@{/js/script.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+</body>
+
+</html>

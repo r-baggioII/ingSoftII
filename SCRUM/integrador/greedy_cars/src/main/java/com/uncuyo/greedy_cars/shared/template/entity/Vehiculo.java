@@ -1,5 +1,6 @@
 package com.uncuyo.greedy_cars.shared.template.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.uncuyo.greedy_cars.shared.template.enums.EstadoVehiculo;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -35,6 +36,7 @@ public class Vehiculo extends BaseEntity<String> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "caracteristica_vehiculo_id")
+    @JsonIgnoreProperties({"imagenes", "costos", "hibernateLazyInitializer", "handler"})
     private CaracteristicaVehiculo caracteristicaVehiculo;
 
     // Implementación explícita de métodos abstractos de BaseEntity

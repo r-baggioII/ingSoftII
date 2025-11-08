@@ -145,11 +145,12 @@ public class GestionVehiculosController {
             // Guardar/actualizar el vehículo
             if (isNewVehicle) {
                 vehiculoService.alta(vehiculo);
-                // Update characteristic count when new vehicle is added
-                actualizarConteoCaracteristica(caracId, 1, 0);
             } else {
                 vehiculoService.modificar(vehiculoId, vehiculo);
             }
+
+            // Synchronize all characteristic counts after vehicle save/update
+            sincronizarConteosCaracteristicas();
 
             ra.addFlashAttribute("success", "Vehículo guardado correctamente");
         } catch (ErrorServiceException e) {
@@ -171,10 +172,8 @@ public class GestionVehiculosController {
 
             vehiculoService.baja(id);
 
-            // Update characteristic count when vehicle is deleted
-            if (caracteristicaId != null) {
-                actualizarConteoCaracteristica(caracteristicaId, -1, 0);
-            }
+            // Synchronize all characteristic counts after vehicle deletion
+            sincronizarConteosCaracteristicas();
 
             ra.addFlashAttribute("success", "Vehículo eliminado");
         } catch (ErrorServiceException e) {

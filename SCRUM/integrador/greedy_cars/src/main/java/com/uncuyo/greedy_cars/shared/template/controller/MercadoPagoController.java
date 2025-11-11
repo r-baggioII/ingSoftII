@@ -74,6 +74,8 @@ public class MercadoPagoController {
                     .monto(monto)
                     .build();
 
+            // TODO CLIENTE: invocar este endpoint desde el portal (botón "Pagar con billetera virtual"),
+            // leer initPoint y redirigir al checkout de Mercado Pago antes de mostrar la pantalla de confirmación.
             return ResponseEntity.ok(response);
         } catch (ErrorServiceException e) {
             log.warn("Error negocio al crear preferencia Mercado Pago: {}", e.getMessage());
@@ -127,6 +129,8 @@ public class MercadoPagoController {
             marcarFacturaComoPagada(facturaProcesada, monto, paymentId);
 
             // TODO: ajustar URL de retorno cuando se defina el ngrok definitivo.
+            // TODO FRONT: al recibir esta respuesta, refrescar la vista de facturas y habilitar la descarga del PDF
+            // solo cuando el estado resulte PAGADA/Habilitada por este callback.
             Map<String, Object> body = Map.of(
                     "mensaje", "pago confirmado",
                     "facturaId", facturaProcesada.getId(),

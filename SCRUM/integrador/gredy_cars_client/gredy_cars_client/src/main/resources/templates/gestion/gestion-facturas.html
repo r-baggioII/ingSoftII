@@ -245,7 +245,7 @@
                     <button type="button" class="btn btn-sm btn-outline-secondary" disabled>
                       Descargar factura (TODO backend)
                     </button>
-                    <!-- TODO: hook download when /api/facturas/{id}/pdf is available -->
+                    <!-- TODO FRONT/BACK: habilitar descarga solo para facturas pagadas tras callback /api/pagos/mp/success y exponer /api/facturas/{id}/pdf -->
                   </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(facturas)}">

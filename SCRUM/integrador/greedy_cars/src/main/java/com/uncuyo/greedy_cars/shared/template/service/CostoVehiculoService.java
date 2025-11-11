@@ -142,8 +142,13 @@ public class CostoVehiculoService extends BaseService<CostoVehiculo, String> {
     }
 
     public Optional<CostoVehiculo> buscarCostoVehiculoVigente(String idCaracteristicaVehiculo) throws ErrorServiceException {
+        return buscarCostoVehiculoVigente(idCaracteristicaVehiculo, LocalDate.now());
+    }
+
+    public Optional<CostoVehiculo> buscarCostoVehiculoVigente(String idCaracteristicaVehiculo, LocalDate fechaReferencia) throws ErrorServiceException {
         try {
-            return costoRepo.findVigenteByCaracteristicaAndDate(idCaracteristicaVehiculo, LocalDate.now());
+            LocalDate fecha = fechaReferencia != null ? fechaReferencia : LocalDate.now();
+            return costoRepo.findVigenteByCaracteristicaAndDate(idCaracteristicaVehiculo, fecha);
         } catch (Exception e) {
             throw new ErrorServiceException("Error al buscar costo vigente: " + e.getMessage());
         }

@@ -164,6 +164,7 @@ public class GestionFacturasController {
         }
         model.addAttribute("clienteSeleccionadoNombre", clienteSeleccionadoNombre);
 
+        // TODO FRONT: agregar acción (botón/JS) que llame a /api/pagos/mp/preferencia y redirija al initPoint para pagos con billetera virtual.
         cargarSeccionesSeleccionadas(model, facturaSeleccionadaId, cargarDetalles, cargarFormas);
     }
 

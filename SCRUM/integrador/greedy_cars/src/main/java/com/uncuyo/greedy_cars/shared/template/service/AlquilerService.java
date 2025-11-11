@@ -9,7 +9,10 @@ import com.uncuyo.greedy_cars.shared.template.mapper.AlquilerMapper;
 import com.uncuyo.greedy_cars.shared.template.repository.*;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -21,17 +24,23 @@ public class AlquilerService extends BaseService<Alquiler, String> {
     private final ClienteRepository clienteRepository;
     private final VehiculoRepository vehiculoRepository;
     private final DocumentacionRepository documentacionRepository;
+    private final FacturaService facturaService;
+    private final CostoVehiculoService costoVehiculoService;
     private final AlquilerMapper alquilerMapper;
 
     public AlquilerService(AlquilerRepository repository,
                            ClienteRepository clienteRepository,
                            VehiculoRepository vehiculoRepository,
                            DocumentacionRepository documentacionRepository,
+                           FacturaService facturaService,
+                           CostoVehiculoService costoVehiculoService,
                            AlquilerMapper alquilerMapper) {
         super(repository);
         this.clienteRepository = clienteRepository;
         this.vehiculoRepository = vehiculoRepository;
         this.documentacionRepository = documentacionRepository;
+        this.facturaService = facturaService;
+        this.costoVehiculoService = costoVehiculoService;
         this.alquilerMapper = alquilerMapper;
     }
 
@@ -79,7 +88,8 @@ public class AlquilerService extends BaseService<Alquiler, String> {
 
         Alquiler entidad = alquilerMapper.toEntity(dto, cli, veh, docs);
         Alquiler guardado = alta(entidad);
-        
+        generarFacturaInicial(guardado);
+
         // Synchronize vehicle state based on all current rentals
         sincronizarEstadoVehiculo(veh.getId());
         
@@ -117,8 +127,9 @@ public class AlquilerService extends BaseService<Alquiler, String> {
         Alquiler nuevo = new Alquiler();
         nuevo.crearAlquiler(fechaDesde, fechaHasta, cliente, vehiculo);
 
-        alta(nuevo);
-        
+        Alquiler guardado = alta(nuevo);
+        generarFacturaInicial(guardado);
+
         // Synchronize vehicle state based on all current rentals
         sincronizarEstadoVehiculo(idVehiculo);
     }
@@ -178,6 +189,45 @@ public class AlquilerService extends BaseService<Alquiler, String> {
 
     public Collection<Alquiler> listarAlquierActivo() throws ErrorServiceException {
         return listarActivos();
+    }
+
+    // =============== Facturación automática ===============
+    private void generarFacturaInicial(Alquiler alquiler) throws ErrorServiceException {
+        if (alquiler == null) {
+            throw new ErrorServiceException("No se pudo generar la factura para el alquiler indicado");
+        }
+        Vehiculo vehiculo = alquiler.getVehiculo();
+        if (vehiculo == null) {
+            throw new ErrorServiceException("El alquiler no tiene un vehículo asociado");
+        }
+        if (vehiculo.getCaracteristicaVehiculo() == null) {
+            throw new ErrorServiceException("El vehículo no tiene configurada una característica para calcular el costo");
+        }
+
+        int cantidadDias = calcularDiasFacturados(alquiler.getFechaDesde(), alquiler.getFechaHasta());
+        double total = costoVehiculoService.buscarCostoVehiculoVigente(
+                        vehiculo.getCaracteristicaVehiculo().getId(),
+                        alquiler.getFechaDesde())
+                .map(costo -> redondear(costo.getCosto() * cantidadDias))
+                .orElseThrow(() -> new ErrorServiceException(
+                        "No hay un costo vigente para la característica del vehículo seleccionado"));
+
+        facturaService.crearFacturaBorradorDesdeAlquiler(alquiler, total, cantidadDias);
+    }
+
+    private int calcularDiasFacturados(LocalDate fechaDesde, LocalDate fechaHasta) throws ErrorServiceException {
+        if (fechaDesde == null || fechaHasta == null) {
+            throw new ErrorServiceException("El alquiler debe indicar fechas desde y hasta");
+        }
+        long dias = ChronoUnit.DAYS.between(fechaDesde, fechaHasta);
+        long total = dias >= 0 ? dias + 1 : 1;
+        return (int) Math.max(1, total);
+    }
+
+    private double redondear(double valor) {
+        return BigDecimal.valueOf(valor)
+                .setScale(2, RoundingMode.HALF_UP)
+                .doubleValue();
     }
 
     // =============== Hooks de BaseService ===============

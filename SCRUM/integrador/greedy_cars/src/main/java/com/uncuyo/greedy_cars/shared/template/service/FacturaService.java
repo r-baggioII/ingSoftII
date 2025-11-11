@@ -18,6 +18,9 @@ import com.uncuyo.greedy_cars.shared.template.repository.AlquilerRepository;
 import com.uncuyo.greedy_cars.shared.template.repository.ClienteRepository;
 import com.uncuyo.greedy_cars.shared.template.repository.FacturaRepository;
 import jakarta.persistence.EntityNotFoundException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -316,8 +319,9 @@ public class FacturaService extends BaseService<Factura, String> {
                 if (factura.getDetalles() == null || factura.getDetalles().isEmpty()) {
                     throw new ErrorServiceException("La factura debe contener al menos un detalle");
                 }
-                if (factura.getFormasPago() == null || factura.getFormasPago().isEmpty()) {
-                    throw new ErrorServiceException("La factura debe contener al menos una forma de pago");
+                boolean requiereFormaPago = factura.getEstado() == EstadoFactura.PAGADA;
+                if (requiereFormaPago && (factura.getFormasPago() == null || factura.getFormasPago().isEmpty())) {
+                    throw new ErrorServiceException("La factura pagada debe registrar al menos una forma de pago");
                 }
             }
 
@@ -377,6 +381,42 @@ public class FacturaService extends BaseService<Factura, String> {
         if (detalle.getAlquiler() == null || detalle.getAlquiler().getId() == null) {
             throw new ErrorServiceException("Cada detalle debe estar asociado a un alquiler");
         }
+    }
+
+    public Factura crearFacturaBorradorDesdeAlquiler(Alquiler alquiler, double monto, int cantidadDias) throws ErrorServiceException {
+        if (alquiler == null) {
+            throw new ErrorServiceException("No se indicó el alquiler para generar la factura");
+        }
+        if (alquiler.getCliente() == null) {
+            throw new ErrorServiceException("El alquiler no tiene un cliente asociado");
+        }
+        if (cantidadDias <= 0) {
+            throw new ErrorServiceException("La cantidad de días debe ser mayor a cero");
+        }
+
+        double totalRedondeado = redondear(monto);
+
+        Factura factura = new Factura();
+        factura.setFechaFactura(LocalDate.now());
+        factura.setEstado(EstadoFactura.SIN_DEFINIR);
+        factura.setCliente(alquiler.getCliente());
+        factura.setTotalPagado(totalRedondeado);
+        factura.setFormasPago(new ArrayList<>());
+
+        DetalleFactura detalle = new DetalleFactura();
+        detalle.setCantidad(cantidadDias);
+        detalle.setSubtotal(totalRedondeado);
+        detalle.setAlquiler(alquiler);
+        detalle.setEliminado(false);
+        factura.agregarDetalle(detalle);
+
+        return alta(factura);
+    }
+
+    private double redondear(double valor) {
+        return BigDecimal.valueOf(valor)
+                .setScale(2, RoundingMode.HALF_UP)
+                .doubleValue();
     }
 
     private void validarFormaPago(FormaDePago formaDePago) {

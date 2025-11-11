@@ -54,7 +54,28 @@ public class EmpleadoController extends BaseRestController<Empleado, String> {
         }
     }
 
-    @PostMapping("/dto")
+    /**
+     * Create a new Empleado. 
+     * Override to prevent direct entity creation - must use DTO
+     */
+    @PostMapping
+    @Override
+    public ResponseEntity<?> crear(@Valid @RequestBody Empleado entity) {
+        // Since we can't distinguish between Empleado and EmpleadoDTO at compile time,
+        // we treat all POST requests as DTO format
+        try {
+            // The incoming JSON with direccionIds, contactoIds, etc will be handled by
+            // a custom converter or we redirect to the service that expects a DTO
+            return buildErrorResponse("Please use the correct DTO format with relationship IDs", HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return buildErrorResponse("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Create a new Empleado using explicit DTO endpoint
+     */
+    @PostMapping("/new")
     public ResponseEntity<?> crearDTO(@Valid @RequestBody EmpleadoDTO empleadoDTO) {
         try {
             EmpleadoDTO creado = empleadoService.altaDTO(empleadoDTO);
@@ -66,7 +87,22 @@ public class EmpleadoController extends BaseRestController<Empleado, String> {
         }
     }
 
-    @PutMapping("/dto/{id}")
+
+
+    /**
+     * Update an existing Empleado. 
+     * Override to prevent direct entity update - must use DTO
+     */
+    @PutMapping("/{id}")
+    @Override
+    public ResponseEntity<?> actualizar(@PathVariable String id, @Valid @RequestBody Empleado entity) {
+        return buildErrorResponse("Please use the correct DTO format with relationship IDs", HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Update an existing Empleado using explicit DTO endpoint
+     */
+    @PutMapping("/update/{id}")
     public ResponseEntity<?> actualizarDTO(@PathVariable String id, @Valid @RequestBody EmpleadoDTO empleadoDTO) {
         try {
             EmpleadoDTO actualizado = empleadoService.modificarDTO(id, empleadoDTO)

@@ -32,6 +32,10 @@ public class UsuarioDTO extends BaseDTO<String> {
     @NotNull(message = "El rol es obligatorio")
     private Rol rol;
     
+    // ID de la persona asociada (obligatorio)
+    @NotBlank(message = "La persona asociada es obligatoria")
+    private String personaId;
+    
     @Override
     public String getId() {
         return super.id;

@@ -85,12 +85,15 @@ public class VehicleCatalogService {
             log.warn("Error counting vehicles for characteristic {}, using stored values", feature.getId(), e);
             // Fallback to stored values if counting fails
             totalUnits = feature.getCantidadTotalVehiculo();
-            availableUnits = Math.max(feature.getCantidadTotalVehiculo() - feature.getCantidadVehiculoAlquilado(), 0);
             rentedUnits = feature.getCantidadVehiculoAlquilado();
+            availableUnits = totalUnits - rentedUnits;
         }
 
-        String imageUrl = CollectionUtils.isEmpty(feature.getImagenIds()) ? null
-            : apiProperties.buildImageContentUrl(feature.getImagenIds().get(0));
+        String imageUrl = null;
+        if (!CollectionUtils.isEmpty(feature.getImagenIds())) {
+            String firstImageId = feature.getImagenIds().get(0);
+            imageUrl = apiProperties.buildImageContentUrl(firstImageId);
+        }
 
         VehicleCardView view = new VehicleCardView(
             feature.getId(),

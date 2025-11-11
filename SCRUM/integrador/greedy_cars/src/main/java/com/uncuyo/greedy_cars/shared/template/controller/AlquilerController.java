@@ -87,6 +87,24 @@ public class AlquilerController {
             return buildErrorResponse("Error de Sistema: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    
+    /**
+     * Synchronizes all vehicle states based on current active rentals.
+     * This endpoint can be called manually or via a scheduled task.
+     */
+    @PostMapping("/sincronizar-estados-vehiculos")
+    public ResponseEntity<?> sincronizarEstadosVehiculos() {
+        try {
+            alquilerService.sincronizarTodosLosEstadosVehiculos();
+            Map<String, String> response = new HashMap<>();
+            response.put("mensaje", "Estados de vehículos sincronizados correctamente");
+            return ResponseEntity.ok(response);
+        } catch (ErrorServiceException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return buildErrorResponse("Error de Sistema: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
     private ResponseEntity<?> buildErrorResponse(String mensaje, HttpStatus status) {
         Map<String, String> error = new HashMap<>();

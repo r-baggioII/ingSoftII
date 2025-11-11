@@ -37,4 +37,10 @@ public class Usuario extends BaseEntity<String> {
     @Enumerated(EnumType.STRING)
     @Column(name = "rol", nullable = false, length = 20)
     private Rol rol = Rol.CLIENTE;
+
+    // Relación con Persona (puede ser Cliente o Empleado)
+    // No se usa cascade para evitar eliminaciones accidentales de personas
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "persona_id", unique = true)
+    private Persona persona;
 }

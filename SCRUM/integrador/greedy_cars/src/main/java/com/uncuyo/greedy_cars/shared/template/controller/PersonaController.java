@@ -68,7 +68,7 @@ public class PersonaController {
                 .orElseThrow(() -> new ErrorServiceException("Persona no encontrada con ID: " + id));
             return ResponseEntity.ok(personaActualizadaDTO);
         } catch (ErrorServiceException e) {
-            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return buildErrorResponse("Error de Sistema: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

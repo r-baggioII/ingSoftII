@@ -4,6 +4,7 @@ import com.uncuyo.greedy_cars.shared.template.dto.DetalleFacturaDTO;
 import com.uncuyo.greedy_cars.shared.template.dto.FacturaDTO;
 import com.uncuyo.greedy_cars.shared.template.dto.FormaDePagoDTO;
 import com.uncuyo.greedy_cars.shared.template.entity.Alquiler;
+import com.uncuyo.greedy_cars.shared.template.entity.Cliente;
 import com.uncuyo.greedy_cars.shared.template.entity.DetalleFactura;
 import com.uncuyo.greedy_cars.shared.template.entity.Factura;
 import com.uncuyo.greedy_cars.shared.template.entity.FormaDePago;
@@ -14,20 +15,29 @@ import com.uncuyo.greedy_cars.shared.template.mapper.DetalleFacturaMapper;
 import com.uncuyo.greedy_cars.shared.template.mapper.FacturaMapper;
 import com.uncuyo.greedy_cars.shared.template.mapper.FormaDePagoMapper;
 import com.uncuyo.greedy_cars.shared.template.repository.AlquilerRepository;
+import com.uncuyo.greedy_cars.shared.template.repository.ClienteRepository;
 import com.uncuyo.greedy_cars.shared.template.repository.FacturaRepository;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 @Transactional
 public class FacturaService extends BaseService<Factura, String> {
 
+    private static final Logger log = LoggerFactory.getLogger(FacturaService.class);
+
     private final FacturaRepository facturaRepository;
     private final AlquilerRepository alquilerRepository;
+    private final ClienteRepository clienteRepository;
     private final FacturaMapper facturaMapper;
     private final DetalleFacturaMapper detalleFacturaMapper;
     private final FormaDePagoMapper formaDePagoMapper;
@@ -35,12 +45,14 @@ public class FacturaService extends BaseService<Factura, String> {
     public FacturaService(
             FacturaRepository facturaRepository,
             AlquilerRepository alquilerRepository,
+            ClienteRepository clienteRepository,
             FacturaMapper facturaMapper,
             DetalleFacturaMapper detalleFacturaMapper,
             FormaDePagoMapper formaDePagoMapper) {
         super(facturaRepository);
         this.facturaRepository = facturaRepository;
         this.alquilerRepository = alquilerRepository;
+        this.clienteRepository = clienteRepository;
         this.facturaMapper = facturaMapper;
         this.detalleFacturaMapper = detalleFacturaMapper;
         this.formaDePagoMapper = formaDePagoMapper;
@@ -49,13 +61,15 @@ public class FacturaService extends BaseService<Factura, String> {
     @Transactional(readOnly = true)
     public List<FacturaDTO> listarActivosDTO() throws ErrorServiceException {
         List<Factura> facturas = listarActivos();
-        return facturaMapper.toDTOList(facturas);
+        return facturas.stream()
+                .map(this::convertirConClienteSeguro)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public Optional<FacturaDTO> obtenerDTO(String id) throws ErrorServiceException {
         Optional<Factura> factura = obtener(id);
-        return factura.map(facturaMapper::toDTO);
+        return factura.map(this::convertirConClienteSeguro);
     }
 
     @Transactional(readOnly = true)
@@ -64,14 +78,16 @@ public class FacturaService extends BaseService<Factura, String> {
             return listarActivosDTO();
         }
         List<Factura> facturas = facturaRepository.findAllByEstadoAndEliminadoIsFalse(estado);
-        return facturaMapper.toDTOList(facturas);
+        return facturas.stream()
+                .map(this::convertirConClienteSeguro)
+                .collect(Collectors.toList());
     }
 
     public FacturaDTO altaDTO(FacturaDTO dto) throws ErrorServiceException {
         try {
             Factura factura = prepararFacturaDesdeDTO(dto);
             Factura guardada = alta(factura);
-            return facturaMapper.toDTO(guardada);
+            return convertirConClienteSeguro(guardada);
         } catch (ErrorServiceException e) {
             throw e;
         } catch (Exception e) {
@@ -83,7 +99,7 @@ public class FacturaService extends BaseService<Factura, String> {
         try {
             Factura factura = prepararFacturaDesdeDTO(dto);
             Optional<Factura> modificada = modificar(id, factura);
-            return modificada.map(facturaMapper::toDTO);
+            return modificada.map(this::convertirConClienteSeguro);
         } catch (ErrorServiceException e) {
             throw e;
         } catch (Exception e) {
@@ -111,6 +127,11 @@ public class FacturaService extends BaseService<Factura, String> {
         }
 
         Factura factura = facturaMapper.toEntity(dto);
+        if (StringUtils.hasText(dto.getClienteId())) {
+            factura.setCliente(obtenerClienteActivo(dto.getClienteId()));
+        } else {
+            factura.setCliente(null);
+        }
         if (factura.getEstado() == null) {
             factura.setEstado(EstadoFactura.SIN_DEFINIR);
         }
@@ -151,6 +172,41 @@ public class FacturaService extends BaseService<Factura, String> {
         return factura;
     }
 
+    private FacturaDTO convertirConClienteSeguro(Factura factura) {
+        if (factura == null) {
+            return null;
+        }
+        FacturaDTO dto = facturaMapper.toDTO(factura);
+        Cliente cliente = extraerClienteSeguro(factura);
+        if (cliente != null) {
+            dto.setClienteId(cliente.getId());
+            dto.setClienteNombreCompleto(construirNombreCliente(cliente));
+        } else {
+            dto.setClienteId(null);
+            dto.setClienteNombreCompleto(null);
+        }
+        return dto;
+    }
+
+    private Cliente extraerClienteSeguro(Factura factura) {
+        try {
+            return factura.getCliente();
+        } catch (EntityNotFoundException ex) {
+            log.warn("Factura {} referencia un cliente inexistente. Se ignorará la relación", factura.getId());
+            return null;
+        }
+    }
+
+    private String construirNombreCliente(Cliente cliente) {
+        if (cliente == null) {
+            return null;
+        }
+        String nombre = cliente.getNombre() != null ? cliente.getNombre().trim() : "";
+        String apellido = cliente.getApellido() != null ? cliente.getApellido().trim() : "";
+        String fullName = (nombre + " " + apellido).trim();
+        return fullName.isEmpty() ? null : fullName;
+    }
+
     private double calcularTotal(List<DetalleFactura> detalles) {
         return detalles.stream()
                 .map(DetalleFactura::getSubtotal)
@@ -167,6 +223,14 @@ public class FacturaService extends BaseService<Factura, String> {
                 .orElseThrow(() -> new ErrorServiceException("Alquiler no encontrado o eliminado"));
     }
 
+    private Cliente obtenerClienteActivo(String clienteId) throws ErrorServiceException {
+        if (clienteId == null || clienteId.isBlank()) {
+            throw new ErrorServiceException("Debe indicar un cliente válido para la factura");
+        }
+        return clienteRepository.findByIdAndEliminadoIsFalse(clienteId)
+                .orElseThrow(() -> new ErrorServiceException("Cliente no encontrado o eliminado"));
+    }
+
     @Override
     protected void actualizarEntidad(Factura entidadExistente, Factura entidadNueva) {
         if (entidadNueva.getNumeroFactura() != null) {
@@ -180,6 +244,9 @@ public class FacturaService extends BaseService<Factura, String> {
         }
         if (entidadNueva.getEstado() != null) {
             entidadExistente.setEstado(entidadNueva.getEstado());
+        }
+        if (entidadNueva.getCliente() != null) {
+            entidadExistente.setCliente(entidadNueva.getCliente());
         }
 
         if (entidadNueva.getDetalles() != null) {
@@ -240,6 +307,9 @@ public class FacturaService extends BaseService<Factura, String> {
             }
             if (factura.getEstado() == null) {
                 factura.setEstado(EstadoFactura.SIN_DEFINIR);
+            }
+            if (useCase == BaseUseCaseService.ALTA && factura.getCliente() == null) {
+                throw new ErrorServiceException("Debe asociar la factura a un cliente");
             }
 
             if (useCase == BaseUseCaseService.ALTA) {

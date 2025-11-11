@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detalle de Cliente - Greedy Cars</title>
+  <meta name="_csrf" th:if="${_csrf}" th:content="${_csrf.token}">
+  <meta name="_csrf_header" th:if="${_csrf}" th:content="${_csrf.headerName}">
+  <meta name="app-context" th:content="@{/}" />
+
+  <link rel="stylesheet" type="text/css" th:href="@{/css/vendor.css}" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous" />
+  <link rel="stylesheet" type="text/css" th:href="@{/style.css}" />
+  <script th:src="@{/js/modernizr.js}"></script>
+</head>
+<body>
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<section id="banner" class="position-relative overflow-hidden jarallax"
+         th:style="|background-image: url(@{/images/Bg.jpg}); background-repeat: no-repeat; background-size: cover; background-position: center;|">
+  <div class="container text-center py-5 mt-5">
+    <div class="row my-5">
+      <div class="d-flex flex-wrap flex-column justify-content-center align-items-center text-white">
+        <h2 class="page-title display-3 mt-5">Detalle de Cliente</h2>
+        <nav class="breadcrumb">
+          <a class="breadcrumb-item text-white" th:href="@{/gestion/clientes}">Gestión de Clientes</a>
+          <span class="breadcrumb-item text-white active" aria-current="page" th:text="${cliente?.nombre}">Cliente</span>
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="contact-us-wrap py-5">
+  <div class="container">
+    <div class="mb-3">
+      <a class="btn btn-outline-secondary" th:href="@{/gestion/clientes}">&larr; Volver</a>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <div class="row g-4">
+      <div class="col-lg-5">
+        <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
+          <div class="card-body">
+            <h5 class="card-title">Datos del cliente</h5>
+            <div class="d-flex gap-3 align-items-start">
+              <div class="flex-shrink-0">
+                <div class="ratio ratio-1x1 rounded-circle bg-light overflow-hidden" style="width: 100px;">
+                  <img th:if="${cliente != null && !#lists.isEmpty(cliente.imagenes)}"
+                       th:src="@{/imagenes/{id}(id=${cliente.imagenes[0].id})}"
+                       class="w-100 h-100 object-fit-cover" alt="Foto cliente">
+                  <div th:if="${cliente == null || #lists.isEmpty(cliente.imagenes)}"
+                       class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
+                    <span>Sin foto</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <p class="mb-1"><strong>Nombre:</strong> <span th:text="${cliente?.nombre + ' ' + cliente?.apellido}">-</span></p>
+                <p class="mb-1"><strong>Documento:</strong>
+                  <span th:text="${cliente?.tipoDocumento}">DNI</span>
+                  <span th:text="${cliente?.numeroDocumento}">00000000</span>
+                </p>
+                <p class="mb-1"><strong>Nacionalidad:</strong> <span th:text="${cliente?.nacionalidad != null ? cliente.nacionalidad.nombre : '--'}">Argentina</span></p>
+                <p class="mb-1"><strong>Dirección de estadía:</strong> <span th:text="${cliente?.direccionEstadia != null ? cliente.direccionEstadia : '--'}">--</span></p>
+              </div>
+            </div>
+            <hr>
+            <div>
+              <h6 class="text-muted">Teléfonos</h6>
+              <ul class="list-unstyled mb-3">
+                <li th:each="tel : ${cliente?.contactosTelefono}" th:text="${tel.telefono + ' (' + tel.tipoTelefono + ')'}"></li>
+                <li th:if="${cliente == null || #lists.isEmpty(cliente.contactosTelefono)}" class="text-muted">Sin teléfonos cargados.</li>
+              </ul>
+
+              <h6 class="text-muted">Correos</h6>
+              <ul class="list-unstyled mb-3">
+                <li th:each="correo : ${cliente?.contactosCorreo}" th:text="${correo.mail}"></li>
+                <li th:if="${cliente == null || #lists.isEmpty(cliente.contactosCorreo)}" class="text-muted">Sin correos cargados.</li>
+              </ul>
+
+              <!-- TODO: abrir WhatsApp con teléfono principal del cliente -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-7">
+        <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="card-title mb-0">Alquileres de este cliente</h5>
+              <span class="badge bg-primary-subtle text-primary" th:text="${#lists.size(alquileresCliente)} + ' registros'">0 registros</span>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead>
+                <tr>
+                  <th>Vehículo / patente</th>
+                  <th>Desde</th>
+                  <th>Hasta</th>
+                  <th>Estado</th>
+                  <th>Monto</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="alquiler : ${alquileresCliente}">
+                  <td>
+                    <div class="fw-semibold" th:text="${alquiler.idVehiculo}">Vehículo</div>
+                    <!-- TODO: mostrar datos completos del vehículo -->
+                  </td>
+                  <td th:text="${alquiler.fechaDesde}">2030-01-01</td>
+                  <td th:text="${alquiler.fechaHasta}">2030-01-03</td>
+                  <td><span class="badge bg-secondary">Pendiente</span></td>
+                  <td><!-- TODO montoPagado -->&mdash;</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(alquileresCliente)}">
+                  <td colspan="5" class="text-center text-muted">Sin alquileres para mostrar.</td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+              <button class="btn btn-outline-secondary" type="button" disabled>Descargar factura (TODO backend)</button>
+              <button class="btn btn-outline-secondary" type="button" disabled>Exportar a Excel (TODO backend)</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script th:src="@{/js/jquery-1.11.0.min.js}"></script>
+<script th:src="@{/js/plugins.js}"></script>
+<script th:src="@{/js/script.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+</body>
+</html>

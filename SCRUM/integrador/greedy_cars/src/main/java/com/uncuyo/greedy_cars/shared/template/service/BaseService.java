@@ -44,7 +44,10 @@ public abstract class BaseService<T extends BaseEntity<ID>, ID> {
         try {
             entidad.setEliminado(false);
             validar(BaseUseCaseService.ALTA, entidad);
+            
+            log.info("=== ALTA: ID de la entidad ANTES de preAlta: {}", entidad.getId());
             preAlta(entidad);
+            log.info("=== ALTA: ID de la entidad DESPUÉS de preAlta: {}", entidad.getId());
 
             T guardado = repository.save(entidad);
 

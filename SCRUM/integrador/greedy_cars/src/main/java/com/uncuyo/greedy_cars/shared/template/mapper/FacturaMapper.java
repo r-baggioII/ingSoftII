@@ -17,11 +17,13 @@ public interface FacturaMapper extends BaseMapper<Factura, FacturaDTO, String> {
     @Override
     @Mapping(source = "detalles", target = "detalles")
     @Mapping(source = "formasPago", target = "formasPago")
+    @Mapping(target = "clienteId", ignore = true)
+    @Mapping(target = "clienteNombreCompleto", ignore = true)
     FacturaDTO toDTO(Factura entity);
 
     @Override
     @Mapping(target = "detalles", ignore = true)
     @Mapping(target = "formasPago", ignore = true)
+    @Mapping(target = "cliente", ignore = true)
     Factura toEntity(FacturaDTO dto);
 }
-

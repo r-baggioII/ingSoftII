@@ -10,6 +10,9 @@ import lombok.ToString;
 
 import com.uncuyo.greedy_cars.shared.template.enums.TipoContacto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -32,9 +35,8 @@ public abstract class Contacto extends BaseEntity<String> {
     @Column(name = "observacion", length = 300)
     private String observacion;
 
-    @ManyToOne
-    @JoinColumn(name = "persona_id")
-    private Persona persona;
+    @ManyToMany(mappedBy = "contactos")
+    private List<Persona> personas = new ArrayList<>();
 
     @Override
     public String getId() {

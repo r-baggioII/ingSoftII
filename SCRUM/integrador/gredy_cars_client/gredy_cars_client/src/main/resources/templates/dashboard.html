@@ -1,18 +1,21 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard - Greedy Cars</title>
+  <title th:text="|Panel ${usuarioRol} - Greedy Cars|">Panel - Greedy Cars</title>
+
+  <!--vendor css ================================================== -->
+  <link rel="stylesheet" type="text/css" th:href="@{/css/vendor.css}" />
 
   <!--Bootstrap ================================================== -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous" />
 
   <!-- Style Sheet ================================================== -->
-  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="stylesheet" type="text/css" th:href="@{/style.css}" />
 
   <!-- Google Fonts ================================================== -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -20,150 +23,336 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
     rel="stylesheet" />
+
+  <script th:src="@{/js/modernizr.js}"></script>
 </head>
 
 <body>
-
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
+  <nav class="navbar navbar-expand-lg navbar-light container-fluid py-3 position-fixed">
     <div class="container">
-      <a class="navbar-brand" th:href="@{/}">
-        <img src="/images/logo.png" alt="logo" style="height: 40px;" />
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <a class="navbar-brand" th:href="@{/}"><img th:src="@{/images/logo.png}" alt="logo" /></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
+        aria-controls="offcanvasNavbar">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto align-items-center">
-          <li class="nav-item">
-            <a class="nav-link" th:href="@{/dashboard}">Dashboard</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" th:href="@{/usuarios}">Usuarios</a>
-          </li>
-          <li class="nav-item">
-            <form th:action="@{/logout}" method="post" class="d-inline">
-              <button type="submit" class="btn btn-outline-light btn-sm ms-2">
-                Cerrar Sesión
-              </button>
-            </form>
-          </li>
-        </ul>
+      <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+        <div class="offcanvas-header">
+          <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menu</h5>
+          <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+          <ul class="navbar-nav align-items-center justify-content-end flex-grow-1 pe-3">
+            <li class="nav-item">
+              <a class="nav-link px-3" th:href="@{/}">Home</a>
+            </li>
+            <li class="nav-item" th:if="${usuarioRol == 'ADMINISTRATIVO' || usuarioRol == 'JEFE'}">
+              <a class="nav-link px-3" th:href="@{/cars}">Vehículos</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-3" th:href="@{/dashboard}">Panel de Gestión</a>
+            </li>
+            <li class="nav-item" th:if="${usuarioRol == 'JEFE'}">
+              <a class="nav-link px-3" th:href="@{/reportes}">Reportes</a>
+            </li>
+            <li class="nav-item">
+              <a class="btn btn-outline-primary px-3" th:href="@{/logout}">Cerrar Sesión</a>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </nav>
 
-  <div class="container py-5">
-    <div class="row">
-      <div class="col-12">
-        <h1 class="display-4 mb-4">Bienvenido al Dashboard</h1>
-        <div class="alert alert-success" role="alert">
-          <h4 class="alert-heading">¡Autenticación exitosa!</h4>
-          <p>Has iniciado sesión correctamente. Esta es una página protegida que solo puede ser vista por usuarios autenticados.</p>
-          <hr>
-          <p class="mb-0">El sistema utiliza JWT en cookies HttpOnly para mantener tu sesión segura.</p>
+  <section id="banner" class="position-relative overflow-hidden jarallax"
+    th:style="|background-image: url(@{/images/Bg.jpg}); background-repeat: no-repeat; background-size: cover; background-position: center;|">
+    <div class="container text-center py-5 mt-5">
+      <div class="row my-5">
+        <div class="d-flex flex-wrap flex-column justify-content-center align-items-center text-white">
+          <h2 class="page-title display-3 mt-5" th:text="${usuarioRol}">Usuario</h2>
+          <nav class="breadcrumb">
+            <a class="breadcrumb-item text-white" th:href="@{/}">Home</a>
+            <a class="breadcrumb-item text-white" th:href="@{/dashboard}">Panel de Gestión</a>
+            <span class="breadcrumb-item text-white active" aria-current="page" th:text="${usuarioRol}">Usuario</span>
+          </nav>
         </div>
       </div>
     </div>
+  </section>
 
-    <div class="row mt-4">
-      <div class="col-md-4 mb-3">
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title">
-              <iconify-icon icon="mdi:account-group" class="text-primary"></iconify-icon>
-              Gestión de Usuarios
-            </h5>
-            <p class="card-text">Administra los usuarios del sistema.</p>
-            <a th:href="@{/usuarios}" class="btn btn-primary">Ver Usuarios</a>
-          </div>
+  <section class="gestion-dashboard py-5">
+    <div class="container-fluid">
+      <div class="row g-4">
+        <div class="col-lg-3 col-xl-2">
+          <aside class="gestion-sidebar card border-0 h-100 shadow-sm">
+            <div class="card-header bg-white border-0 pb-0">
+              <h5 class="mb-1">Panel de Gestión</h5>
+              <p class="text-muted small mb-0">Supervisión y control administrativo.</p>
+            </div>
+            <nav class="list-group list-group-flush gestion-menu">
+              <!-- Cliente: Mis Alquileres -->
+              <a th:if="${usuarioRol == 'CLIENTE'}" class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/alquileres}">
+                <span class="badge rounded-pill me-2">AL</span>
+                Mis Alquileres
+              </a>
+              <a th:if="${usuarioRol == 'CLIENTE'}" class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/facturas}">
+                <span class="badge rounded-pill me-2">FC</span>
+                Mis Facturas
+              </a>
+              <a th:if="${usuarioRol == 'CLIENTE'}" class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/billetera}">
+                <span class="badge rounded-pill me-2">BV</span>
+                Billetera Virtual
+              </a>
+              
+              <!-- Administrativo y Jefe -->
+              <a th:if="${usuarioRol == 'ADMINISTRATIVO' || usuarioRol == 'JEFE'}" class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/gestion-vehiculos}">
+                <span class="badge rounded-pill me-2">VH</span>
+                Gestión de Vehículos
+              </a>
+              <a th:if="${usuarioRol == 'ADMINISTRATIVO' || usuarioRol == 'JEFE'}" class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/gestion-alquiler}">
+                <span class="badge rounded-pill me-2">AL</span>
+                Gestión de Alquileres
+              </a>
+              <a th:if="${usuarioRol == 'ADMINISTRATIVO' || usuarioRol == 'JEFE'}" class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/gestion-pagos}">
+                <span class="badge rounded-pill me-2">PG</span>
+                Gestión de Pagos
+              </a>
+              <a th:if="${usuarioRol == 'ADMINISTRATIVO' || usuarioRol == 'JEFE'}" class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/gestion-promociones}">
+                <span class="badge rounded-pill me-2">PR</span>
+                Gestión de Promociones
+              </a>
+              
+              <!-- Solo Jefe -->
+              <div th:if="${usuarioRol == 'JEFE'}" class="gestion-menu-divider">Administración</div>
+              <a th:if="${usuarioRol == 'JEFE'}" class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/gestion-usuarios}">
+                <span class="badge rounded-pill me-2">US</span>
+                Gestión de Usuarios
+              </a>
+              <a th:if="${usuarioRol == 'JEFE'}" class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/reportes-alquileres}">
+                <span class="badge rounded-pill me-2">RP</span>
+                Reportes Ejecutivos
+              </a>
+            </nav>
+          </aside>
         </div>
-      </div>
-
-      <div class="col-md-4 mb-3">
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title">
-              <iconify-icon icon="mdi:car" class="text-primary"></iconify-icon>
-              Vehículos
-            </h5>
-            <p class="card-text">Gestiona el catálogo de vehículos.</p>
-            <a href="#" class="btn btn-primary">Ver Vehículos</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-4 mb-3">
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title">
-              <iconify-icon icon="mdi:calendar-clock" class="text-primary"></iconify-icon>
-              Reservas
-            </h5>
-            <p class="card-text">Administra las reservas de clientes.</p>
-            <a href="#" class="btn btn-primary">Ver Reservas</a>
+        <div class="col-lg-9 col-xl-10">
+          <div class="gestion-content">
+            <div class="row g-4">
+              <div class="col-12 col-xl-4">
+                <div class="card shadow-sm border-0 gestion-profile-card h-100">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center mb-4">
+                      <div class="gestion-avatar me-3">
+                        <img th:src="${usuarioFoto != null ? usuarioFoto : '/images/team2.jpg'}" th:alt="${usuarioNombre}" />
+                      </div>
+                      <div>
+                        <h5 class="mb-1" th:text="${usuarioNombre}">Usuario</h5>
+                        <span class="badge bg-primary text-white fw-semibold" th:text="${usuarioRol}">Rol</span>
+                      </div>
+                    </div>
+                    <ul class="list-unstyled gestion-profile-list mb-4">
+                      <li th:if="${usuarioId != null}"><span>ID</span><strong th:text="${usuarioId}">-</strong></li>
+                      <li th:if="${usuarioEmail != null}"><span>Email</span><strong th:text="${usuarioEmail}">-</strong></li>
+                      <li th:if="${usuarioTelefono != null}"><span>Teléfono</span><strong th:text="${usuarioTelefono}">-</strong></li>
+                      <li><span>Último acceso</span><strong>Hoy</strong></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-xl-8">
+                <!-- Indicadores para JEFE -->
+                <div th:if="${usuarioRol == 'JEFE'}" class="card shadow-sm border-0 h-100">
+                  <div class="card-body">
+                    <h5 class="card-title">Indicadores clave</h5>
+                    <p class="card-text text-muted">Monitoreo estratégico del negocio.</p>
+                    <div class="row g-3 gestion-stats">
+                      <div class="col-sm-4">
+                        <div class="stat-tile">
+                          <strong>$4.8M</strong>
+                          <span>Ingresos del mes</span>
+                        </div>
+                      </div>
+                      <div class="col-sm-4">
+                        <div class="stat-tile">
+                          <strong>92%</strong>
+                          <span>Tasa de ocupación</span>
+                        </div>
+                      </div>
+                      <div class="col-sm-4">
+                        <div class="stat-tile">
+                          <strong>7</strong>
+                          <span>Usuarios incorporados</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Tareas para ADMINISTRATIVO -->
+                <div th:if="${usuarioRol == 'ADMINISTRATIVO'}" class="card shadow-sm border-0 h-100">
+                  <div class="card-body">
+                    <h5 class="card-title">Tareas pendientes</h5>
+                    <p class="card-text text-muted">Operaciones diarias del negocio.</p>
+                    <div class="row g-3 gestion-stats">
+                      <div class="col-sm-4">
+                        <div class="stat-tile">
+                          <strong>12</strong>
+                          <span>Alquileres activos</span>
+                        </div>
+                      </div>
+                      <div class="col-sm-4">
+                        <div class="stat-tile">
+                          <strong>5</strong>
+                          <span>Pagos pendientes</span>
+                        </div>
+                      </div>
+                      <div class="col-sm-4">
+                        <div class="stat-tile">
+                          <strong>3</strong>
+                          <span>Vehículos en mantenimiento</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Resumen para CLIENTE -->
+                <div th:if="${usuarioRol == 'CLIENTE'}" class="card shadow-sm border-0 h-100">
+                  <div class="card-body">
+                    <h5 class="card-title">Mi actividad</h5>
+                    <p class="card-text text-muted">Resumen de tus alquileres.</p>
+                    <div class="row g-3 gestion-stats">
+                      <div class="col-sm-4">
+                        <div class="stat-tile">
+                          <strong>2</strong>
+                          <span>Alquileres activos</span>
+                        </div>
+                      </div>
+                      <div class="col-sm-4">
+                        <div class="stat-tile">
+                          <strong>$15,000</strong>
+                          <span>Saldo en billetera</span>
+                        </div>
+                      </div>
+                      <div class="col-sm-4">
+                        <div class="stat-tile">
+                          <strong>8</strong>
+                          <span>Alquileres totales</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Reportes ejecutivos - Solo JEFE -->
+              <div th:if="${usuarioRol == 'JEFE'}" class="col-12">
+                <div class="card shadow-sm border-0 h-100">
+                  <div class="card-body">
+                    <h5 class="card-title">Reportes ejecutivos</h5>
+                    <p class="card-text text-muted">Descargá los informes principales en PDF o Excel.</p>
+                    <div class="table-responsive">
+                      <table class="table table-hover align-middle">
+                        <thead>
+                          <tr>
+                            <th>Reporte</th>
+                            <th>Período</th>
+                            <th>Estado</th>
+                            <th class="text-end">Descargar</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>Alquileres confirmados por modelo</td>
+                            <td>01/10/2024 - 10/10/2024</td>
+                            <td><span class="badge bg-success">Listo</span></td>
+                            <td class="text-end">
+                              <div class="btn-group btn-group-sm" role="group">
+                                <a class="btn btn-outline-primary" th:href="@{/reportes-alquileres}">PDF</a>
+                                <a class="btn btn-outline-primary" th:href="@{/reportes-alquileres}">Excel</a>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>Recaudación total por modelo</td>
+                            <td>01/09/2024 - 30/09/2024</td>
+                            <td><span class="badge bg-success">Listo</span></td>
+                            <td class="text-end">
+                              <div class="btn-group btn-group-sm" role="group">
+                                <a class="btn btn-outline-primary" th:href="@{/reportes-alquileres}">PDF</a>
+                                <a class="btn btn-outline-primary" th:href="@{/reportes-alquileres}">Excel</a>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>Ingresos pendientes de acreditación</td>
+                            <td>Semana actual</td>
+                            <td><span class="badge bg-warning text-dark">En proceso</span></td>
+                            <td class="text-end">
+                              <div class="btn-group btn-group-sm" role="group">
+                                <button class="btn btn-outline-secondary" disabled>PDF</button>
+                                <button class="btn btn-outline-secondary" disabled>Excel</button>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <a class="btn btn-outline-primary btn-sm" th:href="@{/reportes-alquileres}">Ir al módulo de reportes</a>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Mis alquileres - Solo CLIENTE -->
+              <div th:if="${usuarioRol == 'CLIENTE'}" class="col-12">
+                <div class="card shadow-sm border-0 h-100">
+                  <div class="card-body">
+                    <h5 class="card-title">Mis alquileres</h5>
+                    <p class="card-text text-muted">Historial de tus alquileres y reservas.</p>
+                    <div class="table-responsive">
+                      <table class="table table-hover align-middle">
+                        <thead>
+                          <tr>
+                            <th>Vehículo</th>
+                            <th>Fecha inicio</th>
+                            <th>Fecha fin</th>
+                            <th>Estado</th>
+                            <th class="text-end">Acciones</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>Toyota Corolla 2023</td>
+                            <td>15/01/2025</td>
+                            <td>20/01/2025</td>
+                            <td><span class="badge bg-success">Activo</span></td>
+                            <td class="text-end">
+                              <a class="btn btn-outline-primary btn-sm" th:href="@{/alquiler-detalle}">Ver</a>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>Ford Focus 2022</td>
+                            <td>01/12/2024</td>
+                            <td>10/12/2024</td>
+                            <td><span class="badge bg-secondary">Completado</span></td>
+                            <td class="text-end">
+                              <a class="btn btn-outline-primary btn-sm" th:href="@{/factura-descarga}">Factura</a>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <a class="btn btn-outline-primary btn-sm" th:href="@{/alquileres}">Ver todos mis alquileres</a>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
+  </section>
 
-    <div class="row mt-4">
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Información del Sistema</h5>
-          </div>
-          <div class="card-body">
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item">
-                <strong>Cliente:</strong> Aplicación Spring Boot MVC con Thymeleaf
-              </li>
-              <li class="list-group-item">
-                <strong>Backend API:</strong> <span th:text="${backendUrl}">http://localhost:18082/greedy_cars/api</span>
-              </li>
-              <li class="list-group-item">
-                <strong>Autenticación:</strong> JWT en cookies HttpOnly
-              </li>
-              <li class="list-group-item">
-                <strong>Protección de rutas:</strong> AuthCheckInterceptor + Backend verification
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="row mt-4">
-      <div class="col-12">
-        <div class="alert alert-info" role="alert">
-          <h5>
-            <iconify-icon icon="mdi:information" class="me-2"></iconify-icon>
-            Cómo funciona
-          </h5>
-          <ol class="mb-0">
-            <li>El usuario se autentica en <code>/login</code></li>
-            <li>El controlador MVC envía las credenciales al backend</li>
-            <li>El backend valida y devuelve un JWT en cookie HttpOnly (Set-Cookie)</li>
-            <li>El cliente copia el header Set-Cookie al response para que el navegador guarde la cookie</li>
-            <li>Para cada ruta protegida, el AuthCheckInterceptor valida la cookie con el backend</li>
-            <li>Los servicios del cliente copian la cookie en cada petición al backend</li>
-          </ol>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <footer class="bg-dark text-white py-4 mt-5">
-    <div class="container text-center">
-      <p class="mb-0">© Greedy Cars 2025 - Todos los derechos reservados</p>
-    </div>
-  </footer>
-
-  <!-- Scripts ================================================== -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
-    crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
-
+    integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
 </body>
 
 </html>

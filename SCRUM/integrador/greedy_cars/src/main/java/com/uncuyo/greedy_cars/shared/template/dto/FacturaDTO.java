@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.uncuyo.greedy_cars.shared.template.enums.EstadoFactura;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
@@ -33,6 +34,11 @@ public class FacturaDTO extends BaseDTO<String> {
     private Double totalPagado;
 
     private EstadoFactura estado = EstadoFactura.SIN_DEFINIR;
+
+    @NotBlank(message = "Debe indicar el cliente asociado a la factura")
+    private String clienteId;
+
+    private String clienteNombreCompleto;
 
     @Valid
     @NotNull(message = "Debe indicar al menos un detalle")

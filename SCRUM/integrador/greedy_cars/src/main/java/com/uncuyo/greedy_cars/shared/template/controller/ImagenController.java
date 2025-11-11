@@ -11,7 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -121,6 +123,54 @@ public class ImagenController {
         try {
             ImagenDTO imagenCreadaDTO = imagenService.altaDTO(imagenDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(imagenCreadaDTO);
+        } catch (ErrorServiceException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return buildErrorResponse("Error de Sistema: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Endpoint para subir una imagen mediante multipart/form-data
+     * 
+     * @param file archivo de imagen
+     * @param tipoImagen tipo de imagen (PERSONA o VEHICULO)
+     * @return ResponseEntity con la imagen creada
+     */
+    @PostMapping("/upload")
+    public ResponseEntity<?> subirImagen(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("tipoImagen") String tipoImagen) {
+        try {
+            if (file.isEmpty()) {
+                return buildErrorResponse("El archivo está vacío", HttpStatus.BAD_REQUEST);
+            }
+
+            // Validar tipo de imagen
+            TipoImagen tipo;
+            try {
+                tipo = TipoImagen.valueOf(tipoImagen.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                return buildErrorResponse("Tipo de imagen inválido: " + tipoImagen + ". Use PERSONA o VEHICULO", HttpStatus.BAD_REQUEST);
+            }
+
+            // Validar que sea una imagen
+            String contentType = file.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                return buildErrorResponse("El archivo debe ser una imagen", HttpStatus.BAD_REQUEST);
+            }
+
+            // Crear DTO de imagen
+            ImagenDTO imagenDTO = new ImagenDTO();
+            imagenDTO.setNombre(file.getOriginalFilename());
+            imagenDTO.setMime(contentType);
+            imagenDTO.setContenido(file.getBytes());
+            imagenDTO.setTipoImagen(tipo);
+
+            ImagenDTO imagenCreadaDTO = imagenService.altaDTO(imagenDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(imagenCreadaDTO);
+        } catch (IOException e) {
+            return buildErrorResponse("Error al leer el archivo: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (ErrorServiceException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {

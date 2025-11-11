@@ -1,8 +1,10 @@
 package com.uncuyo.greedy_cars.shared.template.service;
 
 import com.uncuyo.greedy_cars.shared.template.dto.UsuarioDTO;
+import com.uncuyo.greedy_cars.shared.template.entity.Persona;
 import com.uncuyo.greedy_cars.shared.template.entity.Usuario;
 import com.uncuyo.greedy_cars.shared.template.mapper.UsuarioMapper;
+import com.uncuyo.greedy_cars.shared.template.repository.PersonaRepository;
 import com.uncuyo.greedy_cars.shared.template.repository.UsuarioRepository;
 
 import com.uncuyo.greedy_cars.shared.template.exception.ErrorServiceException;
@@ -19,15 +21,17 @@ import java.util.Optional;
 public class UsuarioService extends BaseService<Usuario, String> {
 
     private final UsuarioRepository usuarioRepository;
+    private final PersonaRepository personaRepository;
     private final UsuarioMapper usuarioMapper;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UsuarioService(UsuarioRepository repository, UsuarioMapper usuarioMapper) {
+    public UsuarioService(UsuarioRepository repository, PersonaRepository personaRepository, UsuarioMapper usuarioMapper) {
         super(repository);
         this.usuarioRepository = repository;
+        this.personaRepository = personaRepository;
         this.usuarioMapper = usuarioMapper;
     }
 
@@ -75,7 +79,16 @@ public class UsuarioService extends BaseService<Usuario, String> {
     
     public UsuarioDTO altaDTO(UsuarioDTO usuarioDTO) throws ErrorServiceException {
         try {
+            // Limpiar el ID si está vacío (viene "" del cliente en lugar de null)
+            if (usuarioDTO.getId() != null && usuarioDTO.getId().trim().isEmpty()) {
+                usuarioDTO.setId(null);
+            }
+            
             Usuario usuario = usuarioMapper.toEntity(usuarioDTO);
+            
+            // Asegurar que el ID de la entidad también sea null
+            usuario.setId(null);
+            
             Usuario usuarioGuardado = registrarUsuario(usuario);
             return usuarioMapper.toDTO(usuarioGuardado);
         } catch (Exception e) {
@@ -111,5 +124,28 @@ public class UsuarioService extends BaseService<Usuario, String> {
         if (entidadNueva.getRol() != null) {
             entidadExistente.setRol(entidadNueva.getRol());
         }
+        
+        // Actualizar persona si se proporciona
+        if (entidadNueva.getPersona() != null) {
+            entidadExistente.setPersona(entidadNueva.getPersona());
+        }
+    }
+    
+    @Override
+    protected void preAlta(Usuario usuario) throws ErrorServiceException {
+        super.preAlta(usuario);
+        
+        // Validar que la persona asociada existe y está activa
+        if (usuario.getPersona() == null || usuario.getPersona().getId() == null) {
+            throw new ErrorServiceException("El usuario debe estar asociado a una persona (Cliente o Empleado)");
+        }
+        
+        Optional<Persona> personaOpt = personaRepository.findByIdAndEliminadoIsFalse(usuario.getPersona().getId());
+        if (personaOpt.isEmpty()) {
+            throw new ErrorServiceException("La persona con ID " + usuario.getPersona().getId() + " no existe o está eliminada");
+        }
+        
+        // Asignar la persona gestionada
+        usuario.setPersona(personaOpt.get());
     }
 }

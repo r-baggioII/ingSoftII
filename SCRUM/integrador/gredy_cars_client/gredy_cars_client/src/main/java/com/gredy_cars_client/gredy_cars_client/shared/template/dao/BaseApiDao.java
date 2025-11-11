@@ -132,17 +132,30 @@ public abstract class BaseApiDao<T, ID> {
 
     public T create(T payload) throws ErrorServiceException {
         try {
+            System.err.println("=== INICIO BaseApiDao.create ===");
+            System.err.println("Payload recibido: " + payload);
+            System.err.println("URL de destino: " + collectionUrl());
+            
+            
             ResponseEntity<T> response = restTemplate.exchange(
                 collectionUrl(),
                 HttpMethod.POST,
                 buildRequestEntity(payload),
                 getEntityClass()
             );
+            System.err.println("Respuesta recibida: " + response.getStatusCode());
+            System.err.println("=== FIN BaseApiDao.create ===");
             return response.getBody();
         } catch (RestClientResponseException e) {
+            System.err.println("RestClientResponseException en create: " + e.getRawStatusCode() + " - " + e.getResponseBodyAsString());
             throw translateException("crear el recurso", e);
         } catch (RestClientException e) {
+            System.err.println("RestClientException en create: " + e.getMessage());
             throw new ErrorServiceException("Error de comunicación al crear el recurso", e);
+        } catch (Exception e) {
+            System.err.println("Exception general en create: " + e.getMessage());
+            e.printStackTrace();
+            throw new ErrorServiceException("Error inesperado al crear el recurso", e);
         }
     }
 

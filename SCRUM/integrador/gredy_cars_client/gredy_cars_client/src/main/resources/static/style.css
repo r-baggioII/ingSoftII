@@ -802,3 +802,227 @@ cars page style start
 .rental-list{
   color: var(--secondary-color);
 }
+
+
+/*--------------------------------------------------------------
+Dashboard / Gestion styles start
+--------------------------------------------------------------*/
+.gestion-dashboard {
+  background-color: #f8f9fa;
+}
+
+.gestion-sidebar .card-header h5 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--dark-color);
+}
+
+.gestion-menu {
+  margin-top: 0.75rem;
+}
+
+.gestion-menu .list-group-item {
+  border: none;
+  padding: 0.85rem 1.25rem;
+  font-size: 0.95rem;
+  transition: all 0.25s ease-in-out;
+  color: var(--dark-color);
+}
+
+.gestion-menu .list-group-item .badge {
+  background-color: var(--secondary-color);
+  color: var(--white-color);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.25rem 0.55rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gestion-menu .list-group-item.active,
+.gestion-menu .list-group-item:hover {
+  background-color: rgba(158, 132, 100, 0.12);
+  color: var(--accent-color);
+}
+
+.gestion-menu .list-group-item.active .badge {
+  background-color: var(--accent-color);
+}
+
+.gestion-menu-divider {
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--secondary-color);
+  padding: 0.75rem 1.25rem 0.25rem;
+  display: block;
+}
+
+.gestion-content .card-title {
+  font-weight: 600;
+}
+
+.gestion-content .card-text {
+  font-size: 0.95rem;
+}
+
+.gestion-content .card .btn {
+  align-self: flex-start;
+}
+
+.gestion-profile-card .gestion-avatar {
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: rgba(158, 132, 100, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gestion-profile-card .gestion-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gestion-profile-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  font-size: 0.95rem;
+}
+
+.gestion-profile-list li span {
+  color: var(--secondary-color);
+}
+
+.gestion-profile-list li:last-child {
+  border-bottom: none;
+}
+
+.info-chip {
+  background-color: rgba(158, 132, 100, 0.15);
+  color: var(--dark-color);
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.gestion-stats .stat-tile {
+  background-color: var(--white-color);
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.gestion-stats .stat-tile strong {
+  display: block;
+  font-size: 1.65rem;
+  color: var(--accent-color);
+}
+
+.gestion-stats .stat-tile span {
+  font-size: 0.85rem;
+  color: var(--secondary-color);
+  letter-spacing: 0.01em;
+}
+
+.gestion-updates .list-group-item {
+  border: none;
+  padding-left: 0;
+  padding-right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.gestion-updates .list-group-item + .list-group-item {
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.gestion-updates time {
+  font-size: 0.8rem;
+  color: var(--secondary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.gestion-role-card {
+  border-radius: 18px;
+  border: none;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.gestion-role-card .list-group-item {
+  border: none;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.gestion-checklist .list-group-item {
+  border: none;
+  padding-left: 0;
+  padding-right: 0;
+  padding-bottom: 1rem;
+}
+
+.gestion-checklist .list-group-item + .list-group-item {
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding-top: 1rem;
+}
+
+.quick-access-box {
+  background-color: var(--white-color);
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  padding: 1.5rem;
+  flex: 1 1 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  transition: all 0.3s ease-in-out;
+}
+
+.quick-access-box:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+}
+
+.quick-access-box h6 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0;
+  color: var(--dark-color);
+}
+
+.quick-access-box p {
+  font-size: 0.875rem;
+  color: var(--secondary-color);
+  margin-bottom: 0;
+}
+
+.main-button-panel {
+  background-color: var(--accent-color);
+  border: 2px solid var(--accent-color);
+  color: var(--white-color);
+  font-weight: 600;
+  padding: 0.65rem 1.75rem;
+  border-radius: 8px;
+  transition: all 0.3s ease-in-out;
+}
+
+.main-button-panel:hover {
+  background-color: transparent;
+  color: var(--accent-color);
+}

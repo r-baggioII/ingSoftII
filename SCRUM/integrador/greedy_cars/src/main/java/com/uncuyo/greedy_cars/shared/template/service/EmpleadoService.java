@@ -1,25 +1,49 @@
 package com.uncuyo.greedy_cars.shared.template.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.uncuyo.greedy_cars.shared.template.dto.EmpleadoDTO;
+import com.uncuyo.greedy_cars.shared.template.entity.Contacto;
+import com.uncuyo.greedy_cars.shared.template.entity.Direccion;
 import com.uncuyo.greedy_cars.shared.template.entity.Empleado;
-import com.uncuyo.greedy_cars.shared.template.enums.BaseUseCaseService;
+import com.uncuyo.greedy_cars.shared.template.entity.Imagen;
 import com.uncuyo.greedy_cars.shared.template.exception.ErrorServiceException;
 import com.uncuyo.greedy_cars.shared.template.mapper.EmpleadoMapper;
+import com.uncuyo.greedy_cars.shared.template.repository.ContactoRepository;
+import com.uncuyo.greedy_cars.shared.template.repository.DireccionRepository;
 import com.uncuyo.greedy_cars.shared.template.repository.EmpleadoRepository;
+import com.uncuyo.greedy_cars.shared.template.repository.ImagenRepository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class EmpleadoService extends BaseService<Empleado, String> {
 
-    private final EmpleadoMapper empleadoMapper;
+    @PersistenceContext
+    private EntityManager entityManager;
 
-    public EmpleadoService(EmpleadoRepository repository, EmpleadoMapper empleadoMapper) {
+    private final EmpleadoMapper empleadoMapper;
+    private final ContactoRepository contactoRepository;
+    private final ImagenRepository imagenRepository;
+    private final DireccionRepository direccionRepository;
+
+    @Autowired
+    public EmpleadoService(EmpleadoRepository repository, 
+                          EmpleadoMapper empleadoMapper,
+                          ContactoRepository contactoRepository,
+                          ImagenRepository imagenRepository,
+                          DireccionRepository direccionRepository) {
         super(repository);
         this.empleadoMapper = empleadoMapper;
+        this.contactoRepository = contactoRepository;
+        this.imagenRepository = imagenRepository;
+        this.direccionRepository = direccionRepository;
     }
 
     // Métodos con DTOs
@@ -45,6 +69,16 @@ public class EmpleadoService extends BaseService<Empleado, String> {
         try {
             Empleado empleado = empleadoMapper.toEntity(empleadoDTO);
             Empleado guardado = alta(empleado);
+            
+            // Flush to database and refresh to ensure all collections are loaded
+            entityManager.flush();
+            entityManager.refresh(guardado);
+            
+            // Force initialization of lazy collections
+            guardado.getDirecciones().size();
+            guardado.getContactos().size();
+            guardado.getImagenes().size();
+            
             return empleadoMapper.toDTO(guardado);
         } catch (Exception e) {
             throw new ErrorServiceException("Error al crear empleado: " + e.getMessage());
@@ -61,134 +95,113 @@ public class EmpleadoService extends BaseService<Empleado, String> {
         }
     }
 
-    // Métodos adicionales solicitados
-    public EmpleadoDTO crearEmpleado(String nombre, String apellido, java.time.LocalDate fechaNacimiento,
-                                     com.uncuyo.greedy_cars.shared.template.enums.TipoDocumento tipoDocumento,
-                                     String numeroDocumento, String telefono, String correoElectronico,
-                                     com.uncuyo.greedy_cars.shared.template.enums.TipoEmpleado tipoEmpleado) throws ErrorServiceException {
-        // validar parámetros
-        validarParametros(nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento, telefono, correoElectronico, tipoEmpleado);
-
-        EmpleadoDTO dto = new EmpleadoDTO();
-        dto.setNombre(nombre);
-        dto.setApellido(apellido);
-        dto.setFechaNacimiento(fechaNacimiento);
-        dto.setTipoDocumento(tipoDocumento);
-        dto.setNumeroDocumento(numeroDocumento);
-        dto.setTelefono(telefono);
-        dto.setCorreoElectronico(correoElectronico);
-        dto.setTipoEmpleado(tipoEmpleado);
-
-        return altaDTO(dto);
-    }
-
-    public void validar(String nombre, String apellido, java.time.LocalDate fechaNacimiento,
-                        com.uncuyo.greedy_cars.shared.template.enums.TipoDocumento tipoDocumento,
-                        String numeroDocumento, String telefono, String correoElectronico,
-                        com.uncuyo.greedy_cars.shared.template.enums.TipoEmpleado tipoEmpleado) throws ErrorServiceException {
-        validarParametros(nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento, telefono, correoElectronico, tipoEmpleado);
-    }
-
-    public Optional<EmpleadoDTO> modificarEmpleado(String id, String nombre, String apellido, java.time.LocalDate fechaNacimiento,
-                                                   com.uncuyo.greedy_cars.shared.template.enums.TipoDocumento tipoDocumento,
-                                                   String numeroDocumento, com.uncuyo.greedy_cars.shared.template.enums.TipoEmpleado tipoEmpleado) throws ErrorServiceException {
-        validarParametros(nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento, null, null, tipoEmpleado);
-
-        EmpleadoDTO dto = new EmpleadoDTO();
-        dto.setId(id);
-        dto.setNombre(nombre);
-        dto.setApellido(apellido);
-        dto.setFechaNacimiento(fechaNacimiento);
-        dto.setTipoDocumento(tipoDocumento);
-        dto.setNumeroDocumento(numeroDocumento);
-        dto.setTipoEmpleado(tipoEmpleado);
-
-        return modificarDTO(id, dto);
-    }
-
-    public java.util.Collection<Empleado> listarEmpleado() throws ErrorServiceException {
-        return listarActivos();
-    }
-
-    public java.util.Collection<Empleado> listarEmpleadoActivo() throws ErrorServiceException {
-        return listarActivos();
-    }
-
-    public void asociarEmpleadoUsuario(Empleado empleado, Object usuario) {
-        // No hay definición de Usuario en este módulo; dejar hook para implementar la asociación.
-        throw new UnsupportedOperationException("asociarEmpleadoUsuario no implementado: depende de la entidad Usuario del módulo de seguridad.");
-    }
-
-    // helper para validar parámetros primitivos (mismo comportamiento que validar())
-    private void validarParametros(String nombre, String apellido, java.time.LocalDate fechaNacimiento,
-                                    com.uncuyo.greedy_cars.shared.template.enums.TipoDocumento tipoDocumento,
-                                    String numeroDocumento, String telefono, String correoElectronico,
-                                    com.uncuyo.greedy_cars.shared.template.enums.TipoEmpleado tipoEmpleado) throws ErrorServiceException {
-        if (nombre == null || nombre.trim().isEmpty()) {
-            throw new ErrorServiceException("Debe indicar el nombre del empleado");
-        }
-        if (apellido == null || apellido.trim().isEmpty()) {
-            throw new ErrorServiceException("Debe indicar el apellido del empleado");
-        }
-        if (fechaNacimiento == null) {
-            throw new ErrorServiceException("Debe indicar la fecha de nacimiento");
-        }
-        if (tipoDocumento == null) {
-            throw new ErrorServiceException("Debe indicar el tipo de documento");
-        }
-        if (numeroDocumento == null || numeroDocumento.trim().isEmpty()) {
-            throw new ErrorServiceException("Debe indicar el número de documento");
-        }
-        if (tipoEmpleado == null) {
-            throw new ErrorServiceException("Debe indicar el tipo de empleado");
-        }
-    }
-
     @Override
-    protected void actualizarEntidad(Empleado entidadExistente, Empleado entidadNueva) {
-        if (entidadNueva.getNombre() != null) {
-            entidadExistente.setNombre(entidadNueva.getNombre());
-        }
-        if (entidadNueva.getApellido() != null) {
-            entidadExistente.setApellido(entidadNueva.getApellido());
-        }
-    }
-
-    @Override
-    protected void validar(BaseUseCaseService useCase, Empleado empleado) throws ErrorServiceException {
-        try {
-            if (useCase != BaseUseCaseService.BAJA) {
-                if (empleado == null) {
-                    throw new ErrorServiceException("Debe indicar el empleado");
-                }
-
-                if (empleado.getNombre() == null || empleado.getNombre().trim().isEmpty()) {
-                    throw new ErrorServiceException("Debe indicar el nombre del empleado");
-                }
-
-                if (empleado.getApellido() == null || empleado.getApellido().trim().isEmpty()) {
-                    throw new ErrorServiceException("Debe indicar el apellido del empleado");
-                }
-
-                if (empleado.getEliminado() != null && empleado.getEliminado()) {
-                    throw new ErrorServiceException("El empleado indicado se encuentra eliminado");
-                }
-
-                Empleado existente = ((EmpleadoRepository) repository).findByNombreAndApellido(empleado.getNombre(), empleado.getApellido());
-
-                if (existente != null && !existente.getEliminado() && useCase == BaseUseCaseService.ALTA) {
-                    throw new ErrorServiceException("Existe un empleado con el nombre y apellido indicados");
-                }
-
-                if (existente != null && !existente.getEliminado() && !existente.getId().equals(empleado.getId()) && useCase == BaseUseCaseService.MODIFICACION) {
-                    throw new ErrorServiceException("Existe un empleado con el nombre y apellido indicados");
+    protected void preAlta(Empleado entidad) throws ErrorServiceException {
+        super.preAlta(entidad);
+        
+        System.out.println("=== EMPLEADO preAlta - INICIO ===");
+        System.out.println("Direcciones size: " + (entidad.getDirecciones() != null ? entidad.getDirecciones().size() : "null"));
+        System.out.println("Contactos size: " + (entidad.getContactos() != null ? entidad.getContactos().size() : "null"));
+        System.out.println("Imagenes size: " + (entidad.getImagenes() != null ? entidad.getImagenes().size() : "null"));
+        
+        // Handle Direcciones - ensure they're managed entities
+        if (entidad.getDirecciones() != null && !entidad.getDirecciones().isEmpty()) {
+            List<Direccion> managedDirecciones = new ArrayList<>();
+            for (Direccion direccion : entidad.getDirecciones()) {
+                if (direccion.getId() != null) {
+                    Optional<Direccion> existingDireccion = direccionRepository.findById(direccion.getId());
+                    if (existingDireccion.isPresent()) {
+                        managedDirecciones.add(existingDireccion.get());
+                    } else {
+                        throw new ErrorServiceException("Direccion no encontrada con ID: " + direccion.getId());
+                    }
+                } else {
+                    managedDirecciones.add(direccion);
                 }
             }
-        } catch (ErrorServiceException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ErrorServiceException("Error de Sistemas");
+            entidad.getDirecciones().clear();
+            entidad.getDirecciones().addAll(managedDirecciones);
+            System.out.println("Direcciones after processing: " + entidad.getDirecciones().size());
         }
+        
+        // Handle Contactos - ManyToMany relationship
+        if (entidad.getContactos() != null && !entidad.getContactos().isEmpty()) {
+            List<Contacto> contactosToAssociate = new ArrayList<>();
+            for (Contacto contacto : entidad.getContactos()) {
+                if (contacto.getId() != null) {
+                    Optional<Contacto> existingContacto = contactoRepository.findById(contacto.getId());
+                    if (existingContacto.isPresent()) {
+                        contactosToAssociate.add(existingContacto.get());
+                    } else {
+                        throw new ErrorServiceException("Contacto no encontrado con ID: " + contacto.getId());
+                    }
+                } else {
+                    contactosToAssociate.add(contacto);
+                }
+            }
+            entidad.getContactos().clear();
+            entidad.getContactos().addAll(contactosToAssociate);
+            System.out.println("Contactos after processing: " + entidad.getContactos().size());
+        }
+        
+        // Handle Imagenes - ensure they're managed entities
+        if (entidad.getImagenes() != null && !entidad.getImagenes().isEmpty()) {
+            List<Imagen> managedImagenes = new ArrayList<>();
+            for (Imagen imagen : entidad.getImagenes()) {
+                if (imagen.getId() != null) {
+                    Optional<Imagen> existingImagen = imagenRepository.findById(imagen.getId());
+                    if (existingImagen.isPresent()) {
+                        managedImagenes.add(existingImagen.get());
+                    } else {
+                        throw new ErrorServiceException("Imagen no encontrada con ID: " + imagen.getId());
+                    }
+                } else {
+                    managedImagenes.add(imagen);
+                }
+            }
+            entidad.getImagenes().clear();
+            entidad.getImagenes().addAll(managedImagenes);
+            System.out.println("Imagenes after processing: " + entidad.getImagenes().size());
+        }
+        
+        System.out.println("=== EMPLEADO preAlta - FIN ===");
     }
 
+    @Override
+    protected void actualizarEntidad(Empleado existente, Empleado nueva) {
+        if (nueva.getNombre() != null) {
+            existente.setNombre(nueva.getNombre());
+        }
+        if (nueva.getApellido() != null) {
+            existente.setApellido(nueva.getApellido());
+        }
+        if (nueva.getFechaNacimiento() != null) {
+            existente.setFechaNacimiento(nueva.getFechaNacimiento());
+        }
+        if (nueva.getTipoDocumento() != null) {
+            existente.setTipoDocumento(nueva.getTipoDocumento());
+        }
+        if (nueva.getNumeroDocumento() != null) {
+            existente.setNumeroDocumento(nueva.getNumeroDocumento());
+        }
+        if (nueva.getTipoEmpleado() != null) {
+            existente.setTipoEmpleado(nueva.getTipoEmpleado());
+        }
+
+        // Update collections
+        if (nueva.getContactos() != null) {
+            existente.getContactos().clear();
+            existente.getContactos().addAll(nueva.getContactos());
+        }
+
+        if (nueva.getDirecciones() != null) {
+            existente.getDirecciones().clear();
+            existente.getDirecciones().addAll(nueva.getDirecciones());
+        }
+
+        if (nueva.getImagenes() != null) {
+            existente.getImagenes().clear();
+            existente.getImagenes().addAll(nueva.getImagenes());
+        }
+    }
 }

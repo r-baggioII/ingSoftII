@@ -3,6 +3,7 @@ package com.uncuyo.greedy_cars.shared.template.service;
 import com.uncuyo.greedy_cars.shared.template.dto.AlquilerDTO;
 import com.uncuyo.greedy_cars.shared.template.entity.*;
 import com.uncuyo.greedy_cars.shared.template.enums.BaseUseCaseService;
+import com.uncuyo.greedy_cars.shared.template.enums.EstadoVehiculo;
 import com.uncuyo.greedy_cars.shared.template.exception.ErrorServiceException;
 import com.uncuyo.greedy_cars.shared.template.mapper.AlquilerMapper;
 import com.uncuyo.greedy_cars.shared.template.repository.*;
@@ -45,6 +46,30 @@ public class AlquilerService extends BaseService<Alquiler, String> {
         return opt.map(alquilerMapper::toDTO);
     }
 
+    public List<AlquilerDTO> listarPorCliente(String clienteId) throws ErrorServiceException {
+        if (clienteRepository.findByIdAndEliminadoIsFalse(clienteId).isEmpty()) {
+            throw new ErrorServiceException("Cliente no encontrado con ID: " + clienteId);
+        }
+        try {
+            List<Alquiler> lista = ((AlquilerRepository) repository).findAllByClienteIdAndEliminadoIsFalse(clienteId);
+            return lista.stream().map(alquilerMapper::toDTO).collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new ErrorServiceException("Error al listar alquileres del cliente: " + e.getMessage());
+        }
+    }
+
+    public List<AlquilerDTO> listarPendientesFacturaPorCliente(String clienteId) throws ErrorServiceException {
+        if (clienteRepository.findByIdAndEliminadoIsFalse(clienteId).isEmpty()) {
+            throw new ErrorServiceException("Cliente no encontrado con ID: " + clienteId);
+        }
+        try {
+            List<Alquiler> lista = ((AlquilerRepository) repository).findPendientesFacturaPorCliente(clienteId);
+            return lista.stream().map(alquilerMapper::toDTO).collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new ErrorServiceException("Error al listar alquileres pendientes de facturación del cliente: " + e.getMessage());
+        }
+    }
+
     public AlquilerDTO altaDTO(AlquilerDTO dto) throws ErrorServiceException {
         Cliente cli = findCliente(dto.getIdCliente());
         Vehiculo veh = findVehiculo(dto.getIdVehiculo());
@@ -54,6 +79,10 @@ public class AlquilerService extends BaseService<Alquiler, String> {
 
         Alquiler entidad = alquilerMapper.toEntity(dto, cli, veh, docs);
         Alquiler guardado = alta(entidad);
+        
+        // Synchronize vehicle state based on all current rentals
+        sincronizarEstadoVehiculo(veh.getId());
+        
         return alquilerMapper.toDTO(guardado);
     }
 
@@ -64,8 +93,19 @@ public class AlquilerService extends BaseService<Alquiler, String> {
                 ? List.of()
                 : documentacionRepository.findAllById(dto.getDocumentacionIds());
 
+        // Get old vehicle to sync its state after change
+        Optional<Alquiler> existingOpt = obtener(id);
+        String oldVehiculoId = existingOpt.map(a -> a.getVehiculo().getId()).orElse(null);
+
         Alquiler entidad = alquilerMapper.toEntity(dto, cli, veh, docs);
         Optional<Alquiler> mod = modificar(id, entidad);
+        
+        // Synchronize both old and new vehicle states
+        if (oldVehiculoId != null && !oldVehiculoId.equals(veh.getId())) {
+            sincronizarEstadoVehiculo(oldVehiculoId);
+        }
+        sincronizarEstadoVehiculo(veh.getId());
+        
         return mod.map(alquilerMapper::toDTO);
     }
 
@@ -78,6 +118,9 @@ public class AlquilerService extends BaseService<Alquiler, String> {
         nuevo.crearAlquiler(fechaDesde, fechaHasta, cliente, vehiculo);
 
         alta(nuevo);
+        
+        // Synchronize vehicle state based on all current rentals
+        sincronizarEstadoVehiculo(idVehiculo);
     }
 
     public void validar(LocalDate fechaDesde, LocalDate fechaHasta, String idCliente, String idVehiculo) throws ErrorServiceException {
@@ -94,11 +137,21 @@ public class AlquilerService extends BaseService<Alquiler, String> {
         Cliente cliente = findCliente(idCliente);
         Vehiculo vehiculo = findVehiculo(idVehiculo);
 
+        // Get old vehicle to sync its state after change
+        Optional<Alquiler> existingOpt = obtener(id);
+        String oldVehiculoId = existingOpt.map(a -> a.getVehiculo().getId()).orElse(null);
+
         Alquiler cambios = new Alquiler();
         cambios.setId(id);
         cambios.modificarAlquiler(fechaDesde, fechaHasta, cliente, vehiculo);
 
         modificar(id, cambios).orElseThrow(() -> new ErrorServiceException("Alquiler no encontrado"));
+        
+        // Synchronize both old and new vehicle states
+        if (oldVehiculoId != null && !oldVehiculoId.equals(idVehiculo)) {
+            sincronizarEstadoVehiculo(oldVehiculoId);
+        }
+        sincronizarEstadoVehiculo(idVehiculo);
     }
 
     public Alquiler buscarAlquiler(String id) throws ErrorServiceException {
@@ -107,7 +160,16 @@ public class AlquilerService extends BaseService<Alquiler, String> {
 
     // Nota: mantengo el nombre con el typo pedido por el enunciado
     public void eliminarAlquier(String id) throws ErrorServiceException {
+        // Get the rental before deleting to sync the vehicle state
+        Optional<Alquiler> alquilerOpt = obtener(id);
+        String vehiculoId = alquilerOpt.map(a -> a.getVehiculo().getId()).orElse(null);
+        
         baja(id);
+        
+        // Synchronize vehicle state after deletion
+        if (vehiculoId != null) {
+            sincronizarEstadoVehiculo(vehiculoId);
+        }
     }
 
     public Collection<Alquiler> listarAlquiler() throws ErrorServiceException {
@@ -153,6 +215,54 @@ public class AlquilerService extends BaseService<Alquiler, String> {
             throw e;
         } catch (Exception e) {
             throw new ErrorServiceException("Error de Sistemas");
+        }
+    }
+
+    // =============== Vehicle State Management ===============
+    /**
+     * Synchronizes vehicle state based on current active rentals.
+     * This ensures the state reflects reality regardless of when rentals were created.
+     */
+    public void sincronizarEstadoVehiculo(String vehiculoId) throws ErrorServiceException {
+        Vehiculo vehiculo = findVehiculo(vehiculoId);
+        LocalDate today = LocalDate.now();
+        
+        boolean tieneAlquilerActivo = ((AlquilerRepository) repository).tieneAlquilerActivo(vehiculoId, today);
+        
+        EstadoVehiculo estadoEsperado = tieneAlquilerActivo ? EstadoVehiculo.ALQUILADO : EstadoVehiculo.DISPONIBLE;
+        
+        if (vehiculo.getEstadoVehiculo() != estadoEsperado) {
+            vehiculo.setEstadoVehiculo(estadoEsperado);
+            vehiculoRepository.save(vehiculo);
+        }
+    }
+    
+    /**
+     * Synchronizes all vehicle states based on current date.
+     * Should be called periodically (e.g., daily scheduled task) or on-demand.
+     */
+    public void sincronizarTodosLosEstadosVehiculos() throws ErrorServiceException {
+        try {
+            List<Vehiculo> vehiculos = vehiculoRepository.findAll();
+            LocalDate today = LocalDate.now();
+            
+            for (Vehiculo vehiculo : vehiculos) {
+                if (!vehiculo.getEliminado()) {
+                    boolean tieneAlquilerActivo = ((AlquilerRepository) repository)
+                        .tieneAlquilerActivo(vehiculo.getId(), today);
+                    
+                    EstadoVehiculo estadoEsperado = tieneAlquilerActivo 
+                        ? EstadoVehiculo.ALQUILADO 
+                        : EstadoVehiculo.DISPONIBLE;
+                    
+                    if (vehiculo.getEstadoVehiculo() != estadoEsperado) {
+                        vehiculo.setEstadoVehiculo(estadoEsperado);
+                        vehiculoRepository.save(vehiculo);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new ErrorServiceException("Error sincronizando estados de vehículos: " + e.getMessage());
         }
     }
 

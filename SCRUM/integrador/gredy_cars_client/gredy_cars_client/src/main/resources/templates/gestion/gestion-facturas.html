@@ -38,6 +38,7 @@
   <div class="container">
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <div th:if="${errorFacturas}" class="alert alert-warning" th:text="${errorFacturas}"></div>
 
     <div class="section-heading text-center mb-4">
       <h2>Administrar Facturas</h2>
@@ -49,9 +50,38 @@
         <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
           <div class="card-body">
             <h5 class="card-title">Crear / Editar Factura</h5>
+            <div class="mb-3">
+              <form class="row g-2 align-items-end" method="get" th:action="@{/gestion/facturas}">
+                <input type="hidden" name="estado" th:value="${estadoSeleccionado}" />
+                <div class="col-8">
+                  <label class="form-label fw-semibold">Cliente</label>
+                  <select class="form-select" name="clienteId" th:value="${clienteSeleccionadoId}">
+                    <option value="">Seleccione un cliente</option>
+                    <option th:each="cliente : ${clientes}"
+                            th:value="${cliente.id}"
+                            th:text="${cliente.nombre + ' ' + cliente.apellido}"></option>
+                  </select>
+                </div>
+                <div class="col-4">
+                  <label class="form-label fw-semibold opacity-0">Cargar</label>
+                  <button class="btn btn-outline-primary w-100" type="submit"
+                          th:disabled="${facturaForm.id != null}">Cargar alquileres</button>
+                </div>
+              </form>
+              <div class="alert alert-danger mt-3" role="alert" th:if="${errorClientes}" th:text="${errorClientes}"></div>
+              <div class="alert alert-info mt-3" role="alert" th:if="${clienteSeleccionadoId == null}">
+                Seleccione un cliente y presione <strong>Cargar alquileres</strong> para completar los detalles con sus alquileres sin facturar.
+              </div>
+              <div class="alert alert-secondary mt-3" role="alert" th:if="${clienteSeleccionadoId != null}">
+                Factura para <strong th:text="${clienteSeleccionadoNombre != null ? clienteSeleccionadoNombre : 'Cliente sin nombre'}">Cliente</strong>
+                <small class="d-block text-muted">ID: <span th:text="${clienteSeleccionadoId}">--</span></small>
+              </div>
+            </div>
             <form th:object="${facturaForm}" th:action="@{/gestion/facturas}" method="post">
               <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
               <input type="hidden" th:field="*{id}" />
+              <input type="hidden" th:field="*{clienteId}" />
+              <div class="alert alert-warning" th:if="${errorFacturaForm}" th:text="${errorFacturaForm}"></div>
 
               <div class="row g-2">
                 <div class="col-md-6">
@@ -88,10 +118,22 @@
 
                 <div class="border rounded-3 p-3 mt-2 bg-light" th:each="detalle, stat : *{detalles}">
                   <input type="hidden" th:field="*{detalles[__${stat.index}__].id}" />
-                  <div class="row g-2">
+                  <input type="hidden" th:field="*{detalles[__${stat.index}__].alquilerId}" />
+                  <div class="row g-2"
+                       th:with="alquiler=${#strings.isEmpty(detalle.alquilerId) ? null : alquileresPendientesMap[detalle.alquilerId]}">
                     <div class="col-md-6">
-                      <label class="form-label small">Alquiler (ID)</label>
-                      <input type="text" th:field="*{detalles[__${stat.index}__].alquilerId}" class="form-control form-control-sm" placeholder="UUID alquiler" required />
+                      <label class="form-label small mb-1">Alquiler</label>
+                      <div class="border rounded-3 px-2 py-2 bg-white small">
+                        <div class="fw-semibold" th:text="${alquiler != null ? 'Alquiler ' + alquiler.id : detalle.alquilerId}">ALQ-001</div>
+                        <div class="text-muted" th:if="${alquiler != null}">
+                          <span th:text="${#temporals.format(alquiler.fechaDesde, 'dd/MM/yyyy')}">2024-01-01</span>
+                          <span> al </span>
+                          <span th:text="${#temporals.format(alquiler.fechaHasta, 'dd/MM/yyyy')}">2024-01-05</span>
+                        </div>
+                        <div class="text-muted" th:if="${alquiler == null}">
+                          Alquiler asociado previamente a la factura
+                        </div>
+                      </div>
                     </div>
                     <div class="col-md-3">
                       <label class="form-label small">Cantidad</label>
@@ -102,6 +144,10 @@
                       <input type="number" min="0" step="0.01" th:field="*{detalles[__${stat.index}__].subtotal}" class="form-control form-control-sm" required />
                     </div>
                   </div>
+                </div>
+                <div class="alert alert-warning mt-3" role="alert"
+                     th:if="${facturaForm.id == null and clienteSeleccionadoId != null and #lists.isEmpty(alquileresPendientes)}">
+                  El cliente seleccionado no posee alquileres pendientes de facturación.
                 </div>
               </div>
 
@@ -132,7 +178,9 @@
               </div>
 
               <div class="d-flex gap-2 mt-4">
-                <button class="btn main-button-panel flex-grow-1" type="submit">
+                <button class="btn main-button-panel flex-grow-1" type="submit"
+                        th:disabled="${facturaForm.clienteId == null or (facturaForm.id == null and #lists.isEmpty(alquileresPendientes))}"
+                        th:title="${facturaForm.clienteId == null ? 'Seleccione un cliente y cargue sus alquileres pendientes para habilitar el guardado' : (facturaForm.id == null and #lists.isEmpty(alquileresPendientes) ? 'El cliente seleccionado no posee alquileres pendientes' : 'Guardar factura')}">
                   <span th:text="${facturaForm.id != null ? 'Actualizar' : 'Crear'}"></span>
                 </button>
                 <a class="btn btn-outline-secondary" th:href="@{/gestion/facturas}">Limpiar</a>
@@ -149,6 +197,7 @@
               <h5 class="card-title mb-0">Listado de Facturas</h5>
               <form class="d-flex align-items-center gap-2" th:action="@{/gestion/facturas}" method="get">
                 <input type="hidden" name="editId" th:value="${#httpServletRequest.getParameter('editId')}" />
+                <input type="hidden" name="clienteId" th:value="${clienteSeleccionadoId}" />
                 <select class="form-select form-select-sm" name="estado">
                   <option value="">Todos los estados</option>
                   <option th:each="estado : ${estadosFactura}"
@@ -165,6 +214,7 @@
                 <tr>
                   <th>Número</th>
                   <th>Fecha</th>
+                  <th>Cliente</th>
                   <th>Estado</th>
                   <th>Total pagado</th>
                   <th class="text-end">Acciones</th>
@@ -175,19 +225,23 @@
                   <td th:text="${factura.numeroFactura}">0001</td>
                   <td th:text="${factura.fechaFactura}">2024-01-01</td>
                   <td>
+                    <span th:text="${factura.clienteNombreCompleto != null ? factura.clienteNombreCompleto : 'Sin cliente'}">Cliente</span>
+                  </td>
+                  <td>
                     <span class="badge bg-primary-subtle text-primary" th:text="${factura.estado}">SIN_DEFINIR</span>
                   </td>
                   <td th:text="${factura.totalPagado}">0.00</td>
                   <td class="text-end">
-                    <a class="btn btn-sm btn-outline-secondary me-1" th:href="@{/gestion/facturas(editId=${factura.id})}">Editar</a>
+                    <a class="btn btn-sm btn-outline-secondary me-1" th:href="@{/gestion/facturas(editId=${factura.id}, clienteId=${clienteSeleccionadoId})}">Editar</a>
                     <form th:action="@{/gestion/facturas/{id}/eliminar(id=${factura.id})}" method="post" class="d-inline">
                       <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                      <input type="hidden" name="clienteId" th:value="${clienteSeleccionadoId}" />
                       <button class="btn btn-sm btn-outline-danger me-1" type="submit">Eliminar</button>
                     </form>
                     <a class="btn btn-sm btn-outline-info me-1"
-                       th:href="@{/gestion/facturas/{id}/detalles(id=${factura.id})}">Ver detalles</a>
+                       th:href="@{/gestion/facturas/{id}/detalles(id=${factura.id}, clienteId=${clienteSeleccionadoId})}">Ver detalles</a>
                     <a class="btn btn-sm btn-outline-success me-1"
-                       th:href="@{/gestion/facturas/{id}/formas-pago(id=${factura.id})}">Formas de pago</a>
+                       th:href="@{/gestion/facturas/{id}/formas-pago(id=${factura.id}, clienteId=${clienteSeleccionadoId})}">Formas de pago</a>
                     <button type="button" class="btn btn-sm btn-outline-secondary" disabled>
                       Descargar factura (TODO backend)
                     </button>
@@ -195,7 +249,7 @@
                   </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(facturas)}">
-                  <td colspan="5" class="text-center text-muted">No hay facturas para mostrar.</td>
+                  <td colspan="6" class="text-center text-muted">No hay facturas para mostrar.</td>
                 </tr>
                 </tbody>
               </table>
@@ -211,6 +265,7 @@
                   <h6 class="mb-0">Detalles de la factura</h6>
                   <small class="text-muted" th:text="${facturaSeleccionadaId != null ? 'Factura ' + facturaSeleccionadaId : 'Seleccione una factura'}"></small>
                 </div>
+                <div class="alert alert-warning py-2" th:if="${errorDetalles}" th:text="${errorDetalles}"></div>
                 <div class="table-responsive">
                   <table class="table table-sm">
                     <thead>
@@ -243,6 +298,7 @@
                   <h6 class="mb-0">Formas de pago</h6>
                   <small class="text-muted" th:text="${facturaSeleccionadaId != null ? 'Factura ' + facturaSeleccionadaId : 'Seleccione una factura'}"></small>
                 </div>
+                <div class="alert alert-warning py-2" th:if="${errorFormasPago}" th:text="${errorFormasPago}"></div>
                 <div class="table-responsive">
                   <table class="table table-sm">
                     <thead>

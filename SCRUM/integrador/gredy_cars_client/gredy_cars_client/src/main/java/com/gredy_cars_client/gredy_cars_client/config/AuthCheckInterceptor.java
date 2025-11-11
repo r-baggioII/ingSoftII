@@ -5,9 +5,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -67,6 +71,37 @@ public class AuthCheckInterceptor implements HandlerInterceptor {
             
             if (resp.getStatusCode().is2xxSuccessful()) {
                 log.info(">>> Autenticación exitosa para ruta: {}", uri);
+                
+                // Extraer información del usuario y configurar Spring Security
+                Map<String, Object> body = resp.getBody();
+                if (body != null && body.containsKey("usuario")) {
+                    Map<String, Object> usuario = (Map<String, Object>) body.get("usuario");
+                    String nombreUsuario = (String) usuario.get("nombreUsuario");
+                    String rol = (String) usuario.get("rol");
+                    String usuarioId = (String) usuario.get("id");
+                    
+                    // Crear un UserDetails personalizado con la información del usuario
+                    UserDetailsWithRole userDetails = new UserDetailsWithRole(
+                        nombreUsuario, 
+                        rol,
+                        usuarioId
+                    );
+                    
+                    // Crear el token de autenticación
+                    UsernamePasswordAuthenticationToken authToken = 
+                        new UsernamePasswordAuthenticationToken(
+                            userDetails, 
+                            null, 
+                            Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + rol))
+                        );
+                    
+                    // Establecer en el SecurityContext
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                    
+                    log.info(">>> Información del usuario guardada en SecurityContext: {} con rol: {}", 
+                            nombreUsuario, rol);
+                }
+                
                 return true; // Usuario autenticado
             } else {
                 log.warn(">>> Backend rechazó autenticación con status: {}", resp.getStatusCode());
@@ -98,5 +133,32 @@ public class AuthCheckInterceptor implements HandlerInterceptor {
             || uri.startsWith("/error")
             || uri.startsWith("/webjars/")
             || uri.startsWith("/favicon.ico");
+    }
+    
+    /**
+     * Clase interna para almacenar información del usuario en Spring Security
+     */
+    public static class UserDetailsWithRole {
+        private final String nombreUsuario;
+        private final String rol;
+        private final String usuarioId;
+        
+        public UserDetailsWithRole(String nombreUsuario, String rol, String usuarioId) {
+            this.nombreUsuario = nombreUsuario;
+            this.rol = rol;
+            this.usuarioId = usuarioId;
+        }
+        
+        public String getNombreUsuario() {
+            return nombreUsuario;
+        }
+        
+        public String getRol() {
+            return rol;
+        }
+        
+        public String getUsuarioId() {
+            return usuarioId;
+        }
     }
 }

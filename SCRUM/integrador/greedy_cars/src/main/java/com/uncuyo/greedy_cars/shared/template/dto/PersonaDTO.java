@@ -50,6 +50,12 @@ public class PersonaDTO extends BaseDTO<String> {
     @NotEmpty(message = "La persona debe tener al menos una dirección asociada")
     private List<Long> direccionIds = new ArrayList<>();
     
+    // IDs de contactos existentes a asociar (opcional)
+    private List<String> contactoIds = new ArrayList<>();
+    
+    // IDs de imágenes existentes a asociar (opcional)
+    private List<String> imagenIds = new ArrayList<>();
+    
     @Override
     public String getId() {
         return super.id;

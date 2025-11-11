@@ -14,6 +14,7 @@ public class UsuarioDTO extends BaseDTO<String> {
     private String nombreUsuario;
     private String clave; // write-only, solo para crear/editar
     private Rol rol;
+    private String personaId; // ID de la persona (cliente o empleado) asociada
     
     @Override
     public String getId() {

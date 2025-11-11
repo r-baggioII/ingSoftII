@@ -53,6 +53,7 @@ public class UsuarioController {
     public ResponseEntity<?> crear(@Valid @RequestBody UsuarioDTO usuarioDTO) {
         try {
             UsuarioDTO usuarioCreadoDTO = usuarioService.altaDTO(usuarioDTO);
+            // TODO: llamar a NotificacionCorreoService.enviarCorreoBienvenida() cuando se capture el correo del usuario.
             return ResponseEntity.status(HttpStatus.CREATED).body(usuarioCreadoDTO);
         } catch (ErrorServiceException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);

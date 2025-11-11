@@ -41,6 +41,11 @@ public class UsuarioService extends BaseClientService<UsuarioDTO, String> {
         if (dto.getRol() == null) {
             throw new ErrorServiceException("El rol es obligatorio");
         }
+
+        // Validar que el usuario esté asociado a una persona
+        if (dto.getPersonaId() == null || dto.getPersonaId().trim().isEmpty()) {
+            throw new ErrorServiceException("El usuario debe estar asociado a una persona (cliente o empleado)");
+        }
     }
 
     @Override

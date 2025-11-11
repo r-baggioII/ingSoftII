@@ -56,10 +56,15 @@ public class Persona extends BaseEntity<String> {
     @Column(name = "numero_documento", nullable = false, length = 20, unique = true)
     private String numeroDocumento;
 
-    @OneToMany(mappedBy = "persona", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToMany
+    @JoinTable(
+        name = "persona_contacto",
+        joinColumns = @JoinColumn(name = "persona_id"),
+        inverseJoinColumns = @JoinColumn(name = "contacto_id")
+    )
     private List<Contacto> contactos = new ArrayList<>();
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany
     @JoinTable(
         name = "persona_direccion",
         joinColumns = @JoinColumn(name = "persona_id"),
@@ -82,20 +87,22 @@ public class Persona extends BaseEntity<String> {
         this.id = id;
     }
 
-    // Métodos de conveniencia para la relación bidireccional
+    // Métodos de conveniencia para la relación ManyToMany con Contacto
     public void addContacto(Contacto contacto) {
-        contactos.add(contacto);
-        contacto.setPersona(this);
+        if (!contactos.contains(contacto)) {
+            contactos.add(contacto);
+        }
     }
 
     public void removeContacto(Contacto contacto) {
         contactos.remove(contacto);
-        contacto.setPersona(null);
     }
 
     // Métodos de conveniencia para direcciones
     public void addDireccion(Direccion direccion) {
-        direcciones.add(direccion);
+        if (!direcciones.contains(direccion)) {
+            direcciones.add(direccion);
+        }
     }
 
     public void removeDireccion(Direccion direccion) {

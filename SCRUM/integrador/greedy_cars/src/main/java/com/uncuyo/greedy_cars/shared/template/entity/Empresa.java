@@ -9,7 +9,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
@@ -43,13 +44,23 @@ public class Empresa extends BaseEntity<String> {
     @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ConfiguracionCorreoAutomatico> configuracionesCorreo = new ArrayList<>();
 
-    @ManyToOne
-    @JoinColumn(name = "direccion_id")
-    private Direccion direccion;
+    // Una empresa puede tener múltiples direcciones
+    @ManyToMany
+    @JoinTable(
+        name = "empresa_direccion",
+        joinColumns = @JoinColumn(name = "empresa_id"),
+        inverseJoinColumns = @JoinColumn(name = "direccion_id")
+    )
+    private List<Direccion> direcciones = new ArrayList<>();
 
-    @ManyToOne
-    @JoinColumn(name = "contacto_id")
-    private Contacto contacto;
+    // Una empresa puede tener múltiples contactos
+    @ManyToMany
+    @JoinTable(
+        name = "empresa_contacto",
+        joinColumns = @JoinColumn(name = "empresa_id"),
+        inverseJoinColumns = @JoinColumn(name = "contacto_id")
+    )
+    private List<Contacto> contactos = new ArrayList<>();
 
     // Implementación de métodos abstractos de BaseEntity
     @Override

@@ -1,0 +1,16 @@
+HTTP/1.1 500 
+Vary: Origin
+Vary: Access-Control-Request-Method
+Vary: Access-Control-Request-Headers
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Fri, 07 Nov 2025 23:13:25 GMT
+Connection: close
+
+{"error":"Error de Sistema: could not execute statement [(conn=15324) Cannot add or update a child row: a foreign key constraint fails (`greedy_cars_db`.`clientes`, CONSTRAINT `FKa4y1qwgeie6ktg68bjs33jigs` FOREIGN KEY (`nacionalidad_id`) REFERENCES `nacionalidad` (`id`))] [insert into clientes (direccion_estadia,nacionalidad_id,id) values (?,?,?)]; SQL [insert into clientes (direccion_estadia,nacionalidad_id,id) values (?,?,?)]; constraint [null]"}

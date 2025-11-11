@@ -77,16 +77,24 @@ public abstract class BaseClientService<T extends BaseDTO<ID>, ID> {
 
     public T alta(T dto) throws ErrorServiceException {
         try {
+            log.info("=== INICIO alta() - DTO: {}", dto);
+            log.info("Validando DTO...");
             validar(BaseUseCaseService.ALTA, dto);
+            log.info("Validación OK. Ejecutando preAlta()...");
             preAlta(dto);
+            log.info("preAlta() OK. Llamando a dao.create()...");
             T creado = dao.create(dto);
+            log.info("dao.create() OK. Resultado: {}", creado);
+            log.info("Ejecutando postAlta()...");
             postAlta(creado);
+            log.info("=== FIN alta() - Éxito");
             return creado;
         } catch (ErrorServiceException e) {
+            log.error("ErrorServiceException en alta(): {}", e.getMessage());
             throw e;
         } catch (Exception e) {
             log.error("Error inesperado durante el alta de {}", dto, e);
-            throw new ErrorServiceException("Error de sistema al crear el registro", e);
+            throw new ErrorServiceException("Error de Sistema al dar de alta", e);
         }
     }
 

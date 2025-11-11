@@ -71,11 +71,13 @@
                          class="form-control panel-control" placeholder="Ej: ABC123" required>
                 </div>
                 <div class="col-md-6">
-                  <label class="panel-label">Estado *</label>
-                  <select class="form-select panel-control" th:field="${vehiculoForm.estadoVehiculo}" name="vehiculoForm.estadoVehiculo">
-                    <option value="DISPONIBLE">Disponible</option>
-                    <option value="ALQUILADO">Alquilado</option>
-                  </select>
+                  <label class="panel-label">Estado</label>
+                  <input type="text" class="form-control panel-control" 
+                         th:value="${vehiculoForm.estadoVehiculo != null ? vehiculoForm.estadoVehiculo.descripcion : 'Disponible'}" 
+                         disabled readonly
+                         style="background-color: #f8f9fa;">
+                  <small class="text-muted">El estado se actualiza automáticamente según los alquileres activos</small>
+                  <input type="hidden" th:field="${vehiculoForm.estadoVehiculo}" name="vehiculoForm.estadoVehiculo" value="DISPONIBLE">
                 </div>
               </div>
 

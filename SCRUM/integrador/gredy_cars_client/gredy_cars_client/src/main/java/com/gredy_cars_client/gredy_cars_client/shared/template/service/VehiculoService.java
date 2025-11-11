@@ -79,6 +79,13 @@ public class VehiculoService extends BaseClientService<VehiculoDTO, String> {
         dto.setId(id);
         normalizarEstado(dto);
         vincularCaracteristica(dto);
+        
+        // Ensure we only send minimal characteristic object with ID to avoid overwriting
+        if (dto.getCaracteristica() != null && dto.getCaracteristicaVehiculoId() != null) {
+            CaracteristicaVehiculoMinDTO minimal = new CaracteristicaVehiculoMinDTO();
+            minimal.setId(dto.getCaracteristicaVehiculoId());
+            dto.setCaracteristicaVehiculo(minimal);
+        }
     }
 
     private void normalizarEstado(VehiculoDTO dto) {

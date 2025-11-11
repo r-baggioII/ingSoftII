@@ -98,6 +98,7 @@
                 <span class="badge rounded-pill me-2">FC</span>
                 Mis Facturas
               </a>
+              <!-- TODO CLIENTE: implementar una vista específica que liste solo las facturas pagadas del cliente y permita descargar el PDF sin reutilizar la pantalla administrativa. -->
               
               <!-- Administrativo y Jefe -->
               <a th:if="${usuarioRol == 'ADMINISTRATIVO' || usuarioRol == 'JEFE'}" class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/gestion/vehiculos}">
@@ -115,6 +116,33 @@
               <a th:if="${usuarioRol == 'ADMINISTRATIVO' || usuarioRol == 'JEFE'}" class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/gestion/costos}">
                 <span class="badge rounded-pill me-2">CO</span>
                 Gestión de Costos
+              </a>
+              
+              <!-- Todos los usuarios: Direcciones y Contactos -->
+              <div class="gestion-menu-divider">Datos Comunes</div>
+              <a class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/gestion/direcciones}">
+                <span class="badge rounded-pill me-2">DR</span>
+                Gestión de Direcciones
+              </a>
+              <a class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/gestion/contactos}">
+                <span class="badge rounded-pill me-2">CT</span>
+                Gestión de Contactos
+              </a>
+              <a class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/localidades}">
+                <span class="badge rounded-pill me-2">LC</span>
+                Localidades
+              </a>
+              <a class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/departamentos}">
+                <span class="badge rounded-pill me-2">DP</span>
+                Departamentos
+              </a>
+              <a class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/provincias}">
+                <span class="badge rounded-pill me-2">PR</span>
+                Provincias
+              </a>
+              <a class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/gestion/nacionalidades}">
+                <span class="badge rounded-pill me-2">NA</span>
+                Nacionalidades
               </a>
               
               <!-- Solo Jefe -->

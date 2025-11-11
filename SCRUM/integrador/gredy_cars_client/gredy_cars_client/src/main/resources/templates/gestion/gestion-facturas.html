@@ -195,6 +195,7 @@
           <div class="card-body">
             <div class="d-flex flex-wrap justify-content-between align-items-center">
               <h5 class="card-title mb-0">Listado de Facturas</h5>
+              <!-- TODO FRONT: agregar botón/acción para “Pagar con billetera virtual” que invoque /api/pagos/mp/preferencia y redirija al initPoint devuelto. -->
               <form class="d-flex align-items-center gap-2" th:action="@{/gestion/facturas}" method="get">
                 <input type="hidden" name="editId" th:value="${#httpServletRequest.getParameter('editId')}" />
                 <input type="hidden" name="clienteId" th:value="${clienteSeleccionadoId}" />

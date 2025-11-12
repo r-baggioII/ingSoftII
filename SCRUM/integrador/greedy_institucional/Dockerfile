@@ -1,5 +1,5 @@
 # Dockerfile para greedy_institucional
-FROM openjdk:17-slim
+FROM openjdk:21-slim
 
 # Argumento para especificar el archivo WAR
 ARG WAR_FILE=target/greedy_institucional.war

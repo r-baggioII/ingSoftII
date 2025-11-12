@@ -1,5 +1,5 @@
 # Dockerfile para greedy_cars
-FROM openjdk:17-slim
+FROM openjdk:21-slim
 
 # Argumento para especificar el archivo WAR
 ARG WAR_FILE=target/greedy_cars.war

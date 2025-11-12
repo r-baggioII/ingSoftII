@@ -20,7 +20,8 @@ Este proyecto contiene la configuración completa para desplegar todas las aplic
 ### Prerrequisitos
 - Docker instalado
 - Docker Compose instalado
-- Maven instalado (para construir las aplicaciones)
+- Java 21 y Maven instalados (para construir las aplicaciones)
+- Opcional: si no tienes Java 21, el script usará Docker para compilar
 
 ### 1. Configurar Variables de Entorno
 ```bash

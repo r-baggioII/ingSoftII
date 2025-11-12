@@ -24,34 +24,56 @@ if [ ! -f .env ]; then
 fi
 
 # Compilar las aplicaciones Java
-echo "🔨 Compilando aplicaciones Java..."
+echo "🔨 Compilando aplicaciones Java con Java 21..."
 
-echo "   - Compilando greedy_cars..."
-cd greedy_cars
-if [ ! -f "target/greedy_cars.war" ]; then
-    mvn clean package -DskipTests
-else
-    echo "     WAR ya existe, omitiendo compilación."
-fi
-cd ..
+# Verificar si Java 21 está disponible
+if ! command -v java &> /dev/null || ! java -version 2>&1 | grep -q "21\."; then
+    echo "⚠️  Java 21 no encontrado en el sistema. Usando Docker para compilar..."
 
-echo "   - Compilando greedy_institucional..."
-cd greedy_institucional
-if [ ! -f "target/greedy_institucional.war" ]; then
-    mvn clean package -DskipTests
-else
-    echo "     WAR ya existe, omitiendo compilación."
-fi
-cd ..
+    echo "   - Compilando greedy_cars con Docker..."
+    cd greedy_cars
+    docker run --rm -v "$(pwd)":/app -w /app maven:3.9-openjdk-21 mvn clean package -DskipTests
+    cd ..
 
-echo "   - Compilando gredy_cars_client..."
-cd gredy_cars_client/gredy_cars_client
-if [ ! -f "target/gredy_cars_client.war" ]; then
-    mvn clean package -DskipTests
+    echo "   - Compilando greedy_institucional con Docker..."
+    cd greedy_institucional
+    docker run --rm -v "$(pwd)":/app -w /app maven:3.9-openjdk-21 mvn clean package -DskipTests
+    cd ..
+
+    echo "   - Compilando gredy_cars_client con Docker..."
+    cd gredy_cars_client/gredy_cars_client
+    docker run --rm -v "$(pwd)":/app -w /app maven:3.9-openjdk-21 mvn clean package -DskipTests
+    cd ../..
 else
-    echo "     WAR ya existe, omitiendo compilación."
+    echo "✅ Java 21 encontrado. Compilando localmente..."
+
+    echo "   - Compilando greedy_cars..."
+    cd greedy_cars
+    if [ ! -f "target/greedy_cars.war" ]; then
+        mvn clean package -DskipTests
+    else
+        echo "     WAR ya existe, omitiendo compilación."
+    fi
+    cd ..
+
+    echo "   - Compilando greedy_institucional..."
+    cd greedy_institucional
+    if [ ! -f "target/greedy_institucional.war" ]; then
+        mvn clean package -DskipTests
+    else
+        echo "     WAR ya existe, omitiendo compilación."
+    fi
+    cd ..
+
+    echo "   - Compilando gredy_cars_client..."
+    cd gredy_cars_client/gredy_cars_client
+    if [ ! -f "target/gredy_cars_client.war" ]; then
+        mvn clean package -DskipTests
+    else
+        echo "     WAR ya existe, omitiendo compilación."
+    fi
+    cd ../..
 fi
-cd ../..
 
 # Construir imágenes Docker
 echo "🐳 Construyendo imágenes Docker..."

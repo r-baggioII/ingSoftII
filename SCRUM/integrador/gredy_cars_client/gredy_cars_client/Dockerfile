@@ -1,5 +1,5 @@
 # Dockerfile para gredy_cars_client
-FROM openjdk:17-slim
+FROM openjdk:21-slim
 
 # Argumento para especificar el archivo WAR
 ARG WAR_FILE=target/gredy_cars_client.war

@@ -53,7 +53,7 @@ docker-compose up -d
 
 Una vez desplegado, puede acceder a las aplicaciones en:
 
-- **API Greedy Cars**: http://localhost:9000/greedy_cars
+- **API Greedy Cars**: http://localhost:9000/greedy_cars/api
 - **Sitio Institucional**: http://localhost:8080/greedy_institucional
 - **App Cliente**: http://localhost:8081/gredy_cars_client
 

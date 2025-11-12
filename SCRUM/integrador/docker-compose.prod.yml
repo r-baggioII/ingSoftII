@@ -46,6 +46,7 @@ services:
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
       GREEDY_MAIL_DEFAULT_FROM: noreply@greedy-cars.com
+      SERVER_SERVLET_CONTEXT_PATH: /greedy_cars
     depends_on:
       - greedy_cars_db
     networks:

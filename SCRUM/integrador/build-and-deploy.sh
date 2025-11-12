@@ -20,12 +20,7 @@ fi
 if [ ! -f .env ]; then
     echo "⚠️  Archivo .env no encontrado. Creando desde .env.example..."
     cp .env.example .env
-    echo "📝 Por favor, edite el archivo .env con sus configuraciones antes de continuar."
-    echo "   Variables importantes a configurar:"
-    echo "   - MERCADOPAGO_ACCESS_TOKEN"
-    echo "   - JWT_SECRET"
-    echo "   - SPRING_MAIL_PASSWORD"
-    read -p "Presione Enter después de configurar el archivo .env..."
+    echo "✅ Archivo .env creado con configuración existente del proyecto."
 fi
 
 # Compilar las aplicaciones Java
@@ -82,7 +77,7 @@ echo ""
 echo "✅ Despliegue completado!"
 echo ""
 echo "🌐 URLs de acceso:"
-echo "   - API Greedy Cars:      http://localhost:9000/greedy_cars"
+echo "   - API Greedy Cars:      http://localhost:9000/greedy_cars/api"
 echo "   - Sitio Institucional: http://localhost:8080/greedy_institucional"
 echo "   - App Cliente:         http://localhost:8081/gredy_cars_client"
 echo "   - Base de Datos:       localhost:3307"

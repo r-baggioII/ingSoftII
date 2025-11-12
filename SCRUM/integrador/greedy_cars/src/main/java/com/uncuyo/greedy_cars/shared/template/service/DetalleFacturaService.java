@@ -4,16 +4,19 @@ import com.uncuyo.greedy_cars.shared.template.dto.DetalleFacturaDTO;
 import com.uncuyo.greedy_cars.shared.template.entity.Alquiler;
 import com.uncuyo.greedy_cars.shared.template.entity.DetalleFactura;
 import com.uncuyo.greedy_cars.shared.template.entity.Factura;
+import com.uncuyo.greedy_cars.shared.template.entity.Promocion;
 import com.uncuyo.greedy_cars.shared.template.enums.BaseUseCaseService;
 import com.uncuyo.greedy_cars.shared.template.exception.ErrorServiceException;
 import com.uncuyo.greedy_cars.shared.template.mapper.DetalleFacturaMapper;
 import com.uncuyo.greedy_cars.shared.template.repository.AlquilerRepository;
 import com.uncuyo.greedy_cars.shared.template.repository.DetalleFacturaRepository;
 import com.uncuyo.greedy_cars.shared.template.repository.FacturaRepository;
+import com.uncuyo.greedy_cars.shared.template.repository.PromocionRepository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 @Transactional
@@ -22,17 +25,20 @@ public class DetalleFacturaService extends BaseService<DetalleFactura, String> {
     private final DetalleFacturaRepository detalleFacturaRepository;
     private final FacturaRepository facturaRepository;
     private final AlquilerRepository alquilerRepository;
+    private final PromocionRepository promocionRepository;
     private final DetalleFacturaMapper detalleFacturaMapper;
 
     public DetalleFacturaService(
             DetalleFacturaRepository detalleFacturaRepository,
             FacturaRepository facturaRepository,
             AlquilerRepository alquilerRepository,
+            PromocionRepository promocionRepository,
             DetalleFacturaMapper detalleFacturaMapper) {
         super(detalleFacturaRepository);
         this.detalleFacturaRepository = detalleFacturaRepository;
         this.facturaRepository = facturaRepository;
         this.alquilerRepository = alquilerRepository;
+        this.promocionRepository = promocionRepository;
         this.detalleFacturaMapper = detalleFacturaMapper;
     }
 
@@ -49,6 +55,14 @@ public class DetalleFacturaService extends BaseService<DetalleFactura, String> {
         }
         List<DetalleFactura> detalles = detalleFacturaRepository.findAllByFacturaIdAndEliminadoIsFalse(facturaId);
         return detalleFacturaMapper.toDTOList(detalles);
+    }
+
+    @Transactional(readOnly = true)
+    public List<DetalleFactura> findByAlquilerId(String alquilerId) throws ErrorServiceException {
+        if (alquilerId == null || alquilerId.isBlank()) {
+            throw new ErrorServiceException("Debe indicar el alquiler");
+        }
+        return detalleFacturaRepository.findAllByAlquilerIdAndEliminadoIsFalse(alquilerId);
     }
 
     @Transactional(readOnly = true)
@@ -90,6 +104,7 @@ public class DetalleFacturaService extends BaseService<DetalleFactura, String> {
         Alquiler alquiler = obtenerAlquilerActivo(dto.getAlquilerId());
         detalle.setFactura(factura);
         detalle.setAlquiler(alquiler);
+        detalle.setPromocion(obtenerPromocionActiva(dto.getPromocionId()));
         detalle.setEliminado(Boolean.FALSE);
         return detalle;
     }
@@ -110,6 +125,14 @@ public class DetalleFacturaService extends BaseService<DetalleFactura, String> {
                 .orElseThrow(() -> new ErrorServiceException("Alquiler no encontrado o eliminado"));
     }
 
+    private Promocion obtenerPromocionActiva(String promocionId) throws ErrorServiceException {
+        if (!StringUtils.hasText(promocionId)) {
+            return null;
+        }
+        return promocionRepository.findByIdAndEliminadoIsFalse(promocionId)
+                .orElseThrow(() -> new ErrorServiceException("Promoción no encontrada o eliminada"));
+    }
+
     @Override
     protected void actualizarEntidad(DetalleFactura existente, DetalleFactura nuevo) {
         if (nuevo.getCantidad() != null) {
@@ -120,6 +143,9 @@ public class DetalleFacturaService extends BaseService<DetalleFactura, String> {
         }
         if (nuevo.getAlquiler() != null) {
             existente.setAlquiler(nuevo.getAlquiler());
+        }
+        if (nuevo.getPromocion() != null) {
+            existente.setPromocion(nuevo.getPromocion());
         }
     }
 
@@ -147,6 +173,11 @@ public class DetalleFacturaService extends BaseService<DetalleFactura, String> {
             if (detalle.getFactura().getEliminado() != null && detalle.getFactura().getEliminado()) {
                 throw new ErrorServiceException("No se pueden agregar detalles a facturas eliminadas");
             }
+            if (detalle.getPromocion() != null
+                    && detalle.getPromocion().getEliminado() != null
+                    && detalle.getPromocion().getEliminado()) {
+                throw new ErrorServiceException("No se puede asociar una promoción eliminada");
+            }
         } catch (ErrorServiceException e) {
             throw e;
         } catch (Exception e) {
@@ -154,4 +185,3 @@ public class DetalleFacturaService extends BaseService<DetalleFactura, String> {
         }
     }
 }
-

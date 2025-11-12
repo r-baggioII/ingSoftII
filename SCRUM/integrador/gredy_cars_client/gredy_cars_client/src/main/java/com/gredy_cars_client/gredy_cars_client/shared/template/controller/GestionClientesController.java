@@ -188,7 +188,8 @@ public class GestionClientesController extends BaseThymeleafController<ClienteDT
         dto.setContactosTelefono(null);
         dto.setDirecciones(null);
         dto.setImagenes(null);
-        dto.setNacionalidad(null);
+        dto.setNacionalidades(null);
+        dto.setContactos(null);
 
         if (dto.getContactoIds() == null) {
             dto.setContactoIds(new ArrayList<>());

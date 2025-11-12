@@ -11,7 +11,9 @@ import jakarta.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -142,6 +144,22 @@ public class FacturaController extends BaseRestController<Factura, String> {
         try {
             List<FormaDePagoDTO> formas = facturaService.listarFormasPago(id);
             return ResponseEntity.ok(formas);
+        } catch (ErrorServiceException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return buildErrorResponse("Error de Sistema: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/{id}/pdf")
+    public ResponseEntity<?> descargarPdf(@PathVariable String id) {
+        try {
+            byte[] pdf = facturaService.generarFacturaPdf(id);
+            String filename = "factura-" + id + ".pdf";
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(pdf);
         } catch (ErrorServiceException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {

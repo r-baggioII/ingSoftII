@@ -29,6 +29,7 @@ public class DetalleFacturaDTO extends BaseDTO<String> {
     private String alquilerId;
 
     private String facturaId;
+    private String promocionId;
 
     @Override
     public String getId() {
@@ -40,4 +41,3 @@ public class DetalleFacturaDTO extends BaseDTO<String> {
         super.id = id;
     }
 }
-

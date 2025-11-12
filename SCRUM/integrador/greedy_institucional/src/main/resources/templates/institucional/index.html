@@ -16,8 +16,6 @@
   <!--Bootstrap ================================================== -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous" />
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" />
 
   <!-- Style Sheet ================================================== -->
   <link rel="stylesheet" type="text/css" href="style.css" th:href="@{/style.css}" />
@@ -55,66 +53,15 @@
     <div class="container position-relative" style="z-index: 2;">
       <!-- Hero Title -->
       <div class="hero-content text-center mb-4 mb-md-5">
-        <h1 class="text-white display-4 fw-bold mb-3">Encuentra tu Vehículo y Limusina</h1>
+        <h1 class="text-white display-4 fw-bold mb-3">Greedy Cars - Alquiler de Vehículos</h1>
         <p class="hero-paragraph text-white fs-5">
           Tenemos muchas mejores colecciones de alquiler de autos.
         </p>
       </div>
 
-      <!-- Search Form -->
+      <!-- Stats Display Only -->
       <div class="search-block p-3 p-md-4 p-lg-5" style="background-color: rgba(0, 0, 0, 0.7); border-radius: 8px; max-width: 1200px; margin: 0 auto;">
-        <form class="row g-3">
-          <div class="col-12 col-md-6 col-lg-3">
-            <label for="vehicle" class="label-style text-capitalize form-label text-white mb-2">Tipo de vehículo</label>
-            <div class="input-group position-relative">
-              <select class="form-select form-control p-3" id="vehicle" aria-label="Default select example"
-                style="background-image: none; padding-left: 45px !important;">
-                <option value="" selected>Seleccionar Tipo de Vehículo</option>
-                <option th:each="vehicle : ${vehicleCards}"
-                  th:value="${vehicle.id}"
-                  th:text="${vehicle.displayName}">
-                  Vehículo
-                </option>
-              </select>
-              <span class="position-absolute top-50 start-0 translate-middle-y ps-3" style="z-index: 10; pointer-events: none;">
-                <iconify-icon class="search-icons text-secondary" icon="solar:bus-outline"></iconify-icon>
-              </span>
-            </div>
-          </div>
-          <div class="col-12 col-md-6 col-lg-3">
-            <label for="location" class="label-style text-capitalize form-label text-white mb-2">Ubicación de recogida</label>
-            <div class="input-group position-relative">
-              <input type="text" class="form-control p-3" placeholder="Aeropuerto o cualquier lugar" id="location" style="padding-left: 45px !important;">
-              <span class="position-absolute top-50 start-0 translate-middle-y ps-3" style="z-index: 10; pointer-events: none;">
-                <iconify-icon class="search-icons text-secondary" icon="solar:map-arrow-square-outline"></iconify-icon>
-              </span>
-            </div>
-          </div>
-          <div class="col-12 col-md-6 col-lg-3">
-            <label for="pick-up-date" class="label-style text-capitalize form-label text-white mb-2">Fecha de recogida</label>
-            <div class="position-relative">
-              <input type="text" class="form-control p-3" id="pick-up-date" placeholder="dd/mm/yyyy" style="padding-left: 45px !important;" readonly />
-              <span class="position-absolute top-50 start-0 translate-middle-y ps-3" style="z-index: 10; pointer-events: none;">
-                <iconify-icon class="search-icons text-secondary" icon="solar:calendar-broken"></iconify-icon>
-              </span>
-            </div>
-          </div>
-          <div class="col-12 col-md-6 col-lg-3">
-            <label for="return-date" class="label-style text-capitalize form-label text-white mb-2">Fecha de devolución</label>
-            <div class="position-relative">
-              <input type="text" class="form-control p-3" id="return-date" placeholder="dd/mm/yyyy" style="padding-left: 45px !important;" readonly />
-              <span class="position-absolute top-50 start-0 translate-middle-y ps-3" style="z-index: 10; pointer-events: none;">
-                <iconify-icon class="search-icons text-secondary" icon="solar:calendar-broken"></iconify-icon>
-              </span>
-            </div>
-          </div>
-        </form>
-
-        <div class="d-grid gap-2 mt-4">
-          <button class="btn btn-primary p-3 fw-bold fs-5" type="button">Encuentra tu auto</button>
-        </div>
-
-        <div class="row text-white text-center mt-4" th:if="${catalogStats != null}">
+        <div class="row text-white text-center" th:if="${catalogStats != null}">
           <div class="col-12 col-md-4 mb-3 mb-md-0">
             <p class="display-5 fw-bold mb-1" th:text="${catalogStats.totalVehicles}">0</p>
             <p class="text-uppercase mb-0 small">Modelos publicados</p>
@@ -131,64 +78,12 @@
       </div>
     </div>
   </section>
-  <!-- process section start  -->
-  <section id="process"  class="padding-small">
-    <div class="process-content container">
-      <div class="row justify-content-center text-center text-md-start g-4">
-        <div class="col-lg-3 col-md-6">
-          <h4 class="fst-italic" style="color:#D0D0D0;">01</h4>
-
-          <p class="fw-bold text-dark mb-0">Elige un vehículo</p>
-          <p class="text-secondary mb-0">Sed euismod mauris corper libero.</p>
-        </div>
-        <div class="col-lg-3 col-md-6">
-          <h4 class="fst-italic" style="color:#D0D0D0;">02</h4>
-          <p class="fw-bold text-dark mb-0">Elige ubicación y fecha</p>
-          <p class="text-secondary mb-0">Sed euismod mauris corper libero.</p>
-        </div>
-        <div class="col-lg-3 col-md-6">
-          <h4 class="fst-italic" style="color:#D0D0D0;">03</h4>
-          <p class="fw-bold text-dark mb-0">Reserva tu auto</p>
-          <p class="text-secondary mb-0">Sed euismod mauris corper libero.</p>
-        </div>
-        <div class="col-lg-3 col-md-6">
-          <h4 class="fst-italic" style="color:#D0D0D0;">04</h4>
-          <p class="fw-bold text-dark mb-0">Finaliza el proceso</p>
-          <p class="text-secondary mb-0">Sed euismod mauris corper libero.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
+  
   <!-- car gallery section start  -->
   <section id="gallery"  class="padding-small">
     <div class="container mb-5 pb-5">
-      <h2 class="text-uppercase text-center text-dark">encontrar por tipo</h2>
+      <h2 class="text-uppercase text-center text-dark">Nuestra Flota de Vehículos</h2>
       <div class="alert alert-warning text-center" th:if="${catalogError}" th:text="${catalogError}"></div>
-      <div class="mb-4 text-center">
-        <p class="">
-          <button
-            class="filter-button text-secondary btn btn-light border border-secondary-subtle rounded-0 px-4 py-1 me-2 mb-3 text-capitalize"
-            data-filter="*">
-            Todos
-          </button>
-          <button
-            class="filter-button text-secondary btn btn-light border border-secondary-subtle rounded-0 px-4 py-1 me-2 mb-3 text-capitalize"
-            data-filter=".life">
-            coupe
-          </button>
-          <button
-            class="filter-button text-secondary btn btn-light border border-secondary-subtle rounded-0 px-4 py-1 me-2 mb-3 text-capitalize"
-            data-filter=".travel">
-            sedan
-          </button>
-          <button
-            class="filter-button text-secondary btn btn-light border border-secondary-subtle rounded-0 px-4 py-1 me-2 mb-3 text-capitalize"
-            data-filter=".love">
-            suv
-          </button>
-        </p>
-      </div>
 
       <div class="isotope-container row">
         <div class="col-12" th:if="${#lists.isEmpty(vehicleCards)}">
@@ -198,8 +93,7 @@
         </div>
         <div class="col-md-3 item p-2" th:each="vehicle : ${vehicleCards}"
           th:classappend="${' ' + vehicle.categoryClass}">
-          <a class="image-link" th:href="${vehicle.imageUrl != null ? vehicle.imageUrl : '#'}"
-            th:title="${vehicle.displayName}">
+          <div class="vehicle-card">
             <img class="post-image img-fluid" th:src="${vehicle.imageUrl != null ? vehicle.imageUrl : fallbackImage}"
               th:alt="${vehicle.displayName}" />
             <div class="types mt-2">
@@ -221,13 +115,8 @@
                   $0/día
                 </b>
               </p>
-
-              <div class="d-flex justify-content-center">
-                <a href="#" class="btn-underline mt-2 mb-2 text-uppercase fw-bold" style="font-size: 14px">Alquilar
-                  ahora</a>
-              </div>
             </div>
-          </a>
+          </div>
         </div>
 
       </div>
@@ -414,8 +303,6 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
     crossorigin="anonymous"></script>
-  <script
-    src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
@@ -503,32 +390,10 @@
         });
     }
 
-    // Initialize datepickers
-    function initializeDatepickers() {
-      if (typeof $.fn.datepicker !== 'undefined') {
-        $('#pick-up-date').datepicker({
-          format: 'dd/mm/yyyy',
-          autoclose: true,
-          startDate: new Date(),
-          language: 'es',
-          todayHighlight: true
-        });
-        
-        $('#return-date').datepicker({
-          format: 'dd/mm/yyyy',
-          autoclose: true,
-          startDate: new Date(),
-          language: 'es',
-          todayHighlight: true
-        });
-      }
-    }
-
     // Load data when page loads
     document.addEventListener('DOMContentLoaded', function() {
       fetchExchangeRate();
       updateWeather();
-      initializeDatepickers();
       
       // Update exchange rate every 5 minutes
       setInterval(fetchExchangeRate, 300000);

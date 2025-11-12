@@ -19,7 +19,7 @@ import lombok.ToString;
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true, exclude = {"factura", "alquiler"})
+@ToString(callSuper = true, exclude = {"factura", "alquiler", "promocion"})
 @Entity
 @Table(name = "detalle_factura")
 public class DetalleFactura extends BaseEntity<String> {
@@ -43,6 +43,10 @@ public class DetalleFactura extends BaseEntity<String> {
     @JoinColumn(name = "factura_id", nullable = false)
     private Factura factura;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "promocion_id")
+    private Promocion promocion;
+
     @Override
     public String getId() {
         return id;
@@ -53,4 +57,3 @@ public class DetalleFactura extends BaseEntity<String> {
         this.id = id;
     }
 }
-

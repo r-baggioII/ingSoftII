@@ -301,5 +301,105 @@
   <script src="js/jquery-1.11.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+  
+  <script>
+    // Manejar respuesta de MercadoPago
+    document.addEventListener('DOMContentLoaded', function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const pagoStatus = urlParams.get('pago');
+      const facturaId = urlParams.get('factura_id');
+      const paymentId = urlParams.get('payment_id');
+      const error = urlParams.get('error');
+
+      // Contenedor para los mensajes (se agregará al inicio del contenido principal)
+      const mainContent = document.querySelector('.col-md-9');
+      
+      if (pagoStatus === 'success' && facturaId) {
+        // Pago exitoso
+        const alertHtml = `
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <h4 class="alert-heading">
+              <iconify-icon icon="mdi:check-circle" class="me-2"></iconify-icon>
+              ¡Pago realizado con éxito!
+            </h4>
+            <p class="mb-2">Tu pago ha sido procesado correctamente.</p>
+            <hr>
+            <p class="mb-0">
+              <strong>Factura ID:</strong> ${facturaId}<br>
+              ${paymentId ? '<strong>ID de Pago:</strong> ' + paymentId + '<br>' : ''}
+              <small class="text-muted">Ya puedes descargar tu factura desde el historial de alquileres.</small>
+            </p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        `;
+        mainContent.insertAdjacentHTML('afterbegin', alertHtml);
+        
+        // Limpiar URL después de mostrar el mensaje
+        setTimeout(() => {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }, 500);
+        
+      } else if (pagoStatus === 'failure' || error) {
+        // Pago fallido
+        let errorMsg = 'El pago fue rechazado o cancelado.';
+        
+        if (error === 'sin_referencia') {
+          errorMsg = 'No se recibió la información del pago.';
+        } else if (error === 'referencia_invalida') {
+          errorMsg = 'La referencia del pago es inválida.';
+        } else if (error === 'factura_no_encontrada') {
+          errorMsg = 'No se pudo encontrar la factura asociada.';
+        } else if (error === 'error_negocio') {
+          errorMsg = 'Hubo un error al procesar el pago.';
+        } else if (error === 'error_sistema') {
+          errorMsg = 'Error interno del sistema. Por favor, contacta con soporte.';
+        }
+        
+        const alertHtml = `
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <h4 class="alert-heading">
+              <iconify-icon icon="mdi:close-circle" class="me-2"></iconify-icon>
+              Error en el pago
+            </h4>
+            <p class="mb-2">${errorMsg}</p>
+            <hr>
+            <p class="mb-0">
+              <small class="text-muted">Puedes intentar realizar el pago nuevamente desde el historial de alquileres.</small>
+            </p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        `;
+        mainContent.insertAdjacentHTML('afterbegin', alertHtml);
+        
+        // Limpiar URL
+        setTimeout(() => {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }, 500);
+        
+      } else if (pagoStatus === 'pending') {
+        // Pago pendiente
+        const alertHtml = `
+          <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <h4 class="alert-heading">
+              <iconify-icon icon="mdi:clock-outline" class="me-2"></iconify-icon>
+              Pago pendiente de aprobación
+            </h4>
+            <p class="mb-2">Tu pago está siendo procesado.</p>
+            <hr>
+            <p class="mb-0">
+              <small class="text-muted">Recibirás una confirmación cuando el pago sea aprobado. Esto puede tomar algunos minutos.</small>
+            </p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        `;
+        mainContent.insertAdjacentHTML('afterbegin', alertHtml);
+        
+        // Limpiar URL
+        setTimeout(() => {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }, 500);
+      }
+    });
+  </script>
 </body>
 </html>

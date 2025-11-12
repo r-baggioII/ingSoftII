@@ -1,5 +1,7 @@
 package com.gredy_cars_client.gredy_cars_client.shared.template.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.gredy_cars_client.gredy_cars_client.shared.template.enums.TipoDocumento;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -23,6 +25,7 @@ import java.util.List;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ClienteDTO extends BaseDTO<String> {
 
     @NotBlank(message = "El nombre del cliente es obligatorio")
@@ -55,16 +58,23 @@ public class ClienteDTO extends BaseDTO<String> {
     
     private List<String> nacionalidadIds = new ArrayList<>();
     
-    // Objetos completos para mostrar en el cliente (no se envían al servidor)
-    private NacionalidadDTO nacionalidad;
-    
-    private List<ContactoCorreoElectronicoDTO> contactosCorreo = new ArrayList<>();
-    
-    private List<ContactoTelefonicoDTO> contactosTelefono = new ArrayList<>();
-    
+    // Objetos completos recibidos del servidor
     private List<DireccionDTO> direcciones = new ArrayList<>();
     
     private List<ImagenDTO> imagenes = new ArrayList<>();
+    
+    private List<NacionalidadDTO> nacionalidades = new ArrayList<>();
+    
+    // Lista unificada de contactos del servidor (puede contener correos y teléfonos)
+    @JsonIgnore
+    private List<Object> contactos = new ArrayList<>();
+    
+    // Objetos separados para el cliente (no se deserializan del servidor)
+    @JsonIgnore
+    private List<ContactoCorreoElectronicoDTO> contactosCorreo = new ArrayList<>();
+    
+    @JsonIgnore
+    private List<ContactoTelefonicoDTO> contactosTelefono = new ArrayList<>();
 
     @Override
     public String getId() {

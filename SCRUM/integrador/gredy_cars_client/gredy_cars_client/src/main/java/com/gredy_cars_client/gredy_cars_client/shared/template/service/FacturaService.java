@@ -55,4 +55,12 @@ public class FacturaService extends BaseClientService<FacturaDTO, String> {
     public List<FormaDePagoDTO> listarFormasPago(String facturaId) throws ErrorServiceException {
         return facturaDao.findFormasPagoByFactura(facturaId);
     }
+
+    public byte[] descargarPdf(String facturaId) throws ErrorServiceException {
+        return facturaDao.descargarPdf(facturaId);
+    }
+
+    public List<FacturaDTO> listarPorCliente(String clienteId) throws ErrorServiceException {
+        return facturaDao.findByCliente(clienteId);
+    }
 }

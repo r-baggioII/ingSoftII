@@ -14,7 +14,7 @@ import com.gredy_cars_client.gredy_cars_client.shared.template.exception.ErrorSe
  * Servicio concreto de Imagen que delega en el DAO remoto.
  */
 @Service
-public class ImagenService extends BaseClientService<ImagenDTO, Long> {
+public class ImagenService extends BaseClientService<ImagenDTO, String> {
 
     private final ImagenDao imagenDao;
 
@@ -39,7 +39,7 @@ public class ImagenService extends BaseClientService<ImagenDTO, Long> {
     }
 
     @Override
-    protected void preModificacion(Long id, ImagenDTO dto) throws ErrorServiceException {
+    protected void preModificacion(String id, ImagenDTO dto) throws ErrorServiceException {
         if (id == null) {
             throw new ErrorServiceException("El id de la imagen es obligatorio para modificar");
         }

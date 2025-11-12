@@ -5,10 +5,12 @@ import java.util.List;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.gredy_cars_client.gredy_cars_client.config.GreedyApiProperties;
 import com.gredy_cars_client.gredy_cars_client.shared.template.dto.AlquilerDTO;
@@ -135,6 +137,29 @@ public class ClienteDao extends BaseApiDao<ClienteDTO, String> {
             throw translateException("listar alquileres pendientes de facturación del cliente " + clienteId, e);
         } catch (RestClientException e) {
             throw new ErrorServiceException("Error de comunicación al obtener los alquileres pendientes de facturación del cliente " + clienteId, e);
+        }
+    }
+
+    public List<ClienteDTO> buscarPorQuery(String query) throws ErrorServiceException {
+        if (!StringUtils.hasText(query)) {
+            return findAll();
+        }
+        String url = UriComponentsBuilder.fromHttpUrl(collectionUrl())
+                .path("/search")
+                .queryParam("query", query.trim())
+                .toUriString();
+        try {
+            org.springframework.http.ResponseEntity<List<ClienteDTO>> response = restTemplate.exchange(
+                url,
+                org.springframework.http.HttpMethod.GET,
+                new org.springframework.http.HttpEntity<>(null, buildHeaders()),
+                getListTypeReference()
+            );
+            return java.util.Optional.ofNullable(response.getBody()).orElse(Collections.emptyList());
+        } catch (RestClientResponseException e) {
+            throw translateException("buscar clientes por '" + query + "'", e);
+        } catch (RestClientException e) {
+            throw new ErrorServiceException("Error de comunicación al buscar clientes", e);
         }
     }
 }

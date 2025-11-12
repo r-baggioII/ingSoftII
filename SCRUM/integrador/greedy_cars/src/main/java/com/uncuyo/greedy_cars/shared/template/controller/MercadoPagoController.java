@@ -4,7 +4,6 @@ import com.mercadopago.resources.preference.Preference;
 import com.uncuyo.greedy_cars.shared.template.dto.MercadoPagoPreferenceRequest;
 import com.uncuyo.greedy_cars.shared.template.dto.MercadoPagoPreferenceResponse;
 import com.uncuyo.greedy_cars.shared.template.entity.Alquiler;
-import com.uncuyo.greedy_cars.shared.template.entity.DetalleFactura;
 import com.uncuyo.greedy_cars.shared.template.entity.Factura;
 import com.uncuyo.greedy_cars.shared.template.entity.FormaDePago;
 import com.uncuyo.greedy_cars.shared.template.enums.EstadoFactura;
@@ -12,14 +11,17 @@ import com.uncuyo.greedy_cars.shared.template.enums.TipoPago;
 import com.uncuyo.greedy_cars.shared.template.exception.ErrorServiceException;
 import com.uncuyo.greedy_cars.shared.template.repository.AlquilerRepository;
 import com.uncuyo.greedy_cars.shared.template.repository.FacturaRepository;
+import com.uncuyo.greedy_cars.shared.template.service.FacturaService;
 import com.uncuyo.greedy_cars.shared.template.service.MercadoPagoService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import java.time.LocalDate;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,14 +41,26 @@ public class MercadoPagoController {
     private final MercadoPagoService mercadoPagoService;
     private final FacturaRepository facturaRepository;
     private final AlquilerRepository alquilerRepository;
+    private final FacturaService facturaService;
+    
+    @Value("${mercadopago.frontend-url-success}")
+    private String frontendSuccessUrl;
+    
+    @Value("${mercadopago.frontend-url-failure}")
+    private String frontendFailureUrl;
+    
+    @Value("${mercadopago.frontend-url-pending}")
+    private String frontendPendingUrl;
 
     public MercadoPagoController(
             MercadoPagoService mercadoPagoService,
             FacturaRepository facturaRepository,
-            AlquilerRepository alquilerRepository) {
+            AlquilerRepository alquilerRepository,
+            FacturaService facturaService) {
         this.mercadoPagoService = mercadoPagoService;
         this.facturaRepository = facturaRepository;
         this.alquilerRepository = alquilerRepository;
+        this.facturaService = facturaService;
     }
 
     @PostMapping("/preferencia")
@@ -89,17 +103,20 @@ public class MercadoPagoController {
 
     @GetMapping("/success")
     @Transactional
-    public ResponseEntity<?> pagoExitoso(
+    public void pagoExitoso(
             @RequestParam(name = "payment_id", required = false) String paymentId,
             @RequestParam(name = "status", required = false) String status,
             @RequestParam(name = "external_reference", required = false) String externalReference,
-            @RequestParam(name = "preference_id", required = false) String preferenceId) {
+            @RequestParam(name = "preference_id", required = false) String preferenceId,
+            HttpServletResponse response) throws IOException {
         try {
             log.info("Callback de éxito Mercado Pago - paymentId={}, status={}, externalReference={}, preferenceId={}",
                     paymentId, status, externalReference, preferenceId);
 
             if (externalReference == null || externalReference.isBlank()) {
-                throw new ErrorServiceException("No se recibió la referencia externa del pago");
+                log.error("No se recibió la referencia externa del pago");
+                response.sendRedirect(buildUrlWithParams(frontendFailureUrl, "error", "sin_referencia"));
+                return;
             }
 
             Factura facturaProcesada;
@@ -108,56 +125,66 @@ public class MercadoPagoController {
             if (externalReference.startsWith("ALQUILER:")) {
                 String[] partes = externalReference.split(":");
                 if (partes.length < 3) {
-                    throw new ErrorServiceException("Referencia externa de alquiler inválida");
+                    log.error("Referencia externa de alquiler inválida: {}", externalReference);
+                    response.sendRedirect(buildUrlWithParams(frontendFailureUrl, "error", "referencia_invalida"));
+                    return;
                 }
                 String vehiculoId = partes[1];
                 int cantidadDias;
                 try {
                     cantidadDias = Integer.parseInt(partes[2]);
                 } catch (NumberFormatException ex) {
-                    throw new ErrorServiceException("No se pudo interpretar la cantidad de días desde la referencia externa");
+                    log.error("No se pudo interpretar la cantidad de días: {}", partes[2]);
+                    response.sendRedirect(buildUrlWithParams(frontendFailureUrl, "error", "dias_invalidos"));
+                    return;
                 }
 
                 monto = mercadoPagoService.calcularMonto(null, vehiculoId, cantidadDias);
                 facturaProcesada = generarFacturaParaAlquiler(vehiculoId, cantidadDias, monto);
             } else {
-                facturaProcesada = facturaRepository.findByIdAndEliminadoIsFalse(externalReference)
-                        .orElseThrow(() -> new ErrorServiceException("Factura no encontrada para la referencia recibida"));
+                Optional<Factura> facturaOpt = facturaRepository.findByIdAndEliminadoIsFalse(externalReference);
+                if (facturaOpt.isEmpty()) {
+                    log.error("Factura no encontrada para la referencia: {}", externalReference);
+                    response.sendRedirect(buildUrlWithParams(frontendFailureUrl, "error", "factura_no_encontrada"));
+                    return;
+                }
+                facturaProcesada = facturaOpt.get();
                 monto = facturaProcesada.getTotalPagado() != null ? facturaProcesada.getTotalPagado() : 0D;
             }
 
             marcarFacturaComoPagada(facturaProcesada, monto, paymentId);
 
-            // TODO: ajustar URL de retorno cuando se defina el ngrok definitivo.
-            // TODO FRONT: al recibir esta respuesta, refrescar la vista de facturas y habilitar la descarga del PDF
-            // solo cuando el estado resulte PAGADA/Habilitada por este callback.
-            Map<String, Object> body = Map.of(
-                    "mensaje", "pago confirmado",
-                    "facturaId", facturaProcesada.getId(),
-                    "estado", facturaProcesada.getEstado().name());
-            return ResponseEntity.ok(body);
+            log.info("Pago procesado exitosamente para factura: {}", facturaProcesada.getId());
+            
+            // Redirigir al frontend con parámetros de éxito
+            String redirectUrl = buildUrlWithParams(frontendSuccessUrl, 
+                    "factura_id", facturaProcesada.getId(),
+                    "payment_id", paymentId != null ? paymentId : "");
+            response.sendRedirect(redirectUrl);
+            
         } catch (ErrorServiceException e) {
             log.warn("Error de negocio al procesar pago exitoso de Mercado Pago: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+            response.sendRedirect(buildUrlWithParams(frontendFailureUrl, "error", "error_negocio"));
         } catch (Exception e) {
             log.error("Error inesperado al procesar pago exitoso de Mercado Pago", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Error inesperado al procesar el pago"));
+            response.sendRedirect(buildUrlWithParams(frontendFailureUrl, "error", "error_sistema"));
         }
     }
 
     @GetMapping("/failure")
-    public ResponseEntity<?> pagoFallido(@RequestParam Map<String, String> queryParams) {
+    public void pagoFallido(
+            @RequestParam Map<String, String> queryParams,
+            HttpServletResponse response) throws IOException {
         log.warn("Callback de fallo Mercado Pago recibido: {}", queryParams);
-        // TODO: ajustar URL de retorno cuando se defina el ngrok definitivo.
-        return ResponseEntity.ok(Map.of("mensaje", "El pago fue rechazado o cancelado"));
+        response.sendRedirect(frontendFailureUrl);
     }
 
     @GetMapping("/pending")
-    public ResponseEntity<?> pagoPendiente(@RequestParam Map<String, String> queryParams) {
+    public void pagoPendiente(
+            @RequestParam Map<String, String> queryParams,
+            HttpServletResponse response) throws IOException {
         log.info("Callback de pago pendiente Mercado Pago: {}", queryParams);
-        // TODO: ajustar URL de retorno cuando se defina el ngrok definitivo.
-        return ResponseEntity.ok(Map.of("mensaje", "El pago está pendiente de aprobación"));
+        response.sendRedirect(frontendPendingUrl);
     }
 
     private Factura generarFacturaParaAlquiler(String vehiculoId, int cantidadDias, double monto) {
@@ -167,22 +194,9 @@ public class MercadoPagoController {
         Alquiler alquiler = alquilerOpt.orElseThrow(
                 () -> new ErrorServiceException("No se encontró un alquiler asociado al vehículo para generar la factura"));
 
-        Factura factura = new Factura();
-        factura.setEliminado(false);
-        factura.setFechaFactura(LocalDate.now());
-        factura.setEstado(EstadoFactura.PAGADA);
-        factura.setTotalPagado(monto);
-        factura.setNumeroFactura(obtenerSiguienteNumeroFactura());
-
-        DetalleFactura detalle = new DetalleFactura();
-        detalle.setCantidad(cantidadDias);
-        detalle.setSubtotal(monto);
-        detalle.setAlquiler(alquiler);
-        detalle.setEliminado(false);
-        factura.agregarDetalle(detalle);
-
+        Factura factura = facturaService.crearFacturaBorradorDesdeAlquiler(alquiler, monto, cantidadDias, null);
+        factura.setCliente(alquiler.getCliente());
         registrarFormaDePago(factura, null);
-
         return facturaRepository.save(factura);
     }
 
@@ -224,5 +238,27 @@ public class MercadoPagoController {
             max = 0L;
         }
         return max + 1;
+    }
+    
+    private String buildUrlWithParams(String baseUrl, String... params) {
+        if (params.length % 2 != 0) {
+            throw new IllegalArgumentException("Los parámetros deben ser pares clave-valor");
+        }
+        
+        StringBuilder url = new StringBuilder(baseUrl);
+        boolean firstParam = !baseUrl.contains("?");
+        
+        for (int i = 0; i < params.length; i += 2) {
+            String key = params[i];
+            String value = params[i + 1];
+            
+            if (value != null && !value.isEmpty()) {
+                url.append(firstParam ? "?" : "&");
+                url.append(key).append("=").append(value);
+                firstParam = false;
+            }
+        }
+        
+        return url.toString();
     }
 }

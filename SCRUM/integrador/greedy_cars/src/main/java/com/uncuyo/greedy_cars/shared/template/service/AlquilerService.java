@@ -6,8 +6,12 @@ import com.uncuyo.greedy_cars.shared.template.enums.BaseUseCaseService;
 import com.uncuyo.greedy_cars.shared.template.enums.EstadoVehiculo;
 import com.uncuyo.greedy_cars.shared.template.exception.ErrorServiceException;
 import com.uncuyo.greedy_cars.shared.template.mapper.AlquilerMapper;
-import com.uncuyo.greedy_cars.shared.template.repository.*;
+import com.uncuyo.greedy_cars.shared.template.repository.AlquilerRepository;
+import com.uncuyo.greedy_cars.shared.template.repository.ClienteRepository;
+import com.uncuyo.greedy_cars.shared.template.repository.DocumentacionRepository;
+import com.uncuyo.greedy_cars.shared.template.repository.VehiculoRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -26,6 +30,7 @@ public class AlquilerService extends BaseService<Alquiler, String> {
     private final DocumentacionRepository documentacionRepository;
     private final FacturaService facturaService;
     private final CostoVehiculoService costoVehiculoService;
+    private final PromocionService promocionService;
     private final AlquilerMapper alquilerMapper;
 
     public AlquilerService(AlquilerRepository repository,
@@ -34,6 +39,7 @@ public class AlquilerService extends BaseService<Alquiler, String> {
                            DocumentacionRepository documentacionRepository,
                            FacturaService facturaService,
                            CostoVehiculoService costoVehiculoService,
+                           PromocionService promocionService,
                            AlquilerMapper alquilerMapper) {
         super(repository);
         this.clienteRepository = clienteRepository;
@@ -41,6 +47,7 @@ public class AlquilerService extends BaseService<Alquiler, String> {
         this.documentacionRepository = documentacionRepository;
         this.facturaService = facturaService;
         this.costoVehiculoService = costoVehiculoService;
+        this.promocionService = promocionService;
         this.alquilerMapper = alquilerMapper;
     }
 
@@ -86,9 +93,11 @@ public class AlquilerService extends BaseService<Alquiler, String> {
                 ? List.of()
                 : documentacionRepository.findAllById(dto.getDocumentacionIds());
 
+        Promocion promocionAplicada = obtenerPromocionAplicable(dto.getCodigoPromocion(), dto.getFechaDesde());
+
         Alquiler entidad = alquilerMapper.toEntity(dto, cli, veh, docs);
         Alquiler guardado = alta(entidad);
-        generarFacturaInicial(guardado);
+        generarFacturaInicial(guardado, promocionAplicada);
 
         // Synchronize vehicle state based on all current rentals
         sincronizarEstadoVehiculo(veh.getId());
@@ -128,7 +137,7 @@ public class AlquilerService extends BaseService<Alquiler, String> {
         nuevo.crearAlquiler(fechaDesde, fechaHasta, cliente, vehiculo);
 
         Alquiler guardado = alta(nuevo);
-        generarFacturaInicial(guardado);
+        generarFacturaInicial(guardado, null);
 
         // Synchronize vehicle state based on all current rentals
         sincronizarEstadoVehiculo(idVehiculo);
@@ -192,7 +201,7 @@ public class AlquilerService extends BaseService<Alquiler, String> {
     }
 
     // =============== Facturación automática ===============
-    private void generarFacturaInicial(Alquiler alquiler) throws ErrorServiceException {
+    private void generarFacturaInicial(Alquiler alquiler, Promocion promocionAplicada) throws ErrorServiceException {
         if (alquiler == null) {
             throw new ErrorServiceException("No se pudo generar la factura para el alquiler indicado");
         }
@@ -212,7 +221,8 @@ public class AlquilerService extends BaseService<Alquiler, String> {
                 .orElseThrow(() -> new ErrorServiceException(
                         "No hay un costo vigente para la característica del vehículo seleccionado"));
 
-        facturaService.crearFacturaBorradorDesdeAlquiler(alquiler, total, cantidadDias);
+        double totalConPromocion = aplicarDescuento(total, promocionAplicada);
+        facturaService.crearFacturaBorradorDesdeAlquiler(alquiler, totalConPromocion, cantidadDias, promocionAplicada);
     }
 
     private int calcularDiasFacturados(LocalDate fechaDesde, LocalDate fechaHasta) throws ErrorServiceException {
@@ -228,6 +238,16 @@ public class AlquilerService extends BaseService<Alquiler, String> {
         return BigDecimal.valueOf(valor)
                 .setScale(2, RoundingMode.HALF_UP)
                 .doubleValue();
+    }
+
+    private double aplicarDescuento(double totalBase, Promocion promocion) {
+        if (promocion == null || promocion.getPorcentajeDescuento() == null) {
+            return redondear(totalBase);
+        }
+        double porcentaje = promocion.getPorcentajeDescuento() / 100d;
+        double descuento = totalBase * porcentaje;
+        double totalConDescuento = Math.max(0D, totalBase - descuento);
+        return redondear(totalConDescuento);
     }
 
     // =============== Hooks de BaseService ===============
@@ -317,6 +337,14 @@ public class AlquilerService extends BaseService<Alquiler, String> {
     }
 
     // =============== Helpers ===============
+    private Promocion obtenerPromocionAplicable(String codigoPromocion, LocalDate fechaReferencia) throws ErrorServiceException {
+        if (!StringUtils.hasText(codigoPromocion)) {
+            return null;
+        }
+        LocalDate referencia = fechaReferencia != null ? fechaReferencia : LocalDate.now();
+        return promocionService.buscarPorCodigo(codigoPromocion.trim(), referencia);
+    }
+
     private void validarFechasYRelaciones(LocalDate fechaDesde, LocalDate fechaHasta, String idCliente, String idVehiculo) throws ErrorServiceException {
         if (fechaDesde == null) throw new ErrorServiceException("Debe indicar la fecha desde");
         if (fechaHasta == null) throw new ErrorServiceException("Debe indicar la fecha hasta");

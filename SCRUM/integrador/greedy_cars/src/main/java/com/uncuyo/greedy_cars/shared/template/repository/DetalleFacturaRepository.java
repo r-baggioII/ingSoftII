@@ -6,5 +6,7 @@ import java.util.List;
 public interface DetalleFacturaRepository extends BaseRepository<DetalleFactura, String> {
 
     List<DetalleFactura> findAllByFacturaIdAndEliminadoIsFalse(String facturaId);
+    
+    List<DetalleFactura> findAllByAlquilerIdAndEliminadoIsFalse(String alquilerId);
 }
 

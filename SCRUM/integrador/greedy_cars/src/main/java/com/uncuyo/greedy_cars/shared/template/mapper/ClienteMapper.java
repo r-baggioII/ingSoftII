@@ -1,8 +1,15 @@
 package com.uncuyo.greedy_cars.shared.template.mapper;
 
 import com.uncuyo.greedy_cars.shared.template.dto.ClienteDTO;
+import com.uncuyo.greedy_cars.shared.template.dto.ContactoCorreoElectronicoDTO;
+import com.uncuyo.greedy_cars.shared.template.dto.ContactoTelefonicoDTO;
+import com.uncuyo.greedy_cars.shared.template.dto.DireccionDTO;
+import com.uncuyo.greedy_cars.shared.template.dto.ImagenDTO;
+import com.uncuyo.greedy_cars.shared.template.dto.NacionalidadDTO;
 import com.uncuyo.greedy_cars.shared.template.entity.Cliente;
 import com.uncuyo.greedy_cars.shared.template.entity.Contacto;
+import com.uncuyo.greedy_cars.shared.template.entity.ContactoCorreoElectronico;
+import com.uncuyo.greedy_cars.shared.template.entity.ContactoTelefonico;
 import com.uncuyo.greedy_cars.shared.template.entity.Direccion;
 import com.uncuyo.greedy_cars.shared.template.entity.Imagen;
 import com.uncuyo.greedy_cars.shared.template.entity.Nacionalidad;
@@ -37,11 +44,30 @@ public abstract class ClienteMapper implements BaseMapper<Cliente, ClienteDTO, S
     
     @Autowired
     protected NacionalidadRepository nacionalidadRepository;
+    
+    @Autowired
+    protected DireccionMapper direccionMapper;
+    
+    @Autowired
+    protected ImagenMapper imagenMapper;
+    
+    @Autowired
+    protected NacionalidadMapper nacionalidadMapper;
+    
+    @Autowired
+    protected ContactoCorreoElectronicoMapper contactoCorreoMapper;
+    
+    @Autowired
+    protected ContactoTelefonicoMapper contactoTelefonicoMapper;
 
     @Mapping(source = "direcciones", target = "direccionIds", qualifiedByName = "direccionesToIds")
     @Mapping(source = "contactos", target = "contactoIds", qualifiedByName = "contactosToIds")
     @Mapping(source = "imagenes", target = "imagenIds", qualifiedByName = "imagenesToIds")
     @Mapping(source = "nacionalidades", target = "nacionalidadIds", qualifiedByName = "nacionalidadesToIds")
+    @Mapping(source = "direcciones", target = "direcciones", qualifiedByName = "direccionesToDTOs")
+    @Mapping(source = "imagenes", target = "imagenes", qualifiedByName = "imagenesToDTOs")
+    @Mapping(source = "nacionalidades", target = "nacionalidades", qualifiedByName = "nacionalidadesToDTOs")
+    @Mapping(source = "contactos", target = "contactos", qualifiedByName = "contactosToDTOs")
     public abstract ClienteDTO toDTO(Cliente entity);
 
     @Mapping(source = "direccionIds", target = "direcciones", qualifiedByName = "idsToDirecciones")
@@ -130,5 +156,55 @@ public abstract class ClienteMapper implements BaseMapper<Cliente, ClienteDTO, S
             return new ArrayList<>();
         }
         return nacionalidadRepository.findAllById(ids);
+    }
+    
+    // ==================== MAPEO A DTOs COMPLETOS ====================
+    
+    @Named("direccionesToDTOs")
+    protected List<DireccionDTO> direccionesToDTOs(List<Direccion> direcciones) {
+        if (direcciones == null || direcciones.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return direcciones.stream()
+                .map(direccionMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+    
+    @Named("imagenesToDTOs")
+    protected List<ImagenDTO> imagenesToDTOs(List<Imagen> imagenes) {
+        if (imagenes == null || imagenes.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return imagenes.stream()
+                .map(imagenMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+    
+    @Named("nacionalidadesToDTOs")
+    protected List<NacionalidadDTO> nacionalidadesToDTOs(List<Nacionalidad> nacionalidades) {
+        if (nacionalidades == null || nacionalidades.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return nacionalidades.stream()
+                .map(nacionalidadMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+    
+    @Named("contactosToDTOs")
+    protected List<Object> contactosToDTOs(List<Contacto> contactos) {
+        if (contactos == null || contactos.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return contactos.stream()
+                .map(contacto -> {
+                    if (contacto instanceof ContactoCorreoElectronico) {
+                        return contactoCorreoMapper.toDTO((ContactoCorreoElectronico) contacto);
+                    } else if (contacto instanceof ContactoTelefonico) {
+                        return contactoTelefonicoMapper.toDTO((ContactoTelefonico) contacto);
+                    }
+                    return null;
+                })
+                .filter(dto -> dto != null)
+                .collect(Collectors.toList());
     }
 }

@@ -7,6 +7,11 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -18,6 +23,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.gredy_cars_client.gredy_cars_client.config.AuthCheckInterceptor.UserDetailsWithRole;
@@ -26,26 +33,30 @@ import com.gredy_cars_client.gredy_cars_client.shared.template.dto.ClienteDTO;
 import com.gredy_cars_client.gredy_cars_client.shared.template.dto.DetalleFacturaDTO;
 import com.gredy_cars_client.gredy_cars_client.shared.template.dto.FacturaDTO;
 import com.gredy_cars_client.gredy_cars_client.shared.template.dto.FormaDePagoDTO;
+import com.gredy_cars_client.gredy_cars_client.shared.template.dto.MercadoPagoPreferenceResponse;
 import com.gredy_cars_client.gredy_cars_client.shared.template.enums.EstadoFactura;
 import com.gredy_cars_client.gredy_cars_client.shared.template.enums.TipoPago;
 import com.gredy_cars_client.gredy_cars_client.shared.template.exception.ErrorServiceException;
 import com.gredy_cars_client.gredy_cars_client.shared.template.service.ClienteService;
 import com.gredy_cars_client.gredy_cars_client.shared.template.service.FacturaService;
+import com.gredy_cars_client.gredy_cars_client.shared.template.service.PagoMpService;
 
 /**
  * Controlador MVC para la gestión de facturas desde la interfaz administrativa.
  */
 @Controller
-@RequestMapping("/gestion")
+@RequestMapping({"", "/gestion"})
 public class GestionFacturasController extends BaseThymeleafController<FacturaDTO, String> {
 
     private final FacturaService facturaService;
     private final ClienteService clienteService;
+    private final PagoMpService pagoMpService;
 
-    public GestionFacturasController(FacturaService facturaService, ClienteService clienteService) {
+    public GestionFacturasController(FacturaService facturaService, ClienteService clienteService, PagoMpService pagoMpService) {
         super(facturaService);
         this.facturaService = facturaService;
         this.clienteService = clienteService;
+        this.pagoMpService = pagoMpService;
     }
 
     @Override
@@ -104,6 +115,16 @@ public class GestionFacturasController extends BaseThymeleafController<FacturaDT
         FacturaViewState viewState = FacturaViewState.of(estado, editId, facturaSeleccionada, clienteId);
         prepareFacturaScreen(model, viewState, true, true);
         return getListView();
+    }
+
+    @GetMapping(value = "/api/clientes/search", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<ClienteDTO> buscarClientes(@RequestParam("query") String query) {
+        try {
+            return clienteService.buscarPorQuery(query);
+        } catch (ErrorServiceException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
     @GetMapping("/facturas/{id}/detalles")
@@ -173,6 +194,73 @@ public class GestionFacturasController extends BaseThymeleafController<FacturaDT
             return buildRedirect(clienteId);
         }
         return outcome;
+    }
+
+    @PostMapping("/facturas/{id}/marcar-pagada")
+    public String marcarPagada(
+        @PathVariable String id,
+        @RequestParam("tipoPago") TipoPago tipoPago,
+        @RequestParam(value = "observacion", required = false) String observacion,
+        @RequestParam(value = "clienteId", required = false) String clienteId,
+        RedirectAttributes redirectAttributes
+    ) {
+        try {
+            FacturaDTO factura = facturaService.buscar(id)
+                    .orElseThrow(() -> new ErrorServiceException("Factura no encontrada"));
+            factura.setEstado(EstadoFactura.PAGADA);
+            FormaDePagoDTO forma = new FormaDePagoDTO();
+            forma.setTipoPago(tipoPago);
+            forma.setObservacion(StringUtils.hasText(observacion)
+                    ? observacion.trim()
+                    : "Pago registrado manualmente desde el dashboard");
+            forma.setFacturaId(factura.getId());
+            factura.setFormasPago(Collections.singletonList(forma));
+            asegurarColecciones(factura);
+            facturaService.modificar(id, factura);
+            redirectAttributes.addFlashAttribute("success", "La factura fue marcada como pagada");
+        } catch (ErrorServiceException e) {
+            redirectAttributes.addFlashAttribute("error", "No se pudo marcar como pagada: " + e.getMessage());
+        }
+        return buildRedirect(clienteId);
+    }
+
+    @PostMapping("/facturas/{id}/mp")
+    public String generarPagoMp(
+        @PathVariable String id,
+        @RequestParam(value = "clienteId", required = false) String clienteId,
+        RedirectAttributes redirectAttributes
+    ) {
+        try {
+            MercadoPagoPreferenceResponse preference = pagoMpService.generarPreferenciaPorFactura(id);
+            if (preference == null || !StringUtils.hasText(preference.getInitPoint())) {
+                throw new ErrorServiceException("La API de pagos no devolvió un init point válido");
+            }
+            return "redirect:" + preference.getInitPoint();
+        } catch (ErrorServiceException e) {
+            redirectAttributes.addFlashAttribute("error", "No se pudo generar el pago: " + e.getMessage());
+            return buildRedirect(clienteId);
+        }
+    }
+
+    @GetMapping("/facturas/{id}/pdf")
+    @ResponseBody
+    public ResponseEntity<byte[]> descargarPdf(@PathVariable String id) {
+        try {
+            byte[] pdf = facturaService.descargarPdf(id);
+            if (pdf == null || pdf.length == 0) {
+                throw new ErrorServiceException("El comprobante está vacío");
+            }
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDisposition(ContentDisposition.attachment()
+                    .filename("factura-" + id + ".pdf")
+                    .build());
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdf);
+        } catch (ErrorServiceException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
     private String processFacturaMutation(
@@ -299,11 +387,37 @@ public class GestionFacturasController extends BaseThymeleafController<FacturaDT
             List<FacturaDTO> facturas = StringUtils.hasText(estado)
                 ? facturaService.listarPorEstado(estado)
                 : facturaService.listar();
+            
+            // Ordenar facturas: SIN_DEFINIR primero, luego PAGADAS, luego las demás
+            facturas.sort((f1, f2) -> {
+                int priority1 = getEstadoPriority(f1.getEstado());
+                int priority2 = getEstadoPriority(f2.getEstado());
+                
+                if (priority1 != priority2) {
+                    return Integer.compare(priority1, priority2);
+                }
+                
+                // Si tienen la misma prioridad, ordenar por número de factura descendente
+                if (f1.getNumeroFactura() != null && f2.getNumeroFactura() != null) {
+                    return Long.compare(f2.getNumeroFactura(), f1.getNumeroFactura());
+                }
+                return 0;
+            });
+            
             model.addAttribute("facturas", facturas);
         } catch (ErrorServiceException e) {
             model.addAttribute("facturas", Collections.emptyList());
             model.addAttribute("errorFacturas", "No se pudieron obtener las facturas: " + e.getMessage());
         }
+    }
+    
+    private int getEstadoPriority(EstadoFactura estado) {
+        if (estado == null) return 3;
+        return switch (estado) {
+            case SIN_DEFINIR -> 1;  // Prioridad alta (primero)
+            case PAGADA -> 2;       // Prioridad media
+            default -> 3;           // Prioridad baja
+        };
     }
 
     private List<ClienteDTO> ensureClientes(Model model) {

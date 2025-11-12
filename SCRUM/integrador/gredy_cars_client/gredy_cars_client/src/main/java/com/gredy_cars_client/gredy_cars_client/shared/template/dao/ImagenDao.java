@@ -17,7 +17,7 @@ import com.gredy_cars_client.gredy_cars_client.shared.template.enums.TipoImagen;
  * DAO concreto que consume los endpoints REST de Imagen.
  */
 @Repository
-public class ImagenDao extends BaseApiDao<ImagenDTO, Long> {
+public class ImagenDao extends BaseApiDao<ImagenDTO, String> {
 
     public ImagenDao(RestTemplate restTemplate, GreedyApiProperties properties) {
         super(restTemplate, properties);

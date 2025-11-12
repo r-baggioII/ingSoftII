@@ -119,4 +119,8 @@ public class ClienteService extends BaseClientService<ClienteDTO, String> {
             return Collections.emptyList();
         }
     }
+
+    public List<ClienteDTO> buscarPorQuery(String query) throws ErrorServiceException {
+        return clienteDao.buscarPorQuery(query);
+    }
 }

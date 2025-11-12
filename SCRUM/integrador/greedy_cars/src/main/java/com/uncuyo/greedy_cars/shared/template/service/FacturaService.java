@@ -8,6 +8,7 @@ import com.uncuyo.greedy_cars.shared.template.entity.Cliente;
 import com.uncuyo.greedy_cars.shared.template.entity.DetalleFactura;
 import com.uncuyo.greedy_cars.shared.template.entity.Factura;
 import com.uncuyo.greedy_cars.shared.template.entity.FormaDePago;
+import com.uncuyo.greedy_cars.shared.template.entity.Promocion;
 import com.uncuyo.greedy_cars.shared.template.enums.BaseUseCaseService;
 import com.uncuyo.greedy_cars.shared.template.enums.EstadoFactura;
 import com.uncuyo.greedy_cars.shared.template.exception.ErrorServiceException;
@@ -17,12 +18,28 @@ import com.uncuyo.greedy_cars.shared.template.mapper.FormaDePagoMapper;
 import com.uncuyo.greedy_cars.shared.template.repository.AlquilerRepository;
 import com.uncuyo.greedy_cars.shared.template.repository.ClienteRepository;
 import com.uncuyo.greedy_cars.shared.template.repository.FacturaRepository;
+import com.uncuyo.greedy_cars.shared.template.repository.PromocionRepository;
+import com.lowagie.text.Chunk;
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.Font;
+import com.lowagie.text.FontFactory;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
 import jakarta.persistence.EntityNotFoundException;
+import java.awt.Color;
+import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -44,11 +61,13 @@ public class FacturaService extends BaseService<Factura, String> {
     private final FacturaMapper facturaMapper;
     private final DetalleFacturaMapper detalleFacturaMapper;
     private final FormaDePagoMapper formaDePagoMapper;
+    private final PromocionRepository promocionRepository;
 
     public FacturaService(
             FacturaRepository facturaRepository,
             AlquilerRepository alquilerRepository,
             ClienteRepository clienteRepository,
+            PromocionRepository promocionRepository,
             FacturaMapper facturaMapper,
             DetalleFacturaMapper detalleFacturaMapper,
             FormaDePagoMapper formaDePagoMapper) {
@@ -56,6 +75,7 @@ public class FacturaService extends BaseService<Factura, String> {
         this.facturaRepository = facturaRepository;
         this.alquilerRepository = alquilerRepository;
         this.clienteRepository = clienteRepository;
+        this.promocionRepository = promocionRepository;
         this.facturaMapper = facturaMapper;
         this.detalleFacturaMapper = detalleFacturaMapper;
         this.formaDePagoMapper = formaDePagoMapper;
@@ -124,6 +144,78 @@ public class FacturaService extends BaseService<Factura, String> {
         return formaDePagoMapper.toDTOList(formas == null ? new ArrayList<>() : new ArrayList<>(formas));
     }
 
+    public byte[] generarFacturaPdf(String id) throws ErrorServiceException {
+        Factura factura = obtenerEntidad(id);
+        List<DetalleFactura> detalles = factura.getDetalles() != null ? factura.getDetalles() : new ArrayList<>();
+        double total = factura.getTotalPagado() != null ? factura.getTotalPagado() : calcularTotal(detalles);
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("es", "AR"));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            Document document = new Document(PageSize.A4, 36, 36, 36, 36);
+            PdfWriter.getInstance(document, baos);
+            document.open();
+            try {
+                Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16);
+                Font sectionFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12);
+                Font regularFont = FontFactory.getFont(FontFactory.HELVETICA, 11);
+
+                document.add(new Paragraph("Comprobante de alquiler", titleFont));
+                document.add(new Paragraph("Factura N° " + (factura.getNumeroFactura() != null ? factura.getNumeroFactura() : "-"), regularFont));
+                document.add(new Paragraph("Fecha: " + (factura.getFechaFactura() != null ? factura.getFechaFactura() : LocalDate.now()), regularFont));
+                if (factura.getEstado() != null) {
+                    document.add(new Paragraph("Estado: " + factura.getEstado(), regularFont));
+                }
+                document.add(Chunk.NEWLINE);
+
+                document.add(new Paragraph("Datos del cliente", sectionFont));
+                Cliente cliente = extraerClienteSeguro(factura);
+                if (cliente != null) {
+                    document.add(new Paragraph(construirNombreCliente(cliente), regularFont));
+                    document.add(new Paragraph("ID Cliente: " + cliente.getId(), regularFont));
+                } else {
+                    document.add(new Paragraph("Sin datos de cliente", regularFont));
+                }
+                document.add(Chunk.NEWLINE);
+
+                document.add(new Paragraph("Detalle", sectionFont));
+                PdfPTable tabla = new PdfPTable(new float[]{4f, 1.2f, 1.5f});
+                tabla.setWidthPercentage(100f);
+
+                agregarCeldaTabla(tabla, "Concepto", true, PdfPCell.ALIGN_LEFT);
+                agregarCeldaTabla(tabla, "Cantidad", true, PdfPCell.ALIGN_CENTER);
+                agregarCeldaTabla(tabla, "Subtotal", true, PdfPCell.ALIGN_RIGHT);
+
+                if (detalles.isEmpty()) {
+                    agregarCeldaTabla(tabla, "Sin ítems asociados", false, PdfPCell.ALIGN_LEFT);
+                    agregarCeldaTabla(tabla, "-", false, PdfPCell.ALIGN_CENTER);
+                    agregarCeldaTabla(tabla, "-", false, PdfPCell.ALIGN_RIGHT);
+                } else {
+                    for (DetalleFactura detalle : detalles) {
+                        agregarCeldaTabla(tabla, construirDescripcionDetalle(detalle), false, PdfPCell.ALIGN_LEFT);
+                        agregarCeldaTabla(tabla,
+                                detalle.getCantidad() != null ? detalle.getCantidad().toString() : "-",
+                                false,
+                                PdfPCell.ALIGN_CENTER);
+                        agregarCeldaTabla(tabla,
+                                detalle.getSubtotal() != null ? currencyFormat.format(detalle.getSubtotal()) : "-",
+                                false,
+                                PdfPCell.ALIGN_RIGHT);
+                    }
+                }
+
+                document.add(tabla);
+                document.add(Chunk.NEWLINE);
+                document.add(new Paragraph("Total: " + currencyFormat.format(total), sectionFont));
+            } finally {
+                document.close();
+            }
+            return baos.toByteArray();
+        } catch (DocumentException e) {
+            throw new ErrorServiceException("No se pudo generar el comprobante en PDF", e);
+        }
+    }
+
     private Factura prepararFacturaDesdeDTO(FacturaDTO dto) throws ErrorServiceException {
         if (dto == null) {
             throw new ErrorServiceException("Los datos de la factura son obligatorios");
@@ -146,6 +238,7 @@ public class FacturaService extends BaseService<Factura, String> {
                 DetalleFactura detalle = detalleFacturaMapper.toEntity(detalleDTO);
                 detalle.setAlquiler(obtenerAlquilerActivo(detalleDTO.getAlquilerId()));
                 detalle.setFactura(factura);
+                detalle.setPromocion(obtenerPromocionParaDetalle(detalleDTO.getPromocionId()));
                 detalle.setEliminado(Boolean.FALSE);
                 detallesConstruidos.add(detalle);
             }
@@ -224,6 +317,14 @@ public class FacturaService extends BaseService<Factura, String> {
         }
         return alquilerRepository.findByIdAndEliminadoIsFalse(alquilerId)
                 .orElseThrow(() -> new ErrorServiceException("Alquiler no encontrado o eliminado"));
+    }
+
+    private Promocion obtenerPromocionParaDetalle(String promocionId) throws ErrorServiceException {
+        if (!StringUtils.hasText(promocionId)) {
+            return null;
+        }
+        return promocionRepository.findByIdAndEliminadoIsFalse(promocionId)
+                .orElseThrow(() -> new ErrorServiceException("Promoción no encontrada o eliminada"));
     }
 
     private Cliente obtenerClienteActivo(String clienteId) throws ErrorServiceException {
@@ -381,9 +482,13 @@ public class FacturaService extends BaseService<Factura, String> {
         if (detalle.getAlquiler() == null || detalle.getAlquiler().getId() == null) {
             throw new ErrorServiceException("Cada detalle debe estar asociado a un alquiler");
         }
+        if (detalle.getPromocion() != null
+                && Boolean.TRUE.equals(detalle.getPromocion().getEliminado())) {
+            throw new ErrorServiceException("No se puede asociar una promoción eliminada");
+        }
     }
 
-    public Factura crearFacturaBorradorDesdeAlquiler(Alquiler alquiler, double monto, int cantidadDias) throws ErrorServiceException {
+    public Factura crearFacturaBorradorDesdeAlquiler(Alquiler alquiler, double monto, int cantidadDias, Promocion promocionAplicada) throws ErrorServiceException {
         if (alquiler == null) {
             throw new ErrorServiceException("No se indicó el alquiler para generar la factura");
         }
@@ -407,10 +512,50 @@ public class FacturaService extends BaseService<Factura, String> {
         detalle.setCantidad(cantidadDias);
         detalle.setSubtotal(totalRedondeado);
         detalle.setAlquiler(alquiler);
+        detalle.setPromocion(promocionAplicada);
         detalle.setEliminado(false);
         factura.agregarDetalle(detalle);
 
         return alta(factura);
+    }
+
+    private void agregarCeldaTabla(PdfPTable tabla, String texto, boolean encabezado, int alineacionHorizontal) {
+        Font font = encabezado
+                ? FontFactory.getFont(FontFactory.HELVETICA_BOLD, 11)
+                : FontFactory.getFont(FontFactory.HELVETICA, 11);
+
+        PdfPCell celda = new PdfPCell(new Phrase(texto != null ? texto : "", font));
+        celda.setHorizontalAlignment(alineacionHorizontal);
+        celda.setVerticalAlignment(PdfPCell.ALIGN_MIDDLE);
+        celda.setPadding(6f);
+        if (encabezado) {
+            celda.setBackgroundColor(new Color(230, 230, 230));
+        }
+        tabla.addCell(celda);
+    }
+
+    private String construirDescripcionDetalle(DetalleFactura detalle) {
+        if (detalle == null) {
+            return "Detalle sin información";
+        }
+        Alquiler alquiler = detalle.getAlquiler();
+        if (alquiler == null) {
+            return "Concepto varios";
+        }
+        StringBuilder sb = new StringBuilder("Alquiler");
+        if (alquiler.getVehiculo() != null) {
+            String patente = alquiler.getVehiculo().getPatente();
+            if (patente != null && !patente.isBlank()) {
+                sb.append(" ").append(patente);
+            }
+        }
+        if (alquiler.getId() != null) {
+            sb.append(" (ID ").append(alquiler.getId()).append(")");
+        }
+        if (alquiler.getFechaDesde() != null && alquiler.getFechaHasta() != null) {
+            sb.append(" ").append(alquiler.getFechaDesde()).append(" al ").append(alquiler.getFechaHasta());
+        }
+        return sb.toString();
     }
 
     private double redondear(double valor) {

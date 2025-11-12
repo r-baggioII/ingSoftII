@@ -79,18 +79,35 @@ public class UsuarioService extends BaseService<Usuario, String> {
     
     public UsuarioDTO altaDTO(UsuarioDTO usuarioDTO) throws ErrorServiceException {
         try {
-            // Limpiar el ID si está vacío (viene "" del cliente en lugar de null)
+            // Validación manual: la clave es obligatoria en creación
+            if (usuarioDTO.getClave() == null || usuarioDTO.getClave().trim().isEmpty()) {
+                throw new ErrorServiceException("La clave es obligatoria al crear un usuario");
+            }
+            
+            // Validación: el usuario debe tener una persona asociada
+            if (usuarioDTO.getPersonaId() == null || usuarioDTO.getPersonaId().trim().isEmpty()) {
+                throw new ErrorServiceException("El usuario debe estar asociado a una persona");
+            }
+            
+            // Limpiar el ID si viene como cadena vacía (Hibernate error fix)
             if (usuarioDTO.getId() != null && usuarioDTO.getId().trim().isEmpty()) {
                 usuarioDTO.setId(null);
             }
             
             Usuario usuario = usuarioMapper.toEntity(usuarioDTO);
             
-            // Asegurar que el ID de la entidad también sea null
+            // Verificar que la persona existe y asignarla
+            Persona persona = personaRepository.findById(usuarioDTO.getPersonaId())
+                .orElseThrow(() -> new ErrorServiceException("Persona no encontrada con ID: " + usuarioDTO.getPersonaId()));
+            usuario.setPersona(persona);
+            
+            // Limpiar el ID del usuario también (por seguridad)
             usuario.setId(null);
             
-            Usuario usuarioGuardado = registrarUsuario(usuario);
+            Usuario usuarioGuardado = alta(usuario);
             return usuarioMapper.toDTO(usuarioGuardado);
+        } catch (ErrorServiceException e) {
+            throw e;
         } catch (Exception e) {
             throw new ErrorServiceException("Error al crear usuario: " + e.getMessage());
         }

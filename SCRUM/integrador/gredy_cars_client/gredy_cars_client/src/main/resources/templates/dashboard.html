@@ -52,7 +52,7 @@
               <a class="nav-link px-3" th:href="@{/dashboard}">Panel de Gestión</a>
             </li>
             <li class="nav-item" th:if="${usuarioRol == 'JEFE'}">
-              <a class="nav-link px-3" th:href="@{/reportes}">Reportes</a>
+              <a class="nav-link px-3" th:href="@{/reportes/alquileres}">Reportes</a>
             </li>
             <li class="nav-item">
               <a class="btn btn-outline-primary px-3" th:href="@{/logout}">Cerrar Sesión</a>
@@ -94,7 +94,7 @@
                 <span class="badge rounded-pill me-2">AL</span>
                 Mis Alquileres
               </a>
-              <a th:if="${usuarioRol == 'CLIENTE'}" class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/gestion/facturas}">
+              <a th:if="${usuarioRol == 'CLIENTE'}" class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/cliente/mis-facturas}">
                 <span class="badge rounded-pill me-2">FC</span>
                 Mis Facturas
               </a>

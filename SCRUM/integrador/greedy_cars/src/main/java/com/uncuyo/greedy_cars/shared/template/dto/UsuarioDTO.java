@@ -25,7 +25,8 @@ public class UsuarioDTO extends BaseDTO<String> {
     @Size(min = 4, max = 50, message = "El nombre de usuario debe tener entre 4 y 50 caracteres")
     private String nombreUsuario;
     
-    @NotBlank(message = "La clave es obligatoria")
+    // La clave es opcional en modificaciones (si es null o vacía, no se cambia)
+    // Solo se valida si se proporciona un valor
     @Size(min = 6, message = "La clave debe tener al menos 6 caracteres")
     private String clave;
     

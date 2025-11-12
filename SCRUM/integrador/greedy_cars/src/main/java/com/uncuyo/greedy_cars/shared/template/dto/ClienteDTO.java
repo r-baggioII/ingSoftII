@@ -16,6 +16,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * DTO para la entidad Cliente.
  * Extiende las propiedades de Persona e incluye campos específicos de Cliente.
@@ -25,6 +27,7 @@ import java.util.List;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ClienteDTO extends BaseDTO<String> {
 
     // Campos heredados de Persona
@@ -57,16 +60,22 @@ public class ClienteDTO extends BaseDTO<String> {
     // IDs de imágenes existentes a asociar (opcional)
     private List<String> imagenIds = new ArrayList<>();
 
-    // Campos específicos de Cliente
-    @Size(max = 500, message = "La dirección de estadía no puede exceder los 500 caracteres")
-    private String direccionEstadia;
-
     // IDs de nacionalidades - al menos una es obligatoria
     @NotEmpty(message = "El cliente debe tener al menos una nacionalidad")
     private List<String> nacionalidadIds = new ArrayList<>();
+
+    // Campos específicos de Cliente
+    @Size(max = 500, message = "La dirección de estadía no puede exceder los 500 caracteres")
+    private String direccionEstadia;
     
     // ID del usuario asociado (opcional)
     private String usuarioId;
+    
+    // Objetos completos para devolver al cliente (no se usan para guardar)
+    private List<DireccionDTO> direcciones;
+    private List<Object> contactos;  // Puede ser ContactoCorreoElectronicoDTO o ContactoTelefonicoDTO
+    private List<ImagenDTO> imagenes;
+    private List<NacionalidadDTO> nacionalidades;
 
     @Override
     public String getId() {

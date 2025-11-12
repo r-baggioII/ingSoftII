@@ -332,8 +332,9 @@ public class GestionUsuariosController extends BaseThymeleafController<UsuarioDT
             clienteForm.setContactosCorreo(new ArrayList<>());
             clienteForm.getContactosCorreo().add(new ContactoCorreoElectronicoDTO());
         }
-        if (clienteForm.getNacionalidad() == null) {
-            clienteForm.setNacionalidad(new NacionalidadDTO());
+        if (clienteForm.getNacionalidades() == null || clienteForm.getNacionalidades().isEmpty()) {
+            clienteForm.setNacionalidades(new ArrayList<>());
+            clienteForm.getNacionalidades().add(new NacionalidadDTO());
         }
         model.addAttribute("clienteForm", clienteForm);
     }

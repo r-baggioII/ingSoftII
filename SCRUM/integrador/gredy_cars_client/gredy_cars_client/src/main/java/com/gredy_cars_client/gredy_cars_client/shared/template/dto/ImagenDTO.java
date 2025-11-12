@@ -15,7 +15,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class ImagenDTO extends BaseDTO<Long> {
+public class ImagenDTO extends BaseDTO<String> {
 
     @Size(max = 500, message = "El nombre del archivo no puede exceder los 500 caracteres")
     private String nombreArchivo;
@@ -35,12 +35,12 @@ public class ImagenDTO extends BaseDTO<Long> {
     private String tipoImagen;
 
     @Override
-    public Long getId() {
+    public String getId() {
         return super.id;
     }
 
     @Override
-    public void setId(Long id) {
+    public void setId(String id) {
         super.id = id;
     }
 }

@@ -106,15 +106,17 @@
               <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
                 <div class="card-body">
                   <h5 class="card-title">Crear / Editar Empresa</h5>
-                  <form id="empresa-form" method="post" 
-                        th:action="${empresaEditar != null} ? @{/gestion/empresas/modificar/{id}(id=${empresaEditar.id})} : @{/gestion/empresas/crear}">
-                    <input type="hidden" id="empresaId" name="id" th:value="${empresaEditar?.id}">
+                  <form id="empresaForm"
+                        method="post"
+                        th:object="${empresaForm}"
+                        th:action="${#strings.isEmpty(empresaForm.id)} ? @{/gestion/empresas} : @{/gestion/empresas/{id}(id=${empresaForm.id})}">
+                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <input type="hidden" th:field="*{id}">
                     
                     <div class="row g-3">
                       <div class="col-md-12">
                         <label class="panel-label">Nombre de la Empresa *</label>
-                        <input type="text" class="form-control panel-control" id="empresaNombre" name="nombre" 
-                               th:value="${empresaEditar?.nombre}" required>
+                        <input type="text" class="form-control panel-control" id="empresaNombre" th:field="*{nombre}" required>
                       </div>
                     </div>
 
@@ -122,12 +124,11 @@
                       <div class="col-md-12">
                         <label class="panel-label">Direcciones *</label>
                         <p class="text-muted small">Seleccione una o más direcciones (mantenga Ctrl/Cmd para selección múltiple)</p>
-                        <select class="form-select panel-control" id="empresaDireccionesSelect" name="direccionIds" 
-                                multiple size="5" required>
-                          <option th:each="dir : ${direcciones}" 
-                                  th:value="${dir.id}" 
-                                  th:text="${dir.calle + ' ' + dir.numeracion + ', ' + dir.localidad?.nombre}"
-                                  th:selected="${empresaEditar != null && #lists.contains(empresaEditar.direccionIds, dir.id)}">
+                        <select class="form-select panel-control" id="empresaDireccionesSelect"
+                                th:field="*{direccionIds}" multiple size="5" required>
+                          <option th:each="dir : ${direcciones}"
+                                  th:value="${dir.id}"
+                                  th:text="${dir.calle + ' ' + dir.numeracion + ', ' + dir.localidad?.nombre}">
                           </option>
                         </select>
                         <div class="mt-2">
@@ -143,12 +144,12 @@
                       <div class="col-md-6">
                         <label class="panel-label">Contactos de Correo Electrónico</label>
                         <p class="text-muted small">Seleccione uno o más correos (Ctrl/Cmd para múltiple)</p>
-                        <select class="form-select panel-control" id="empresaContactosCorreoSelect" name="contactoIds" 
+                        <select class="form-select panel-control" id="empresaContactosCorreoSelect" name="contactoIds"
                                 multiple size="4">
                           <option th:each="correo : ${contactosCorreo}" 
                                   th:value="${correo.id}" 
                                   th:text="'📧 ' + ${correo.mail}"
-                                  th:selected="${empresaEditar != null && #lists.contains(empresaEditar.contactoIds, correo.id)}">
+                                  th:selected="${empresaForm.contactoIds != null && #lists.contains(empresaForm.contactoIds, correo.id)}">
                           </option>
                         </select>
                         <div class="mt-2">
@@ -162,12 +163,12 @@
                       <div class="col-md-6">
                         <label class="panel-label">Contactos Telefónicos</label>
                         <p class="text-muted small">Seleccione uno o más teléfonos (Ctrl/Cmd para múltiple)</p>
-                        <select class="form-select panel-control" id="empresaContactosTelefonoSelect" name="contactoIds" 
+                        <select class="form-select panel-control" id="empresaContactosTelefonoSelect" name="contactoIds"
                                 multiple size="4">
                           <option th:each="tel : ${contactosTelefono}" 
                                   th:value="${tel.id}" 
                                   th:text="'📞 ' + ${tel.telefono}"
-                                  th:selected="${empresaEditar != null && #lists.contains(empresaEditar.contactoIds, tel.id)}">
+                                  th:selected="${empresaForm.contactoIds != null && #lists.contains(empresaForm.contactoIds, tel.id)}">
                           </option>
                         </select>
                         <div class="mt-2">
@@ -181,8 +182,8 @@
 
                     <div class="d-flex gap-2 mt-3">
                       <button type="submit" class="btn main-button-panel">
-                        <span th:if="${empresaEditar == null}">Crear Empresa</span>
-                        <span th:if="${empresaEditar != null}">Actualizar Empresa</span>
+                        <span th:if="${#strings.isEmpty(empresaForm.id)}">Crear Empresa</span>
+                        <span th:if="${!#strings.isEmpty(empresaForm.id)}">Actualizar Empresa</span>
                       </button>
                       <button type="button" class="btn btn-outline-secondary" onclick="window.location.href='/gestion/empresas'">Cancelar</button>
                     </div>
@@ -217,7 +218,7 @@
                           <td class="text-end">
                             <a th:href="@{/gestion/empresas(editEmpresaId=${empresa.id})}" 
                                class="btn btn-sm btn-outline-primary me-1">Editar</a>
-                            <form th:action="@{/gestion/empresas/eliminar/{id}(id=${empresa.id})}" 
+                            <form th:action="@{/gestion/empresas/{id}/eliminar(id=${empresa.id})}" 
                                   method="post" style="display:inline;">
                               <button type="submit" class="btn btn-sm btn-outline-danger"
                                       onclick="return confirm('¿Está seguro de eliminar esta empresa?')">Eliminar</button>

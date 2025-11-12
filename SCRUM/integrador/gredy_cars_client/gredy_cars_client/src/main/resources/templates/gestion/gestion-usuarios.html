@@ -31,6 +31,10 @@
         </nav>
       </div>
     </div>
+    <form id="resetPasswordForm" method="post" style="display:none;">
+      <input type="hidden" name="nuevaClave" id="resetPasswordValue">
+      <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    </form>
   </div>
 </section>
 
@@ -50,7 +54,10 @@
         <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
           <div class="card-body">
             <h5 class="card-title">Usuario (crear/editar)</h5>
-            <form th:object="${usuarioForm}" th:action="@{/gestion/usuarios/usuario}" method="post">
+            <form id="usuarioForm"
+                  th:object="${usuarioForm}"
+                  th:action="${#strings.isEmpty(usuarioForm.id)} ? @{/gestion/usuarios} : @{/gestion/usuarios/{id}(id=${usuarioForm.id})}"
+                  method="post">
               <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
               <input type="hidden" th:field="*{id}" />
               <div class="row g-3">
@@ -132,13 +139,19 @@
                       <a class="btn btn-sm btn-outline-secondary" th:href="@{/gestion/usuarios(editUsuarioId=${u.id})}">
                         <i class="bi bi-pencil"></i> Editar
                       </a>
-                      <form th:action="@{/gestion/usuarios/usuario/{id}/eliminar(id=${u.id})}" method="post" class="d-inline">
+                      <form th:action="@{/gestion/usuarios/{id}/eliminar(id=${u.id})}" method="post" class="d-inline">
                         <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <button class="btn btn-sm btn-outline-danger ms-1" type="submit" 
                                 onclick="return confirm('¿Está seguro de eliminar este usuario?')">
                           <i class="bi bi-trash"></i> Eliminar
                         </button>
                       </form>
+                      <button class="btn btn-sm btn-outline-warning ms-1 btn-reset-password"
+                              type="button"
+                              th:data-reset-url="@{/gestion/usuarios/{id}/reset-password(id=${u.id})}"
+                              th:data-username="${u.nombreUsuario}">
+                        <i class="bi bi-key"></i> Reset Clave
+                      </button>
                     </td>
                   </tr>
                   <tr th:if="${#lists.isEmpty(usuarios)}">
@@ -208,6 +221,25 @@
     
     // Ejecutar al cargar la página (por si hay un rol preseleccionado)
     actualizarPersonas();
+
+    const resetPasswordForm = document.getElementById('resetPasswordForm');
+    const resetPasswordInput = document.getElementById('resetPasswordValue');
+    const resetButtons = document.querySelectorAll('.btn-reset-password');
+
+    if (resetPasswordForm && resetPasswordInput && resetButtons.length) {
+      resetButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const username = button.dataset.username || 'el usuario';
+          const nuevaClave = prompt('Ingrese la nueva contraseña para ' + username);
+          if (!nuevaClave) {
+            return;
+          }
+          resetPasswordForm.action = button.dataset.resetUrl;
+          resetPasswordInput.value = nuevaClave;
+          resetPasswordForm.submit();
+        });
+      });
+    }
   });
 </script>
 

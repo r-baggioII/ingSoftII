@@ -4,8 +4,11 @@ import com.gredy_cars_client.gredy_cars_client.shared.template.dao.UsuarioApiDao
 import com.gredy_cars_client.gredy_cars_client.shared.template.dto.UsuarioDTO;
 import com.gredy_cars_client.gredy_cars_client.shared.template.enums.BaseUseCaseService;
 import com.gredy_cars_client.gredy_cars_client.shared.template.exception.ErrorServiceException;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 /**
  * Servicio para gestionar usuarios en el cliente.
@@ -79,5 +82,18 @@ public class UsuarioService extends BaseClientService<UsuarioDTO, String> {
     @Override
     protected void postBaja(String id) throws ErrorServiceException {
         log.info("Usuario eliminado exitosamente con id: {}", id);
+    }
+
+    public void resetPassword(String id, String nuevaClave) throws ErrorServiceException {
+        if (!StringUtils.hasText(nuevaClave)) {
+            throw new ErrorServiceException("La nueva contraseña es obligatoria");
+        }
+        UsuarioDTO usuario = obtener(id)
+            .orElseThrow(() -> new ErrorServiceException("Usuario no encontrado"));
+        usuario.setClave(nuevaClave);
+        Optional<UsuarioDTO> actualizado = modificar(id, usuario);
+        if (actualizado.isEmpty()) {
+            throw new ErrorServiceException("No se pudo actualizar la contraseña");
+        }
     }
 }

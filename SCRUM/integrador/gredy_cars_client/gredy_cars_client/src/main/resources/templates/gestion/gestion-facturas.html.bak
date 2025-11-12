@@ -78,13 +78,8 @@
                 <small class="d-block text-muted">ID: <span th:text="${clienteSeleccionadoId}">--</span></small>
               </div>
             </div>
-            <form th:object="${facturaForm}"
-                  th:action="${#strings.isEmpty(facturaForm.id)} ? @{/gestion/facturas} : @{/gestion/facturas/{id}(id=${facturaForm.id})}"
-                  method="post">
+            <form th:object="${facturaForm}" th:action="@{/gestion/facturas}" method="post">
               <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-              <input type="hidden" name="estadoFiltro" th:value="${estadoSeleccionado}" />
-              <input type="hidden" name="facturaSeleccionadaId" th:value="${facturaSeleccionadaId}" />
-              <input type="hidden" name="clienteSeleccionadoId" th:value="${clienteSeleccionadoId}" />
               <input type="hidden" th:field="*{id}" />
               <input type="hidden" th:field="*{clienteId}" />
               <div class="alert alert-warning" th:if="${errorFacturaForm}" th:text="${errorFacturaForm}"></div>

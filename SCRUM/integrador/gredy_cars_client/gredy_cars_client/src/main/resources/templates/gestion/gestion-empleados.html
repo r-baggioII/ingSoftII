@@ -50,7 +50,10 @@
         <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
           <div class="card-body">
             <h5 class="card-title">Empleado (crear/editar)</h5>
-            <form th:object="${empleadoForm}" th:action="@{/gestion/empleados/empleado}" method="post">
+            <form id="empleadoForm"
+                  th:object="${empleadoForm}"
+                  th:action="${#strings.isEmpty(empleadoForm.id)} ? @{/gestion/empleados} : @{/gestion/empleados/{id}(id=${empleadoForm.id})}"
+                  method="post">
               <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
               <input type="hidden" th:field="*{id}" />
               <div class="row g-3">
@@ -153,7 +156,7 @@
                   <td th:text="${e.tipoEmpleado}">Tipo</td>
                   <td class="text-end">
                     <a class="btn btn-sm btn-outline-secondary" th:href="@{/gestion/empleados(editEmpleadoId=${e.id})}">Editar</a>
-                    <form th:action="@{/gestion/empleados/empleado/{id}/eliminar(id=${e.id})}" method="post" class="d-inline">
+                    <form th:action="@{/gestion/empleados/{id}/eliminar(id=${e.id})}" method="post" class="d-inline">
                       <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                       <button class="btn btn-sm btn-outline-danger ms-1" type="submit">Eliminar</button>
                     </form>
@@ -179,7 +182,7 @@
 <script>
   // Manejar la selección de direcciones y contactos para Empleado
   document.addEventListener('DOMContentLoaded', function() {
-    const empleadoForm = document.querySelector('form[action*="/gestion/empleados/empleado"]');
+    const empleadoForm = document.getElementById('empleadoForm');
     const appContext = document.querySelector('meta[name="app-context"]')?.getAttribute('content') || '';
     
     // URL del servidor API (no del cliente)

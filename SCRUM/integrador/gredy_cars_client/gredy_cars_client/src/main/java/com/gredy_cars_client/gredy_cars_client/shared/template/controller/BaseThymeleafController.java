@@ -24,7 +24,7 @@ import com.gredy_cars_client.gredy_cars_client.shared.template.service.BaseClien
  */
 public abstract class BaseThymeleafController<T extends BaseDTO<ID>, ID> {
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    protected final Logger log = LoggerFactory.getLogger(getClass());
 
     protected final BaseClientService<T, ID> service;
 
@@ -170,4 +170,3 @@ public abstract class BaseThymeleafController<T extends BaseDTO<ID>, ID> {
         return getRedirectToList();
     }
 }
-

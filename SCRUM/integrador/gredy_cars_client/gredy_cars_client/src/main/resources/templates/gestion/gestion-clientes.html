@@ -50,7 +50,10 @@
         <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
           <div class="card-body">
             <h5 class="card-title">Cliente (crear/editar)</h5>
-            <form th:object="${clienteForm}" th:action="@{/gestion/clientes/cliente}" method="post">
+            <form id="clienteForm"
+                  th:object="${clienteForm}"
+                  th:action="${#strings.isEmpty(clienteForm.id)} ? @{/gestion/clientes} : @{/gestion/clientes/{id}(id=${clienteForm.id})}"
+                  method="post">
               <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
               <input type="hidden" th:field="*{id}" />
               <div class="row g-3">
@@ -165,7 +168,7 @@
                   <td th:text="${c.direcciones != null ? c.direcciones.size() + ' dirección(es)' : '0 direcciones'}">Direcciones</td>
                   <td class="text-end">
                     <a class="btn btn-sm btn-outline-secondary" th:href="@{/gestion/clientes(editClienteId=${c.id})}">Editar</a>
-                    <form th:action="@{/gestion/clientes/cliente/{id}/eliminar(id=${c.id})}" method="post" class="d-inline">
+                    <form th:action="@{/gestion/clientes/{id}/eliminar(id=${c.id})}" method="post" class="d-inline">
                       <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                       <button class="btn btn-sm btn-outline-danger ms-1" type="submit" onclick="return confirm('¿Está seguro de eliminar este cliente?')">Eliminar</button>
                     </form>
@@ -191,7 +194,7 @@
 <script>
   // Manejar la selección de nacionalidades, direcciones y contactos para Cliente
   document.addEventListener('DOMContentLoaded', function() {
-    const clienteForm = document.querySelector('form[action*="/gestion/clientes/cliente"]');
+    const clienteForm = document.getElementById('clienteForm');
     const appContext = document.querySelector('meta[name="app-context"]')?.getAttribute('content') || '';
     
     // URL del servidor API (no del cliente)

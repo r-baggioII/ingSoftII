@@ -37,14 +37,59 @@ import com.gredy_cars_client.gredy_cars_client.shared.template.service.FacturaSe
  */
 @Controller
 @RequestMapping("/gestion")
-public class GestionFacturasController {
+public class GestionFacturasController extends BaseThymeleafController<FacturaDTO, String> {
 
     private final FacturaService facturaService;
     private final ClienteService clienteService;
 
     public GestionFacturasController(FacturaService facturaService, ClienteService clienteService) {
+        super(facturaService);
         this.facturaService = facturaService;
         this.clienteService = clienteService;
+    }
+
+    @Override
+    protected String getListView() {
+        return "gestion/gestion-facturas";
+    }
+
+    @Override
+    protected String getFormView() {
+        return "gestion/gestion-facturas";
+    }
+
+    @Override
+    protected String getRedirectToList() {
+        return "redirect:/gestion/facturas";
+    }
+
+    @Override
+    protected String getListModelAttribute() {
+        return "facturas";
+    }
+
+    @Override
+    protected String getFormModelAttribute() {
+        return "facturaForm";
+    }
+
+    @Override
+    protected String getEntityLabel() {
+        return "Factura";
+    }
+
+    @Override
+    protected FacturaDTO buildNewInstance() {
+        FacturaDTO nueva = new FacturaDTO();
+        asegurarColecciones(nueva);
+        return nueva;
+    }
+
+    @Override
+    protected void populateCollections(Model model) {
+        addUsuarioRol(model);
+        addStaticCatalogs(model);
+        ensureClientes(model);
     }
 
     @GetMapping("/facturas")
@@ -55,17 +100,10 @@ public class GestionFacturasController {
         @RequestParam(value = "clienteId", required = false) String clienteId,
         Model model
     ) {
-        // Get user role from Spring Security
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String usuarioRol = "CLIENTE";
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetailsWithRole) {
-            UserDetailsWithRole userDetails = (UserDetailsWithRole) authentication.getPrincipal();
-            usuarioRol = userDetails.getRol();
-        }
-        model.addAttribute("usuarioRol", usuarioRol);
-        
-        cargarPantallaFacturas(model, estado, editId, facturaSeleccionada, clienteId, true, true);
-        return "gestion/gestion-facturas";
+        addUsuarioRol(model);
+        FacturaViewState viewState = FacturaViewState.of(estado, editId, facturaSeleccionada, clienteId);
+        prepareFacturaScreen(model, viewState, true, true);
+        return getListView();
     }
 
     @GetMapping("/facturas/{id}/detalles")
@@ -76,8 +114,10 @@ public class GestionFacturasController {
         @RequestParam(value = "clienteId", required = false) String clienteId,
         Model model
     ) {
-        cargarPantallaFacturas(model, estado, editId, id, clienteId, true, true);
-        return "gestion/gestion-facturas";
+        addUsuarioRol(model);
+        FacturaViewState viewState = FacturaViewState.of(estado, editId, id, clienteId);
+        prepareFacturaScreen(model, viewState, true, true);
+        return getListView();
     }
 
     @GetMapping("/facturas/{id}/formas-pago")
@@ -88,118 +128,118 @@ public class GestionFacturasController {
         @RequestParam(value = "clienteId", required = false) String clienteId,
         Model model
     ) {
-        cargarPantallaFacturas(model, estado, editId, id, clienteId, true, true);
-        return "gestion/gestion-facturas";
+        addUsuarioRol(model);
+        FacturaViewState viewState = FacturaViewState.of(estado, editId, id, clienteId);
+        prepareFacturaScreen(model, viewState, true, true);
+        return getListView();
     }
 
     @PostMapping("/facturas")
-    public String guardarFactura(
+    public String crearFactura(
         @ModelAttribute("facturaForm") FacturaDTO facturaDTO,
-        RedirectAttributes ra
+        @RequestParam(value = "estadoFiltro", required = false) String estadoFiltro,
+        @RequestParam(value = "facturaSeleccionadaId", required = false) String facturaSeleccionadaId,
+        @RequestParam(value = "clienteSeleccionadoId", required = false) String clienteSeleccionadoId,
+        Model model,
+        RedirectAttributes redirectAttributes
     ) {
-        try {
-            if (!StringUtils.hasText(facturaDTO.getId())) {
-                facturaService.crear(facturaDTO);
-                ra.addFlashAttribute("success", "Factura creada correctamente");
-            } else {
-                if (facturaService.modificar(facturaDTO.getId(), facturaDTO).isPresent()) {
-                    ra.addFlashAttribute("success", "Factura actualizada correctamente");
-                } else {
-                    ra.addFlashAttribute("error", "No se encontró la factura a actualizar");
-                }
-            }
-        } catch (ErrorServiceException e) {
-            ra.addFlashAttribute("error", e.getMessage());
-            ra.addFlashAttribute("facturaForm", facturaDTO);
-        }
-        return redirigirConCliente(facturaDTO.getClienteId());
+        FacturaViewState viewState = FacturaViewState.of(estadoFiltro, null, facturaSeleccionadaId, clienteSeleccionadoId);
+        return processFacturaMutation(facturaDTO, viewState, model, redirectAttributes, false);
+    }
+
+    @PostMapping("/facturas/{id}")
+    public String actualizarFactura(
+        @PathVariable String id,
+        @ModelAttribute("facturaForm") FacturaDTO facturaDTO,
+        @RequestParam(value = "estadoFiltro", required = false) String estadoFiltro,
+        @RequestParam(value = "facturaSeleccionadaId", required = false) String facturaSeleccionadaId,
+        @RequestParam(value = "clienteSeleccionadoId", required = false) String clienteSeleccionadoId,
+        Model model,
+        RedirectAttributes redirectAttributes
+    ) {
+        facturaDTO.setId(id);
+        FacturaViewState viewState = FacturaViewState.of(estadoFiltro, id, facturaSeleccionadaId, clienteSeleccionadoId);
+        return processFacturaMutation(facturaDTO, viewState, model, redirectAttributes, true);
     }
 
     @PostMapping("/facturas/{id}/eliminar")
     public String eliminarFactura(
         @PathVariable String id,
         @RequestParam(value = "clienteId", required = false) String clienteId,
-        RedirectAttributes ra
+        RedirectAttributes redirectAttributes
     ) {
-        try {
-            facturaService.eliminar(id);
-            ra.addFlashAttribute("success", "Factura eliminada correctamente");
-        } catch (ErrorServiceException e) {
-            ra.addFlashAttribute("error", e.getMessage());
+        String outcome = super.handleDelete(id, redirectAttributes);
+        if (outcome.startsWith("redirect:/gestion/facturas") && StringUtils.hasText(clienteId)) {
+            return buildRedirect(clienteId);
         }
-        return redirigirConCliente(clienteId);
+        return outcome;
     }
 
-    private void cargarPantallaFacturas(
+    private String processFacturaMutation(
+        FacturaDTO facturaDTO,
+        FacturaViewState viewState,
         Model model,
-        String estado,
-        String editId,
-        String facturaSeleccionadaId,
-        String clienteId,
-        boolean cargarDetalles,
-        boolean cargarFormas
+        RedirectAttributes redirectAttributes,
+        boolean isUpdate
     ) {
-        List<FacturaDTO> facturas;
-        try {
-            facturas = StringUtils.hasText(estado)
-                ? facturaService.listarPorEstado(estado)
-                : facturaService.listar();
-        } catch (ErrorServiceException e) {
-            facturas = Collections.emptyList();
-            model.addAttribute("errorFacturas", "No se pudieron obtener las facturas: " + e.getMessage());
-        }
-        model.addAttribute("facturas", facturas);
-        model.addAttribute("estadosFactura", EstadoFactura.values());
-        model.addAttribute("tiposPago", TipoPago.values());
-        List<ClienteDTO> clientes;
-        try {
-            clientes = clienteService.listarActivos();
-        } catch (ErrorServiceException e) {
-            clientes = Collections.emptyList();
-            model.addAttribute("errorClientes", "No se pudieron obtener los clientes: " + e.getMessage());
-        }
-        model.addAttribute("clientes", clientes);
-        model.addAttribute("estadoSeleccionado", estado);
+        addUsuarioRol(model);
+        FacturaDTO sanitized = sanitizeFactura(facturaDTO);
+        String outcome = isUpdate
+            ? super.handleUpdate(sanitized.getId(), sanitized, model, redirectAttributes)
+            : super.handleCreate(sanitized, model, redirectAttributes);
 
-        FacturaDTO formulario = prepararFormulario(model, editId, clienteId);
-        String clienteSeleccionado = StringUtils.hasText(clienteId)
-            ? clienteId
-            : formulario.getClienteId();
-        model.addAttribute("clienteSeleccionadoId", clienteSeleccionado);
-        String clienteSeleccionadoNombre = null;
-        if (StringUtils.hasText(clienteSeleccionado)) {
-            clienteSeleccionadoNombre = clientes.stream()
-                .filter(cliente -> cliente.getId().equals(clienteSeleccionado))
-                .map(cliente -> cliente.getNombre() + " " + cliente.getApellido())
-                .findFirst()
-                .orElse(null);
-        }
-        model.addAttribute("clienteSeleccionadoNombre", clienteSeleccionadoNombre);
+        FacturaViewState stateWithCliente = viewState.withClienteFallback(sanitized.getClienteId());
 
-        // TODO FRONT: agregar acción (botón/JS) que llame a /api/pagos/mp/preferencia y redirija al initPoint para pagos con billetera virtual.
-        cargarSeccionesSeleccionadas(model, facturaSeleccionadaId, cargarDetalles, cargarFormas);
+        if (outcome.startsWith("redirect:/")) {
+            return buildRedirect(stateWithCliente.clienteId());
+        }
+
+        prepareFacturaScreen(model, stateWithCliente, true, true);
+        return outcome;
     }
 
-    private FacturaDTO prepararFormulario(Model model, String editId, String clienteId) {
+    private String buildRedirect(String clienteId) {
+        return StringUtils.hasText(clienteId)
+            ? "redirect:/gestion/facturas?clienteId=" + clienteId
+            : getRedirectToList();
+    }
+
+    private void prepareFacturaScreen(Model model, FacturaViewState viewState, boolean cargarDetalles, boolean cargarFormas) {
+        addStaticCatalogs(model);
+        List<ClienteDTO> clientes = ensureClientes(model);
+        loadFacturas(model, viewState.estado());
+
+        model.addAttribute("estadoSeleccionado", viewState.estado());
+        model.addAttribute("facturaSeleccionadaId", viewState.facturaSeleccionadaId());
+
+        FacturaDTO formulario = prepararFormulario(model, viewState);
+        String clienteSeleccionado = resolveClienteSeleccionado(formulario, viewState);
+        model.addAttribute("clienteSeleccionadoId", clienteSeleccionado);
+        model.addAttribute("clienteSeleccionadoNombre", buscarNombreCliente(clientes, clienteSeleccionado));
+
+        cargarSeccionesSeleccionadas(model, viewState.facturaSeleccionadaId(), cargarDetalles, cargarFormas);
+    }
+
+    private FacturaDTO prepararFormulario(Model model, FacturaViewState viewState) {
         FacturaDTO formulario;
         Map<String, Object> atributos = model.asMap();
-        boolean formularioDesdeFlash = model.containsAttribute("facturaForm");
-        if (formularioDesdeFlash) {
-            formulario = (FacturaDTO) atributos.get("facturaForm");
-        } else if (StringUtils.hasText(editId)) {
+        boolean formularioDesdeModelo = atributos.containsKey(getFormModelAttribute());
+        if (formularioDesdeModelo) {
+            formulario = (FacturaDTO) atributos.get(getFormModelAttribute());
+        } else if (StringUtils.hasText(viewState.editId())) {
             try {
-                formulario = facturaService.buscar(editId).orElseGet(FacturaDTO::new);
+                formulario = facturaService.buscar(viewState.editId()).orElseGet(FacturaDTO::new);
             } catch (ErrorServiceException e) {
                 formulario = new FacturaDTO();
                 model.addAttribute("errorFacturaForm", "No se pudo cargar la factura a editar: " + e.getMessage());
             }
         } else {
-            formulario = new FacturaDTO();
+            formulario = buildNewInstance();
         }
 
         boolean esFacturaNueva = !StringUtils.hasText(formulario.getId());
-        String clienteParaConsulta = StringUtils.hasText(clienteId)
-            ? clienteId
+        String clienteParaConsulta = StringUtils.hasText(viewState.clienteId())
+            ? viewState.clienteId()
             : formulario.getClienteId();
 
         List<AlquilerDTO> alquileresPendientes = Collections.emptyList();
@@ -207,22 +247,21 @@ public class GestionFacturasController {
             alquileresPendientes = clienteService.listarAlquileresPendientesFactura(clienteParaConsulta);
         }
 
-        if (esFacturaNueva && !formularioDesdeFlash && !alquileresPendientes.isEmpty()) {
+        if (esFacturaNueva && !formularioDesdeModelo && !alquileresPendientes.isEmpty()) {
             formulario.setClienteId(clienteParaConsulta);
             formulario.setDetalles(construirDetallesDesdeAlquileres(alquileresPendientes));
-        } else if (esFacturaNueva && StringUtils.hasText(clienteId) && !formularioDesdeFlash) {
-            formulario.setClienteId(clienteId);
+        } else if (esFacturaNueva && !formularioDesdeModelo && StringUtils.hasText(viewState.clienteId())) {
+            formulario.setClienteId(viewState.clienteId());
         }
 
         asegurarColecciones(formulario);
-        model.addAttribute("facturaForm", formulario);
+        model.addAttribute(getFormModelAttribute(), formulario);
         model.addAttribute("alquileresPendientes", alquileresPendientes);
-        Map<String, AlquilerDTO> mapaPendientes = alquileresPendientes.isEmpty()
+        model.addAttribute("alquileresPendientesMap", alquileresPendientes.isEmpty()
             ? Collections.emptyMap()
             : alquileresPendientes.stream()
                 .filter(alquiler -> StringUtils.hasText(alquiler.getId()))
-                .collect(Collectors.toMap(AlquilerDTO::getId, Function.identity(), (a, b) -> a));
-        model.addAttribute("alquileresPendientesMap", mapaPendientes);
+                .collect(Collectors.toMap(AlquilerDTO::getId, Function.identity(), (a, b) -> a)));
         return formulario;
     }
 
@@ -232,8 +271,6 @@ public class GestionFacturasController {
         boolean cargarDetalles,
         boolean cargarFormas
     ) {
-        model.addAttribute("facturaSeleccionadaId", facturaSeleccionadaId);
-
         if (cargarDetalles && StringUtils.hasText(facturaSeleccionadaId)) {
             try {
                 model.addAttribute("detallesSeleccionados", facturaService.listarDetalles(facturaSeleccionadaId));
@@ -257,17 +294,72 @@ public class GestionFacturasController {
         }
     }
 
-    private void asegurarColecciones(FacturaDTO factura) {
-        if (factura.getDetalles() == null || factura.getDetalles().isEmpty()) {
-            List<DetalleFacturaDTO> detalles = new ArrayList<>();
-            detalles.add(new DetalleFacturaDTO());
-            factura.setDetalles(detalles);
+    private void loadFacturas(Model model, String estado) {
+        try {
+            List<FacturaDTO> facturas = StringUtils.hasText(estado)
+                ? facturaService.listarPorEstado(estado)
+                : facturaService.listar();
+            model.addAttribute("facturas", facturas);
+        } catch (ErrorServiceException e) {
+            model.addAttribute("facturas", Collections.emptyList());
+            model.addAttribute("errorFacturas", "No se pudieron obtener las facturas: " + e.getMessage());
         }
-        if (factura.getFormasPago() == null || factura.getFormasPago().isEmpty()) {
-            List<FormaDePagoDTO> formas = new ArrayList<>();
-            formas.add(new FormaDePagoDTO());
-            factura.setFormasPago(formas);
+    }
+
+    private List<ClienteDTO> ensureClientes(Model model) {
+        Map<String, Object> atributos = model.asMap();
+        if (atributos.containsKey("clientes")) {
+            Object existentes = atributos.get("clientes");
+            if (existentes instanceof List<?>) {
+                @SuppressWarnings("unchecked")
+                List<ClienteDTO> clientes = (List<ClienteDTO>) existentes;
+                return clientes;
+            }
         }
+        try {
+            List<ClienteDTO> clientes = clienteService.listarActivos();
+            model.addAttribute("clientes", clientes);
+            return clientes;
+        } catch (ErrorServiceException e) {
+            model.addAttribute("clientes", Collections.emptyList());
+            model.addAttribute("errorClientes", "No se pudieron obtener los clientes: " + e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    private void addUsuarioRol(Model model) {
+        if (model.asMap().containsKey("usuarioRol")) {
+            return;
+        }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String usuarioRol = "CLIENTE";
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetailsWithRole userDetails) {
+            usuarioRol = userDetails.getRol();
+        }
+        model.addAttribute("usuarioRol", usuarioRol);
+    }
+
+    private void addStaticCatalogs(Model model) {
+        model.addAttribute("estadosFactura", EstadoFactura.values());
+        model.addAttribute("tiposPago", TipoPago.values());
+    }
+
+    private String resolveClienteSeleccionado(FacturaDTO formulario, FacturaViewState viewState) {
+        if (StringUtils.hasText(viewState.clienteId())) {
+            return viewState.clienteId();
+        }
+        return formulario.getClienteId();
+    }
+
+    private String buscarNombreCliente(List<ClienteDTO> clientes, String clienteId) {
+        if (!StringUtils.hasText(clienteId)) {
+            return null;
+        }
+        return clientes.stream()
+            .filter(cliente -> clienteId.equals(cliente.getId()))
+            .map(cliente -> cliente.getNombre() + " " + cliente.getApellido())
+            .findFirst()
+            .orElse(null);
     }
 
     private List<DetalleFacturaDTO> construirDetallesDesdeAlquileres(List<AlquilerDTO> alquileres) {
@@ -288,9 +380,46 @@ public class GestionFacturasController {
         return detalles;
     }
 
-    private String redirigirConCliente(String clienteId) {
-        return StringUtils.hasText(clienteId)
-            ? "redirect:/gestion/facturas?clienteId=" + clienteId
-            : "redirect:/gestion/facturas";
+    private void asegurarColecciones(FacturaDTO factura) {
+        if (factura.getDetalles() == null || factura.getDetalles().isEmpty()) {
+            List<DetalleFacturaDTO> detalles = new ArrayList<>();
+            detalles.add(new DetalleFacturaDTO());
+            factura.setDetalles(detalles);
+        }
+        if (factura.getFormasPago() == null || factura.getFormasPago().isEmpty()) {
+            List<FormaDePagoDTO> formas = new ArrayList<>();
+            formas.add(new FormaDePagoDTO());
+            factura.setFormasPago(formas);
+        }
+    }
+
+    private FacturaDTO sanitizeFactura(FacturaDTO dto) {
+        if (dto == null) {
+            return buildNewInstance();
+        }
+        asegurarColecciones(dto);
+        return dto;
+    }
+
+    private record FacturaViewState(String estado, String editId, String facturaSeleccionadaId, String clienteId) {
+
+        static FacturaViewState of(String estado, String editId, String facturaSeleccionadaId, String clienteId) {
+            return new FacturaViewState(
+                normalize(estado),
+                normalize(editId),
+                normalize(facturaSeleccionadaId),
+                normalize(clienteId)
+            );
+        }
+
+        FacturaViewState withClienteFallback(String fallback) {
+            return StringUtils.hasText(clienteId)
+                ? this
+                : new FacturaViewState(estado, editId, facturaSeleccionadaId, normalize(fallback));
+        }
+
+        private static String normalize(String value) {
+            return StringUtils.hasText(value) ? value : null;
+        }
     }
 }

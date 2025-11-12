@@ -3,9 +3,21 @@ package com.gredy_cars_client.gredy_cars_client.shared.template.controller;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.gredy_cars_client.gredy_cars_client.shared.template.dto.EmpleadoDTO;
 import com.gredy_cars_client.gredy_cars_client.shared.template.dto.ImagenDTO;
+import com.gredy_cars_client.gredy_cars_client.shared.template.enums.BaseUseCaseController;
 import com.gredy_cars_client.gredy_cars_client.shared.template.enums.TipoDocumento;
 import com.gredy_cars_client.gredy_cars_client.shared.template.enums.TipoEmpleado;
 import com.gredy_cars_client.gredy_cars_client.shared.template.enums.TipoImagen;
@@ -15,18 +27,10 @@ import com.gredy_cars_client.gredy_cars_client.shared.template.service.ContactoT
 import com.gredy_cars_client.gredy_cars_client.shared.template.service.DireccionService;
 import com.gredy_cars_client.gredy_cars_client.shared.template.service.EmpleadoService;
 import com.gredy_cars_client.gredy_cars_client.shared.template.service.ImagenService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/gestion/empleados")
-public class GestionEmpleadosController {
-
-    private static final Logger log = LoggerFactory.getLogger(GestionEmpleadosController.class);
+public class GestionEmpleadosController extends BaseThymeleafController<EmpleadoDTO, String> {
 
     private final EmpleadoService empleadoService;
     private final ContactoCorreoElectronicoService contactoCorreoService;
@@ -39,6 +43,7 @@ public class GestionEmpleadosController {
                                       ContactoTelefonicoService contactoTelefonicoService,
                                       DireccionService direccionService,
                                       ImagenService imagenService) {
+        super(empleadoService);
         this.empleadoService = empleadoService;
         this.contactoCorreoService = contactoCorreoService;
         this.contactoTelefonicoService = contactoTelefonicoService;
@@ -46,124 +51,149 @@ public class GestionEmpleadosController {
         this.imagenService = imagenService;
     }
 
-    @GetMapping
-    public String gestionarEmpleados(@RequestParam(value = "editEmpleadoId", required = false) String editEmpleadoId,
-                                     Model model) {
-        try {
-            // Listados
-            model.addAttribute("empleados", empleadoService.listarActivos());
-
-            // Catálogos / enums
-            model.addAttribute("tiposDocumento", TipoDocumento.values());
-            model.addAttribute("tiposEmpleado", TipoEmpleado.values());
-            model.addAttribute("direcciones", direccionService.listarActivos());
-            
-            // Listas de contactos disponibles
-            model.addAttribute("contactosCorreo", contactoCorreoService.listarActivos());
-            model.addAttribute("contactosTelefono", contactoTelefonicoService.listarActivos());
-            
-            // Listas de imágenes disponibles (tipo PERSONA)
-            try {
-                List<ImagenDTO> imagenes = imagenService.listarPorTipo(TipoImagen.PERSONA);
-                model.addAttribute("imagenes", imagenes);
-            } catch (Exception e) {
-                log.warn("Error al cargar imágenes: {}", e.getMessage());
-                model.addAttribute("imagenes", Collections.emptyList());
-            }
-        } catch (ErrorServiceException e) {
-            model.addAttribute("error", e.getMessage());
-            model.addAttribute("empleados", Collections.emptyList());
-            model.addAttribute("tiposDocumento", TipoDocumento.values());
-            model.addAttribute("tiposEmpleado", TipoEmpleado.values());
-            model.addAttribute("direcciones", Collections.emptyList());
-            model.addAttribute("contactosCorreo", Collections.emptyList());
-            model.addAttribute("contactosTelefono", Collections.emptyList());
-        }
-
-        // Formulario (nuevo o edición)
-        EmpleadoDTO empleadoForm;
-        try {
-            if (editEmpleadoId != null && !editEmpleadoId.isBlank()) {
-                empleadoForm = empleadoService.obtener(editEmpleadoId).orElseGet(EmpleadoDTO::new);
-            } else {
-                empleadoForm = new EmpleadoDTO();
-            }
-        } catch (ErrorServiceException e) {
-            empleadoForm = new EmpleadoDTO();
-        }
-        
-        // Inicializar listas vacías si son null
-        if (empleadoForm.getContactoIds() == null) {
-            empleadoForm.setContactoIds(new ArrayList<>());
-        }
-        if (empleadoForm.getDireccionIds() == null) {
-            empleadoForm.setDireccionIds(new ArrayList<>());
-        }
-        if (empleadoForm.getImagenIds() == null) {
-            empleadoForm.setImagenIds(new ArrayList<>());
-        }
-        
-        model.addAttribute("empleadoForm", empleadoForm);
-
+    @Override
+    protected String getListView() {
         return "gestion/gestion-empleados";
     }
 
-    @PostMapping("/empleado")
-    public String guardarEmpleado(@ModelAttribute("empleadoForm") EmpleadoDTO dto, RedirectAttributes ra) {
-        log.info("=== INICIO guardarEmpleado ===");
-        log.info("DTO recibido: {}", dto);
-        log.info("Nombre: {}, Apellido: {}", dto.getNombre(), dto.getApellido());
-        log.info("Documento: {} - {}", dto.getTipoDocumento(), dto.getNumeroDocumento());
-        log.info("TipoEmpleado: {}", dto.getTipoEmpleado());
-        log.info("DireccionIds: {}", dto.getDireccionIds());
-        log.info("ContactoIds: {}", dto.getContactoIds());
-        
-        try {
-            // Limpiar objetos completos que no se deben enviar al servidor
-            dto.setContactosCorreo(null);
-            dto.setContactosTelefono(null);
-            dto.setDirecciones(null);
-            dto.setImagenes(null);
-            
-            // Asegurar que las listas de IDs no sean null
-            if (dto.getDireccionIds() == null) {
-                dto.setDireccionIds(new ArrayList<>());
-            }
-            if (dto.getContactoIds() == null) {
-                dto.setContactoIds(new ArrayList<>());
-            }
-            if (dto.getImagenIds() == null) {
-                dto.setImagenIds(new ArrayList<>());
-            }
-            
-            log.info("Enviando al servidor - DireccionIds: {}, ContactoIds: {}", 
-                    dto.getDireccionIds(), dto.getContactoIds());
-            
-            if (dto.getId() == null || dto.getId().isBlank()) {
-                log.info("Creando nuevo empleado...");
-                EmpleadoDTO guardado = empleadoService.alta(dto);
-                log.info("Empleado creado con ID: {}", guardado.getId());
-                ra.addFlashAttribute("success", "Empleado creado correctamente");
-            } else {
-                log.info("Modificando empleado con ID: {}", dto.getId());
-                empleadoService.modificar(dto.getId(), dto);
-                ra.addFlashAttribute("success", "Empleado actualizado correctamente");
-            }
-        } catch (ErrorServiceException e) {
-            log.error("Error al guardar empleado: {}", e.getMessage(), e);
-            ra.addFlashAttribute("error", e.getMessage());
-        }
+    @Override
+    protected String getFormView() {
+        return "gestion/gestion-empleados";
+    }
+
+    @Override
+    protected String getRedirectToList() {
         return "redirect:/gestion/empleados";
     }
 
-    @PostMapping("/empleado/{id}/eliminar")
-    public String eliminarEmpleado(@PathVariable String id, RedirectAttributes ra) {
+    @Override
+    protected String getListModelAttribute() {
+        return "empleados";
+    }
+
+    @Override
+    protected String getFormModelAttribute() {
+        return "empleadoForm";
+    }
+
+    @Override
+    protected String getEntityLabel() {
+        return "Empleado";
+    }
+
+    @Override
+    protected EmpleadoDTO buildNewInstance() {
+        EmpleadoDTO dto = new EmpleadoDTO();
+        dto.setContactoIds(new ArrayList<>());
+        dto.setDireccionIds(new ArrayList<>());
+        dto.setImagenIds(new ArrayList<>());
+        return dto;
+    }
+
+    @Override
+    protected void populateCollections(Model model) throws ErrorServiceException {
+        model.addAttribute("tiposDocumento", TipoDocumento.values());
+        model.addAttribute("tiposEmpleado", TipoEmpleado.values());
+        model.addAttribute("direcciones", direccionService.listarActivos());
+        model.addAttribute("contactosCorreo", contactoCorreoService.listarActivos());
+        model.addAttribute("contactosTelefono", contactoTelefonicoService.listarActivos());
+
         try {
-            empleadoService.baja(id);
-            ra.addFlashAttribute("success", "Empleado eliminado");
-        } catch (ErrorServiceException e) {
-            ra.addFlashAttribute("error", e.getMessage());
+            List<ImagenDTO> imagenes = imagenService.listarPorTipo(TipoImagen.PERSONA);
+            model.addAttribute("imagenes", imagenes);
+        } catch (Exception e) {
+            log.warn("Error al cargar imágenes de empleados: {}", e.getMessage());
+            model.addAttribute("imagenes", Collections.emptyList());
         }
-        return "redirect:/gestion/empleados";
+    }
+
+    @Override
+    protected void preUseCase(BaseUseCaseController useCase, Model model) throws ErrorServiceException {
+        populateCollections(model);
+    }
+
+    @GetMapping
+    public String gestionarEmpleados(@RequestParam(value = "editEmpleadoId", required = false) String editEmpleadoId,
+                                     Model model) {
+        String view = renderList(model);
+        if (editEmpleadoId != null && !editEmpleadoId.isBlank()) {
+            try {
+                Optional<EmpleadoDTO> empleadoOpt = service.obtener(editEmpleadoId);
+                if (empleadoOpt.isPresent()) {
+                    model.addAttribute(getFormModelAttribute(), empleadoOpt.get());
+                } else {
+                    registerError(model, "Empleado no encontrado");
+                    model.addAttribute(getFormModelAttribute(), buildNewInstance());
+                }
+            } catch (ErrorServiceException e) {
+                log.warn("No se pudo cargar el empleado {}: {}", editEmpleadoId, e.getMessage());
+                registerError(model, e.getMessage());
+                model.addAttribute(getFormModelAttribute(), buildNewInstance());
+            }
+        } else if (!model.containsAttribute(getFormModelAttribute())) {
+            model.addAttribute(getFormModelAttribute(), buildNewInstance());
+        }
+        return view;
+    }
+
+    @PostMapping
+    public String guardarEmpleado(@ModelAttribute("empleadoForm") EmpleadoDTO dto,
+                                  Model model,
+                                  RedirectAttributes redirectAttributes) {
+        return handleCreate(dto, model, redirectAttributes);
+    }
+
+    @PostMapping("/{id}")
+    public String actualizarEmpleado(@PathVariable String id,
+                                     @ModelAttribute("empleadoForm") EmpleadoDTO dto,
+                                     Model model,
+                                     RedirectAttributes redirectAttributes) {
+        return handleUpdate(id, dto, model, redirectAttributes);
+    }
+
+    @PostMapping("/{id}/eliminar")
+    public String eliminarEmpleado(@PathVariable String id, RedirectAttributes redirectAttributes) {
+        return handleDelete(id, redirectAttributes);
+    }
+
+    private EmpleadoDTO sanitizeEmpleadoDTO(EmpleadoDTO dto) {
+        if (dto == null) {
+            return buildNewInstance();
+        }
+
+        dto.setContactosCorreo(null);
+        dto.setContactosTelefono(null);
+        dto.setDirecciones(null);
+        dto.setImagenes(null);
+
+        if (dto.getContactoIds() == null) {
+            dto.setContactoIds(new ArrayList<>());
+        }
+        if (dto.getDireccionIds() == null) {
+            dto.setDireccionIds(new ArrayList<>());
+        }
+        if (dto.getImagenIds() == null) {
+            dto.setImagenIds(new ArrayList<>());
+        }
+
+        return dto;
+    }
+
+    @Override
+    public String handleCreate(EmpleadoDTO dto, Model model, RedirectAttributes redirectAttributes) {
+        String view = super.handleCreate(sanitizeEmpleadoDTO(dto), model, redirectAttributes);
+        if (!view.startsWith("redirect:")) {
+            renderList(model);
+        }
+        return view;
+    }
+
+    @Override
+    public String handleUpdate(String id, EmpleadoDTO dto, Model model, RedirectAttributes redirectAttributes) {
+        String view = super.handleUpdate(id, sanitizeEmpleadoDTO(dto), model, redirectAttributes);
+        if (!view.startsWith("redirect:")) {
+            renderList(model);
+        }
+        return view;
     }
 }

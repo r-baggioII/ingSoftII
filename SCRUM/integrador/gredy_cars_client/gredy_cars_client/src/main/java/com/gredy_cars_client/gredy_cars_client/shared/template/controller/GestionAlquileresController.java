@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.util.StringUtils;
 
+import com.gredy_cars_client.gredy_cars_client.config.AuthCheckInterceptor.UserDetailsWithRole;
 import com.gredy_cars_client.gredy_cars_client.shared.template.dto.AlquilerDTO;
 import com.gredy_cars_client.gredy_cars_client.shared.template.dto.CaracteristicaVehiculoDTO;
 import com.gredy_cars_client.gredy_cars_client.shared.template.dto.ClienteDTO;
@@ -56,6 +59,15 @@ public class GestionAlquileresController {
         @RequestParam(value = "editId", required = false) String editId,
         Model model
     ) throws ErrorServiceException {
+        // Get user role from Spring Security
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String usuarioRol = "CLIENTE";
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetailsWithRole) {
+            UserDetailsWithRole userDetails = (UserDetailsWithRole) authentication.getPrincipal();
+            usuarioRol = userDetails.getRol();
+        }
+        model.addAttribute("usuarioRol", usuarioRol);
+        
         model.addAttribute("alquileres", alquilerService.listarActivos());
 
         // Load clients and vehicles for dropdowns

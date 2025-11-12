@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+  # Base de datos MariaDB para greedy_cars
+  greedy_cars_db:
+    image: mariadb:10.6
+    container_name: greedy_cars_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: adminAdmin
+      MYSQL_DATABASE: greedy_cars_db
+      MYSQL_USER: greedy_cars
+      MYSQL_PASSWORD: adminAdmin
+    ports:
+      - "3307:3306"
+    volumes:
+      - greedy_cars_db_data:/var/lib/mysql
+    networks:
+      - greedy_network
+
+  # API principal de greedy_cars
+  greedy_cars:
+    build:
+      context: ./greedy_cars
+      dockerfile: Dockerfile
+    image: greedy_cars:latest
+    container_name: greedy_cars_api
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    environment:
+      SPRING_APPLICATION_NAME: greedy_cars
+      SPRING_DATASOURCE_URL: jdbc:mariadb://greedy_cars_db:3306/greedy_cars_db?useUnicode=true&characterEncoding=utf8&serverTimezone=America/Argentina/Mendoza
+      SPRING_DATASOURCE_USERNAME: greedy_cars
+      SPRING_DATASOURCE_PASSWORD: adminAdmin
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.mariadb.jdbc.Driver
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MariaDBDialect
+      APP_JWT_SECRET: replace_this_with_a_long_random_secret_at_least_256_bits_base64_or_random_string_docker_production
+      APP_JWT_EXPIRATION_MS: 3600000
+      MERCADOPAGO_ACCESS_TOKEN: ${MERCADOPAGO_ACCESS_TOKEN:-APP_USR-1161916719081917-092219-7d27c8faacdc9c984b9bd4539830b21b-2708507674}
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: 587
+      SPRING_MAIL_USERNAME: greedyteam0@gmail.com
+      SPRING_MAIL_PASSWORD: upiz bhvd orss pqls
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
+      GREEDY_MAIL_DEFAULT_FROM: noreply@greedy-cars.com
+    depends_on:
+      - greedy_cars_db
+    networks:
+      - greedy_network
+    volumes:
+      - ./greedy_cars/target:/app/target:ro
+
+  # Sitio institucional
+  greedy_institucional:
+    build:
+      context: ./greedy_institucional
+      dockerfile: Dockerfile
+    image: greedy_institucional:latest
+    container_name: greedy_institucional_web
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_APPLICATION_NAME: institucional
+      GREEDY_API_BASE_URL: http://greedy_cars:9000/greedy_cars/api
+      GREEDY_API_USERNAME: admin
+      GREEDY_API_PASSWORD: GreedyAdmin123!
+      SERVER_SERVLET_CONTEXT_PATH: /greedy_institucional
+    depends_on:
+      - greedy_cars
+    networks:
+      - greedy_network
+    volumes:
+      - ./greedy_institucional/target:/app/target:ro
+
+  # Aplicación cliente
+  gredy_cars_client:
+    build:
+      context: ./gredy_cars_client/gredy_cars_client
+      dockerfile: Dockerfile
+    image: gredy_cars_client:latest
+    container_name: gredy_cars_client_app
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    environment:
+      SPRING_APPLICATION_NAME: gredy_cars_client
+      GREEDY_API_BASE_URL: http://greedy_cars:9000/greedy_cars/api
+      GREEDY_API_USERNAME: admin
+      GREEDY_API_PASSWORD: GreedyAdmin123!
+      SERVER_SERVLET_CONTEXT_PATH: /gredy_cars_client
+    depends_on:
+      - greedy_cars
+    networks:
+      - greedy_network
+    volumes:
+      - ./gredy_cars_client/gredy_cars_client/target:/app/target:ro
+
+# Volumes para persistencia de datos
+volumes:
+  greedy_cars_db_data:
+    driver: local
+
+# Red personalizada para comunicación entre contenedores
+networks:
+  greedy_network:
+    driver: bridge

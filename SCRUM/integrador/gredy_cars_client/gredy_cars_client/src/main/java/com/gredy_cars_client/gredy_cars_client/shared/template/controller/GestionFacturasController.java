@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.gredy_cars_client.gredy_cars_client.config.AuthCheckInterceptor.UserDetailsWithRole;
 import com.gredy_cars_client.gredy_cars_client.shared.template.dto.AlquilerDTO;
 import com.gredy_cars_client.gredy_cars_client.shared.template.dto.ClienteDTO;
 import com.gredy_cars_client.gredy_cars_client.shared.template.dto.DetalleFacturaDTO;
@@ -52,6 +55,15 @@ public class GestionFacturasController {
         @RequestParam(value = "clienteId", required = false) String clienteId,
         Model model
     ) {
+        // Get user role from Spring Security
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String usuarioRol = "CLIENTE";
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetailsWithRole) {
+            UserDetailsWithRole userDetails = (UserDetailsWithRole) authentication.getPrincipal();
+            usuarioRol = userDetails.getRol();
+        }
+        model.addAttribute("usuarioRol", usuarioRol);
+        
         cargarPantallaFacturas(model, estado, editId, facturaSeleccionada, clienteId, true, true);
         return "gestion/gestion-facturas";
     }

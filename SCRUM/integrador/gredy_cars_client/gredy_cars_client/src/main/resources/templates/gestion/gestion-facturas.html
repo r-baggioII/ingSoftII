@@ -46,7 +46,8 @@
     </div>
 
     <div class="row g-4">
-      <div class="col-lg-5">
+      <!-- Form - Only for ADMINISTRATIVO and JEFE -->
+      <div th:if="${usuarioRol == 'ADMINISTRATIVO' || usuarioRol == 'JEFE'}" class="col-lg-5">
         <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
           <div class="card-body">
             <h5 class="card-title">Crear / Editar Factura</h5>
@@ -190,14 +191,15 @@
         </div>
       </div>
 
-      <div class="col-lg-7">
+      <!-- Table - Full width for CLIENTE, col-lg-7 for others -->
+      <div th:class="${usuarioRol == 'CLIENTE'} ? 'col-12' : 'col-lg-7'">
         <div class="card mb-4" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
           <div class="card-body">
             <div class="d-flex flex-wrap justify-content-between align-items-center">
               <h5 class="card-title mb-0">Listado de Facturas</h5>
-              <!-- TODO FRONT: agregar botón/acción para “Pagar con billetera virtual” que invoque /api/pagos/mp/preferencia y redirija al initPoint devuelto. -->
+              <!-- TODO FRONT: agregar botón/acción para "Pagar con billetera virtual" que invoque /api/pagos/mp/preferencia y redirija al initPoint devuelto. -->
               <form class="d-flex align-items-center gap-2" th:action="@{/gestion/facturas}" method="get">
-                <input type="hidden" name="editId" th:value="${#httpServletRequest.getParameter('editId')}" />
+                <input type="hidden" name="editId" th:value="${param.editId}" />
                 <input type="hidden" name="clienteId" th:value="${clienteSeleccionadoId}" />
                 <select class="form-select form-select-sm" name="estado">
                   <option value="">Todos los estados</option>
@@ -218,7 +220,7 @@
                   <th>Cliente</th>
                   <th>Estado</th>
                   <th>Total pagado</th>
-                  <th class="text-end">Acciones</th>
+                  <th th:if="${usuarioRol == 'ADMINISTRATIVO' || usuarioRol == 'JEFE'}" class="text-end">Acciones</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -232,7 +234,7 @@
                     <span class="badge bg-primary-subtle text-primary" th:text="${factura.estado}">SIN_DEFINIR</span>
                   </td>
                   <td th:text="${factura.totalPagado}">0.00</td>
-                  <td class="text-end">
+                  <td th:if="${usuarioRol == 'ADMINISTRATIVO' || usuarioRol == 'JEFE'}" class="text-end">
                     <a class="btn btn-sm btn-outline-secondary me-1" th:href="@{/gestion/facturas(editId=${factura.id}, clienteId=${clienteSeleccionadoId})}">Editar</a>
                     <form th:action="@{/gestion/facturas/{id}/eliminar(id=${factura.id})}" method="post" class="d-inline">
                       <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />

@@ -1,0 +1,131 @@
+version: '3.8'
+
+services:
+  # Base de datos MariaDB para greedy_cars (producción)
+  greedy_cars_db:
+    image: mariadb:10.6
+    container_name: greedy_cars_db_prod
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - greedy_cars_db_data_prod:/var/lib/mysql
+      - ./db-init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - greedy_network
+    # No exponer puerto en producción (acceso solo desde contenedores)
+
+  # API principal de greedy_cars (producción)
+  greedy_cars:
+    build:
+      context: ./greedy_cars
+      dockerfile: Dockerfile
+    image: greedy_cars:prod
+    container_name: greedy_cars_api_prod
+    restart: always
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_APPLICATION_NAME: greedy_cars
+      SPRING_DATASOURCE_URL: jdbc:mariadb://greedy_cars_db:3306/${MYSQL_DATABASE}?useUnicode=true&characterEncoding=utf8&serverTimezone=America/Argentina/Mendoza
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.mariadb.jdbc.Driver
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_JPA_SHOW_SQL: "false"
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MariaDBDialect
+      APP_JWT_SECRET: ${JWT_SECRET}
+      APP_JWT_EXPIRATION_MS: 3600000
+      MERCADOPAGO_ACCESS_TOKEN: ${MERCADOPAGO_ACCESS_TOKEN}
+      SPRING_MAIL_HOST: ${SPRING_MAIL_HOST}
+      SPRING_MAIL_PORT: ${SPRING_MAIL_PORT}
+      SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME}
+      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
+      GREEDY_MAIL_DEFAULT_FROM: noreply@greedy-cars.com
+    depends_on:
+      - greedy_cars_db
+    networks:
+      - greedy_network
+    volumes:
+      - ./greedy_cars/target:/app/target:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/greedy_cars/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Sitio institucional (producción)
+  greedy_institucional:
+    build:
+      context: ./greedy_institucional
+      dockerfile: Dockerfile
+    image: greedy_institucional:prod
+    container_name: greedy_institucional_web_prod
+    restart: always
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_APPLICATION_NAME: institucional
+      GREEDY_API_BASE_URL: http://greedy_cars:9000/greedy_cars/api
+      GREEDY_API_USERNAME: ${GREEDY_API_USERNAME}
+      GREEDY_API_PASSWORD: ${GREEDY_API_PASSWORD}
+      SERVER_SERVLET_CONTEXT_PATH: /greedy_institucional
+    depends_on:
+      - greedy_cars
+    networks:
+      - greedy_network
+    volumes:
+      - ./greedy_institucional/target:/app/target:ro
+
+  # Aplicación cliente (producción)
+  gredy_cars_client:
+    build:
+      context: ./gredy_cars_client/gredy_cars_client
+      dockerfile: Dockerfile
+    image: gredy_cars_client:prod
+    container_name: gredy_cars_client_app_prod
+    restart: always
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_APPLICATION_NAME: gredy_cars_client
+      GREEDY_API_BASE_URL: http://greedy_cars:9000/greedy_cars/api
+      GREEDY_API_USERNAME: ${GREEDY_API_USERNAME}
+      GREEDY_API_PASSWORD: ${GREEDY_API_PASSWORD}
+      SERVER_SERVLET_CONTEXT_PATH: /gredy_cars_client
+    depends_on:
+      - greedy_cars
+    networks:
+      - greedy_network
+    volumes:
+      - ./gredy_cars_client/gredy_cars_client/target:/app/target:ro
+
+  # Nginx reverse proxy (opcional para producción)
+  nginx:
+    image: nginx:alpine
+    container_name: greedy_nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - greedy_cars
+      - greedy_institucional
+      - gredy_cars_client
+    networks:
+      - greedy_network
+
+# Volumes para persistencia de datos
+volumes:
+  greedy_cars_db_data_prod:
+    driver: local
+
+# Red personalizada para comunicación entre contenedores
+networks:
+  greedy_network:
+    driver: bridge

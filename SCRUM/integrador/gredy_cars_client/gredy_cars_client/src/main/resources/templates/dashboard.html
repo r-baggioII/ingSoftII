@@ -89,7 +89,7 @@
               <p class="text-muted small mb-0">Supervisión y control administrativo.</p>
             </div>
             <nav class="list-group list-group-flush gestion-menu">
-              <!-- Cliente: Mis Alquileres -->
+              <!-- Cliente: Solo lectura -->
               <a th:if="${usuarioRol == 'CLIENTE'}" class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/gestion/alquileres}">
                 <span class="badge rounded-pill me-2">AL</span>
                 Mis Alquileres
@@ -98,7 +98,6 @@
                 <span class="badge rounded-pill me-2">FC</span>
                 Mis Facturas
               </a>
-              <!-- TODO CLIENTE: implementar una vista específica que liste solo las facturas pagadas del cliente y permita descargar el PDF sin reutilizar la pantalla administrativa. -->
               
               <!-- Administrativo y Jefe -->
               <a th:if="${usuarioRol == 'ADMINISTRATIVO' || usuarioRol == 'JEFE'}" class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/gestion/vehiculos}">
@@ -118,31 +117,14 @@
                 Gestión de Costos
               </a>
               
-              <!-- Todos los usuarios: Direcciones y Contactos -->
-              <div class="gestion-menu-divider">Datos Comunes</div>
-              <a class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/gestion/direcciones}">
+              <!-- Direcciones y Contactos - Solo Administrativo y Jefe -->
+              <a th:if="${usuarioRol == 'ADMINISTRATIVO' || usuarioRol == 'JEFE'}" class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/gestion/direcciones}">
                 <span class="badge rounded-pill me-2">DR</span>
-                Gestión de Direcciones
+                Direcciones
               </a>
-              <a class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/gestion/contactos}">
+              <a th:if="${usuarioRol == 'ADMINISTRATIVO' || usuarioRol == 'JEFE'}" class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/gestion/contactos}">
                 <span class="badge rounded-pill me-2">CT</span>
-                Gestión de Contactos
-              </a>
-              <a class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/localidades}">
-                <span class="badge rounded-pill me-2">LC</span>
-                Localidades
-              </a>
-              <a class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/departamentos}">
-                <span class="badge rounded-pill me-2">DP</span>
-                Departamentos
-              </a>
-              <a class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/provincias}">
-                <span class="badge rounded-pill me-2">PR</span>
-                Provincias
-              </a>
-              <a class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/gestion/nacionalidades}">
-                <span class="badge rounded-pill me-2">NA</span>
-                Nacionalidades
+                Contactos
               </a>
               
               <!-- Solo Jefe -->

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Reportes de Alquileres - Greedy Cars</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light container-fluid py-3">
+        <div class="container">
+            <a class="navbar-brand" href="/gredy_cars_client/">
+                <img src="/gredy_cars_client/images/logo.png" alt="logo" style="height: 40px;"/>
+            </a>
+            <div class="navbar-nav">
+                <a class="nav-link" href="/gredy_cars_client/dashboard">Panel de Gestión</a>
+                <a class="nav-link active" href="/gredy_cars_client/reportes/alquileres">Reportes</a>
+                <a class="nav-link" href="/gredy_cars_client/logout">Cerrar Sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1 class="mb-4">Reportes de Alquileres</h1>
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5>Filtros de Búsqueda</h5>
+            </div>
+            <div class="card-body">
+                <form id="reporteForm" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Fecha Inicio</label>
+                        <input type="date" name="fechaInicio" class="form-control" th:value="${fechaInicio}" required/>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Fecha Fin</label>
+                        <input type="date" name="fechaFin" class="form-control" th:value="${fechaFin}" required/>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Vehículo</label>
+                        <select name="vehiculoId" class="form-select">
+                            <option value="">Todos los vehículos</option>
+                            <option th:each="vehiculo : ${vehiculos}"
+                                    th:value="${vehiculo.id}"
+                                    th:text="${vehiculo.patente + ' - ' + (vehiculo.caracteristicaVehiculo != null ? vehiculo.caracteristicaVehiculo.marca + ' ' + vehiculo.caracteristicaVehiculo.modelo : 'Sin modelo asociado')}">
+                                Vehículo
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="button" onclick="descargarPdf()" class="btn btn-success w-100">
+                            Descargar PDF
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="alert alert-info">
+            <h5>Información del Reporte</h5>
+            <p class="mb-0">Seleccione el período y haga clic en "Descargar PDF" para generar el reporte de alquileres.</p>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        const pdfEndpoint = /*[[@{/reportes/alquileres/pdf}]]*/ '/reportes/alquileres/pdf';
+        function descargarPdf() {
+            const form = document.getElementById('reporteForm');
+            const formData = new FormData(form);
+            const params = new URLSearchParams();
+
+            for (let [key, value] of formData.entries()) {
+                if (value) params.append(key, value);
+            }
+
+            window.open(`${pdfEndpoint}?${params.toString()}`, '_blank');
+        }
+    </script>
+</body>
+</html>

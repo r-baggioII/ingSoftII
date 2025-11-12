@@ -41,4 +41,16 @@ public interface AlquilerRepository extends BaseRepository<Alquiler, String> {
           )
     """)
     List<Alquiler> findPendientesFacturaPorCliente(@Param("clienteId") String clienteId);
+
+    List<Alquiler> findByFechaDesdeBetweenAndEliminadoIsFalse(
+        java.time.LocalDate inicio, java.time.LocalDate fin);
+
+    @Query("SELECT a FROM Alquiler a WHERE " +
+           "a.vehiculo.id = :vehiculoId AND " +
+           "a.fechaDesde BETWEEN :inicio AND :fin AND " +
+           "a.eliminado = false")
+    List<Alquiler> findByVehiculoIdAndFechaDesdeBetweenAndEliminadoIsFalse(
+        @Param("vehiculoId") String vehiculoId,
+        @Param("inicio") java.time.LocalDate inicio,
+        @Param("fin") java.time.LocalDate fin);
 }

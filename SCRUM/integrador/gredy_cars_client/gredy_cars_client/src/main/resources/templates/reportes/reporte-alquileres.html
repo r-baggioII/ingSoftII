@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reportes de Alquileres - Greedy Cars</title>
+
+  <link rel="stylesheet" type="text/css" th:href="@{/css/vendor.css}" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous" />
+  <link rel="stylesheet" type="text/css" th:href="@{/style.css}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
+  <script th:src="@{/js/modernizr.js}"></script>
+</head>
+<body>
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<section id="banner" class="position-relative overflow-hidden jarallax"
+         th:style="|background-image: url(@{/images/Bg.jpg}); background-repeat: no-repeat; background-size: cover; background-position: center;|">
+  <div class="container text-center py-5 mt-5">
+    <div class="row my-5">
+      <div class="d-flex flex-wrap flex-column justify-content-center align-items-center text-white">
+        <h2 class="page-title display-3 mt-5">Reportes de Alquileres</h2>
+        <nav class="breadcrumb">
+          <a class="breadcrumb-item text-white" th:href="@{/}">Home</a>
+          <a class="breadcrumb-item text-white" th:href="@{/dashboard}">Panel de Gestión</a>
+          <span class="breadcrumb-item text-white active" aria-current="page">Reportes</span>
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="contact-us-wrap py-5">
+  <div class="container">
+    <div class="section-heading text-center mb-5">
+      <h2 class="fw-bold">Analítica para el Jefe Administrativo</h2>
+      <p>Elegí el período, filtrá por vehículo y descargá un PDF listo para compartir.</p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="card" style="border:none; border-radius:14px; box-shadow:0 10px 28px rgba(0,0,0,.08);">
+          <div class="card-body">
+            <div class="d-flex justify-content-between flex-wrap align-items-center mb-3">
+              <h5 class="card-title mb-0">Filtros de búsqueda</h5>
+              <span class="badge bg-primary" th:text="|Rol activo: ${usuarioRol}|">Rol</span>
+            </div>
+
+            <form id="reporteForm" class="row g-3">
+              <div class="col-md-4">
+                <label class="panel-label">Fecha inicio</label>
+                <input type="date" name="fechaInicio" class="form-control panel-control" th:value="${fechaInicio}" required>
+              </div>
+              <div class="col-md-4">
+                <label class="panel-label">Fecha fin</label>
+                <input type="date" name="fechaFin" class="form-control panel-control" th:value="${fechaFin}" required>
+              </div>
+              <div class="col-md-4">
+                <label class="panel-label">Vehículo</label>
+                <select name="vehiculoId" class="form-select panel-control">
+                  <option value="">Todos los vehículos</option>
+                  <option th:each="vehiculo : ${vehiculos}"
+                          th:value="${vehiculo.id}"
+                          th:text="${vehiculo.patente + ' - ' + (vehiculo.caracteristicaVehiculo != null ? vehiculo.caracteristicaVehiculo.marca + ' ' + vehiculo.caracteristicaVehiculo.modelo : 'Sin modelo asociado')}">
+                    Vehículo
+                  </option>
+                </select>
+              </div>
+              <div class="col-12">
+                <label class="panel-label">Acciones</label>
+                <div class="d-flex gap-2 flex-wrap">
+                  <button type="button" class="btn main-button-panel flex-grow-1" id="descargarPdfBtn">
+                    <iconify-icon icon="material-symbols:picture-as-pdf"></iconify-icon>
+                    Descargar PDF
+                  </button>
+                  <button type="reset" class="btn btn-outline-secondary flex-grow-1" id="limpiarBtn">Limpiar</button>
+                </div>
+              </div>
+            </form>
+            <div id="estadoGeneracion" class="alert mt-4 d-none" role="alert"></div>
+          </div>
+        </div>
+
+        <div class="card mt-4" style="border:none; border-radius:14px; box-shadow:0 10px 28px rgba(0,0,0,.08);">
+          <div class="card-body">
+            <h5 class="card-title mb-3">¿Qué incluye el reporte?</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <ul class="list-unstyled mb-0">
+                  <li class="mb-2">
+                    <iconify-icon icon="mdi:check-circle" class="text-success me-2"></iconify-icon>
+                    Detalle completo de cada alquiler
+                  </li>
+                  <li class="mb-2">
+                    <iconify-icon icon="mdi:check-circle" class="text-success me-2"></iconify-icon>
+                    Totales de ingresos y días alquilados
+                  </li>
+                  <li class="mb-2">
+                    <iconify-icon icon="mdi:check-circle" class="text-success me-2"></iconify-icon>
+                    Cliente, vehículo y estado por operación
+                  </li>
+                </ul>
+              </div>
+              <div class="col-md-6">
+                <ul class="list-unstyled mb-0">
+                  <li class="mb-2">
+                    <iconify-icon icon="mdi:chart-line" class="text-primary me-2"></iconify-icon>
+                    Resumen ejecutivo con promedios
+                  </li>
+                  <li class="mb-2">
+                    <iconify-icon icon="mdi:file-pdf-box" class="text-danger me-2"></iconify-icon>
+                    Formato PDF optimizado para impresión
+                  </li>
+                  <li class="mb-2">
+                    <iconify-icon icon="mdi:shield-check" class="text-info me-2"></iconify-icon>
+                    Datos filtrados según tus permisos
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="card" style="border:none; border-radius:14px; box-shadow:0 10px 28px rgba(0,0,0,.08);">
+          <div class="card-body">
+            <h5 class="card-title">Tips rápidos</h5>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item">Períodos extensos pueden demorar unos segundos más.</li>
+              <li class="list-group-item">Podés descargar múltiples PDFs seguidos con distintos filtros.</li>
+              <li class="list-group-item">Si necesitás compartirlo, el archivo ya incluye portada y totales.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card mt-4" style="border:none; border-radius:14px; box-shadow:0 10px 28px rgba(0,0,0,.08);">
+          <div class="card-body">
+            <h5 class="card-title">Control de calidad</h5>
+            <p class="text-muted mb-3">Los reportes usan datos en tiempo real del backend.</p>
+            <div class="d-flex align-items-center mb-3">
+              <div class="flex-grow-1">
+                <p class="mb-1 fw-semibold">Última ventana consultada</p>
+                <small class="text-muted" id="ultimaConsulta">Aún no generado</small>
+              </div>
+              <iconify-icon icon="mdi:clock-outline" class="display-6 text-primary"></iconify-icon>
+            </div>
+            <button class="btn btn-outline-primary w-100" type="button" id="btnDescargaDemo">
+              Ver ejemplo rápido
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="bg-light text-center py-3 mt-5">
+  <div class="container">
+    <p class="mb-0">&copy; 2025 Greedy Cars. Todos los derechos reservados.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+        crossorigin="anonymous"></script>
+<script th:inline="javascript">
+  const pdfEndpoint = /*[[@{/reportes/alquileres/pdf}]]*/ '/reportes/alquileres/pdf';
+  const form = document.getElementById('reporteForm');
+  const downloadBtn = document.getElementById('descargarPdfBtn');
+  const statusBox = document.getElementById('estadoGeneracion');
+  const lastQueryLabel = document.getElementById('ultimaConsulta');
+
+  function setStatus(message, type) {
+    if (!statusBox) return;
+    statusBox.classList.remove('d-none', 'alert-info', 'alert-success', 'alert-danger', 'alert-warning');
+    statusBox.classList.add(`alert-${type}`);
+    statusBox.textContent = message;
+  }
+
+  function resetStatus() {
+    if (!statusBox) return;
+    statusBox.classList.add('d-none');
+  }
+
+  function toggleLoading(isLoading) {
+    if (!downloadBtn) return;
+    downloadBtn.disabled = isLoading;
+    downloadBtn.innerHTML = isLoading
+      ? '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Generando...'
+      : '<iconify-icon icon="material-symbols:picture-as-pdf"></iconify-icon> Descargar PDF';
+  }
+
+  function validarFechas(fechaInicio, fechaFin) {
+    if (!fechaInicio || !fechaFin) {
+      throw new Error('Debes completar ambas fechas.');
+    }
+    if (new Date(fechaFin) < new Date(fechaInicio)) {
+      throw new Error('La fecha de fin no puede ser anterior a la de inicio.');
+    }
+  }
+
+  function buildParams() {
+    const formData = new FormData(form);
+    const params = new URLSearchParams();
+    for (const [key, value] of formData.entries()) {
+      if (value) {
+        params.append(key, value);
+      }
+    }
+    return { params, formData };
+  }
+
+  function extractFilename(disposition) {
+    if (!disposition) return null;
+    const match = disposition.match(/filename="?([^";]+)"?/i);
+    return match ? match[1] : null;
+  }
+
+  async function descargarPdf(event) {
+    event.preventDefault();
+    resetStatus();
+
+    try {
+      const { params, formData } = buildParams();
+      validarFechas(formData.get('fechaInicio'), formData.get('fechaFin'));
+
+      toggleLoading(true);
+      const response = await fetch(`${pdfEndpoint}?${params.toString()}`, {
+        method: 'GET',
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'No se pudo generar el reporte.');
+      }
+
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = extractFilename(response.headers.get('Content-Disposition')) || 'reporte-alquileres.pdf';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+
+      setStatus('Reporte descargado correctamente. Revisa tu carpeta de descargas.', 'success');
+      if (lastQueryLabel) {
+        lastQueryLabel.textContent = new Date().toLocaleString();
+      }
+    } catch (error) {
+      setStatus(error.message || 'Se produjo un error al generar el PDF.', 'danger');
+    } finally {
+      toggleLoading(false);
+    }
+  }
+
+  if (downloadBtn) {
+    downloadBtn.addEventListener('click', descargarPdf);
+  }
+
+  if (form) {
+    form.addEventListener('reset', () => {
+      resetStatus();
+      toggleLoading(false);
+    });
+  }
+
+  const demoBtn = document.getElementById('btnDescargaDemo');
+  if (demoBtn) {
+    demoBtn.addEventListener('click', () => {
+      const hoy = new Date();
+      const haceTreinta = new Date(hoy);
+      haceTreinta.setDate(hoy.getDate() - 30);
+      if (form) {
+        form.querySelector('[name="fechaInicio"]').value = haceTreinta.toISOString().split('T')[0];
+        form.querySelector('[name="fechaFin"]').value = hoy.toISOString().split('T')[0];
+      }
+      setStatus('Completamos un rango típico (últimos 30 días). Ahora podés descargar.', 'info');
+    });
+  }
+</script>
+</body>
+</html>

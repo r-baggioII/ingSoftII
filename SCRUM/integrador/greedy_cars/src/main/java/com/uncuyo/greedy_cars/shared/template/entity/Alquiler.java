@@ -41,7 +41,7 @@ public class Alquiler extends BaseEntity<String> {
     @JoinColumn(name = "vehiculo_id", nullable = false)
     private Vehiculo vehiculo;
 
-    @OneToMany
+    @ManyToMany
     @JoinTable(
         name = "alquiler_documentacion",
         joinColumns = @JoinColumn(name = "alquiler_id"),

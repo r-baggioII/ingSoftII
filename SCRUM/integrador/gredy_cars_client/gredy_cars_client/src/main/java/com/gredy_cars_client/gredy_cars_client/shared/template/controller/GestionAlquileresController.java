@@ -57,6 +57,7 @@ public class GestionAlquileresController {
     @GetMapping("/alquileres")
     public String gestionarAlquileres(
         @RequestParam(value = "editId", required = false) String editId,
+        @RequestParam(value = "editDocId", required = false) String editDocId,
         Model model
     ) throws ErrorServiceException {
         // Get user role from Spring Security
@@ -117,7 +118,9 @@ public class GestionAlquileresController {
         model.addAttribute("carnetConducirSeleccionado", carnetConducirSeleccionado);
 
         if (!model.containsAttribute("documentacionForm")) {
-            model.addAttribute("documentacionForm", new DocumentacionDTO());
+            DocumentacionDTO docForm = editDocId != null && !editDocId.isBlank() ?
+                documentacionService.obtener(editDocId).orElseGet(DocumentacionDTO::new) : new DocumentacionDTO();
+            model.addAttribute("documentacionForm", docForm);
         }
 
         return "gestion/gestion-alquileres";
@@ -158,11 +161,27 @@ public class GestionAlquileresController {
     public String guardarDocumentacion(@ModelAttribute("documentacionForm") DocumentacionDTO documentacion,
                                        RedirectAttributes ra) {
         try {
-            documentacionService.alta(documentacion);
-            ra.addFlashAttribute("success", "Documentación guardada correctamente");
+            if (documentacion.getId() == null || documentacion.getId().isBlank()) {
+                documentacionService.alta(documentacion);
+                ra.addFlashAttribute("success", "Documentación creada correctamente");
+            } else {
+                documentacionService.modificar(documentacion.getId(), documentacion);
+                ra.addFlashAttribute("success", "Documentación actualizada correctamente");
+            }
         } catch (ErrorServiceException e) {
             ra.addFlashAttribute("error", e.getMessage());
             ra.addFlashAttribute("documentacionForm", documentacion);
+        }
+        return "redirect:/gestion/alquileres";
+    }
+
+    @PostMapping("/alquileres/documentacion/{id}/eliminar")
+    public String eliminarDocumentacion(@PathVariable String id, RedirectAttributes ra) {
+        try {
+            documentacionService.baja(id);
+            ra.addFlashAttribute("success", "Documentación eliminada correctamente");
+        } catch (ErrorServiceException e) {
+            ra.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/gestion/alquileres";
     }

@@ -137,9 +137,13 @@
       <div th:if="${usuarioRol == 'ADMINISTRATIVO' || usuarioRol == 'JEFE'}" class="col-12" id="documentacion-card">
         <div class="card" style="border:none; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.08);">
           <div class="card-body">
-            <h5 class="card-title">Documentación del cliente</h5>
+            <h5 class="card-title">
+              Documentación del cliente
+              <span th:if="${documentacionForm.id != null and !#strings.isEmpty(documentacionForm.id)}" class="badge bg-warning text-dark ms-2">Editando</span>
+            </h5>
             <form th:object="${documentacionForm}" th:action="@{/gestion/alquileres/documentacion}" method="post">
               <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+              <input type="hidden" th:field="*{id}" />
               <div class="row g-3">
                 <div class="col-md-4">
                   <label class="panel-label">Tipo de documentación</label>
@@ -166,8 +170,18 @@
                 </div>
               </div>
               <div class="d-flex gap-2 mt-3">
-                <button class="btn main-button-panel" type="submit">Guardar Documentación</button>
-                <button class="btn btn-outline-secondary" type="reset">Limpiar</button>
+                <button class="btn main-button-panel" type="submit" 
+                        th:text="${documentacionForm.id != null and !#strings.isEmpty(documentacionForm.id)} ? 'Actualizar Documentación' : 'Guardar Documentación'">
+                  Guardar Documentación
+                </button>
+                <a th:href="@{/gestion/alquileres}" class="btn btn-outline-secondary"
+                   th:if="${documentacionForm.id != null and !#strings.isEmpty(documentacionForm.id)}">
+                  Cancelar
+                </a>
+                <button class="btn btn-outline-secondary" type="reset"
+                        th:unless="${documentacionForm.id != null and !#strings.isEmpty(documentacionForm.id)}">
+                  Limpiar
+                </button>
               </div>
             </form>
 
@@ -179,6 +193,7 @@
                     <th>Nombre</th>
                     <th>Ruta</th>
                     <th>Observación</th>
+                    <th style="width: 150px;">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -189,6 +204,19 @@
                       <code th:text="${doc.pathArchivo}">/uploads/dni.pdf</code>
                     </td>
                     <td th:text="${doc.observacion ?: '-'}">-</td>
+                    <td>
+                      <div class="btn-group btn-group-sm" role="group">
+                        <a th:href="@{/gestion/alquileres(editDocId=${doc.id})}" class="btn btn-outline-primary" title="Editar">
+                          <i class="bi bi-pencil"></i>
+                        </a>
+                        <form th:action="@{/gestion/alquileres/documentacion/{id}/eliminar(id=${doc.id})}" method="post" style="display: inline;">
+                          <button type="submit" class="btn btn-outline-danger" title="Eliminar"
+                                  onclick="return confirm('¿Está seguro de eliminar esta documentación?');">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </form>
+                      </div>
+                    </td>
                   </tr>
                 </tbody>
               </table>

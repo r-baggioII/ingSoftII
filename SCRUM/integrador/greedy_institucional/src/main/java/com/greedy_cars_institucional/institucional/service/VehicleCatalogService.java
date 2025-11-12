@@ -51,7 +51,6 @@ public class VehicleCatalogService {
             .map(this::mapToView)
             .filter(Optional::isPresent)
             .map(Optional::get)
-            .filter(vehicle -> vehicle.getAvailableUnits() > 0) // Only show vehicles with availability
             .sorted(Comparator.comparing(VehicleCardView::getDisplayName))
             .collect(Collectors.toList());
 

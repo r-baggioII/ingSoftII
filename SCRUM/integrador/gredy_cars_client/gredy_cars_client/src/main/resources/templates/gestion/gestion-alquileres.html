@@ -41,7 +41,6 @@
 
     <div class="section-heading text-center mb-4">
       <h2>Administrar Alquileres</h2>
-      <p>CRUD de Alquileres.</p>
     </div>
 
     <div class="row g-4">
@@ -88,6 +87,12 @@
                 </select>
               </div>
 
+              <div class="mb-3" th:if="${usuarioRol == 'ADMINISTRATIVO' || usuarioRol == 'JEFE'}">
+                <label class="panel-label">Código de descuento (opcional)</label>
+                <input type="text" th:field="*{codigoPromocion}" class="form-control panel-control" placeholder="Ej: SUMMER25">
+                <small class="text-muted">Ingresá el código solo si el cliente tiene una promoción vigente.</small>
+              </div>
+
               <div class="mb-3">
                 <label class="panel-label">Documento de identidad (PDF/Word)</label>
                 <select class="form-select panel-control" name="documentoIdentidadId">
@@ -126,7 +131,6 @@
               <div class="d-flex flex-wrap gap-2 mt-3">
                 <button class="btn main-button-panel" type="submit">Guardar</button>
                 <button class="btn btn-outline-secondary" type="reset">Limpiar</button>
-                <a href="gestion-costos.html" class="btn btn-outline-primary">Gestionar Costos</a>
               </div>
             </form>
           </div>
@@ -204,18 +208,13 @@
                       <code th:text="${doc.pathArchivo}">/uploads/dni.pdf</code>
                     </td>
                     <td th:text="${doc.observacion ?: '-'}">-</td>
-                    <td>
-                      <div class="btn-group btn-group-sm" role="group">
-                        <a th:href="@{/gestion/alquileres(editDocId=${doc.id})}" class="btn btn-outline-primary" title="Editar">
-                          <i class="bi bi-pencil"></i>
-                        </a>
-                        <form th:action="@{/gestion/alquileres/documentacion/{id}/eliminar(id=${doc.id})}" method="post" style="display: inline;">
-                          <button type="submit" class="btn btn-outline-danger" title="Eliminar"
-                                  onclick="return confirm('¿Está seguro de eliminar esta documentación?');">
-                            <i class="bi bi-trash"></i>
-                          </button>
-                        </form>
-                      </div>
+                    <td class="text-end">
+                      <a class="btn btn-sm btn-outline-secondary" th:href="@{/gestion/alquileres(editDocId=${doc.id})}">Editar</a>
+                      <form th:action="@{/gestion/alquileres/documentacion/{id}/eliminar(id=${doc.id})}" method="post" class="d-inline">
+                        <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <button class="btn btn-sm btn-outline-danger ms-1" type="submit"
+                                onclick="return confirm('¿Está seguro de eliminar esta documentación?');">Eliminar</button>
+                      </form>
                     </td>
                   </tr>
                 </tbody>
@@ -282,18 +281,21 @@
                   <td th:text="${#temporals.format(a.fechaHasta, 'dd/MM/yyyy')}">Fecha Fin</td>
                   <td>
                     <div th:if="${#lists.isEmpty(a.documentacionIds)}" class="text-muted fst-italic">Sin documentación</div>
-                    <ul class="list-unstyled mb-0" th:if="${!#lists.isEmpty(a.documentacionIds)}">
-                      <li th:each="docId : ${a.documentacionIds}" th:with="doc=${documentacionMap[docId]}">
-                        <div>
-                          <strong th:text="${doc != null ? doc.tipoDocumentacion : 'Documento no disponible'}">Documento</strong>
-                          <span th:if="${doc == null}" class="text-muted small">(ID: <span th:text="${docId}">ID</span>)</span>
-                        </div>
-                        <div class="small" th:if="${doc != null}">
-                          <span th:text="${doc.nombreArchivo}">archivo.pdf</span>
-                          <code class="ms-1" th:text="${doc.pathArchivo}">/uploads/archivo.pdf</code>
-                        </div>
-                      </li>
-                    </ul>
+                    <div th:if="${!#lists.isEmpty(a.documentacionIds)}" class="small">
+                      <table class="table table-sm table-borderless mb-0">
+                        <tbody>
+                          <tr th:each="docId : ${a.documentacionIds}">
+                            <td class="p-1" style="width: 180px;">
+                              <strong th:text="${documentacionMap.containsKey(docId) ? documentacionMap.get(docId).tipoDocumentacion : 'Tipo desconocido'}">Tipo</strong>
+                            </td>
+                            <td class="p-1" style="width: 120px;" th:text="${documentacionMap.containsKey(docId) ? documentacionMap.get(docId).nombreArchivo : '-'}">Nombre</td>
+                            <td class="p-1">
+                              <code th:text="${documentacionMap.containsKey(docId) ? documentacionMap.get(docId).pathArchivo : docId}">Ruta</code>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </td>
                   <td class="text-end" th:if="${usuarioRol == 'ADMINISTRATIVO' || usuarioRol == 'JEFE'}">
                     <a class="btn btn-sm btn-outline-secondary" th:href="@{/gestion/alquileres(editId=${a.id})}">Editar</a>

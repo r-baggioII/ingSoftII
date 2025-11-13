@@ -49,6 +49,9 @@ public class Alquiler extends BaseEntity<String> {
     )
     private List<Documentacion> documentaciones = new ArrayList<>();
 
+    @OneToMany(mappedBy = "alquiler", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Recordatorio> recordatorios = new ArrayList<>();
+
     @Override
     public String getId() {
         return id;

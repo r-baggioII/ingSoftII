@@ -1,19 +1,23 @@
 package com.uncuyo.greedy_cars.shared.template.service;
 
 import com.uncuyo.greedy_cars.shared.template.entity.Alquiler;
+import com.uncuyo.greedy_cars.shared.template.entity.CaracteristicaVehiculo;
 import com.uncuyo.greedy_cars.shared.template.entity.Cliente;
 import com.uncuyo.greedy_cars.shared.template.entity.ConfiguracionCorreoAutomatico;
 import com.uncuyo.greedy_cars.shared.template.entity.ContactoCorreoElectronico;
 import com.uncuyo.greedy_cars.shared.template.entity.Persona;
 import com.uncuyo.greedy_cars.shared.template.entity.Promocion;
+import com.uncuyo.greedy_cars.shared.template.entity.Vehiculo;
 import com.uncuyo.greedy_cars.shared.template.repository.ClienteRepository;
 import com.uncuyo.greedy_cars.shared.template.repository.PromocionRepository;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,13 +25,12 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 @Service
-@EnableScheduling
 public class NotificacionCorreoService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificacionCorreoService.class);
@@ -39,6 +42,7 @@ public class NotificacionCorreoService {
     private final ConfiguracionCorreoAutomaticoService configuracionCorreoAutomaticoService;
     private final ClienteRepository clienteRepository;
     private final PromocionRepository promocionRepository;
+    private final String supportPhone;
 
     public NotificacionCorreoService(
             JavaMailSender mailSender,
@@ -46,13 +50,15 @@ public class NotificacionCorreoService {
             ClienteRepository clienteRepository,
             PromocionRepository promocionRepository,
             @Value("${greedy.mail.default-from:noreply@greedy-cars.com}") String defaultFrom,
-            @Value("${greedy.mail.promociones.asunto:Nueva promoción de Greedy Cars}") String promocionesSubject) {
+            @Value("${greedy.mail.promociones.asunto:Nueva promoción de Greedy Cars}") String promocionesSubject,
+            @Value("${greedy.support.contact.phone:+54 9 261 555 1234}") String supportPhone) {
         this.mailSender = mailSender;
         this.configuracionCorreoAutomaticoService = configuracionCorreoAutomaticoService;
         this.defaultFrom = defaultFrom;
         this.clienteRepository = clienteRepository;
         this.promocionRepository = promocionRepository;
         this.promocionesSubject = promocionesSubject;
+        this.supportPhone = supportPhone;
     }
 
     @Async
@@ -88,14 +94,68 @@ public class NotificacionCorreoService {
             LOGGER.warn("El cliente del alquiler {} no tiene correo registrado", alquiler.getId());
             return;
         }
-        String asunto = "Recordatorio de devolución de vehículo";
-        String cuerpo = "Hola "
-                + nombreCompleto(cliente)
-                + ", te recordamos que debes devolver el vehículo el día "
-                + FECHA_FORMAT.format(alquiler.getFechaHasta())
-                + ".";
-        // TODO: derivar empresaId desde el alquiler cuando el dominio la propague.
+        String asunto = "Recordatorio de Devolución de Vehículo";
+        String cuerpo = construirCuerpoRecordatorio(alquiler);
         enviarCorreoSimple(correo, asunto, cuerpo, empresaId);
+    }
+
+    private String construirCuerpoRecordatorio(Alquiler alquiler) {
+        Cliente cliente = alquiler.getCliente();
+        Vehiculo vehiculo = alquiler.getVehiculo();
+        CaracteristicaVehiculo caracteristica = vehiculo != null ? vehiculo.getCaracteristicaVehiculo() : null;
+        String descripcionVehiculo;
+        if (caracteristica != null) {
+            descripcionVehiculo = caracteristica.getMarca() + " " + caracteristica.getModelo();
+        } else if (vehiculo != null && StringUtils.hasText(vehiculo.getPatente())) {
+            descripcionVehiculo = "patente " + vehiculo.getPatente();
+        } else {
+            descripcionVehiculo = "vehículo reservado";
+        }
+        String fecha = alquiler.getFechaHasta() != null
+                ? FECHA_FORMAT.format(alquiler.getFechaHasta())
+                : "la fecha pactada";
+
+        return """
+Hola %s:
+
+Te recordamos que la devolución del %s está programada para el %s a las 09:00 hs. Te pedimos presentarte 15 minutos antes con la documentación y llaves entregadas.
+
+Si necesitás reprogramar o tenés dudas podés escribirnos a %s o comunicarte al %s.
+
+Muchas gracias,
+Equipo Greedy Cars
+""".formatted(
+                nombreCompleto(cliente),
+                descripcionVehiculo,
+                fecha,
+                defaultFrom,
+                supportPhone
+        );
+    }
+
+    @Async
+    @Transactional(readOnly = true)
+    public void enviarNuevaPromocion(Promocion promocion) {
+        if (promocion == null) {
+            LOGGER.warn("No se indicó la promoción para enviar correos");
+            return;
+        }
+        Promocion promocionPersistida = promocion.getId() != null
+                ? promocionRepository.findByIdAndEliminadoIsFalse(promocion.getId()).orElse(promocion)
+                : promocion;
+        List<Cliente> destinatarios = obtenerDestinatariosParaPromocion(promocionPersistida);
+        if (destinatarios.isEmpty()) {
+            LOGGER.info("La promoción {} no tiene destinatarios suscritos", promocionPersistida.getCodigoDescuento());
+            return;
+        }
+        for (Cliente cliente : destinatarios) {
+            String correo = obtenerCorreoPersona(cliente);
+            if (!StringUtils.hasText(correo)) {
+                continue;
+            }
+            String cuerpo = construirCuerpoPromocion(cliente, promocionPersistida);
+            enviarCorreoSimple(correo, promocionesSubject, cuerpo);
+        }
     }
 
     @Async
@@ -107,6 +167,10 @@ public class NotificacionCorreoService {
     public void enviarPromocion(Cliente cliente, String codigoPromocion, Integer porcentaje, String empresaId) {
         if (cliente == null) {
             LOGGER.warn("Cliente nulo para el envío de promoción");
+            return;
+        }
+        if (!clienteAceptaPromociones(cliente)) {
+            LOGGER.debug("El cliente {} no está suscripto a promociones. Se omite el envío.", cliente.getId());
             return;
         }
         String correo = obtenerCorreoPersona(cliente);
@@ -125,6 +189,7 @@ public class NotificacionCorreoService {
         enviarCorreoSimple(correo, asunto, cuerpo, empresaId);
     }
 
+    // TODO: evaluar si este job sigue siendo necesario una vez que los envíos al crear promociones cubran el negocio.
     @Scheduled(cron = "${greedy.mail.promociones.cron:0 0 10 */7 * *}")
     public void enviarPromocionesActivas() {
         LocalDate hoy = LocalDate.now();
@@ -134,7 +199,7 @@ public class NotificacionCorreoService {
             return;
         }
 
-        List<Cliente> clientes = clienteRepository.findAllByEliminadoIsFalse();
+        List<Cliente> clientes = clienteRepository.findAllByEliminadoIsFalseAndRecibirPromocionesIsTrue();
         if (clientes.isEmpty()) {
             LOGGER.warn("No hay clientes activos para enviar promociones");
             return;
@@ -142,6 +207,9 @@ public class NotificacionCorreoService {
 
         String descripcionPromos = construirDetallePromociones(promociones);
         for (Cliente cliente : clientes) {
+            if (!clienteAceptaPromociones(cliente)) {
+                continue;
+            }
             String correo = obtenerCorreoPersona(cliente);
             if (!StringUtils.hasText(correo)) {
                 continue;
@@ -215,6 +283,70 @@ public class NotificacionCorreoService {
                 + "Tenemos promociones vigentes que podés aprovechar en tu próximo alquiler:\n"
                 + detallePromos
                 + "\n¡Reservá tu vehículo y usá el código que más te guste en Greedy Cars!";
+    }
+
+    private List<Cliente> obtenerDestinatariosParaPromocion(Promocion promocion) {
+        if (promocion == null) {
+            return Collections.emptyList();
+        }
+        if (promocion.isAplicaATodos()) {
+            return clienteRepository.findAllByEliminadoIsFalseAndRecibirPromocionesIsTrue();
+        }
+        if (promocion.getClientesDestino() == null || promocion.getClientesDestino().isEmpty()) {
+            return Collections.emptyList();
+        }
+        return promocion.getClientesDestino().stream()
+                .filter(this::clienteAceptaPromociones)
+                .collect(Collectors.toList());
+    }
+
+    private boolean clienteAceptaPromociones(Cliente cliente) {
+        if (cliente == null) {
+            return false;
+        }
+        if (Boolean.TRUE.equals(cliente.getEliminado())) {
+            return false;
+        }
+        return cliente.getRecibirPromociones() == null || Boolean.TRUE.equals(cliente.getRecibirPromociones());
+    }
+
+    private String construirCuerpoPromocion(Cliente cliente, Promocion promocion) {
+        String nombre = nombreCompleto(cliente);
+        return "Hola " + nombre + ",\n\n"
+                + "Ya podés usar el código "
+                + promocion.getCodigoDescuento()
+                + " y obtener "
+                + formatearDescuento(promocion)
+                + " en tu próximo alquiler."
+                + "\nVigencia: "
+                + formatearVigencia(promocion)
+                + ".\n\nUsá este código al crear tu próximo alquiler en Greedy Cars.";
+    }
+
+    private String formatearDescuento(Promocion promocion) {
+        Double porcentaje = promocion.getPorcentajeDescuento();
+        if (porcentaje == null) {
+            return "un descuento especial";
+        }
+        boolean esEntero = Math.floor(porcentaje) == porcentaje;
+        return esEntero
+                ? String.format("%.0f%% de descuento", porcentaje)
+                : String.format("%.2f%% de descuento", porcentaje);
+    }
+
+    private String formatearVigencia(Promocion promocion) {
+        LocalDate inicio = promocion.getFechaInicioPromocion();
+        LocalDate fin = promocion.getFechaFinPromocion();
+        if (inicio != null && fin != null) {
+            return "del " + FECHA_FORMAT.format(inicio) + " al " + FECHA_FORMAT.format(fin);
+        }
+        if (inicio != null) {
+            return "a partir del " + FECHA_FORMAT.format(inicio);
+        }
+        if (fin != null) {
+            return "hasta el " + FECHA_FORMAT.format(fin);
+        }
+        return "por tiempo limitado";
     }
 
     private MailSenderContext prepararContexto(String empresaId) {

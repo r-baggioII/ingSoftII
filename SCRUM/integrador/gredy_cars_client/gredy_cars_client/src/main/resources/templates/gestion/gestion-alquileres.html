@@ -299,6 +299,13 @@
                   </td>
                   <td class="text-end" th:if="${usuarioRol == 'ADMINISTRATIVO' || usuarioRol == 'JEFE'}">
                     <a class="btn btn-sm btn-outline-secondary" th:href="@{/gestion/alquileres(editId=${a.id})}">Editar</a>
+                    <form th:action="@{/gestion/alquileres/{id}/recordatorio-whatsapp(id=${a.id})}" method="post" class="d-inline">
+                      <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                      <button class="btn btn-sm btn-success ms-1" type="submit"
+                              onclick="return confirm('¿Enviar recordatorio de WhatsApp al titular del alquiler?');">
+                        WhatsApp
+                      </button>
+                    </form>
                     <form th:action="@{/gestion/alquileres/{id}/eliminar(id=${a.id})}" method="post" class="d-inline">
                       <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                       <button class="btn btn-sm btn-outline-danger ms-1" type="submit">Eliminar</button>

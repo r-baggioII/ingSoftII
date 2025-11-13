@@ -53,4 +53,6 @@ public interface AlquilerRepository extends BaseRepository<Alquiler, String> {
         @Param("vehiculoId") String vehiculoId,
         @Param("inicio") java.time.LocalDate inicio,
         @Param("fin") java.time.LocalDate fin);
+
+    List<Alquiler> findAllByFechaHastaAndEliminadoIsFalse(java.time.LocalDate fechaHasta);
 }

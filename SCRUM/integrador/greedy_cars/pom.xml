@@ -129,6 +129,11 @@
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.twilio.sdk</groupId>
+			<artifactId>twilio</artifactId>
+			<version>9.0.0</version>
+		</dependency>
+		<dependency>
 			<groupId>com.github.librepdf</groupId>
 			<artifactId>openpdf</artifactId>
 			<version>1.3.39</version>
@@ -137,6 +142,7 @@
 
 	<build>
 		<finalName>greedy_cars</finalName>
+		<testOutputDirectory>${project.build.directory}/test-classes-${user.name}</testOutputDirectory>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

@@ -30,6 +30,7 @@ import com.gredy_cars_client.gredy_cars_client.shared.template.service.ClienteSe
 import com.gredy_cars_client.gredy_cars_client.shared.template.service.DocumentacionService;
 import com.gredy_cars_client.gredy_cars_client.shared.template.service.VehiculoService;
 import com.gredy_cars_client.gredy_cars_client.shared.template.service.CaracteristicaVehiculoService;
+import com.gredy_cars_client.gredy_cars_client.shared.template.service.WhatsAppService;
 import com.gredy_cars_client.gredy_cars_client.shared.template.enums.TipoDocumentacion;
 
 @Controller
@@ -41,17 +42,34 @@ public class GestionAlquileresController {
     private final VehiculoService vehiculoService;
     private final CaracteristicaVehiculoService caracteristicaService;
     private final DocumentacionService documentacionService;
+    private final WhatsAppService whatsAppService;
 
     public GestionAlquileresController(AlquilerService alquilerService,
                                        ClienteService clienteService,
                                        VehiculoService vehiculoService,
                                        CaracteristicaVehiculoService caracteristicaService,
-                                       DocumentacionService documentacionService) {
+                                       DocumentacionService documentacionService,
+                                       WhatsAppService whatsAppService) {
         this.alquilerService = alquilerService;
         this.clienteService = clienteService;
         this.vehiculoService = vehiculoService;
         this.caracteristicaService = caracteristicaService;
         this.documentacionService = documentacionService;
+        this.whatsAppService = whatsAppService;
+    }
+
+    @PostMapping("/alquileres/{id}/recordatorio-whatsapp")
+    public String enviarRecordatorioWhatsApp(
+        @PathVariable String id,
+        RedirectAttributes redirectAttributes
+    ) {
+        try {
+            whatsAppService.enviarRecordatorioManual(id);
+            redirectAttributes.addFlashAttribute("success", "Se envió el recordatorio de WhatsApp correctamente.");
+        } catch (ErrorServiceException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/gestion/alquileres";
     }
 
     @GetMapping("/alquileres")

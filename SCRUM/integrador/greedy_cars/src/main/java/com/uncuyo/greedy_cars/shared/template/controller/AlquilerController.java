@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -98,6 +99,21 @@ public class AlquilerController {
             alquilerService.sincronizarTodosLosEstadosVehiculos();
             Map<String, String> response = new HashMap<>();
             response.put("mensaje", "Estados de vehículos sincronizados correctamente");
+            return ResponseEntity.ok(response);
+        } catch (ErrorServiceException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return buildErrorResponse("Error de Sistema: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PreAuthorize("hasAnyRole('ADMINISTRATIVO','JEFE')")
+    @PostMapping("/{id}/recordatorio-whatsapp")
+    public ResponseEntity<?> enviarRecordatorioManual(@PathVariable String id) {
+        try {
+            alquilerService.enviarRecordatorioManualWhatsapp(id);
+            Map<String, String> response = new HashMap<>();
+            response.put("mensaje", "Recordatorio de WhatsApp enviado correctamente");
             return ResponseEntity.ok(response);
         } catch (ErrorServiceException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);

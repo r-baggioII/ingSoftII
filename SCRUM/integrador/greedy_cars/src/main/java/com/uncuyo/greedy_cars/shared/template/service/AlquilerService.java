@@ -3,13 +3,18 @@ package com.uncuyo.greedy_cars.shared.template.service;
 import com.uncuyo.greedy_cars.shared.template.dto.AlquilerDTO;
 import com.uncuyo.greedy_cars.shared.template.entity.*;
 import com.uncuyo.greedy_cars.shared.template.enums.BaseUseCaseService;
+import com.uncuyo.greedy_cars.shared.template.enums.EstadoRecordatorio;
 import com.uncuyo.greedy_cars.shared.template.enums.EstadoVehiculo;
+import com.uncuyo.greedy_cars.shared.template.enums.TipoRecordatorio;
 import com.uncuyo.greedy_cars.shared.template.exception.ErrorServiceException;
 import com.uncuyo.greedy_cars.shared.template.mapper.AlquilerMapper;
 import com.uncuyo.greedy_cars.shared.template.repository.AlquilerRepository;
 import com.uncuyo.greedy_cars.shared.template.repository.ClienteRepository;
 import com.uncuyo.greedy_cars.shared.template.repository.DocumentacionRepository;
+import com.uncuyo.greedy_cars.shared.template.repository.RecordatorioRepository;
 import com.uncuyo.greedy_cars.shared.template.repository.VehiculoRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -25,6 +30,8 @@ import java.util.stream.Collectors;
 @Service
 public class AlquilerService extends BaseService<Alquiler, String> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AlquilerService.class);
+
     private final ClienteRepository clienteRepository;
     private final VehiculoRepository vehiculoRepository;
     private final DocumentacionRepository documentacionRepository;
@@ -32,6 +39,9 @@ public class AlquilerService extends BaseService<Alquiler, String> {
     private final CostoVehiculoService costoVehiculoService;
     private final PromocionService promocionService;
     private final AlquilerMapper alquilerMapper;
+    private final NotificacionCorreoService notificacionCorreoService;
+    private final WhatsAppService whatsAppService;
+    private final RecordatorioRepository recordatorioRepository;
 
     public AlquilerService(AlquilerRepository repository,
                            ClienteRepository clienteRepository,
@@ -40,7 +50,10 @@ public class AlquilerService extends BaseService<Alquiler, String> {
                            FacturaService facturaService,
                            CostoVehiculoService costoVehiculoService,
                            PromocionService promocionService,
-                           AlquilerMapper alquilerMapper) {
+                           AlquilerMapper alquilerMapper,
+                           NotificacionCorreoService notificacionCorreoService,
+                           WhatsAppService whatsAppService,
+                           RecordatorioRepository recordatorioRepository) {
         super(repository);
         this.clienteRepository = clienteRepository;
         this.vehiculoRepository = vehiculoRepository;
@@ -49,6 +62,9 @@ public class AlquilerService extends BaseService<Alquiler, String> {
         this.costoVehiculoService = costoVehiculoService;
         this.promocionService = promocionService;
         this.alquilerMapper = alquilerMapper;
+        this.notificacionCorreoService = notificacionCorreoService;
+        this.whatsAppService = whatsAppService;
+        this.recordatorioRepository = recordatorioRepository;
     }
 
     // =============== Métodos con DTOs ===============
@@ -86,6 +102,123 @@ public class AlquilerService extends BaseService<Alquiler, String> {
         }
     }
 
+    // =============== Recordatorios ===============
+    public ReminderDispatchResult enviarRecordatoriosDevolucionProgramados(LocalDate fechaObjetivo) throws ErrorServiceException {
+        LocalDate objetivo = fechaObjetivo != null ? fechaObjetivo : LocalDate.now().plusDays(1);
+        List<Alquiler> alquileres = ((AlquilerRepository) repository)
+                .findAllByFechaHastaAndEliminadoIsFalse(objetivo);
+
+        int correosOk = 0;
+        int correosError = 0;
+        int whatsappOk = 0;
+        int whatsappError = 0;
+        int sinTelefono = 0;
+
+        for (Alquiler alquiler : alquileres) {
+            inicializarRelacionesBasicas(alquiler);
+            if (!yaSeEnvioRecordatorio(alquiler.getId(), TipoRecordatorio.EMAIL)) {
+                try {
+                    notificacionCorreoService.enviarRecordatorioDevolucion(alquiler);
+                    registrarRecordatorio(alquiler, TipoRecordatorio.EMAIL, EstadoRecordatorio.ENVIADO, null);
+                    correosOk++;
+                } catch (Exception ex) {
+                    registrarRecordatorio(alquiler, TipoRecordatorio.EMAIL, EstadoRecordatorio.ERROR, ex.getMessage());
+                    correosError++;
+                }
+            }
+
+            if (!yaSeEnvioRecordatorio(alquiler.getId(), TipoRecordatorio.WHATSAPP_AUTO)) {
+                try {
+                    WhatsAppService.WhatsAppSendResult result = whatsAppService.enviarRecordatorioDevolucion(alquiler, false);
+                    registrarRecordatorio(alquiler, TipoRecordatorio.WHATSAPP_AUTO,
+                            result.enviado() ? EstadoRecordatorio.ENVIADO : EstadoRecordatorio.ERROR,
+                            result.error());
+                    if (result.enviado()) {
+                        whatsappOk++;
+                    } else {
+                        whatsappError++;
+                    }
+                } catch (ErrorServiceException ex) {
+                    registrarRecordatorio(alquiler, TipoRecordatorio.WHATSAPP_AUTO, EstadoRecordatorio.ERROR, ex.getMessage());
+                    whatsappError++;
+                    sinTelefono++;
+                }
+            }
+        }
+
+        ReminderDispatchResult result = new ReminderDispatchResult(
+                alquileres.size(),
+                correosOk,
+                correosError,
+                whatsappOk,
+                whatsappError,
+                sinTelefono
+        );
+        LOGGER.info("Recordatorios programados para {} -> {}", objetivo, result);
+        return result;
+    }
+
+    public Recordatorio enviarRecordatorioManualWhatsapp(String alquilerId) throws ErrorServiceException {
+        if (!StringUtils.hasText(alquilerId)) {
+            throw new ErrorServiceException("Debe indicar el alquiler para enviar el recordatorio");
+        }
+        if (yaSeEnvioRecordatorio(alquilerId, TipoRecordatorio.WHATSAPP_MANUAL)) {
+            throw new ErrorServiceException("Ya existe un recordatorio manual para este alquiler");
+        }
+        Alquiler alquiler = obtenerEntidad(alquilerId);
+        inicializarRelacionesBasicas(alquiler);
+        WhatsAppService.WhatsAppSendResult result = whatsAppService.enviarRecordatorioDevolucion(alquiler, true);
+        Recordatorio recordatorio = registrarRecordatorio(alquiler, TipoRecordatorio.WHATSAPP_MANUAL,
+                result.enviado() ? EstadoRecordatorio.ENVIADO : EstadoRecordatorio.ERROR,
+                result.error());
+        if (!result.enviado()) {
+            String detalle = StringUtils.hasText(result.error())
+                    ? result.error()
+                    : "No se pudo enviar el recordatorio de WhatsApp";
+            throw new ErrorServiceException(detalle);
+        }
+        return recordatorio;
+    }
+
+    private void inicializarRelacionesBasicas(Alquiler alquiler) {
+        if (alquiler == null) {
+            return;
+        }
+        Cliente cliente = alquiler.getCliente();
+        if (cliente != null && cliente.getContactos() != null) {
+            cliente.getNombre();
+            cliente.getContactos().size();
+        }
+        Vehiculo vehiculo = alquiler.getVehiculo();
+        if (vehiculo != null) {
+            vehiculo.getPatente();
+            CaracteristicaVehiculo caracteristica = vehiculo.getCaracteristicaVehiculo();
+            if (caracteristica != null) {
+                caracteristica.getMarca();
+                caracteristica.getModelo();
+            }
+        }
+    }
+
+    private boolean yaSeEnvioRecordatorio(String alquilerId, TipoRecordatorio tipoRecordatorio) {
+        return recordatorioRepository.existsByAlquilerIdAndTipoRecordatorioAndEliminadoIsFalse(alquilerId, tipoRecordatorio);
+    }
+
+    private Recordatorio registrarRecordatorio(Alquiler alquiler,
+                                               TipoRecordatorio tipo,
+                                               EstadoRecordatorio estado,
+                                               String detalleError) {
+        Recordatorio recordatorio = new Recordatorio(alquiler, tipo, estado, detalleError);
+        return recordatorioRepository.save(recordatorio);
+    }
+
+    public record ReminderDispatchResult(int totalAlquileres,
+                                         int correosExitosos,
+                                         int correosFallidos,
+                                         int whatsappsExitosos,
+                                         int whatsappsFallidos,
+                                         int sinTelefono) {}
+
     public AlquilerDTO altaDTO(AlquilerDTO dto) throws ErrorServiceException {
         Cliente cli = findCliente(dto.getIdCliente());
         Vehiculo veh = findVehiculo(dto.getIdVehiculo());
@@ -93,7 +226,7 @@ public class AlquilerService extends BaseService<Alquiler, String> {
                 ? List.of()
                 : documentacionRepository.findAllById(dto.getDocumentacionIds());
 
-        Promocion promocionAplicada = obtenerPromocionAplicable(dto.getCodigoPromocion(), dto.getFechaDesde());
+        Promocion promocionAplicada = obtenerPromocionAplicable(dto.getCodigoPromocion(), cli, dto.getFechaDesde());
 
         Alquiler entidad = alquilerMapper.toEntity(dto, cli, veh, docs);
         Alquiler guardado = alta(entidad);
@@ -337,12 +470,13 @@ public class AlquilerService extends BaseService<Alquiler, String> {
     }
 
     // =============== Helpers ===============
-    private Promocion obtenerPromocionAplicable(String codigoPromocion, LocalDate fechaReferencia) throws ErrorServiceException {
+    private Promocion obtenerPromocionAplicable(String codigoPromocion, Cliente cliente, LocalDate fechaReferencia)
+            throws ErrorServiceException {
         if (!StringUtils.hasText(codigoPromocion)) {
             return null;
         }
         LocalDate referencia = fechaReferencia != null ? fechaReferencia : LocalDate.now();
-        return promocionService.buscarPorCodigo(codigoPromocion.trim(), referencia);
+        return promocionService.obtenerPromocionVigenteParaClienteObligatoria(codigoPromocion.trim(), cliente, referencia);
     }
 
     private void validarFechasYRelaciones(LocalDate fechaDesde, LocalDate fechaHasta, String idCliente, String idVehiculo) throws ErrorServiceException {

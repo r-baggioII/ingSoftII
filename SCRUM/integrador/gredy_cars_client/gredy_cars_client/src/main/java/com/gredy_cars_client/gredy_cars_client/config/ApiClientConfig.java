@@ -27,6 +27,10 @@ public class ApiClientConfig {
     ) {
         return builder
             .defaultHeader(HttpHeaders.AUTHORIZATION, createBasicAuthHeader(properties))
+            .additionalInterceptors((request, body, execution) -> {
+                request.getHeaders().set(HttpHeaders.AUTHORIZATION, createBasicAuthHeader(properties));
+                return execution.execute(request, body);
+            })
             .requestFactory(() -> httpRequestFactory)
             .build();
     }

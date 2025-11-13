@@ -196,16 +196,20 @@
                       </span>
                     </td>
                     <td class="text-end">
-                      <a class="btn btn-sm btn-outline-primary" th:href="@{/gestion/vehiculos(editId=${v.id})}">
-                        <i class="bi bi-pencil"></i> Editar
-                      </a>
-                      <form th:action="@{/gestion/vehiculos/{id}/eliminar(id=${v.id})}" method="post" class="d-inline"
+                      <!-- Solo mostrar el botón eliminar si el vehículo NO está alquilado -->
+                      <form th:if="${v.estadoVehiculo.name() == 'DISPONIBLE'}" 
+                            th:action="@{/gestion/vehiculos/{id}/eliminar(id=${v.id})}" 
+                            method="post" 
+                            class="d-inline"
                             onsubmit="return confirm('¿Está seguro de eliminar este vehículo?');">
                         <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                        <button class="btn btn-sm btn-outline-danger ms-1" type="submit">
+                        <button class="btn btn-sm btn-outline-danger" type="submit">
                           <i class="bi bi-trash"></i> Eliminar
                         </button>
                       </form>
+                      <a class="btn btn-sm btn-outline-primary ms-1" th:href="@{/gestion/vehiculos(editId=${v.id})}">
+                        <i class="bi bi-pencil"></i> Editar
+                      </a>
                     </td>
                   </tr>
                   <tr th:if="${#lists.isEmpty(vehiculos)}">

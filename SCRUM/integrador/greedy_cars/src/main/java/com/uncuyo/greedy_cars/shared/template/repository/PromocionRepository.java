@@ -30,4 +30,6 @@ public interface PromocionRepository extends BaseRepository<Promocion, String> {
         ORDER BY p.fechaInicioPromocion DESC
     """)
     List<Promocion> findActivas(@Param("fechaReferencia") LocalDate fechaReferencia);
+
+    List<Promocion> findByClientesDestino_IdAndEliminadoIsFalse(String clienteId);
 }

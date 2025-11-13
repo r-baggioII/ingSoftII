@@ -91,6 +91,7 @@
                 <label class="panel-label">Código de descuento (opcional)</label>
                 <input type="text" th:field="*{codigoPromocion}" class="form-control panel-control" placeholder="Ej: SUMMER25">
                 <small class="text-muted">Ingresá el código solo si el cliente tiene una promoción vigente.</small>
+                <div class="small mt-2" id="promocionesClienteHelper"></div>
               </div>
 
               <div class="mb-3">
@@ -241,6 +242,7 @@
                     <th>Fecha Inicio</th>
                     <th>Fecha Fin</th>
                     <th>Documentación</th>
+                    <th>Promoción</th>
                     <th th:if="${usuarioRol == 'ADMINISTRATIVO' || usuarioRol == 'JEFE'}" class="text-end">Acciones</th>
                   </tr>
                 </thead>
@@ -297,6 +299,22 @@
                       </table>
                     </div>
                   </td>
+                  <td>
+                    <div th:if="${promocionesPorAlquiler != null and promocionesPorAlquiler.containsKey(a.id)}"
+                         class="bg-light rounded p-2 small">
+                      <th:block th:with="promo=${promocionesPorAlquiler.get(a.id)}">
+                        <div><strong>Código:</strong> <span th:text="${promo.codigo()}">PROMO</span></div>
+                        <div th:if="${promo.porcentaje() != null}"><strong>Descuento:</strong> <span th:text="${promo.porcentaje()} + '%'">0%</span></div>
+                        <div><strong>Monto original:</strong> $<span th:text="${#numbers.formatDecimal(promo.montoOriginal(), 1, 2)}">0,00</span></div>
+                        <div><strong>Descuento aplicado:</strong> $<span th:text="${#numbers.formatDecimal(promo.descuento(), 1, 2)}">0,00</span></div>
+                        <div><strong>Total con promoción:</strong> $<span th:text="${#numbers.formatDecimal(promo.montoConDescuento(), 1, 2)}">0,00</span></div>
+                      </th:block>
+                    </div>
+                    <div th:unless="${promocionesPorAlquiler != null and promocionesPorAlquiler.containsKey(a.id)}"
+                         class="text-muted fst-italic small">
+                      Sin promoción aplicada
+                    </div>
+                  </td>
                   <td class="text-end" th:if="${usuarioRol == 'ADMINISTRATIVO' || usuarioRol == 'JEFE'}">
                     <a class="btn btn-sm btn-outline-secondary" th:href="@{/gestion/alquileres(editId=${a.id})}">Editar</a>
                     <form th:action="@{/gestion/alquileres/{id}/recordatorio-whatsapp(id=${a.id})}" method="post" class="d-inline">
@@ -328,6 +346,52 @@
 <script th:src="@{/js/script.js}"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const clienteSelect = document.querySelector('select[name="idCliente"]');
+    const helper = document.getElementById('promocionesClienteHelper');
+    const contextoMeta = document.querySelector('meta[name="app-context"]');
+    const baseUrl = contextoMeta ? contextoMeta.getAttribute('content').replace(/\/$/, '') : '';
+
+    if (!clienteSelect || !helper || !baseUrl) {
+      return;
+    }
+
+    clienteSelect.addEventListener('change', () => actualizarPromociones(clienteSelect.value));
+    if (clienteSelect.value) {
+      actualizarPromociones(clienteSelect.value);
+    }
+
+    async function actualizarPromociones(clienteId) {
+      if (!clienteId) {
+        helper.textContent = 'Seleccioná un cliente para ver sus promociones disponibles.';
+        return;
+      }
+      helper.textContent = 'Buscando promociones vigentes...';
+      try {
+        const response = await fetch(`${baseUrl}/api/promociones/vigentes/cliente/${clienteId}`);
+        if (!response.ok) {
+          helper.textContent = 'No se pudieron obtener las promociones.';
+          return;
+        }
+        const promos = await response.json();
+        if (!promos.length) {
+          helper.textContent = 'El cliente no tiene promociones vigentes.';
+          return;
+        }
+        helper.innerHTML = promos.map(promo => `
+          <div class="border rounded p-2 mb-2 bg-light">
+            <div><strong>${promo.codigoDescuento}</strong> (${promo.porcentajeDescuento || 0}% OFF)</div>
+            <div class="small text-muted">Vigencia: ${promo.fechaInicioPromocion || '-'} a ${promo.fechaFinPromocion || '-'}</div>
+          </div>
+        `).join('');
+      } catch (error) {
+        console.error('Error cargando promociones', error);
+        helper.textContent = 'Error al cargar las promociones vigentes.';
+      }
+    }
+  });
+</script>
 </body>
 
 </html>

@@ -75,6 +75,13 @@
                 </div>
                 <div class="col-md-6"><label class="panel-label">Número Documento</label><input type="text" th:field="*{numeroDocumento}" class="form-control panel-control" required></div>
                 <div class="col-md-6"><label class="panel-label">Dirección de Estadia</label><input type="text" th:field="*{direccionEstadia}" class="form-control panel-control"></div>
+                <div class="col-md-6">
+                  <label class="panel-label d-block">Preferencias de promociones</label>
+                  <div class="form-check form-switch mt-2">
+                    <input class="form-check-input" type="checkbox" th:field="*{recibirPromociones}" id="recibirPromocionesSwitch">
+                    <label class="form-check-label" for="recibirPromocionesSwitch">Desea recibir promociones y descuentos</label>
+                  </div>
+                </div>
                 
                 <!-- Nacionalidades como checkboxes (más fácil de usar) -->
                 <div class="col-md-12">

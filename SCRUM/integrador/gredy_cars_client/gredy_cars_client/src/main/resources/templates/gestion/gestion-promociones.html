@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de Promociones - Greedy Cars</title>
+  <meta name="_csrf" th:if="${_csrf}" th:content="${_csrf.token}">
+  <meta name="_csrf_header" th:if="${_csrf}" th:content="${_csrf.headerName}">
+  <meta name="app-context" th:content="@{/}" />
+
+  <link rel="stylesheet" type="text/css" th:href="@{/css/vendor.css}" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous" />
+  <link rel="stylesheet" type="text/css" th:href="@{/style.css}" />
+  <script th:src="@{/js/modernizr.js}"></script>
+</head>
+
+<body>
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<section id="banner" class="position-relative overflow-hidden jarallax"
+         th:style="|background-image: url(@{/images/Bg.jpg}); background-repeat: no-repeat; background-size: cover; background-position: center;|">
+  <div class="container text-center py-5 mt-5">
+    <div class="row my-5">
+      <div class="d-flex flex-wrap flex-column justify-content-center align-items-center text-white">
+        <h2 class="page-title display-3 mt-5">Gestión de Promociones</h2>
+        <nav class="breadcrumb ">
+          <a class="breadcrumb-item text-white" href="/">Home</a>
+          <span class="breadcrumb-item text-white active" aria-current="page">Promociones</span>
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="contact-us-wrap py-5">
+  <div class="container">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <div class="section-heading text-center mb-4">
+      <h2>Panel de Promociones</h2>
+      <p th:if="${usuarioRol == 'JEFE'}">Creá, notificá y supervisá las promociones vigentes para tus clientes.</p>
+      <p th:if="${usuarioRol != 'JEFE'}" class="text-danger">Solo un usuario con rol JEFE puede operar este módulo.</p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="card-title mb-0" th:text="${editando} ? 'Editar promoción' : 'Nueva promoción'"></h5>
+              <a th:if="${editando}" class="btn btn-sm btn-outline-secondary" th:href="@{/gestion/promociones}">Cancelar</a>
+            </div>
+            <form th:object="${promocionForm}" th:action="@{/gestion/promociones}" method="post">
+              <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+              <input type="hidden" th:field="*{id}" />
+
+              <div class="mb-3">
+                <label class="form-label">Código *</label>
+                <input type="text" th:field="*{codigoDescuento}" class="form-control" placeholder="Ej: SUMMER25" required>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Porcentaje de descuento *</label>
+                <div class="input-group">
+                  <input type="number" step="0.01" min="0" max="100" th:field="*{porcentajeDescuento}" class="form-control" required>
+                  <span class="input-group-text">%</span>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Descripción</label>
+                <textarea th:field="*{descripcionDescuento}" class="form-control" rows="2"
+                          placeholder="Detalle opcional para recordar el objetivo de la promo"></textarea>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Inicio *</label>
+                  <input type="date" th:field="*{fechaInicioPromocion}" class="form-control" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Fin *</label>
+                  <input type="date" th:field="*{fechaFinPromocion}" class="form-control" required>
+                </div>
+              </div>
+
+              <div class="form-check form-switch mb-3">
+                <input class="form-check-input" type="checkbox" th:field="*{aplicaATodos}" id="aplicaATodosSwitch">
+                <label class="form-check-label" for="aplicaATodosSwitch">Aplicar a todos los clientes</label>
+              </div>
+
+              <div class="mb-3" id="clientesDestinoWrapper">
+                <label class="form-label">Clientes destinatarios</label>
+                <select multiple class="form-select" th:field="*{clientesDestinoIds}" id="clientesDestinoSelect">
+                  <option th:each="cliente : ${clientes}"
+                          th:value="${cliente.id}"
+                          th:text="${cliente.numeroDocumento + ' - ' + cliente.nombre + ' ' + cliente.apellido}">
+                    Cliente
+                  </option>
+                </select>
+                <small class="text-muted d-block mt-1">Seleccioná uno o varios clientes cuando la promo sea segmentada.</small>
+              </div>
+
+              <div class="d-grid gap-2 mt-3">
+                <button class="btn main-button-panel" type="submit" th:text="${editando} ? 'Actualizar' : 'Crear'"></button>
+                <button class="btn btn-outline-secondary" type="reset">Limpiar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-8">
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="card-title mb-0">Promociones registradas</h5>
+            </div>
+            <div class="table-responsive">
+              <table class="table align-middle">
+                <thead class="table-light">
+                <tr>
+                  <th>Código</th>
+                  <th>Descuento</th>
+                  <th>Vigencia</th>
+                  <th>Destino</th>
+                  <th class="text-end">Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(promociones)}">
+                  <td colspan="5" class="text-center text-muted py-4">Aún no hay promociones cargadas.</td>
+                </tr>
+                <tr th:each="promo : ${promociones}">
+                  <td>
+                    <strong th:text="${promo.codigoDescuento}">CODIGO</strong>
+                    <span class="badge bg-success ms-2" th:if="${promo.eliminado == false}">Activa</span>
+                    <span class="badge bg-danger ms-2" th:if="${promo.eliminado == true}">Eliminada</span>
+                  </td>
+                  <td th:text="${promo.porcentajeDescuento + '%'}"></td>
+                  <td>
+                    <div>
+                      <small th:text="${promo.fechaInicioPromocion}"></small>
+                      <span>→</span>
+                      <small th:text="${promo.fechaFinPromocion}"></small>
+                    </div>
+                  </td>
+                  <td>
+                    <span th:if="${promo.aplicaATodos}">Todos los clientes</span>
+                    <div th:if="${!promo.aplicaATodos}">
+                      <span class="badge bg-primary mb-1">Segmentada</span>
+                      <ul class="list-unstyled mb-0 small">
+                        <li th:if="${promo.clientesDestinoIds == null || promo.clientesDestinoIds.isEmpty()}">Sin destinatarios</li>
+                        <li th:each="clienteId : ${promo.clientesDestinoIds}"
+                            th:text="${clientesMap[clienteId] != null ? clientesMap[clienteId] : clienteId}">Cliente</li>
+                      </ul>
+                    </div>
+                  </td>
+                  <td class="text-end">
+                    <div class="btn-group">
+                      <a class="btn btn-sm btn-outline-primary"
+                         th:href="@{/gestion/promociones(editId=${promo.id})}">
+                        Editar
+                      </a>
+                      <form th:action="@{/gestion/promociones/{id}/eliminar(id=${promo.id})}" method="post"
+                            onsubmit="return confirm('¿Eliminar la promoción?');">
+                        <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title mb-3">Promociones vigentes</h5>
+            <div th:if="${#lists.isEmpty(promocionesVigentes)}" class="text-muted">No hay promociones vigentes para la fecha actual.</div>
+            <div class="list-group" th:if="${!#lists.isEmpty(promocionesVigentes)}">
+              <div class="list-group-item" th:each="vigente : ${promocionesVigentes}">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="mb-1" th:text="${vigente.codigoDescuento}">CODIGO</h6>
+                    <p class="mb-0 small text-muted">
+                      <span th:text="${'Descuento: ' + vigente.porcentajeDescuento + '%'}"></span> ·
+                      <span th:text="${'Vigencia: ' + vigente.fechaInicioPromocion + ' → ' + vigente.fechaFinPromocion}"></span>
+                    </p>
+                  </div>
+                  <span class="badge bg-success">Activa</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div th:replace="fragments/footer :: footer"></div>
+
+<script th:src="@{/js/jquery-1.11.0.min.js}"></script>
+<script th:src="@{/js/plugins.js}"></script>
+<script th:src="@{/js/script.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const aplicaTodos = document.getElementById('aplicaATodosSwitch');
+    const wrapper = document.getElementById('clientesDestinoWrapper');
+    const select = document.getElementById('clientesDestinoSelect');
+    if (!aplicaTodos || !wrapper) {
+      return;
+    }
+    const toggleDestinatarios = () => {
+      const ocultar = aplicaTodos.checked;
+      wrapper.style.display = ocultar ? 'none' : 'block';
+      if (ocultar && select) {
+        Array.from(select.options).forEach(option => option.selected = false);
+      }
+    };
+    toggleDestinatarios();
+    aplicaTodos.addEventListener('change', toggleDestinatarios);
+  });
+</script>
+</body>
+</html>

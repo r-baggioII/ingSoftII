@@ -112,10 +112,10 @@ echo -e "${GREEN}▶ Iniciando Backend en puerto 18081 con Docker (Java 17)...${
 cd "$BACKEND_DIR"
 docker run -d \
     --name greedy-cars-backend \
+    --network host \
     -v "$BACKEND_DIR":/app \
     -v ~/.m2:/root/.m2 \
     -w /app \
-    -p 18081:18081 \
     --restart unless-stopped \
     maven:3.9-eclipse-temurin-17 \
     ./mvnw spring-boot:run > "$SCRIPT_DIR/logs/backend.log" 2>&1
@@ -145,10 +145,10 @@ echo -e "${GREEN}▶ Iniciando Frontend en puerto 18082 con Docker (Java 17)...$
 cd "$FRONTEND_DIR"
 docker run -d \
     --name greedy-cars-frontend \
+    --network host \
     -v "$FRONTEND_DIR":/app \
     -v ~/.m2:/root/.m2 \
     -w /app \
-    -p 18082:18082 \
     --restart unless-stopped \
     maven:3.9-eclipse-temurin-17 \
     ./mvnw spring-boot:run > "$SCRIPT_DIR/logs/frontend.log" 2>&1

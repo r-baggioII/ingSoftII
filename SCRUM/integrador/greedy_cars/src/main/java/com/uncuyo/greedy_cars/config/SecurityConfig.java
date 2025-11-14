@@ -89,7 +89,7 @@ public class SecurityConfig {
                 ).permitAll()
 
                 // Promociones: SOLO JEFE
-                .requestMatchers("/api/promociones/**").hasRole("JEFE")
+                .requestMatchers("/api/promociones/**").hasAnyRole("JEFE","ADMINISTRATIVO")
 
                 // Facturación & Alquileres: deben estar autenticados
                 .requestMatchers("/api/alquileres/**").authenticated()

@@ -60,13 +60,18 @@ fi
 
 echo ""
 echo -e "${GREEN}================================================${NC}"
-echo -e "${GREEN}   Compilando Backend...${NC}"
+echo -e "${GREEN}   Compilando Backend con Docker (Java 21)...${NC}"
 echo -e "${GREEN}================================================${NC}"
 
 cd "$BACKEND_DIR" || exit 1
 
-# Compilar backend (sin tests para ser más rápido)
-./mvnw clean package -DskipTests
+# Compilar backend usando Docker con Java 21
+docker run --rm \
+    -v "$BACKEND_DIR":/app \
+    -v ~/.m2:/root/.m2 \
+    -w /app \
+    maven:3.9-eclipse-temurin-21 \
+    ./mvnw clean package -DskipTests
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}✗ Error al compilar el backend${NC}"
@@ -75,13 +80,18 @@ fi
 
 echo ""
 echo -e "${GREEN}================================================${NC}"
-echo -e "${GREEN}   Compilando Frontend...${NC}"
+echo -e "${GREEN}   Compilando Frontend con Docker (Java 21)...${NC}"
 echo -e "${GREEN}================================================${NC}"
 
 cd "$FRONTEND_DIR" || exit 1
 
-# Compilar frontend
-./mvnw clean package -DskipTests
+# Compilar frontend usando Docker con Java 21
+docker run --rm \
+    -v "$FRONTEND_DIR":/app \
+    -v ~/.m2:/root/.m2 \
+    -w /app \
+    maven:3.9-eclipse-temurin-21 \
+    ./mvnw clean package -DskipTests
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}✗ Error al compilar el frontend${NC}"
@@ -95,14 +105,25 @@ echo -e "${GREEN}================================================${NC}"
 echo ""
 
 # Crear directorio para logs si no existe
-mkdir -p logs
+mkdir -p "$SCRIPT_DIR/logs"
 
-# Iniciar Backend en segundo plano
-echo -e "${GREEN}▶ Iniciando Backend en puerto 18081...${NC}"
+# Iniciar Backend en segundo plano con Docker
+echo -e "${GREEN}▶ Iniciando Backend en puerto 18081 con Docker (Java 21)...${NC}"
 cd "$BACKEND_DIR"
-nohup ./mvnw spring-boot:run > logs/backend.log 2>&1 &
-BACKEND_PID=$!
-echo "  Backend PID: $BACKEND_PID"
+docker run -d \
+    --name greedy-cars-backend \
+    -v "$BACKEND_DIR":/app \
+    -v ~/.m2:/root/.m2 \
+    -w /app \
+    -p 18081:18081 \
+    --restart unless-stopped \
+    maven:3.9-eclipse-temurin-21 \
+    ./mvnw spring-boot:run > "$SCRIPT_DIR/logs/backend.log" 2>&1
+
+if [ $? -ne 0 ]; then
+    echo -e "${RED}✗ Error al iniciar el backend${NC}"
+    exit 1
+fi
 
 # Esperar unos segundos para que el backend inicie
 echo -e "${YELLOW}  Esperando 15 segundos para que el backend inicie...${NC}"
@@ -113,18 +134,29 @@ if check_port 18081; then
     echo -e "${GREEN}  ✓ Backend iniciado correctamente en puerto 18081${NC}"
 else
     echo -e "${RED}  ✗ Error: Backend no pudo iniciar en puerto 18081${NC}"
-    echo -e "${RED}  Ver logs en: $BACKEND_DIR/logs/backend.log${NC}"
+    echo -e "${RED}  Ver logs: docker logs greedy-cars-backend${NC}"
     exit 1
 fi
 
 echo ""
 
-# Iniciar Frontend en segundo plano
-echo -e "${GREEN}▶ Iniciando Frontend en puerto 18082...${NC}"
+# Iniciar Frontend en segundo plano con Docker
+echo -e "${GREEN}▶ Iniciando Frontend en puerto 18082 con Docker (Java 21)...${NC}"
 cd "$FRONTEND_DIR"
-nohup ./mvnw spring-boot:run > logs/frontend.log 2>&1 &
-FRONTEND_PID=$!
-echo "  Frontend PID: $FRONTEND_PID"
+docker run -d \
+    --name greedy-cars-frontend \
+    -v "$FRONTEND_DIR":/app \
+    -v ~/.m2:/root/.m2 \
+    -w /app \
+    -p 18082:18082 \
+    --restart unless-stopped \
+    maven:3.9-eclipse-temurin-21 \
+    ./mvnw spring-boot:run > "$SCRIPT_DIR/logs/frontend.log" 2>&1
+
+if [ $? -ne 0 ]; then
+    echo -e "${RED}✗ Error al iniciar el frontend${NC}"
+    exit 1
+fi
 
 # Esperar unos segundos para que el frontend inicie
 echo -e "${YELLOW}  Esperando 15 segundos para que el frontend inicie...${NC}"
@@ -135,7 +167,7 @@ if check_port 18082; then
     echo -e "${GREEN}  ✓ Frontend iniciado correctamente en puerto 18082${NC}"
 else
     echo -e "${RED}  ✗ Error: Frontend no pudo iniciar en puerto 18082${NC}"
-    echo -e "${RED}  Ver logs en: $FRONTEND_DIR/logs/frontend.log${NC}"
+    echo -e "${RED}  Ver logs: docker logs greedy-cars-frontend${NC}"
     exit 1
 fi
 
@@ -153,15 +185,15 @@ echo -e "   ${GREEN}Registro:${NC}      http://161.153.217.110:18082/registro"
 echo -e "   ${GREEN}Login:${NC}         http://161.153.217.110:18082/login"
 echo -e "   ${GREEN}API Registro:${NC}  http://161.153.217.110:18081/api/registro"
 echo ""
-echo -e "📝 Logs:"
-echo -e "   Backend:  tail -f $BACKEND_DIR/logs/backend.log"
-echo -e "   Frontend: tail -f $FRONTEND_DIR/logs/frontend.log"
+echo -e "📝 Ver logs:"
+echo -e "   ${GREEN}Backend:${NC}  docker logs -f greedy-cars-backend"
+echo -e "   ${GREEN}Frontend:${NC} docker logs -f greedy-cars-frontend"
+echo ""
+echo -e "🐳 Contenedores Docker:"
+echo -e "   ${GREEN}Backend:${NC}  greedy-cars-backend"
+echo -e "   ${GREEN}Frontend:${NC} greedy-cars-frontend"
 echo ""
 echo -e "⏹ Para detener el sistema:"
-echo -e "   kill $BACKEND_PID $FRONTEND_PID"
+echo -e "   ${YELLOW}./stop-greedy-cars.sh${NC}"
+echo -e "   O manualmente: docker stop greedy-cars-backend greedy-cars-frontend"
 echo ""
-echo -e "${YELLOW}Presione Ctrl+C para detener este script (los servicios seguirán corriendo)${NC}"
-echo ""
-
-# Mantener el script corriendo para mostrar los PIDs
-wait

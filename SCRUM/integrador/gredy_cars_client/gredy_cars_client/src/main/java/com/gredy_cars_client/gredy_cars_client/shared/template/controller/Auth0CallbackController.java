@@ -108,7 +108,7 @@ public class Auth0CallbackController {
                 jwtCookie.setHttpOnly(true);
                 jwtCookie.setPath("/");
                 jwtCookie.setMaxAge(24 * 60 * 60); // 24 horas
-                ((HttpServletResponse) response).addCookie(jwtCookie);
+                response.addCookie(jwtCookie);
                 
                 System.out.println("Usuario autenticado - Email: " + email + ", Rol: " + rol);
                 return "redirect:/dashboard";

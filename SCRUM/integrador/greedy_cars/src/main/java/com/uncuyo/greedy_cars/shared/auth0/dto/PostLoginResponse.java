@@ -24,6 +24,6 @@ public class PostLoginResponse {
     private String apellido;
     private String message;
     private String usuarioId; // String porque Usuario.id es UUID
-    private Long clienteId;    // Long porque Cliente.id es Long
+    private String clienteId;  // String porque Cliente (extends Persona).id es UUID
     private String rol; // CLIENTE, JEFE, ADMIN
 }

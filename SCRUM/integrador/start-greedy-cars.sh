@@ -60,17 +60,17 @@ fi
 
 echo ""
 echo -e "${GREEN}================================================${NC}"
-echo -e "${GREEN}   Compilando Backend con Docker (Java 21)...${NC}"
+echo -e "${GREEN}   Compilando Backend con Docker (Java 17)...${NC}"
 echo -e "${GREEN}================================================${NC}"
 
 cd "$BACKEND_DIR" || exit 1
 
-# Compilar backend usando Docker con Java 21
+# Compilar backend usando Docker con Java 17
 docker run --rm \
     -v "$BACKEND_DIR":/app \
     -v ~/.m2:/root/.m2 \
     -w /app \
-    maven:3.9-eclipse-temurin-21 \
+    maven:3.9-eclipse-temurin-17 \
     ./mvnw clean package -DskipTests
 
 if [ $? -ne 0 ]; then
@@ -80,17 +80,17 @@ fi
 
 echo ""
 echo -e "${GREEN}================================================${NC}"
-echo -e "${GREEN}   Compilando Frontend con Docker (Java 21)...${NC}"
+echo -e "${GREEN}   Compilando Frontend con Docker (Java 17)...${NC}"
 echo -e "${GREEN}================================================${NC}"
 
 cd "$FRONTEND_DIR" || exit 1
 
-# Compilar frontend usando Docker con Java 21
+# Compilar frontend usando Docker con Java 17
 docker run --rm \
     -v "$FRONTEND_DIR":/app \
     -v ~/.m2:/root/.m2 \
     -w /app \
-    maven:3.9-eclipse-temurin-21 \
+    maven:3.9-eclipse-temurin-17 \
     ./mvnw clean package -DskipTests
 
 if [ $? -ne 0 ]; then
@@ -108,7 +108,7 @@ echo ""
 mkdir -p "$SCRIPT_DIR/logs"
 
 # Iniciar Backend en segundo plano con Docker
-echo -e "${GREEN}▶ Iniciando Backend en puerto 18081 con Docker (Java 21)...${NC}"
+echo -e "${GREEN}▶ Iniciando Backend en puerto 18081 con Docker (Java 17)...${NC}"
 cd "$BACKEND_DIR"
 docker run -d \
     --name greedy-cars-backend \
@@ -117,7 +117,7 @@ docker run -d \
     -w /app \
     -p 18081:18081 \
     --restart unless-stopped \
-    maven:3.9-eclipse-temurin-21 \
+    maven:3.9-eclipse-temurin-17 \
     ./mvnw spring-boot:run > "$SCRIPT_DIR/logs/backend.log" 2>&1
 
 if [ $? -ne 0 ]; then
@@ -141,7 +141,7 @@ fi
 echo ""
 
 # Iniciar Frontend en segundo plano con Docker
-echo -e "${GREEN}▶ Iniciando Frontend en puerto 18082 con Docker (Java 21)...${NC}"
+echo -e "${GREEN}▶ Iniciando Frontend en puerto 18082 con Docker (Java 17)...${NC}"
 cd "$FRONTEND_DIR"
 docker run -d \
     --name greedy-cars-frontend \
@@ -150,7 +150,7 @@ docker run -d \
     -w /app \
     -p 18082:18082 \
     --restart unless-stopped \
-    maven:3.9-eclipse-temurin-21 \
+    maven:3.9-eclipse-temurin-17 \
     ./mvnw spring-boot:run > "$SCRIPT_DIR/logs/frontend.log" 2>&1
 
 if [ $? -ne 0 ]; then

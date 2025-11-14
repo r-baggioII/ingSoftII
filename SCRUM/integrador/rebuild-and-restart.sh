@@ -70,10 +70,11 @@ echo -e "${GREEN}✓ Permisos configurados${NC}"
 echo ""
 
 echo -e "${BLUE}================================================${NC}"
-echo -e "${BLUE}   2. Deteniendo servicios (excepto BD)...${NC}"
+echo -e "${BLUE}   2. Deteniendo y eliminando servicios...${NC}"
+echo -e "${BLUE}   (excepto BD)${NC}"
 echo -e "${BLUE}================================================${NC}"
 
-# Detener solo los servicios de aplicación, no la BD
+# Detener y eliminar solo los servicios de aplicación, no la BD
 docker-compose stop greedy_cars gredy_cars_client greedy_institucional
 
 if [ $? -ne 0 ]; then
@@ -81,7 +82,15 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-echo -e "${GREEN}✓ Servicios detenidos (BD sigue corriendo)${NC}"
+# Eliminar los contenedores (no los volúmenes)
+docker-compose rm -f greedy_cars gredy_cars_client greedy_institucional
+
+if [ $? -ne 0 ]; then
+    echo -e "${RED}✗ Error al eliminar contenedores${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}✓ Servicios detenidos y contenedores eliminados (BD sigue corriendo)${NC}"
 echo ""
 
 echo -e "${BLUE}================================================${NC}"
@@ -172,7 +181,9 @@ echo -e "${BLUE}   7. Iniciando servicios...${NC}"
 echo -e "${BLUE}================================================${NC}"
 
 # Iniciar servicios (la BD ya debería estar corriendo)
-docker-compose up -d
+# Usar --no-recreate para evitar el error de ContainerConfig en la BD
+docker-compose up -d --no-recreate greedy_cars_db
+docker-compose up -d greedy_cars gredy_cars_client greedy_institucional
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}✗ Error al iniciar los servicios${NC}"

@@ -47,7 +47,7 @@ services:
       - "8080:8080"
     environment:
       - SPRING_APPLICATION_NAME=greedy_institucional
-      - GREEDY_API_BASE_URL=http://greedy_cars:9000/greedy_cars/api
+      - GREEDY_API_BASE_URL=http://greedy_cars:9000/api
       - GREEDY_API_USERNAME=${GREEDY_API_USERNAME:-admin}
       - GREEDY_API_PASSWORD=${GREEDY_API_PASSWORD:-GreedyAdmin123!}
     depends_on:
@@ -63,7 +63,7 @@ services:
       - "8081:8080"
     environment:
       - SPRING_APPLICATION_NAME=gredy_cars_client
-      - GREEDY_API_BASE_URL=http://greedy_cars:9000/greedy_cars/api
+      - GREEDY_API_BASE_URL=http://greedy_cars:9000/api
       - GREEDY_API_USERNAME=${GREEDY_API_USERNAME:-admin}
       - GREEDY_API_PASSWORD=${GREEDY_API_PASSWORD:-GreedyAdmin123!}
     depends_on:

@@ -1,1 +1,0 @@
-Esta hecho en el ejercicio del gym

@@ -31,6 +31,8 @@ public class DetalleFacturaDTO extends BaseDTO<String> {
     private String facturaId;
     private String promocionId;
 
+    private PromocionDTO promocion;
+
     @Override
     public String getId() {
         return super.id;

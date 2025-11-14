@@ -226,7 +226,7 @@ public class AlquilerService extends BaseService<Alquiler, String> {
                 ? List.of()
                 : documentacionRepository.findAllById(dto.getDocumentacionIds());
 
-        Promocion promocionAplicada = obtenerPromocionAplicable(dto.getCodigoPromocion(), cli, dto.getFechaDesde());
+        Promocion promocionAplicada = obtenerPromocionAplicable(dto.getCodigoPromocion(), cli, null);
 
         Alquiler entidad = alquilerMapper.toEntity(dto, cli, veh, docs);
         Alquiler guardado = alta(entidad);

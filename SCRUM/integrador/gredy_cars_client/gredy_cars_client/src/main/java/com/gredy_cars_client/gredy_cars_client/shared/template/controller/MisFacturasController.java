@@ -41,16 +41,20 @@ public class MisFacturasController {
     @GetMapping("/mis-facturas")
     public String verMisFacturas(Model model) {
         addUsuarioContext(model);
-        String clienteId = obtenerUsuarioId();
+        UserDetailsWithRole userDetails = obtenerUsuarioActual();
+        String clienteId = userDetails != null ? userDetails.getClienteId() : null;
+        String usuarioId = userDetails != null ? userDetails.getUsuarioId() : null;
 
-        if (!StringUtils.hasText(clienteId)) {
+        if (!StringUtils.hasText(clienteId) && !StringUtils.hasText(usuarioId)) {
             model.addAttribute("error", "No se pudo determinar el cliente autenticado.");
             model.addAttribute("facturas", Collections.emptyList());
             return "cliente/mis-facturas";
         }
 
         try {
-            List<FacturaDTO> facturas = facturaService.listarPorCliente(clienteId);
+            List<FacturaDTO> facturas = StringUtils.hasText(clienteId)
+                    ? facturaService.listarPorCliente(clienteId)
+                    : facturaService.listarPorUsuario(usuarioId);
             model.addAttribute("facturas", facturas);
         } catch (ErrorServiceException e) {
             model.addAttribute("facturas", Collections.emptyList());
@@ -58,6 +62,7 @@ public class MisFacturasController {
         }
 
         model.addAttribute("clienteId", clienteId);
+        model.addAttribute("usuarioId", usuarioId);
         model.addAttribute("estadoPagada", EstadoFactura.PAGADA);
         model.addAttribute("estadoPendiente", EstadoFactura.SIN_DEFINIR);
         return "cliente/mis-facturas";
@@ -111,10 +116,10 @@ public class MisFacturasController {
         model.addAttribute("usuarioNombre", usuarioNombre);
     }
 
-    private String obtenerUsuarioId() {
+    private UserDetailsWithRole obtenerUsuarioActual() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof UserDetailsWithRole userDetails) {
-            return userDetails.getUsuarioId();
+            return userDetails;
         }
         return null;
     }

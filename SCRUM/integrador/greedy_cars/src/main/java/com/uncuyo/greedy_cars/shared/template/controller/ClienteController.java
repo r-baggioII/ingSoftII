@@ -161,4 +161,16 @@ public class ClienteController extends BaseRestController<Cliente, String> {
         }
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<?> buscarClientes(@RequestParam("query") String query) {
+        try {
+            List<ClienteDTO> clientes = clienteService.buscarPorQuery(query);
+            return ResponseEntity.ok(clientes);
+        } catch (ErrorServiceException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return buildErrorResponse("Error de Sistema: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }

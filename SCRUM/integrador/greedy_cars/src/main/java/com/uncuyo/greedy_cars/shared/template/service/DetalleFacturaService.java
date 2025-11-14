@@ -3,6 +3,7 @@ package com.uncuyo.greedy_cars.shared.template.service;
 import com.uncuyo.greedy_cars.shared.template.dto.DetalleFacturaDTO;
 import com.uncuyo.greedy_cars.shared.template.entity.Alquiler;
 import com.uncuyo.greedy_cars.shared.template.entity.DetalleFactura;
+import com.uncuyo.greedy_cars.shared.template.entity.Cliente;
 import com.uncuyo.greedy_cars.shared.template.entity.Factura;
 import com.uncuyo.greedy_cars.shared.template.entity.Promocion;
 import com.uncuyo.greedy_cars.shared.template.enums.BaseUseCaseService;
@@ -11,7 +12,7 @@ import com.uncuyo.greedy_cars.shared.template.mapper.DetalleFacturaMapper;
 import com.uncuyo.greedy_cars.shared.template.repository.AlquilerRepository;
 import com.uncuyo.greedy_cars.shared.template.repository.DetalleFacturaRepository;
 import com.uncuyo.greedy_cars.shared.template.repository.FacturaRepository;
-import com.uncuyo.greedy_cars.shared.template.repository.PromocionRepository;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
@@ -25,20 +26,20 @@ public class DetalleFacturaService extends BaseService<DetalleFactura, String> {
     private final DetalleFacturaRepository detalleFacturaRepository;
     private final FacturaRepository facturaRepository;
     private final AlquilerRepository alquilerRepository;
-    private final PromocionRepository promocionRepository;
+    private final PromocionService promocionService;
     private final DetalleFacturaMapper detalleFacturaMapper;
 
     public DetalleFacturaService(
             DetalleFacturaRepository detalleFacturaRepository,
             FacturaRepository facturaRepository,
             AlquilerRepository alquilerRepository,
-            PromocionRepository promocionRepository,
+            PromocionService promocionService,
             DetalleFacturaMapper detalleFacturaMapper) {
         super(detalleFacturaRepository);
         this.detalleFacturaRepository = detalleFacturaRepository;
         this.facturaRepository = facturaRepository;
         this.alquilerRepository = alquilerRepository;
-        this.promocionRepository = promocionRepository;
+        this.promocionService = promocionService;
         this.detalleFacturaMapper = detalleFacturaMapper;
     }
 
@@ -104,7 +105,7 @@ public class DetalleFacturaService extends BaseService<DetalleFactura, String> {
         Alquiler alquiler = obtenerAlquilerActivo(dto.getAlquilerId());
         detalle.setFactura(factura);
         detalle.setAlquiler(alquiler);
-        detalle.setPromocion(obtenerPromocionActiva(dto.getPromocionId()));
+        detalle.setPromocion(resolverPromocion(dto.getPromocionId(), factura, alquiler));
         detalle.setEliminado(Boolean.FALSE);
         return detalle;
     }
@@ -125,12 +126,25 @@ public class DetalleFacturaService extends BaseService<DetalleFactura, String> {
                 .orElseThrow(() -> new ErrorServiceException("Alquiler no encontrado o eliminado"));
     }
 
-    private Promocion obtenerPromocionActiva(String promocionId) throws ErrorServiceException {
+    private Promocion resolverPromocion(String promocionId, Factura factura, Alquiler alquiler) throws ErrorServiceException {
         if (!StringUtils.hasText(promocionId)) {
             return null;
         }
-        return promocionRepository.findByIdAndEliminadoIsFalse(promocionId)
-                .orElseThrow(() -> new ErrorServiceException("Promoción no encontrada o eliminada"));
+        Cliente cliente = null;
+        if (factura != null && factura.getCliente() != null) {
+            cliente = factura.getCliente();
+        } else if (alquiler != null) {
+            cliente = alquiler.getCliente();
+        }
+        if (cliente == null || !StringUtils.hasText(cliente.getId())) {
+            throw new ErrorServiceException("No se pudo determinar el cliente para validar la promoción");
+        }
+        LocalDate fechaReferencia = (alquiler != null && alquiler.getFechaDesde() != null)
+                ? alquiler.getFechaDesde()
+                : (factura != null && factura.getFechaFactura() != null
+                        ? factura.getFechaFactura()
+                        : LocalDate.now());
+        return promocionService.obtenerPromocionVigenteParaClientePorId(promocionId, cliente, fechaReferencia);
     }
 
     @Override

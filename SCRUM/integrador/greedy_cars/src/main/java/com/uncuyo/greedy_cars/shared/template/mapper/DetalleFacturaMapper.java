@@ -9,7 +9,8 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(
     componentModel = MappingConstants.ComponentModel.SPRING,
-    unmappedTargetPolicy = ReportingPolicy.IGNORE
+    unmappedTargetPolicy = ReportingPolicy.IGNORE,
+    uses = {PromocionMapper.class}
 )
 public interface DetalleFacturaMapper extends BaseMapper<DetalleFactura, DetalleFacturaDTO, String> {
 
@@ -17,6 +18,7 @@ public interface DetalleFacturaMapper extends BaseMapper<DetalleFactura, Detalle
     @Mapping(source = "alquiler.id", target = "alquilerId")
     @Mapping(source = "factura.id", target = "facturaId")
     @Mapping(source = "promocion.id", target = "promocionId")
+    @Mapping(source = "promocion", target = "promocion")
     DetalleFacturaDTO toDTO(DetalleFactura entity);
 
     @Override

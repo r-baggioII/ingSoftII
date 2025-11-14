@@ -10,6 +10,9 @@ import org.springframework.security.web.SecurityFilterChain;
  * Configuración de Spring Security.
  * Deshabilitamos la seguridad por defecto ya que usamos autenticación personalizada
  * mediante el AuthCheckInterceptor que verifica JWT con el backend.
+ * 
+ * Para Auth0: El cliente NO valida tokens JWT. Solo el backend lo hace.
+ * El cliente obtiene el access_token de Auth0 y lo envía al backend.
  */
 @Configuration
 @EnableWebSecurity
@@ -20,7 +23,26 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll() // Permitir todo, la seguridad se maneja en AuthCheckInterceptor
+                // Endpoints públicos
+                .requestMatchers(
+                    "/",
+                    "/login",
+                    "/login-auth0",
+                    "/callback",
+                    "/auth0/**",
+                    "/registro",
+                    "/registro-intermedio",
+                    "/api/registro/**",
+                    "/api/auth0/**",
+                    "/api/public/**",
+                    "/css/**",
+                    "/js/**",
+                    "/images/**",
+                    "/style.css",
+                    "/error"
+                ).permitAll()
+                // Todo lo demás permitido (la seguridad se maneja en AuthCheckInterceptor)
+                .anyRequest().permitAll()
             )
             .formLogin(form -> form.disable())
             .httpBasic(basic -> basic.disable())

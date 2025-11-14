@@ -1,0 +1,98 @@
+# ========================================
+# CONFIGURACIÓN AUTH0 - EJEMPLO
+# ========================================
+# Copia este archivo y reemplaza los valores con los de tu cuenta de Auth0
+
+# IMPORTANTE: NO COMMITEAR ESTE ARCHIVO CON VALORES REALES EN PRODUCCIÓN
+# Usar variables de entorno o configuración externa para producción
+
+# ========================================
+# FRONTEND (gredy_cars_client)
+# ========================================
+
+# Configuración OAuth2 Resource Server
+spring.security.oauth2.resourceserver.jwt.issuer-uri=https://dev-abc123.us.auth0.com/
+
+# Configuración Auth0
+auth0.domain=dev-abc123.us.auth0.com
+auth0.clientId=aBcDeFgHiJkLmNoPqRsTuVwXyZ123456
+auth0.clientSecret=xYz123456789AbCdEfGhIjKlMnOpQrStUvWxYz123456789AbCdEfGhIjKlMn
+auth0.audience=https://greedy-cars-api
+
+# URLs de callback (ajustar según entorno)
+auth0.callback-url=${server.servlet.context-path}/callback
+auth0.logout-url=${server.servlet.context-path}/
+
+# ========================================
+# BACKEND (greedy_cars)
+# ========================================
+
+# Configuración OAuth2 Resource Server
+spring.security.oauth2.resourceserver.jwt.issuer-uri=https://dev-abc123.us.auth0.com/
+auth0.audience=https://greedy-cars-api
+
+# ========================================
+# CONFIGURACIÓN EN AUTH0 DASHBOARD
+# ========================================
+
+# 1. API Configuration
+#    - Name: Greedy Cars API
+#    - Identifier: https://greedy-cars-api
+#    - Signing Algorithm: RS256
+
+# 2. Application Configuration
+#    - Name: Greedy Cars Client
+#    - Type: Single Page Web Application
+#    - Domain: dev-abc123.us.auth0.com (se genera automáticamente)
+#    - Client ID: aBcDeFgHiJkLmNoPqRsTuVwXyZ123456
+#    - Client Secret: xYz123456789...
+
+# 3. Allowed Callback URLs (separadas por comas)
+# http://localhost:8080/gredy_cars_client/callback,http://161.153.217.110:18081/gredy_cars_client/callback
+
+# 4. Allowed Logout URLs
+# http://localhost:8080/gredy_cars_client/,http://161.153.217.110:18081/gredy_cars_client/
+
+# 5. Allowed Web Origins
+# http://localhost:8080,http://161.153.217.110:18081
+
+# 6. Allowed Origins (CORS)
+# http://localhost:8080,http://161.153.217.110:18081
+
+# ========================================
+# GOOGLE OAUTH CONFIGURATION
+# ========================================
+# En Auth0 Dashboard:
+# Authentication > Social > Google
+
+# Necesitarás crear credenciales en Google Cloud Console:
+# https://console.cloud.google.com/apis/credentials
+
+# 1. Crear proyecto en Google Cloud
+# 2. Habilitar Google+ API
+# 3. Crear credenciales OAuth 2.0
+# 4. Agregar URIs de redirección autorizados:
+#    https://dev-abc123.us.auth0.com/login/callback
+
+# 5. Copiar Client ID y Client Secret a Auth0
+
+# ========================================
+# NOTAS IMPORTANTES
+# ========================================
+
+# 1. El issuer-uri DEBE terminar con "/"
+# 2. El audience debe coincidir exactamente con el Identifier de la API
+# 3. Las URLs de callback deben incluir el context path completo
+# 4. Para producción, usar HTTPS en todas las URLs
+# 5. Guardar el Client Secret de forma segura (no commitear)
+# 6. Usar variables de entorno en producción:
+#    - AUTH0_DOMAIN
+#    - AUTH0_CLIENT_ID
+#    - AUTH0_CLIENT_SECRET
+#    - AUTH0_AUDIENCE
+
+# Ejemplo con variables de entorno:
+# auth0.domain=${AUTH0_DOMAIN:dev-abc123.us.auth0.com}
+# auth0.clientId=${AUTH0_CLIENT_ID:default-client-id}
+# auth0.clientSecret=${AUTH0_CLIENT_SECRET:default-secret}
+# auth0.audience=${AUTH0_AUDIENCE:https://greedy-cars-api}

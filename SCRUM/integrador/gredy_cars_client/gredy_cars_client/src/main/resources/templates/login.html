@@ -103,15 +103,15 @@
             <div class="card-body text-center">
               <h5 class="mb-3">Iniciar sesión con:</h5>
               <div class="d-grid gap-2">
-                <button class="btn btn-primary btn-lg">
+                <a th:href="@{/auth0/login(connection='facebook')}" class="btn btn-primary btn-lg text-decoration-none">
                   <iconify-icon icon="ri:facebook-fill"></iconify-icon> Continuar con Facebook
-                </button>
-                <button class="btn btn-danger btn-lg">
+                </a>
+                <a th:href="@{/auth0/login(connection='google-oauth2')}" class="btn btn-danger btn-lg text-decoration-none">
                   <iconify-icon icon="ri:google-fill"></iconify-icon> Continuar con Google
-                </button>
-                <button class="btn btn-info btn-lg">
+                </a>
+                <a th:href="@{/auth0/login(connection='twitter')}" class="btn btn-info btn-lg text-decoration-none">
                   <iconify-icon icon="ri:twitter-fill"></iconify-icon> Continuar con Twitter
-                </button>
+                </a>
               </div>
               <hr class="my-4">
               <p class="mb-0">O usa tu correo electrónico</p>

@@ -79,11 +79,21 @@
               <div class="row">
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Inicio *</label>
-                  <input type="date" th:field="*{fechaInicioPromocion}" class="form-control" required>
+                  <input type="date"
+                         id="fechaInicioPromocion"
+                         th:field="*{fechaInicioPromocion}"
+                         th:value="${promocionForm.fechaInicioPromocion != null ? #temporals.format(promocionForm.fechaInicioPromocion, 'yyyy-MM-dd') : ''}"
+                         class="form-control"
+                         required>
                 </div>
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Fin *</label>
-                  <input type="date" th:field="*{fechaFinPromocion}" class="form-control" required>
+                  <input type="date"
+                         id="fechaFinPromocion"
+                         th:field="*{fechaFinPromocion}"
+                         th:value="${promocionForm.fechaFinPromocion != null ? #temporals.format(promocionForm.fechaFinPromocion, 'yyyy-MM-dd') : ''}"
+                         class="form-control"
+                         required>
                 </div>
               </div>
 
@@ -216,18 +226,32 @@
     const aplicaTodos = document.getElementById('aplicaATodosSwitch');
     const wrapper = document.getElementById('clientesDestinoWrapper');
     const select = document.getElementById('clientesDestinoSelect');
-    if (!aplicaTodos || !wrapper) {
-      return;
+    if (aplicaTodos && wrapper) {
+      const toggleDestinatarios = () => {
+        const ocultar = aplicaTodos.checked;
+        wrapper.style.display = ocultar ? 'none' : 'block';
+        if (ocultar && select) {
+          Array.from(select.options).forEach(option => option.selected = false);
+        }
+      };
+      toggleDestinatarios();
+      aplicaTodos.addEventListener('change', toggleDestinatarios);
     }
-    const toggleDestinatarios = () => {
-      const ocultar = aplicaTodos.checked;
-      wrapper.style.display = ocultar ? 'none' : 'block';
-      if (ocultar && select) {
-        Array.from(select.options).forEach(option => option.selected = false);
-      }
-    };
-    toggleDestinatarios();
-    aplicaTodos.addEventListener('change', toggleDestinatarios);
+
+    const fechaInicioInput = document.getElementById('fechaInicioPromocion');
+    const fechaFinInput = document.getElementById('fechaFinPromocion');
+    const toIsoDateString = (date) => date.toISOString().slice(0, 10);
+
+    if (fechaInicioInput && !fechaInicioInput.value) {
+      const hoy = new Date();
+      fechaInicioInput.value = toIsoDateString(hoy);
+    }
+
+    if (fechaFinInput && !fechaFinInput.value) {
+      const fin = new Date();
+      fin.setDate(fin.getDate() + 7);
+      fechaFinInput.value = toIsoDateString(fin);
+    }
   });
 </script>
 </body>

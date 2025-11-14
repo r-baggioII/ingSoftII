@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iniciar Sesión - Greedy Cars</title>
+
+  <link rel="stylesheet" type="text/css" th:href="@{/css/vendor.css}" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous" />
+  <link rel="stylesheet" type="text/css" th:href="@{/style.css}" />
+  
+  <!-- Auth0 SDK -->
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+</head>
+
+<body>
+
+<!-- Navbar simple sin autenticación -->
+<nav class="navbar navbar-expand-lg navbar-light container-fluid py-3 position-fixed">
+  <div class="container">
+    <a class="navbar-brand" th:href="@{/}">
+      <img th:src="@{/images/logo.png}" alt="Greedy Cars" />
+    </a>
+  </div>
+</nav>
+
+<!-- Banner -->
+<section id="banner" class="position-relative overflow-hidden jarallax"
+         th:style="|background-image: url(@{/images/Bg.jpg}); background-repeat: no-repeat; background-size: cover; background-position: center;|">
+  <div class="container text-center py-5 mt-5">
+    <div class="row my-5">
+      <div class="d-flex flex-wrap flex-column justify-content-center align-items-center text-white">
+        <h2 class="page-title display-3 mt-5">Iniciar Sesión</h2>
+        <nav class="breadcrumb">
+          <a class="breadcrumb-item text-white" th:href="@{/}">Home</a>
+          <span class="breadcrumb-item text-white active" aria-current="page">Login</span>
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Formulario de Login -->
+<section class="contact-us-wrap py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card shadow-lg">
+          <div class="card-body p-5">
+            <h2 class="text-center mb-4">Bienvenido a <span class="text-primary">Greedy Cars</span></h2>
+            
+            <!-- Mensajes de alerta -->
+            <div id="alertContainer"></div>
+            
+            <!-- Login con Auth0 / Google -->
+            <div class="mb-4">
+              <button type="button" id="btnLoginGoogle" class="btn btn-outline-danger btn-lg w-100 mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-google me-2" viewBox="0 0 16 16">
+                  <path d="M15.545 6.558a9.42 9.42 0 0 1 .139 1.626c0 2.434-.87 4.492-2.384 5.885h.002C11.978 15.292 10.158 16 8 16A8 8 0 1 1 8 0a7.689 7.689 0 0 1 5.352 2.082l-2.284 2.284A4.347 4.347 0 0 0 8 3.166c-2.087 0-3.86 1.408-4.492 3.304a4.792 4.792 0 0 0 0 3.063h.003c.635 1.893 2.405 3.301 4.492 3.301 1.078 0 2.004-.276 2.722-.764h-.003a3.702 3.702 0 0 0 1.599-2.431H8v-3.08h7.545z"/>
+                </svg>
+                Continuar con Google
+              </button>
+              
+              <button type="button" id="btnLoginAuth0" class="btn btn-outline-primary btn-lg w-100">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-shield-lock me-2" viewBox="0 0 16 16">
+                  <path d="M5.338 1.59a61.44 61.44 0 0 0-2.837.856.481.481 0 0 0-.328.39c-.554 4.157.726 7.19 2.253 9.188a10.725 10.725 0 0 0 2.287 2.233c.346.244.652.42.893.533.12.057.218.095.293.118a.55.55 0 0 0 .101.025.615.615 0 0 0 .1-.025c.076-.023.174-.061.294-.118.24-.113.547-.29.893-.533a10.726 10.726 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067c-.53 0-1.552.223-2.662.524zM5.072.56C6.157.265 7.31 0 8 0s1.843.265 2.928.56c1.11.3 2.229.655 2.887.87a1.54 1.54 0 0 1 1.044 1.262c.596 4.477-.787 7.795-2.465 9.99a11.775 11.775 0 0 1-2.517 2.453 7.159 7.159 0 0 1-1.048.625c-.28.132-.581.24-.829.24s-.548-.108-.829-.24a7.158 7.158 0 0 1-1.048-.625 11.777 11.777 0 0 1-2.517-2.453C1.928 10.487.545 7.169 1.141 2.692A1.54 1.54 0 0 1 2.185 1.43 62.456 62.456 0 0 1 5.072.56z"/>
+                  <path d="M9.5 6.5a1.5 1.5 0 0 1-1 1.415l.385 1.99a.5.5 0 0 1-.491.595h-.788a.5.5 0 0 1-.49-.595l.384-1.99a1.5 1.5 0 1 1 2-1.415z"/>
+                </svg>
+                Iniciar Sesión con Auth0
+              </button>
+            </div>
+            
+            <div class="text-center">
+              <hr class="my-4" />
+              <p class="text-muted">¿No tiene cuenta? <a th:href="@{/registro}" class="text-primary">Regístrese aquí</a></p>
+              <p class="text-muted"><a th:href="@{/login-tradicional}" class="text-secondary">Usar login tradicional</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+
+// Configuración de Auth0 desde el servidor
+const AUTH0_DOMAIN = /*[[${@environment.getProperty('auth0.domain')}]]*/ 'YOUR_AUTH0_DOMAIN';
+const AUTH0_CLIENT_ID = /*[[${@environment.getProperty('auth0.clientId')}]]*/ 'YOUR_AUTH0_CLIENT_ID';
+const AUTH0_AUDIENCE = /*[[${@environment.getProperty('auth0.audience')}]]*/ 'YOUR_AUTH0_API_AUDIENCE';
+const CALLBACK_URL = window.location.origin + /*[[@{/callback}]]*/ '/callback';
+
+let auth0Client = null;
+
+// Inicializar Auth0 Client
+async function initAuth0() {
+    try {
+        auth0Client = await auth0.createAuth0Client({
+            domain: AUTH0_DOMAIN,
+            clientId: AUTH0_CLIENT_ID,
+            authorizationParams: {
+                redirect_uri: CALLBACK_URL,
+                audience: AUTH0_AUDIENCE,
+                scope: 'openid profile email'
+            }
+        });
+        
+        console.log('Auth0 client inicializado correctamente');
+    } catch (error) {
+        console.error('Error inicializando Auth0:', error);
+        mostrarAlerta('danger', 'Error al inicializar autenticación: ' + error.message);
+    }
+}
+
+// Login con Google
+document.getElementById('btnLoginGoogle').addEventListener('click', async function() {
+    try {
+        if (!auth0Client) {
+            await initAuth0();
+        }
+        
+        await auth0Client.loginWithRedirect({
+            authorizationParams: {
+                connection: 'google-oauth2'
+            }
+        });
+    } catch (error) {
+        console.error('Error en login con Google:', error);
+        mostrarAlerta('danger', 'Error al iniciar sesión con Google: ' + error.message);
+    }
+});
+
+// Login con Auth0 (Universal Login)
+document.getElementById('btnLoginAuth0').addEventListener('click', async function() {
+    try {
+        if (!auth0Client) {
+            await initAuth0();
+        }
+        
+        await auth0Client.loginWithRedirect();
+    } catch (error) {
+        console.error('Error en login con Auth0:', error);
+        mostrarAlerta('danger', 'Error al iniciar sesión: ' + error.message);
+    }
+});
+
+// Mostrar alerta
+function mostrarAlerta(tipo, mensaje) {
+    const alertContainer = document.getElementById('alertContainer');
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${tipo} alert-dismissible fade show`;
+    alert.role = 'alert';
+    alert.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    alertContainer.innerHTML = '';
+    alertContainer.appendChild(alert);
+}
+
+// Inicializar Auth0 al cargar la página
+window.addEventListener('DOMContentLoaded', function() {
+    initAuth0();
+});
+
+/*]]>*/
+</script>
+
+</body>
+</html>

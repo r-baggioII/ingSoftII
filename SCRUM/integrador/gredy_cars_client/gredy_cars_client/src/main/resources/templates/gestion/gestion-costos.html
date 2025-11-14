@@ -152,18 +152,15 @@
               <table class="table table-hover align-middle">
                 <thead>
                   <tr>
-                    <th>ID Costo</th>
                     <th>Fecha Desde</th>
                     <th>Fecha Hasta</th>
                     <th>Monto diario</th>
                     <th>Característica</th>
-                    <th>Eliminado</th>
                     <th class="text-end">Acciones</th>
                   </tr>
                 </thead>
                 <tbody th:with="dateFormatter=${T(java.time.format.DateTimeFormatter).ofPattern('dd/MM/yyyy')}">
                   <tr th:each="costo : ${costos}" th:if="${costo != null}">
-                    <td class="fw-semibold" th:text="${costo.id}">costo-id</td>
                     <td th:text="${costo.fechaDesde != null ? dateFormatter.format(costo.fechaDesde) : 'S/D'}">01/01/2024</td>
                     <td th:text="${costo.fechaHasta != null ? dateFormatter.format(costo.fechaHasta) : 'S/D'}">31/01/2024</td>
                     <td th:text="${T(java.lang.String).format('$ %.2f', costo.costo)}">$ 150.00</td>
@@ -175,10 +172,6 @@
                       <small class="text-muted" th:text="|ID: ${costo.idCaracteristicaVehiculo != null ? costo.idCaracteristicaVehiculo : 'S/D'}|">
                         ID: CAR-001
                       </small>
-                    </td>
-                    <td>
-                      <span class="badge" th:classappend="${costo.eliminado} ? 'bg-danger' : 'bg-success'"
-                            th:text="${costo.eliminado ? 'Sí' : 'No'}">No</span>
                     </td>
                     <td class="text-end">
                       <a class="btn btn-sm btn-outline-primary"
@@ -195,7 +188,7 @@
                     </td>
                   </tr>
                   <tr th:if="${costos == null or #lists.isEmpty(costos)}">
-                    <td colspan="7" class="text-center text-muted py-4">
+                    <td colspan="5" class="text-center text-muted py-4">
                       <i class="bi bi-currency-dollar"></i> No hay costos registrados.
                     </td>
                   </tr>

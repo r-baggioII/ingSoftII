@@ -57,6 +57,20 @@ public class UsuarioService extends BaseService<Usuario, String> {
     public Optional<Usuario> buscarPorNombreUsuario(String nombreUsuario) {
         return usuarioRepository.findByNombreUsuarioAndEliminadoIsFalse(nombreUsuario);
     }
+    
+    /**
+     * Busca un usuario por externalId (Auth0)
+     */
+    public Optional<Usuario> findByExternalId(String externalId) {
+        return usuarioRepository.findByExternalIdAndEliminadoIsFalse(externalId);
+    }
+    
+    /**
+     * Busca un usuario por email
+     */
+    public Optional<Usuario> findByEmail(String email) {
+        return usuarioRepository.findByEmailAndEliminadoIsFalse(email);
+    }
 
     // Métodos con DTOs
     public List<UsuarioDTO> listarActivosDTO() throws ErrorServiceException {

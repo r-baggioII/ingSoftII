@@ -134,6 +134,10 @@
                 <span class="badge rounded-pill me-2">EP</span>
                 Gestión de Empresas
               </a>
+              <a th:if="${usuarioRol == 'JEFE'}" class="list-group-item list-group-item-action d-flex align-items-center" th:href="@{/gestion/promociones}">
+                <span class="badge rounded-pill me-2">PR</span>
+                Gestión de Promociones
+              </a>
             </nav>
           </aside>
         </div>

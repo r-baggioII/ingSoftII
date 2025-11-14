@@ -23,11 +23,14 @@ import com.gredy_cars_client.gredy_cars_client.shared.template.dto.AlquilerDTO;
 import com.gredy_cars_client.gredy_cars_client.shared.template.dto.CaracteristicaVehiculoDTO;
 import com.gredy_cars_client.gredy_cars_client.shared.template.dto.ClienteDTO;
 import com.gredy_cars_client.gredy_cars_client.shared.template.dto.DocumentacionDTO;
+import com.gredy_cars_client.gredy_cars_client.shared.template.dto.DetalleFacturaDTO;
+import com.gredy_cars_client.gredy_cars_client.shared.template.dto.FacturaDTO;
 import com.gredy_cars_client.gredy_cars_client.shared.template.dto.VehiculoDTO;
 import com.gredy_cars_client.gredy_cars_client.shared.template.exception.ErrorServiceException;
 import com.gredy_cars_client.gredy_cars_client.shared.template.service.AlquilerService;
 import com.gredy_cars_client.gredy_cars_client.shared.template.service.ClienteService;
 import com.gredy_cars_client.gredy_cars_client.shared.template.service.DocumentacionService;
+import com.gredy_cars_client.gredy_cars_client.shared.template.service.FacturaService;
 import com.gredy_cars_client.gredy_cars_client.shared.template.service.VehiculoService;
 import com.gredy_cars_client.gredy_cars_client.shared.template.service.CaracteristicaVehiculoService;
 import com.gredy_cars_client.gredy_cars_client.shared.template.service.WhatsAppService;
@@ -42,6 +45,7 @@ public class GestionAlquileresController {
     private final VehiculoService vehiculoService;
     private final CaracteristicaVehiculoService caracteristicaService;
     private final DocumentacionService documentacionService;
+    private final FacturaService facturaService;
     private final WhatsAppService whatsAppService;
 
     public GestionAlquileresController(AlquilerService alquilerService,
@@ -49,12 +53,14 @@ public class GestionAlquileresController {
                                        VehiculoService vehiculoService,
                                        CaracteristicaVehiculoService caracteristicaService,
                                        DocumentacionService documentacionService,
+                                       FacturaService facturaService,
                                        WhatsAppService whatsAppService) {
         this.alquilerService = alquilerService;
         this.clienteService = clienteService;
         this.vehiculoService = vehiculoService;
         this.caracteristicaService = caracteristicaService;
         this.documentacionService = documentacionService;
+        this.facturaService = facturaService;
         this.whatsAppService = whatsAppService;
     }
 
@@ -112,6 +118,7 @@ public class GestionAlquileresController {
         model.addAttribute("documentosIdentidad", documentosIdentidad);
         model.addAttribute("carnetsConducir", carnetsConducir);
         model.addAttribute("tiposDocumentacion", TipoDocumentacion.values());
+        model.addAttribute("promocionesPorAlquiler", construirMapaPromocionesPorAlquiler());
 
         AlquilerDTO form = editId != null && !editId.isBlank() ?
             alquilerService.obtener(editId).orElseGet(AlquilerDTO::new) : new AlquilerDTO();
@@ -270,4 +277,57 @@ public class GestionAlquileresController {
             System.err.println("Error sincronizando conteos de características: " + e.getMessage());
         }
     }
+
+    private Map<String, PromocionAplicadaView> construirMapaPromocionesPorAlquiler() {
+        Map<String, PromocionAplicadaView> mapa = new HashMap<>();
+        try {
+            List<FacturaDTO> facturas = facturaService.listar();
+            if (facturas == null) {
+                return mapa;
+            }
+            for (FacturaDTO factura : facturas) {
+                if (factura.getDetalles() == null) {
+                    continue;
+                }
+                for (DetalleFacturaDTO detalle : factura.getDetalles()) {
+                    if (detalle == null || !StringUtils.hasText(detalle.getAlquilerId())) {
+                        continue;
+                    }
+                    if (detalle.getPromocion() == null) {
+                        continue;
+                    }
+                    double totalConDescuento = detalle.getSubtotal() != null ? detalle.getSubtotal() : 0D;
+                    double montoOriginal = calcularMontoOriginal(totalConDescuento, detalle.getPromocion().getPorcentajeDescuento());
+                    double descuento = montoOriginal - totalConDescuento;
+                    mapa.put(detalle.getAlquilerId(), new PromocionAplicadaView(
+                            detalle.getPromocion().getCodigoDescuento(),
+                            detalle.getPromocion().getPorcentajeDescuento(),
+                            montoOriginal,
+                            totalConDescuento,
+                            descuento
+                    ));
+                }
+            }
+        } catch (ErrorServiceException e) {
+            // Si falla la carga de facturas, devolvemos el mapa vacío
+        }
+        return mapa;
+    }
+
+    private double calcularMontoOriginal(double totalConDescuento, Double porcentaje) {
+        if (porcentaje == null) {
+            return totalConDescuento;
+        }
+        double factor = 1 - (porcentaje / 100d);
+        if (factor <= 0) {
+            return totalConDescuento;
+        }
+        return totalConDescuento / factor;
+    }
+
+    public record PromocionAplicadaView(String codigo,
+                                        Double porcentaje,
+                                        double montoOriginal,
+                                        double montoConDescuento,
+                                        double descuento) {}
 }

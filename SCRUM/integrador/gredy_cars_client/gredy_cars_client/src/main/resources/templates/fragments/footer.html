@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+  <footer th:fragment="footer">
+    <section id="footer" class="bg-dark padding-medium text-white">
+      <div class="container">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+          <div class="col">
+            <h5 class="text-uppercase">Greedy Cars</h5>
+            <p class="small mb-0">
+              Tu socio para gestionar alquileres, promociones y clientes desde un solo panel.
+            </p>
+          </div>
+          <div class="col">
+            <h6 class="text-uppercase">Navegación</h6>
+            <ul class="list-unstyled">
+              <li><a class="footer-link text-white" th:href="@{/dashboard}">Dashboard</a></li>
+              <li><a class="footer-link text-white" th:href="@{/gestion/alquileres}">Alquileres</a></li>
+              <li><a class="footer-link text-white" th:href="@{/gestion/facturas}">Facturas</a></li>
+              <li><a class="footer-link text-white" th:href="@{/gestion/promociones}">Promociones</a></li>
+            </ul>
+          </div>
+          <div class="col">
+            <h6 class="text-uppercase">Ayuda</h6>
+            <ul class="list-unstyled">
+              <li><a class="footer-link text-white" href="#">Soporte</a></li>
+              <li><a class="footer-link text-white" href="#">Documentación</a></li>
+              <li><a class="footer-link text-white" href="#">Preguntas frecuentes</a></li>
+            </ul>
+          </div>
+          <div class="col">
+            <h6 class="text-uppercase">Contacto</h6>
+            <ul class="list-unstyled small mb-0">
+              <li>Tel: +54 11 5555-5555</li>
+              <li>Email: soporte@greedycars.com</li>
+              <li>Horario: Lun a Vie, 9 a 18 hs</li>
+            </ul>
+          </div>
+        </div>
+        <hr class="border-secondary my-4" />
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center small">
+          <span>© Greedy Cars, todos los derechos reservados</span>
+          <div class="mt-2 mt-md-0">
+            <a class="text-white me-3" href="#">Privacidad</a>
+            <a class="text-white me-3" href="#">Términos</a>
+            <a class="text-white" href="#">Soporte</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </footer>
+</body>
+</html>

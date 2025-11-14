@@ -73,9 +73,12 @@ public class ClienteDTO extends BaseDTO<String> {
     
     // Objetos completos para devolver al cliente (no se usan para guardar)
     private List<DireccionDTO> direcciones;
-    private List<Object> contactos;  // Puede ser ContactoCorreoElectronicoDTO o ContactoTelefonicoDTO
     private List<ImagenDTO> imagenes;
     private List<NacionalidadDTO> nacionalidades;
+    private List<ContactoCorreoElectronicoDTO> contactosCorreo;
+    private List<ContactoTelefonicoDTO> contactosTelefono;
+
+    private Boolean recibirPromociones = Boolean.TRUE;
 
     @Override
     public String getId() {

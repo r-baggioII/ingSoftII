@@ -33,6 +33,9 @@ public class Cliente extends Persona {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", unique = true)
     private Usuario usuario;
+
+    @Column(name = "recibir_promociones", nullable = false)
+    private Boolean recibirPromociones = Boolean.TRUE;
     
     // Métodos de conveniencia para nacionalidades
     public void addNacionalidad(Nacionalidad nacionalidad) {

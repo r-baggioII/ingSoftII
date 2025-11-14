@@ -61,11 +61,9 @@ public abstract class BaseApiDao<T, ID> {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-        System.err.println("Headers construidos - ContentType: " + headers.getContentType() +
-                          ", Accept: " + headers.getAccept() +
-                          ", Authorization: " + (headers.getFirst(HttpHeaders.AUTHORIZATION) != null ? "PRESENT" : "MISSING"));
         return headers;
     }
+
 
     protected <R> HttpEntity<R> buildRequestEntity(R body) {
         return new HttpEntity<>(body, buildHeaders());

@@ -97,18 +97,45 @@ public class GestionClientesController extends BaseThymeleafController<ClienteDT
 
     @Override
     protected void populateCollections(Model model) throws ErrorServiceException {
-        model.addAttribute("tiposDocumento", TipoDocumento.values());
-        model.addAttribute("nacionalidades", nacionalidadService.listarActivos());
-        model.addAttribute("direcciones", direccionService.listarActivos());
-        model.addAttribute("contactosCorreo", contactoCorreoService.listarActivos());
-        model.addAttribute("contactosTelefono", contactoTelefonicoService.listarActivos());
-
+        log.info("=== INICIO populateCollections ===");
         try {
-            List<ImagenDTO> imagenes = imagenService.listarPorTipo(TipoImagen.PERSONA);
-            model.addAttribute("imagenes", imagenes);
+            log.info("Cargando tipos de documento...");
+            model.addAttribute("tiposDocumento", TipoDocumento.values());
+            log.info("Tipos de documento cargados");
+            
+            log.info("Cargando nacionalidades...");
+            List<?> nacionalidades = nacionalidadService.listarActivos();
+            log.info("Nacionalidades cargadas: {}", nacionalidades != null ? nacionalidades.size() : "null");
+            model.addAttribute("nacionalidades", nacionalidades);
+            
+            log.info("Cargando direcciones...");
+            List<?> direcciones = direccionService.listarActivos();
+            log.info("Direcciones cargadas: {}", direcciones != null ? direcciones.size() : "null");
+            model.addAttribute("direcciones", direcciones);
+            
+            log.info("Cargando contactos de correo...");
+            List<?> contactosCorreo = contactoCorreoService.listarActivos();
+            log.info("Contactos de correo cargados: {}", contactosCorreo != null ? contactosCorreo.size() : "null");
+            model.addAttribute("contactosCorreo", contactosCorreo);
+            
+            log.info("Cargando contactos telefónicos...");
+            List<?> contactosTelefono = contactoTelefonicoService.listarActivos();
+            log.info("Contactos telefónicos cargados: {}", contactosTelefono != null ? contactosTelefono.size() : "null");
+            model.addAttribute("contactosTelefono", contactosTelefono);
+
+            try {
+                log.info("Cargando imágenes de tipo PERSONA...");
+                List<ImagenDTO> imagenes = imagenService.listarPorTipo(TipoImagen.PERSONA);
+                log.info("Imágenes cargadas: {}", imagenes != null ? imagenes.size() : "null");
+                model.addAttribute("imagenes", imagenes);
+            } catch (Exception e) {
+                log.warn("Error al cargar imágenes de clientes: {}", e.getMessage());
+                model.addAttribute("imagenes", Collections.emptyList());
+            }
+            log.info("=== FIN populateCollections ===");
         } catch (Exception e) {
-            log.warn("Error al cargar imágenes de clientes: {}", e.getMessage());
-            model.addAttribute("imagenes", Collections.emptyList());
+            log.error("Error inesperado en populateCollections", e);
+            throw new ErrorServiceException("Error al cargar datos del formulario: " + e.getMessage(), e);
         }
     }
 
@@ -120,7 +147,25 @@ public class GestionClientesController extends BaseThymeleafController<ClienteDT
     @GetMapping
     public String gestionarClientes(@RequestParam(value = "editClienteId", required = false) String editClienteId,
                                     Model model) {
+        log.info("=== INICIO gestionarClientes ===");
+        log.info("editClienteId: {}", editClienteId);
+        
         String view = renderList(model);
+        log.info("renderList retornó la vista: {}", view);
+        log.info("Atributos en el modelo después de renderList: {}", model.asMap().keySet());
+        
+        if (model.containsAttribute(getListModelAttribute())) {
+            Object clientes = model.getAttribute(getListModelAttribute());
+            log.info("Lista de clientes en el modelo: {} (tipo: {})", 
+                     clientes, 
+                     clientes != null ? clientes.getClass().getName() : "null");
+            if (clientes instanceof java.util.List) {
+                log.info("Cantidad de clientes: {}", ((java.util.List<?>) clientes).size());
+            }
+        } else {
+            log.warn("El modelo NO contiene el atributo '{}'", getListModelAttribute());
+        }
+        
         if (editClienteId != null && !editClienteId.isBlank()) {
             try {
                 Optional<ClienteDTO> clienteOpt = service.obtener(editClienteId);
@@ -138,6 +183,8 @@ public class GestionClientesController extends BaseThymeleafController<ClienteDT
         } else if (!model.containsAttribute(getFormModelAttribute())) {
             model.addAttribute(getFormModelAttribute(), buildNewInstance());
         }
+        
+        log.info("=== FIN gestionarClientes - Vista a retornar: {} ===", view);
         return view;
     }
 
@@ -189,7 +236,6 @@ public class GestionClientesController extends BaseThymeleafController<ClienteDT
         dto.setDirecciones(null);
         dto.setImagenes(null);
         dto.setNacionalidades(null);
-        dto.setContactos(null);
 
         if (dto.getContactoIds() == null) {
             dto.setContactoIds(new ArrayList<>());

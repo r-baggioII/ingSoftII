@@ -5,9 +5,12 @@ import com.uncuyo.greedy_cars.shared.template.entity.Promocion;
 import com.uncuyo.greedy_cars.shared.template.exception.ErrorServiceException;
 import com.uncuyo.greedy_cars.shared.template.service.PromocionService;
 import jakarta.validation.Valid;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,6 +25,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/promociones")
 public class PromocionController extends BaseRestController<Promocion, String> {
+
+    private static final Logger log = LoggerFactory.getLogger(PromocionController.class);
 
     private final PromocionService promocionService;
 
@@ -64,9 +69,11 @@ public class PromocionController extends BaseRestController<Promocion, String> {
             PromocionDTO creada = promocionService.altaDTO(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(creada);
         } catch (ErrorServiceException e) {
+            log.warn("Error de negocio al dar de alta promoción: {}", e.getMessage(), e);
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            return buildErrorResponse("Error de Sistema: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            log.error("Error de sistema al dar de alta promoción", e);
+            return buildErrorResponse("Error inesperado al dar de alta la promoción", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -105,6 +112,30 @@ public class PromocionController extends BaseRestController<Promocion, String> {
             return ResponseEntity.ok(dto);
         } catch (ErrorServiceException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return buildErrorResponse("Error de Sistema: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/vigentes")
+    public ResponseEntity<?> listarVigentes() {
+        try {
+            List<PromocionDTO> promociones = promocionService.listarVigentesDTO(LocalDate.now());
+            return ResponseEntity.ok(promociones);
+        } catch (ErrorServiceException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return buildErrorResponse("Error de Sistema: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/vigentes/cliente/{clienteId}")
+    public ResponseEntity<?> listarVigentesPorCliente(@PathVariable String clienteId) {
+        try {
+            List<PromocionDTO> promociones = promocionService.listarVigentesParaCliente(clienteId, LocalDate.now());
+            return ResponseEntity.ok(promociones);
+        } catch (ErrorServiceException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return buildErrorResponse("Error de Sistema: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

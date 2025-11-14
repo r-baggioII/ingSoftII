@@ -67,7 +67,8 @@ public abstract class ClienteMapper implements BaseMapper<Cliente, ClienteDTO, S
     @Mapping(source = "direcciones", target = "direcciones", qualifiedByName = "direccionesToDTOs")
     @Mapping(source = "imagenes", target = "imagenes", qualifiedByName = "imagenesToDTOs")
     @Mapping(source = "nacionalidades", target = "nacionalidades", qualifiedByName = "nacionalidadesToDTOs")
-    @Mapping(source = "contactos", target = "contactos", qualifiedByName = "contactosToDTOs")
+    @Mapping(source = "contactos", target = "contactosCorreo", qualifiedByName = "contactosToCorreoDTOs")
+    @Mapping(source = "contactos", target = "contactosTelefono", qualifiedByName = "contactosToTelefonoDTOs")
     public abstract ClienteDTO toDTO(Cliente entity);
 
     @Mapping(source = "direccionIds", target = "direcciones", qualifiedByName = "idsToDirecciones")
@@ -205,6 +206,28 @@ public abstract class ClienteMapper implements BaseMapper<Cliente, ClienteDTO, S
                     return null;
                 })
                 .filter(dto -> dto != null)
+                .collect(Collectors.toList());
+    }
+    
+    @Named("contactosToCorreoDTOs")
+    protected List<ContactoCorreoElectronicoDTO> contactosToCorreoDTOs(List<Contacto> contactos) {
+        if (contactos == null || contactos.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return contactos.stream()
+                .filter(contacto -> contacto instanceof ContactoCorreoElectronico)
+                .map(contacto -> contactoCorreoMapper.toDTO((ContactoCorreoElectronico) contacto))
+                .collect(Collectors.toList());
+    }
+    
+    @Named("contactosToTelefonoDTOs")
+    protected List<ContactoTelefonicoDTO> contactosToTelefonoDTOs(List<Contacto> contactos) {
+        if (contactos == null || contactos.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return contactos.stream()
+                .filter(contacto -> contacto instanceof ContactoTelefonico)
+                .map(contacto -> contactoTelefonicoMapper.toDTO((ContactoTelefonico) contacto))
                 .collect(Collectors.toList());
     }
 }

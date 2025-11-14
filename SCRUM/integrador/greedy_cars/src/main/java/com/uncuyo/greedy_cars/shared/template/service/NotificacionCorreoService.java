@@ -143,9 +143,11 @@ Equipo Greedy Cars
         Promocion promocionPersistida = promocion.getId() != null
                 ? promocionRepository.findByIdAndEliminadoIsFalse(promocion.getId()).orElse(promocion)
                 : promocion;
-        List<Cliente> destinatarios = obtenerDestinatariosParaPromocion(promocionPersistida);
+        List<Cliente> destinatarios = obtenerDestinatariosParaPromocion(promocionPersistida).stream()
+                .filter(cliente -> promocionPersistida.isAplicaATodos() || perteneceAClientesDestino(promocionPersistida, cliente))
+                .collect(Collectors.toList());
         if (destinatarios.isEmpty()) {
-            LOGGER.info("La promoción {} no tiene destinatarios suscritos", promocionPersistida.getCodigoDescuento());
+            LOGGER.info("La promoción {} no tiene destinatarios con correo disponible", promocionPersistida.getCodigoDescuento());
             return;
         }
         for (Cliente cliente : destinatarios) {
@@ -167,10 +169,6 @@ Equipo Greedy Cars
     public void enviarPromocion(Cliente cliente, String codigoPromocion, Integer porcentaje, String empresaId) {
         if (cliente == null) {
             LOGGER.warn("Cliente nulo para el envío de promoción");
-            return;
-        }
-        if (!clienteAceptaPromociones(cliente)) {
-            LOGGER.debug("El cliente {} no está suscripto a promociones. Se omite el envío.", cliente.getId());
             return;
         }
         String correo = obtenerCorreoPersona(cliente);
@@ -199,7 +197,7 @@ Equipo Greedy Cars
             return;
         }
 
-        List<Cliente> clientes = clienteRepository.findAllByEliminadoIsFalseAndRecibirPromocionesIsTrue();
+        List<Cliente> clientes = clienteRepository.findAllByEliminadoIsFalse();
         if (clientes.isEmpty()) {
             LOGGER.warn("No hay clientes activos para enviar promociones");
             return;
@@ -207,9 +205,6 @@ Equipo Greedy Cars
 
         String descripcionPromos = construirDetallePromociones(promociones);
         for (Cliente cliente : clientes) {
-            if (!clienteAceptaPromociones(cliente)) {
-                continue;
-            }
             String correo = obtenerCorreoPersona(cliente);
             if (!StringUtils.hasText(correo)) {
                 continue;
@@ -290,24 +285,23 @@ Equipo Greedy Cars
             return Collections.emptyList();
         }
         if (promocion.isAplicaATodos()) {
-            return clienteRepository.findAllByEliminadoIsFalseAndRecibirPromocionesIsTrue();
+            return clienteRepository.findAllByEliminadoIsFalse();
         }
         if (promocion.getClientesDestino() == null || promocion.getClientesDestino().isEmpty()) {
             return Collections.emptyList();
         }
         return promocion.getClientesDestino().stream()
-                .filter(this::clienteAceptaPromociones)
                 .collect(Collectors.toList());
     }
 
-    private boolean clienteAceptaPromociones(Cliente cliente) {
-        if (cliente == null) {
+    private boolean perteneceAClientesDestino(Promocion promocion, Cliente cliente) {
+        if (promocion == null || cliente == null || !StringUtils.hasText(cliente.getId())) {
             return false;
         }
-        if (Boolean.TRUE.equals(cliente.getEliminado())) {
-            return false;
-        }
-        return cliente.getRecibirPromociones() == null || Boolean.TRUE.equals(cliente.getRecibirPromociones());
+        return promocion.getClientesDestino().stream()
+                .map(Cliente::getId)
+                .filter(StringUtils::hasText)
+                .anyMatch(id -> id.equals(cliente.getId()));
     }
 
     private String construirCuerpoPromocion(Cliente cliente, Promocion promocion) {

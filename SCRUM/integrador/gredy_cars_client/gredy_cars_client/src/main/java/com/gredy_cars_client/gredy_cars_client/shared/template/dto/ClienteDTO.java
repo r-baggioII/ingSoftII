@@ -65,16 +65,12 @@ public class ClienteDTO extends BaseDTO<String> {
     
     private List<NacionalidadDTO> nacionalidades = new ArrayList<>();
     
-    // Lista unificada de contactos del servidor (puede contener correos y teléfonos)
-    @JsonIgnore
-    private List<Object> contactos = new ArrayList<>();
-    
-    // Objetos separados para el cliente (no se deserializan del servidor)
-    @JsonIgnore
+    // Listas separadas de contactos (deserializadas del servidor)
     private List<ContactoCorreoElectronicoDTO> contactosCorreo = new ArrayList<>();
     
-    @JsonIgnore
     private List<ContactoTelefonicoDTO> contactosTelefono = new ArrayList<>();
+
+    private Boolean recibirPromociones = Boolean.TRUE;
 
     @Override
     public String getId() {

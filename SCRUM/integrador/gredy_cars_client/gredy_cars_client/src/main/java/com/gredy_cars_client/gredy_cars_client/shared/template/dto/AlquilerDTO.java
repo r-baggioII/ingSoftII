@@ -37,6 +37,8 @@ public class AlquilerDTO extends BaseDTO<String> {
 
     private List<String> documentacionIds = new ArrayList<>();
 
+    private String codigoPromocion;
+
     @Override
     public String getId() {
         return super.id;

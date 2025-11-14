@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro de Cliente - Greedy Cars</title>
+
+  <link rel="stylesheet" type="text/css" th:href="@{/css/vendor.css}" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous" />
+  <link rel="stylesheet" type="text/css" th:href="@{/style.css}" />
+  <script th:src="@{/js/modernizr.js}"></script>
+</head>
+
+<body>
+
+<!-- Navbar simple sin autenticación -->
+<nav class="navbar navbar-expand-lg navbar-light container-fluid py-3 position-fixed">
+  <div class="container">
+    <a class="navbar-brand" th:href="@{/}">
+      <img th:src="@{/images/logo.png}" alt="Greedy Cars" />
+    </a>
+    <div class="ms-auto">
+      <a class="btn btn-outline-primary px-3" th:href="@{/login}">Iniciar Sesión</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Banner -->
+<section id="banner" class="position-relative overflow-hidden jarallax"
+         th:style="|background-image: url(@{/images/Bg.jpg}); background-repeat: no-repeat; background-size: cover; background-position: center;|">
+  <div class="container text-center py-5 mt-5">
+    <div class="row my-5">
+      <div class="d-flex flex-wrap flex-column justify-content-center align-items-center text-white">
+        <h2 class="page-title display-3 mt-5">Registro de Cliente</h2>
+        <nav class="breadcrumb">
+          <a class="breadcrumb-item text-white" th:href="@{/}">Home</a>
+          <span class="breadcrumb-item text-white active" aria-current="page">Nuevo Cliente</span>
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Formulario de Registro -->
+<section class="contact-us-wrap py-5">
+  <div class="container">
+    <div class="row">
+      <div class="inquiry-item offset-md-1 col-md-10">
+        <h2 class="text-center my-5">Registro de <span class="text-primary">Cliente</span></h2>
+        <p class="text-center mb-4">Complete el formulario para crear su cuenta en Greedy Cars</p>
+
+        <!-- Mensajes de alerta -->
+        <div id="alertContainer"></div>
+
+        <form id="registroForm" class="needs-validation" novalidate>
+          
+          <!-- Sección: Datos de Usuario -->
+          <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0"><i class="bi bi-person-circle"></i> Datos de Usuario</h5>
+            </div>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label for="nombreUsuario" class="form-label fw-medium">Nombre de Usuario *</label>
+                  <input type="text" id="nombreUsuario" name="nombreUsuario" 
+                         class="form-control" required minlength="4" maxlength="50"
+                         placeholder="usuario123">
+                  <div class="invalid-feedback">El nombre de usuario debe tener entre 4 y 50 caracteres</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="clave" class="form-label fw-medium">Contraseña *</label>
+                  <input type="password" id="clave" name="clave" 
+                         class="form-control" required minlength="6"
+                         placeholder="Mínimo 6 caracteres">
+                  <div class="invalid-feedback">La contraseña debe tener al menos 6 caracteres</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección: Datos Personales -->
+          <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0"><i class="bi bi-person"></i> Datos Personales</h5>
+            </div>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label for="nombre" class="form-label fw-medium">Nombre *</label>
+                  <input type="text" id="nombre" name="nombre" 
+                         class="form-control" required maxlength="120"
+                         placeholder="Juan">
+                  <div class="invalid-feedback">El nombre es obligatorio</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="apellido" class="form-label fw-medium">Apellido *</label>
+                  <input type="text" id="apellido" name="apellido" 
+                         class="form-control" required maxlength="120"
+                         placeholder="Pérez">
+                  <div class="invalid-feedback">El apellido es obligatorio</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="fechaNacimiento" class="form-label fw-medium">Fecha de Nacimiento *</label>
+                  <input type="date" id="fechaNacimiento" name="fechaNacimiento" 
+                         class="form-control" required>
+                  <div class="invalid-feedback">La fecha de nacimiento es obligatoria</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="tipoDocumento" class="form-label fw-medium">Tipo de Documento *</label>
+                  <select id="tipoDocumento" name="tipoDocumento" class="form-select" required>
+                    <option value="">Seleccione...</option>
+                    <option value="DNI">DNI</option>
+                    <option value="PASAPORTE">Pasaporte</option>
+                    <option value="CEDULA">Cédula</option>
+                    <option value="LICENCIA">Licencia de Conducir</option>
+                    <option value="OTRO">Otro</option>
+                  </select>
+                  <div class="invalid-feedback">Seleccione un tipo de documento</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="numeroDocumento" class="form-label fw-medium">Número de Documento *</label>
+                  <input type="text" id="numeroDocumento" name="numeroDocumento" 
+                         class="form-control" required maxlength="20"
+                         placeholder="12345678">
+                  <div class="invalid-feedback">El número de documento es obligatorio</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="nacionalidad" class="form-label fw-medium">Nacionalidad *</label>
+                  <input type="text" id="nacionalidad" name="nacionalidad" 
+                         class="form-control" required maxlength="100"
+                         placeholder="Argentina">
+                  <div class="invalid-feedback">La nacionalidad es obligatoria</div>
+                </div>
+                <div class="col-md-12">
+                  <label for="direccionEstadia" class="form-label fw-medium">Dirección de Estadía</label>
+                  <input type="text" id="direccionEstadia" name="direccionEstadia" 
+                         class="form-control" maxlength="500"
+                         placeholder="Información adicional sobre su lugar de estadía">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección: Dirección -->
+          <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Dirección</h5>
+            </div>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-8">
+                  <label for="calle" class="form-label fw-medium">Calle *</label>
+                  <input type="text" id="calle" name="calle" 
+                         class="form-control" required maxlength="100"
+                         placeholder="Av. San Martín">
+                  <div class="invalid-feedback">La calle es obligatoria</div>
+                </div>
+                <div class="col-md-4">
+                  <label for="numeracion" class="form-label fw-medium">Número</label>
+                  <input type="text" id="numeracion" name="numeracion" 
+                         class="form-control" maxlength="20"
+                         placeholder="1234">
+                </div>
+                <div class="col-md-4">
+                  <label for="barrio" class="form-label fw-medium">Barrio</label>
+                  <input type="text" id="barrio" name="barrio" 
+                         class="form-control" maxlength="100"
+                         placeholder="Centro">
+                </div>
+                <div class="col-md-4">
+                  <label for="pisoCasa" class="form-label fw-medium">Piso/Casa</label>
+                  <input type="text" id="pisoCasa" name="pisoCasa" 
+                         class="form-control" maxlength="20"
+                         placeholder="5º">
+                </div>
+                <div class="col-md-4">
+                  <label for="puertaManzana" class="form-label fw-medium">Puerta/Manzana</label>
+                  <input type="text" id="puertaManzana" name="puertaManzana" 
+                         class="form-control" maxlength="20"
+                         placeholder="B">
+                </div>
+                <div class="col-md-6">
+                  <label for="pais" class="form-label fw-medium">País *</label>
+                  <input type="text" id="pais" name="pais" 
+                         class="form-control" required maxlength="100"
+                         placeholder="Argentina">
+                  <div class="invalid-feedback">El país es obligatorio</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="provincia" class="form-label fw-medium">Provincia *</label>
+                  <input type="text" id="provincia" name="provincia" 
+                         class="form-control" required maxlength="100"
+                         placeholder="Mendoza">
+                  <div class="invalid-feedback">La provincia es obligatoria</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="departamento" class="form-label fw-medium">Departamento *</label>
+                  <input type="text" id="departamento" name="departamento" 
+                         class="form-control" required maxlength="100"
+                         placeholder="Capital">
+                  <div class="invalid-feedback">El departamento es obligatorio</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="localidad" class="form-label fw-medium">Localidad *</label>
+                  <input type="text" id="localidad" name="localidad" 
+                         class="form-control" required maxlength="100"
+                         placeholder="Mendoza">
+                  <div class="invalid-feedback">La localidad es obligatoria</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="codigoPostal" class="form-label fw-medium">Código Postal</label>
+                  <input type="text" id="codigoPostal" name="codigoPostal" 
+                         class="form-control" maxlength="10"
+                         placeholder="5500">
+                </div>
+                <div class="col-md-12">
+                  <label for="observacionDireccion" class="form-label fw-medium">Observaciones</label>
+                  <textarea id="observacionDireccion" name="observacionDireccion" 
+                            class="form-control" rows="2" maxlength="500"
+                            placeholder="Información adicional sobre la dirección"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección: Contactos -->
+          <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0"><i class="bi bi-telephone"></i> Información de Contacto</h5>
+            </div>
+            <div class="card-body">
+              <div id="contactosContainer">
+                <!-- Contacto 1 (Email - requerido) -->
+                <div class="contacto-item border p-3 mb-3 rounded">
+                  <div class="row g-3">
+                    <div class="col-md-12">
+                      <h6 class="text-primary">Contacto Principal (Email) *</h6>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-medium">Tipo de Contacto</label>
+                      <select name="tipoContacto[]" class="form-select" required>
+                        <option value="PERSONAL" selected>Personal</option>
+                        <option value="LABORAL">Laboral</option>
+                      </select>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-medium">Correo Electrónico *</label>
+                      <input type="email" name="mail[]" class="form-control" 
+                             required maxlength="120"
+                             placeholder="correo@ejemplo.com">
+                      <div class="invalid-feedback">Ingrese un correo válido</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Contacto 2 (Teléfono - requerido) -->
+                <div class="contacto-item border p-3 mb-3 rounded">
+                  <div class="row g-3">
+                    <div class="col-md-12">
+                      <h6 class="text-primary">Contacto Telefónico *</h6>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label fw-medium">Tipo de Contacto</label>
+                      <select name="tipoContacto[]" class="form-select" required>
+                        <option value="PERSONAL" selected>Personal</option>
+                        <option value="LABORAL">Laboral</option>
+                      </select>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label fw-medium">Tipo de Teléfono</label>
+                      <select name="tipoTelefono[]" class="form-select" required>
+                        <option value="CELULAR" selected>Celular</option>
+                        <option value="FIJO">Fijo</option>
+                        <option value="OFICINA">Oficina</option>
+                      </select>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label fw-medium">Teléfono *</label>
+                      <input type="tel" name="telefono[]" class="form-control" 
+                             required maxlength="20"
+                             placeholder="+54 261 1234567">
+                      <div class="invalid-feedback">El teléfono es obligatorio</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección: Imagen (opcional) -->
+          <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0"><i class="bi bi-image"></i> Foto de Perfil (Opcional)</h5>
+            </div>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-12">
+                  <label for="imagenFile" class="form-label fw-medium">Seleccionar Imagen</label>
+                  <input type="file" id="imagenFile" name="imagenFile" 
+                         class="form-control" accept="image/png, image/jpeg, image/jpg">
+                  <small class="text-muted">Formatos: JPG, JPEG, PNG. Tamaño máximo: 5MB</small>
+                </div>
+                <div class="col-md-12">
+                  <div id="imagenPreview" class="d-none">
+                    <img id="imagenPreviewImg" src="" alt="Preview" class="img-thumbnail" style="max-width: 200px;">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Términos y Condiciones -->
+          <div class="card mb-4">
+            <div class="card-body">
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="aceptaTerminos" required>
+                <label class="form-check-label" for="aceptaTerminos">
+                  Acepto los <a href="#" class="text-primary">términos y condiciones</a> *
+                </label>
+                <div class="invalid-feedback">Debe aceptar los términos y condiciones</div>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="aceptaNewsletter">
+                <label class="form-check-label" for="aceptaNewsletter">
+                  Deseo recibir promociones y ofertas por correo electrónico
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botones -->
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a th:href="@{/login}" class="btn btn-outline-secondary btn-lg me-2">
+              Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary btn-lg" id="btnRegistrar">
+              <span class="spinner-border spinner-border-sm d-none" id="spinnerRegistro"></span>
+              Registrarse
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script th:src="@{/js/jquery-1.11.0.min.js}"></script>
+<script th:src="@{/js/plugins.js}"></script>
+<script th:src="@{/js/script.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+// Configuración base - Usar el contexto de la aplicación cliente
+const REGISTRO_URL = /*[[@{/registro}]]*/ '/registro';
+const LOGIN_URL = /*[[@{/login}]]*/ '/login';
+
+// Previsualización de imagen
+document.getElementById('imagenFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            document.getElementById('imagenPreviewImg').src = event.target.result;
+            document.getElementById('imagenPreview').classList.remove('d-none');
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Manejo del formulario
+document.getElementById('registroForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    // Validar formulario
+    if (!this.checkValidity()) {
+        e.stopPropagation();
+        this.classList.add('was-validated');
+        return;
+    }
+    
+    // Deshabilitar botón y mostrar spinner
+    const btnRegistrar = document.getElementById('btnRegistrar');
+    const spinner = document.getElementById('spinnerRegistro');
+    btnRegistrar.disabled = true;
+    spinner.classList.remove('d-none');
+    
+    try {
+        // Construir el objeto de registro
+        const registroData = await construirObjetoRegistro();
+        
+        // Enviar al servidor cliente (que actuará como proxy al backend)
+        const response = await fetch(REGISTRO_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(registroData)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+            mostrarAlerta('success', result.message || 'Registro exitoso. Redirigiendo al login...');
+            
+            // Redirigir al login después de 2 segundos
+            setTimeout(() => {
+                window.location.href = LOGIN_URL;
+            }, 2000);
+        } else {
+            mostrarAlerta('danger', result.message || 'Error al registrar el cliente');
+            btnRegistrar.disabled = false;
+            spinner.classList.add('d-none');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarAlerta('danger', 'Error de conexión con el servidor');
+        btnRegistrar.disabled = false;
+        spinner.classList.add('d-none');
+    }
+});
+
+// Construir objeto de registro
+async function construirObjetoRegistro() {
+    const form = document.getElementById('registroForm');
+    const formData = new FormData(form);
+    
+    // Construir contactos
+    const contactos = [];
+    const tiposContacto = formData.getAll('tipoContacto[]');
+    const mails = formData.getAll('mail[]');
+    const telefonos = formData.getAll('telefono[]');
+    const tiposTelefono = formData.getAll('tipoTelefono[]');
+    
+    // Contacto de email
+    if (mails[0]) {
+        contactos.push({
+            tipoContacto: tiposContacto[0] || 'PERSONAL',
+            mail: mails[0],
+            telefono: null,
+            tipoTelefono: null,
+            observacion: null
+        });
+    }
+    
+    // Contacto de teléfono
+    if (telefonos[0]) {
+        contactos.push({
+            tipoContacto: tiposContacto[1] || 'PERSONAL',
+            mail: null,
+            telefono: telefonos[0],
+            tipoTelefono: tiposTelefono[0] || 'CELULAR',
+            observacion: null
+        });
+    }
+    
+    // Procesar imagen si existe
+    let imagenDTO = null;
+    const imagenFile = document.getElementById('imagenFile').files[0];
+    if (imagenFile) {
+        const base64 = await fileToBase64(imagenFile);
+        imagenDTO = {
+            nombre: imagenFile.name,
+            mime: imagenFile.type,
+            contenidoBase64: base64.split(',')[1] // Remover el prefijo data:image/...;base64,
+        };
+    }
+    
+    // Construir objeto completo
+    return {
+        nombreUsuario: formData.get('nombreUsuario'),
+        clave: formData.get('clave'),
+        nombre: formData.get('nombre'),
+        apellido: formData.get('apellido'),
+        fechaNacimiento: formData.get('fechaNacimiento'),
+        tipoDocumento: formData.get('tipoDocumento'),
+        numeroDocumento: formData.get('numeroDocumento'),
+        direccionEstadia: formData.get('direccionEstadia') || null,
+        nacionalidad: formData.get('nacionalidad'),
+        direccion: {
+            calle: formData.get('calle'),
+            numeracion: formData.get('numeracion') || null,
+            barrio: formData.get('barrio') || null,
+            pisoCasa: formData.get('pisoCasa') || null,
+            puertaManzana: formData.get('puertaManzana') || null,
+            observacion: formData.get('observacionDireccion') || null,
+            pais: formData.get('pais'),
+            provincia: formData.get('provincia'),
+            departamento: formData.get('departamento'),
+            localidad: formData.get('localidad'),
+            codigoPostal: formData.get('codigoPostal') || null
+        },
+        contactos: contactos,
+        imagen: imagenDTO,
+        recibirPromociones: document.getElementById('aceptaNewsletter')?.checked ?? true
+    };
+}
+
+// Convertir archivo a Base64
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+    });
+}
+
+// Mostrar alerta
+function mostrarAlerta(tipo, mensaje) {
+    const alertContainer = document.getElementById('alertContainer');
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${tipo} alert-dismissible fade show`;
+    alert.role = 'alert';
+    alert.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    alertContainer.innerHTML = '';
+    alertContainer.appendChild(alert);
+    
+    // Scroll hacia arriba para ver la alerta
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+/*]]>*/
+</script>
+
+</body>
+</html>

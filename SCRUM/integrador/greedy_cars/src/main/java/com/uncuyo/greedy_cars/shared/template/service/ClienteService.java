@@ -217,6 +217,9 @@ public class ClienteService extends BaseService<Cliente, String> {
         if (nueva.getDireccionEstadia() != null) {
             existente.setDireccionEstadia(nueva.getDireccionEstadia());
         }
+        if (nueva.getRecibirPromociones() != null) {
+            existente.setRecibirPromociones(nueva.getRecibirPromociones());
+        }
         
         // Update collections
         if (nueva.getNacionalidades() != null) {
@@ -252,5 +255,15 @@ public class ClienteService extends BaseService<Cliente, String> {
         cliente.setUsuario(usuario);
         Cliente guardado = repository.save(cliente);
         return clienteMapper.toDTO(guardado);
+    }
+
+    public List<ClienteDTO> buscarPorQuery(String query) throws ErrorServiceException {
+        try {
+            ClienteRepository clienteRepo = (ClienteRepository) repository;
+            List<Cliente> clientes = clienteRepo.searchByQuery(query);
+            return clienteMapper.toDTOList(clientes);
+        } catch (Exception e) {
+            throw new ErrorServiceException("Error al buscar clientes: " + e.getMessage(), e);
+        }
     }
 }

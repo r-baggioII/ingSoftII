@@ -79,12 +79,13 @@ public class AuthCheckInterceptor implements HandlerInterceptor {
                     String nombreUsuario = (String) usuario.get("nombreUsuario");
                     String rol = (String) usuario.get("rol");
                     String usuarioId = (String) usuario.get("id");
+                    String clienteId = (String) usuario.get("clienteId");
                     
-                    // Crear un UserDetails personalizado con la información del usuario
                     UserDetailsWithRole userDetails = new UserDetailsWithRole(
-                        nombreUsuario, 
+                        nombreUsuario,
                         rol,
-                        usuarioId
+                        usuarioId,
+                        clienteId
                     );
                     
                     // Crear el token de autenticación
@@ -119,20 +120,24 @@ public class AuthCheckInterceptor implements HandlerInterceptor {
      * Determina si una ruta es pública (no requiere autenticación)
      */
     private boolean isPublicPath(String uri) {
-        return uri.startsWith("/login") 
-            || uri.startsWith("/css/") 
-            || uri.startsWith("/js/") 
-            || uri.startsWith("/images/") 
-            || uri.startsWith("/public/")
-            || uri.startsWith("/vendor/")
-            || uri.startsWith("/fonts/")
-            || uri.startsWith("/style.css")
-            || uri.equals("/")
-            || uri.equals("/index")
-            || uri.startsWith("/registro")
-            || uri.startsWith("/error")
-            || uri.startsWith("/webjars/")
-            || uri.startsWith("/favicon.ico");
+        return uri.contains("/login") 
+            || uri.contains("/css/") 
+            || uri.contains("/js/") 
+            || uri.contains("/images/") 
+            || uri.contains("/public/")
+            || uri.contains("/vendor/")
+            || uri.contains("/fonts/")
+            || uri.contains("/style.css")
+            || uri.endsWith("/")
+            || uri.contains("/index")
+            || uri.contains("/registro")
+            || uri.contains("/error")
+            || uri.contains("/webjars/")
+            || uri.contains("/favicon.ico")
+            || uri.contains("/auth0/")
+            || uri.contains("/callback")
+            || uri.contains("/login-auth0")
+            || uri.contains("/registro-intermedio");
     }
     
     /**
@@ -142,11 +147,13 @@ public class AuthCheckInterceptor implements HandlerInterceptor {
         private final String nombreUsuario;
         private final String rol;
         private final String usuarioId;
+        private final String clienteId;
         
-        public UserDetailsWithRole(String nombreUsuario, String rol, String usuarioId) {
+        public UserDetailsWithRole(String nombreUsuario, String rol, String usuarioId, String clienteId) {
             this.nombreUsuario = nombreUsuario;
             this.rol = rol;
             this.usuarioId = usuarioId;
+            this.clienteId = clienteId;
         }
         
         public String getNombreUsuario() {
@@ -159,6 +166,10 @@ public class AuthCheckInterceptor implements HandlerInterceptor {
         
         public String getUsuarioId() {
             return usuarioId;
+        }
+
+        public String getClienteId() {
+            return clienteId;
         }
     }
 }

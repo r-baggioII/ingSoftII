@@ -1,7 +1,9 @@
 package com.uncuyo.greedy_cars.shared.template.controller;
 
 import com.uncuyo.greedy_cars.config.JwtUtil;
+import com.uncuyo.greedy_cars.shared.template.entity.Cliente;
 import com.uncuyo.greedy_cars.shared.template.entity.Usuario;
+import com.uncuyo.greedy_cars.shared.template.repository.ClienteRepository;
 import com.uncuyo.greedy_cars.shared.template.service.CustomUserDetailsService;
 import com.uncuyo.greedy_cars.shared.template.service.UsuarioService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -42,6 +45,9 @@ public class AuthController {
 
     @Autowired
     private CustomUserDetailsService userDetailsService;
+
+    @Autowired
+    private ClienteRepository clienteRepository;
 
     /**
      * DTO simple para login (espera JSON con {"nombreUsuario": "...", "clave":"..."}).
@@ -105,13 +111,10 @@ public class AuthController {
 
             // Respuesta: no incluyo el token en el body por seguridad (ya está en cookie HttpOnly)
             Map<String, Object> responseData = new HashMap<>();
+            Map<String, Object> usuarioPayload = buildUsuarioPayload(usuario);
             responseData.put("success", true);
             responseData.put("message", "Login exitoso");
-            responseData.put("usuario", Map.of(
-                    "id", usuario.getId(),
-                    "nombreUsuario", usuario.getNombreUsuario(),
-                    "rol", usuario.getRol().name()
-            ));
+            responseData.put("usuario", usuarioPayload);
 
             return ResponseEntity.ok(responseData);
 
@@ -194,11 +197,7 @@ public class AuthController {
 
             Map<String, Object> responseData = new HashMap<>();
             responseData.put("success", true);
-            responseData.put("usuario", Map.of(
-                    "id", usuario.getId(),
-                    "nombreUsuario", usuario.getNombreUsuario(),
-                    "rol", usuario.getRol().name()
-            ));
+            responseData.put("usuario", buildUsuarioPayload(usuario));
 
             return ResponseEntity.ok(responseData);
 
@@ -212,5 +211,34 @@ public class AuthController {
         error.put("success", false);
         error.put("error", mensaje);
         return ResponseEntity.status(status).body(error);
+    }
+
+    private Map<String, Object> buildUsuarioPayload(Usuario usuario) {
+        Map<String, Object> usuarioData = new HashMap<>();
+        usuarioData.put("id", usuario.getId());
+        usuarioData.put("nombreUsuario", usuario.getNombreUsuario());
+        usuarioData.put("rol", usuario.getRol().name());
+
+        String clienteId = resolveClienteId(usuario);
+        if (StringUtils.hasText(clienteId)) {
+            usuarioData.put("clienteId", clienteId);
+        }
+        return usuarioData;
+    }
+
+    private String resolveClienteId(Usuario usuario) {
+        if (usuario == null || usuario.getId() == null) {
+            return null;
+        }
+        return clienteRepository.findActivoByUsuarioId(usuario.getId())
+                .map(Cliente::getId)
+                .orElseGet(() -> {
+                    if (usuario.getPersona() == null || usuario.getPersona().getId() == null) {
+                        return null;
+                    }
+                    return clienteRepository.findByIdAndEliminadoIsFalse(usuario.getPersona().getId())
+                            .map(Cliente::getId)
+                            .orElse(null);
+                });
     }
 }

@@ -62,11 +62,6 @@ public abstract class BaseService<T extends BaseEntity<ID>, ID> {
         }
     }
 
-    /**
-     * Modifica una entidad de forma segura.
-     * Previene la pérdida de datos al no guardar directamente 'entidadNueva',
-     * sino que usa el hook 'actualizarEntidad' para mapear los campos.
-     */
     public Optional<T> modificar(ID id, T entidadNueva) throws ErrorServiceException {
         try {
             entidadNueva.setId(id);

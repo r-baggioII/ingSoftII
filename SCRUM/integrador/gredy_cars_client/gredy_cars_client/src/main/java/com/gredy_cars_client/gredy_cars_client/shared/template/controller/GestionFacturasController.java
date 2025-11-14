@@ -127,6 +127,19 @@ public class GestionFacturasController extends BaseThymeleafController<FacturaDT
         }
     }
 
+    @GetMapping(value = "/api/facturas", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<FacturaDTO> listarFacturasPorCliente(@RequestParam("clienteId") String clienteId) {
+        if (!StringUtils.hasText(clienteId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debe indicar un cliente");
+        }
+        try {
+            return facturaService.listarPorCliente(clienteId.trim());
+        } catch (ErrorServiceException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
     @GetMapping("/facturas/{id}/detalles")
     public String verDetallesFactura(
         @PathVariable String id,

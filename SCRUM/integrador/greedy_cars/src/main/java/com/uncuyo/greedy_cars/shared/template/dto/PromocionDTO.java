@@ -1,10 +1,13 @@
 package com.uncuyo.greedy_cars.shared.template.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,13 +29,20 @@ public class PromocionDTO extends BaseDTO<String> {
     @NotBlank(message = "El código de descuento es obligatorio")
     private String codigoDescuento;
 
+    @JsonAlias("descripcion")
     private String descripcionDescuento;
 
     @NotNull(message = "La fecha de inicio es obligatoria")
+    @JsonAlias("fechaInicio")
     private LocalDate fechaInicioPromocion;
 
     @NotNull(message = "La fecha de fin es obligatoria")
+    @JsonAlias("fechaFin")
     private LocalDate fechaFinPromocion;
+
+    private Boolean aplicaATodos = Boolean.TRUE;
+
+    private Set<String> clientesDestinoIds = new HashSet<>();
 
     @Override
     public String getId() {

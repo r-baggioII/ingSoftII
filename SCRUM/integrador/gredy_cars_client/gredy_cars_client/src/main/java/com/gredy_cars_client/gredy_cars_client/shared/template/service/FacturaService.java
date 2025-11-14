@@ -63,4 +63,8 @@ public class FacturaService extends BaseClientService<FacturaDTO, String> {
     public List<FacturaDTO> listarPorCliente(String clienteId) throws ErrorServiceException {
         return facturaDao.findByCliente(clienteId);
     }
+
+    public List<FacturaDTO> listarPorUsuario(String usuarioId) throws ErrorServiceException {
+        return facturaDao.findByUsuario(usuarioId);
+    }
 }

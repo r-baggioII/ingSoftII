@@ -1,5 +1,7 @@
 package com.gredy_cars_client.gredy_cars_client.shared.template.dto;
 
+import com.gredy_cars_client.gredy_cars_client.shared.template.dto.PromocionDTO;
+
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -32,6 +34,9 @@ public class DetalleFacturaDTO extends BaseDTO<String> {
     private String alquilerId;
 
     private String facturaId;
+    private String promocionId;
+
+    private PromocionDTO promocion;
 
     @Override
     public String getId() {

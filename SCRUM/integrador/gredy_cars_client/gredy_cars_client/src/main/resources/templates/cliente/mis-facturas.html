@@ -53,6 +53,7 @@
               <th>Fecha</th>
               <th>Estado</th>
               <th>Total</th>
+              <th>Promoción aplicada</th>
               <th class="text-end">Acciones</th>
             </tr>
             </thead>
@@ -64,6 +65,21 @@
                 <span class="badge bg-primary-subtle text-primary" th:text="${factura.estado}">SIN_DEFINIR</span>
               </td>
               <td th:text="${factura.totalPagado != null ? factura.totalPagado : '0.00'}">0.00</td>
+              <td>
+                <div th:if="${factura.detalles != null}" th:each="detalle : ${factura.detalles}"
+                     class="bg-light rounded p-2 mb-2">
+                  <div><strong th:text="'Alquiler: ' + (detalle.alquilerId != null ? detalle.alquilerId : '-')"></strong></div>
+                  <div th:if="${detalle.promocion != null}"
+                       th:with="subtotal=${detalle.subtotal != null ? detalle.subtotal : 0}, porcentaje=${detalle.promocion.porcentajeDescuento != null ? detalle.promocion.porcentajeDescuento : 0}, factor=${1 - (porcentaje / 100d)}, montoOriginal=${factor > 0 ? subtotal / factor : subtotal}, descuento=${montoOriginal - subtotal}">
+                    <div><strong>Promoción:</strong> <span th:text="${detalle.promocion.codigoDescuento}">CODIGO</span> (<span th:text="${porcentaje}">0</span>% OFF)</div>
+                    <div><strong>Monto original:</strong> $<span th:text="${#numbers.formatDecimal(montoOriginal, 1, 2)}">0,00</span></div>
+                    <div><strong>Descuento:</strong> $<span th:text="${#numbers.formatDecimal(descuento, 1, 2)}">0,00</span></div>
+                    <div><strong>Total con promo:</strong> $<span th:text="${#numbers.formatDecimal(subtotal, 1, 2)}">0,00</span></div>
+                  </div>
+                  <div th:if="${detalle.promocion == null}" class="text-muted small">Sin promoción aplicada.</div>
+                </div>
+                <div th:if="${factura.detalles == null || factura.detalles.isEmpty()}" class="text-muted small">Sin detalles.</div>
+              </td>
               <td class="text-end">
                 <div class="d-flex flex-wrap justify-content-end gap-2">
                   <a class="btn btn-sm btn-outline-dark"

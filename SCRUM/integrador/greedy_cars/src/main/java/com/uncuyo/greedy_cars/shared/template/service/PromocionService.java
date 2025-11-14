@@ -15,6 +15,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -22,6 +26,8 @@ import org.springframework.util.StringUtils;
 @Service
 @Transactional
 public class PromocionService extends BaseService<Promocion, String> {
+
+    private static final Logger log = LoggerFactory.getLogger(PromocionService.class);
 
     private final PromocionRepository promocionRepository;
     private final PromocionMapper promocionMapper;
@@ -56,15 +62,37 @@ public class PromocionService extends BaseService<Promocion, String> {
     }
 
     @Transactional(readOnly = true)
+    public List<PromocionDTO> listarVigentesParaCliente(String clienteId, LocalDate fechaReferencia)
+            throws ErrorServiceException {
+        if (!StringUtils.hasText(clienteId)) {
+            throw new ErrorServiceException("Debe indicar el cliente");
+        }
+        Cliente cliente = clienteRepository.findByIdAndEliminadoIsFalse(clienteId)
+                .orElseThrow(() -> new ErrorServiceException("Cliente no encontrado"));
+        LocalDate referencia = fechaReferencia != null ? fechaReferencia : LocalDate.now();
+        return promocionRepository.findActivas(referencia).stream()
+                .filter(promocion -> aplicaParaCliente(promocion, cliente))
+                .map(promocionMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public Optional<PromocionDTO> obtenerDTO(String id) throws ErrorServiceException {
         return obtener(id).map(promocionMapper::toDTO);
     }
 
     public PromocionDTO altaDTO(PromocionDTO dto) throws ErrorServiceException {
+        if (dto != null && !StringUtils.hasText(dto.getId())) {
+            dto.setId(null);
+        }
         Promocion promocion = promocionMapper.toEntity(dto);
         configurarDestinatarios(promocion, dto);
         Promocion guardada = alta(promocion);
-        notificacionCorreoService.enviarNuevaPromocion(guardada);
+        try {
+            notificacionCorreoService.enviarNuevaPromocion(guardada);
+        } catch (Exception e) {
+            log.error("Error al enviar correo de nueva promoción (no se revierte el alta)", e);
+        }
         return promocionMapper.toDTO(guardada);
     }
 
@@ -118,6 +146,33 @@ public class PromocionService extends BaseService<Promocion, String> {
     }
 
     @Override
+    public Promocion alta(Promocion promocion) throws ErrorServiceException {
+        try {
+            promocion.setEliminado(false);
+            validar(BaseUseCaseService.ALTA, promocion);
+            preAlta(promocion);
+            Promocion guardada = promocionRepository.save(promocion);
+            promocionRepository.flush();
+            postAlta(guardada);
+            return guardada;
+        } catch (ErrorServiceException e) {
+            throw e;
+        } catch (DataIntegrityViolationException e) {
+            throw buildIntegrityException(promocion, e);
+        } catch (TransactionSystemException e) {
+            Throwable rootCause = e.getRootCause();
+            if (rootCause instanceof DataIntegrityViolationException dive) {
+                throw buildIntegrityException(promocion, dive);
+            }
+            log.error("Error transaccional inesperado al dar de alta la promoción {}", promocion.getCodigoDescuento(), e);
+            throw new ErrorServiceException("Error inesperado al dar de alta la promoción. Consulte con soporte.");
+        } catch (Exception e) {
+            log.error("Error inesperado al dar de alta la promoción {}", promocion.getCodigoDescuento(), e);
+            throw new ErrorServiceException("Error inesperado al dar de alta la promoción. Consulte con soporte.");
+        }
+    }
+
+    @Override
     protected void actualizarEntidad(Promocion existente, Promocion nueva) {
         if (StringUtils.hasText(nueva.getCodigoDescuento())) {
             existente.setCodigoDescuento(nueva.getCodigoDescuento().trim());
@@ -155,6 +210,9 @@ public class PromocionService extends BaseService<Promocion, String> {
                 throw new ErrorServiceException("El código de descuento es obligatorio");
             }
             String codigoNormalizado = promocion.getCodigoDescuento().trim();
+            if (codigoNormalizado.length() > 100) {
+                throw new ErrorServiceException("El código de descuento no puede superar los 100 caracteres");
+            }
             promocion.setCodigoDescuento(codigoNormalizado);
 
             Double porcentaje = promocion.getPorcentajeDescuento();
@@ -167,6 +225,10 @@ public class PromocionService extends BaseService<Promocion, String> {
             }
             if (promocion.getFechaFinPromocion().isBefore(promocion.getFechaInicioPromocion())) {
                 throw new ErrorServiceException("La fecha de fin no puede ser anterior a la fecha de inicio");
+            }
+
+            if (promocion.getDescripcionDescuento() != null && promocion.getDescripcionDescuento().length() > 500) {
+                throw new ErrorServiceException("La descripción de la promoción no puede superar los 500 caracteres");
             }
 
             if (!promocion.isAplicaATodos()) {
@@ -188,8 +250,19 @@ public class PromocionService extends BaseService<Promocion, String> {
         } catch (ErrorServiceException e) {
             throw e;
         } catch (Exception e) {
-            throw new ErrorServiceException("Error de Sistema al validar la promoción", e);
+            log.error("Error inesperado al validar la promoción", e);
+            throw new ErrorServiceException("Error inesperado al validar la promoción. Consulte con soporte.");
         }
+    }
+
+    private ErrorServiceException buildIntegrityException(Promocion promocion, DataIntegrityViolationException e) {
+        String detalle = e.getMostSpecificCause() != null ? e.getMostSpecificCause().getMessage() : e.getMessage();
+        String mensaje = "No se pudo guardar la promoción por un error de integridad de datos";
+        if (detalle != null && detalle.toLowerCase().contains("codigo_descuento")) {
+            mensaje = "Ya existe una promoción con el código indicado";
+        }
+        log.warn("Error de integridad al guardar la promoción {}: {}", promocion != null ? promocion.getCodigoDescuento() : "sin código", detalle);
+        return new ErrorServiceException(mensaje);
     }
 
     private void configurarDestinatarios(Promocion promocion, PromocionDTO dto) throws ErrorServiceException {
@@ -247,14 +320,18 @@ public class PromocionService extends BaseService<Promocion, String> {
         if (cliente == null || !StringUtils.hasText(cliente.getId())) {
             throw new ErrorServiceException("Debe indicar el cliente para validar la promoción");
         }
-        if (!promocion.isAplicaATodos()) {
-            boolean habilitado = promocion.getClientesDestino().stream()
-                    .map(Cliente::getId)
-                    .filter(StringUtils::hasText)
-                    .anyMatch(id -> id.equals(cliente.getId()));
-            if (!habilitado) {
-                throw new ErrorServiceException("La promoción no está disponible para el cliente seleccionado");
-            }
+        if (!aplicaParaCliente(promocion, cliente)) {
+            throw new ErrorServiceException("La promoción no está disponible para el cliente seleccionado");
         }
+    }
+
+    private boolean aplicaParaCliente(Promocion promocion, Cliente cliente) {
+        if (promocion.isAplicaATodos()) {
+            return true;
+        }
+        return promocion.getClientesDestino().stream()
+                .map(Cliente::getId)
+                .filter(StringUtils::hasText)
+                .anyMatch(id -> id.equals(cliente.getId()));
     }
 }

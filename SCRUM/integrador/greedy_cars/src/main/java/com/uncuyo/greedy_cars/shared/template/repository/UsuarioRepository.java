@@ -12,4 +12,9 @@ public interface UsuarioRepository extends BaseRepository<Usuario, String> {
 
     //Verificar si existe un usuario
     boolean existsByNombreUsuarioAndEliminadoIsFalse(String nombreUsuario);
+    
+    // Métodos para Auth0
+    Optional<Usuario> findByExternalIdAndEliminadoIsFalse(String externalId);
+    
+    Optional<Usuario> findByEmailAndEliminadoIsFalse(String email);
 }

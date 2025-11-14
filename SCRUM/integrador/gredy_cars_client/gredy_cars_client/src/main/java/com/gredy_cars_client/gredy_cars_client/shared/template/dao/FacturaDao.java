@@ -166,6 +166,28 @@ public class FacturaDao extends BaseApiDao<FacturaDTO, String> {
         }
     }
 
+    public List<FacturaDTO> findByUsuario(String usuarioId) throws ErrorServiceException {
+        if (!StringUtils.hasText(usuarioId)) {
+            return Collections.emptyList();
+        }
+        String url = UriComponentsBuilder.fromHttpUrl(collectionUrl())
+                .queryParam("usuarioId", usuarioId.trim())
+                .toUriString();
+        try {
+            ResponseEntity<List<FacturaDTO>> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                new HttpEntity<>(null, buildHeaders()),
+                getListTypeReference()
+            );
+            return Optional.ofNullable(response.getBody()).orElse(Collections.emptyList());
+        } catch (RestClientResponseException e) {
+            throw translateException("listar facturas del usuario " + usuarioId, e);
+        } catch (RestClientException e) {
+            throw new ErrorServiceException("Error de comunicación al listar facturas del usuario " + usuarioId, e);
+        }
+    }
+
     public byte[] descargarPdf(String facturaId) throws ErrorServiceException {
         validateFacturaId(facturaId);
         HttpHeaders headers = buildHeaders();

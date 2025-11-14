@@ -12,7 +12,10 @@ public interface FacturaRepository extends BaseRepository<Factura, String> {
 
     List<Factura> findAllByEstadoAndEliminadoIsFalse(EstadoFactura estado);
 
+    List<Factura> findAllByClienteIdAndEliminadoIsFalse(String clienteId);
+
+    List<Factura> findAllByClienteUsuarioIdAndEliminadoIsFalse(String usuarioId);
+
     @Query("select coalesce(max(f.numeroFactura), 0) from Factura f where f.eliminado = false")
     Long obtenerMaxNumeroFactura();
 }
-

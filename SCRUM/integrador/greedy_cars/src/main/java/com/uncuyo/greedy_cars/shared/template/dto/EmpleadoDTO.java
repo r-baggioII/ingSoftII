@@ -60,6 +60,12 @@ public class EmpleadoDTO extends BaseDTO<String> {
     // Campo específico de Empleado
     @NotNull(message = "El tipo de empleado es obligatorio")
     private TipoEmpleado tipoEmpleado;
+    
+    // Objetos completos para devolver al cliente (no se usan para guardar)
+    private List<DireccionDTO> direcciones;
+    private List<ImagenDTO> imagenes;
+    private List<ContactoCorreoElectronicoDTO> contactosCorreo;
+    private List<ContactoTelefonicoDTO> contactosTelefono;
 
     @Override
     public String getId() {

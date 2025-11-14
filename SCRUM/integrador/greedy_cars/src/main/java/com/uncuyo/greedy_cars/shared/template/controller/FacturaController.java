@@ -15,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -52,7 +54,28 @@ public class FacturaController extends BaseRestController<Factura, String> {
     @Override
     public ResponseEntity<?> listar() {
         try {
-            List<FacturaDTO> facturas = facturaService.listarActivosDTO();
+            // Get clienteId from request parameter if present
+            String clienteId = null;
+            String usuarioId = null;
+            try {
+                jakarta.servlet.http.HttpServletRequest request = 
+                    ((org.springframework.web.context.request.ServletRequestAttributes) 
+                        org.springframework.web.context.request.RequestContextHolder.getRequestAttributes())
+                    .getRequest();
+                clienteId = request.getParameter("clienteId");
+                usuarioId = request.getParameter("usuarioId");
+            } catch (Exception e) {
+                // Parameter not present, continue with null
+            }
+            
+            List<FacturaDTO> facturas;
+            if (StringUtils.hasText(clienteId)) {
+                facturas = facturaService.listarPorCliente(clienteId);
+            } else if (StringUtils.hasText(usuarioId)) {
+                facturas = facturaService.listarPorClienteUsuario(usuarioId);
+            } else {
+                facturas = facturaService.listarActivosDTO();
+            }
             return ResponseEntity.ok(facturas);
         } catch (ErrorServiceException e) {
             return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);

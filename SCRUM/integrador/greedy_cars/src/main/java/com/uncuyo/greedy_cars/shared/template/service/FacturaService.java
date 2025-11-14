@@ -9,6 +9,7 @@ import com.uncuyo.greedy_cars.shared.template.entity.DetalleFactura;
 import com.uncuyo.greedy_cars.shared.template.entity.Factura;
 import com.uncuyo.greedy_cars.shared.template.entity.FormaDePago;
 import com.uncuyo.greedy_cars.shared.template.entity.Promocion;
+import com.uncuyo.greedy_cars.shared.template.entity.Usuario;
 import com.uncuyo.greedy_cars.shared.template.enums.BaseUseCaseService;
 import com.uncuyo.greedy_cars.shared.template.enums.EstadoFactura;
 import com.uncuyo.greedy_cars.shared.template.exception.ErrorServiceException;
@@ -18,7 +19,7 @@ import com.uncuyo.greedy_cars.shared.template.mapper.FormaDePagoMapper;
 import com.uncuyo.greedy_cars.shared.template.repository.AlquilerRepository;
 import com.uncuyo.greedy_cars.shared.template.repository.ClienteRepository;
 import com.uncuyo.greedy_cars.shared.template.repository.FacturaRepository;
-import com.uncuyo.greedy_cars.shared.template.repository.PromocionRepository;
+import com.uncuyo.greedy_cars.shared.template.repository.UsuarioRepository;
 import com.lowagie.text.Chunk;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
@@ -61,24 +62,27 @@ public class FacturaService extends BaseService<Factura, String> {
     private final FacturaMapper facturaMapper;
     private final DetalleFacturaMapper detalleFacturaMapper;
     private final FormaDePagoMapper formaDePagoMapper;
-    private final PromocionRepository promocionRepository;
+    private final PromocionService promocionService;
+    private final UsuarioRepository usuarioRepository;
 
     public FacturaService(
             FacturaRepository facturaRepository,
             AlquilerRepository alquilerRepository,
             ClienteRepository clienteRepository,
-            PromocionRepository promocionRepository,
+            PromocionService promocionService,
             FacturaMapper facturaMapper,
             DetalleFacturaMapper detalleFacturaMapper,
-            FormaDePagoMapper formaDePagoMapper) {
+            FormaDePagoMapper formaDePagoMapper,
+            UsuarioRepository usuarioRepository) {
         super(facturaRepository);
         this.facturaRepository = facturaRepository;
         this.alquilerRepository = alquilerRepository;
         this.clienteRepository = clienteRepository;
-        this.promocionRepository = promocionRepository;
+        this.promocionService = promocionService;
         this.facturaMapper = facturaMapper;
         this.detalleFacturaMapper = detalleFacturaMapper;
         this.formaDePagoMapper = formaDePagoMapper;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Transactional(readOnly = true)
@@ -104,6 +108,36 @@ public class FacturaService extends BaseService<Factura, String> {
         return facturas.stream()
                 .map(this::convertirConClienteSeguro)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<FacturaDTO> listarPorCliente(String clienteId) throws ErrorServiceException {
+        if (!StringUtils.hasText(clienteId)) {
+            throw new ErrorServiceException("Debe indicar el ID del cliente");
+        }
+        List<Factura> facturas = facturaRepository.findAllByClienteIdAndEliminadoIsFalse(clienteId);
+        return facturas.stream()
+                .map(this::convertirConClienteSeguro)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<FacturaDTO> listarPorClienteUsuario(String usuarioId) throws ErrorServiceException {
+        if (!StringUtils.hasText(usuarioId)) {
+            throw new ErrorServiceException("Debe indicar el ID de usuario asociado al cliente");
+        }
+        Cliente cliente = clienteRepository.findActivoByUsuarioId(usuarioId)
+                .orElseGet(() -> usuarioRepository.findByIdAndEliminadoIsFalse(usuarioId)
+                        .map(Usuario::getPersona)
+                        .filter(Cliente.class::isInstance)
+                        .map(Cliente.class::cast)
+                        .orElse(null));
+
+        if (cliente == null) {
+            throw new ErrorServiceException("No se encontró un cliente asociado al usuario indicado");
+        }
+
+        return listarPorCliente(cliente.getId());
     }
 
     public FacturaDTO altaDTO(FacturaDTO dto) throws ErrorServiceException {
@@ -238,7 +272,7 @@ public class FacturaService extends BaseService<Factura, String> {
                 DetalleFactura detalle = detalleFacturaMapper.toEntity(detalleDTO);
                 detalle.setAlquiler(obtenerAlquilerActivo(detalleDTO.getAlquilerId()));
                 detalle.setFactura(factura);
-                detalle.setPromocion(obtenerPromocionParaDetalle(detalleDTO.getPromocionId()));
+                detalle.setPromocion(resolverPromocionParaDetalle(detalleDTO.getPromocionId(), factura.getCliente(), detalle.getAlquiler()));
                 detalle.setEliminado(Boolean.FALSE);
                 detallesConstruidos.add(detalle);
             }
@@ -319,12 +353,20 @@ public class FacturaService extends BaseService<Factura, String> {
                 .orElseThrow(() -> new ErrorServiceException("Alquiler no encontrado o eliminado"));
     }
 
-    private Promocion obtenerPromocionParaDetalle(String promocionId) throws ErrorServiceException {
+    private Promocion resolverPromocionParaDetalle(String promocionId, Cliente clienteFactura, Alquiler alquiler)
+            throws ErrorServiceException {
         if (!StringUtils.hasText(promocionId)) {
             return null;
         }
-        return promocionRepository.findByIdAndEliminadoIsFalse(promocionId)
-                .orElseThrow(() -> new ErrorServiceException("Promoción no encontrada o eliminada"));
+        Cliente clienteReferencia = clienteFactura != null ? clienteFactura
+                : (alquiler != null ? alquiler.getCliente() : null);
+        if (clienteReferencia == null || !StringUtils.hasText(clienteReferencia.getId())) {
+            throw new ErrorServiceException("No se pudo validar la promoción porque no se identificó al cliente");
+        }
+        LocalDate fechaReferencia = (alquiler != null && alquiler.getFechaDesde() != null)
+                ? alquiler.getFechaDesde()
+                : LocalDate.now();
+        return promocionService.obtenerPromocionVigenteParaClientePorId(promocionId, clienteReferencia, fechaReferencia);
     }
 
     private Cliente obtenerClienteActivo(String clienteId) throws ErrorServiceException {

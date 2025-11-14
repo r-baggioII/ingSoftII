@@ -1,4 +1,4 @@
-package com.gredy_cars_client.gredy_cars_client.shared.dto;
+package com.gredy_cars_client.gredy_cars_client.shared.template.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

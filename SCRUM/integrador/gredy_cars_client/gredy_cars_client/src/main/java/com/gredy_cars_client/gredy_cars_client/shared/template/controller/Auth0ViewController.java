@@ -1,4 +1,4 @@
-package com.gredy_cars_client.gredy_cars_client.shared.controller;
+package com.gredy_cars_client.gredy_cars_client.shared.template.controller;
 
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Value;
@@ -86,6 +86,6 @@ public class Auth0ViewController {
         // NO pasar el token al modelo/vista por seguridad
         // El formulario lo enviará desde la sesión
         
-        return "registro-intermedio-test";
+        return "registro-intermedio";
     }
 }

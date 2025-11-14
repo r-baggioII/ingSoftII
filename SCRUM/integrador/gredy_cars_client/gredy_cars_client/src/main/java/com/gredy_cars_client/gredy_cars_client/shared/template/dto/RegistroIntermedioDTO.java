@@ -1,4 +1,4 @@
-package com.gredy_cars_client.gredy_cars_client.shared.dto;
+package com.gredy_cars_client.gredy_cars_client.shared.template.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,6 +16,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegistroIntermedioDTO {
+    
+    // Datos de Auth0
+    private String externalId;
+    private String email;
+    private Boolean recibirPromociones;
     
     // Datos personales
     private String nombre;

@@ -14,13 +14,16 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PostLoginResponse {
     
-    private String status; // USER_EXISTS, REQUIRED_MORE_INFO, USER_CREATED, ERROR
+    private String status; // USER_EXISTS, REQUIRED_MORE_INFO, USER_CREATED, ERROR, SUCCESS
     private String email;
     private String externalId;
     private String provider;
     private Boolean emailVerified;
-    private String token;
+    private String token; // JWT interno del sistema
     private String nombre;
     private String apellido;
     private String message;
+    private String usuarioId; // String porque Usuario.id es UUID
+    private Long clienteId;    // Long porque Cliente.id es Long
+    private String rol; // CLIENTE, JEFE, ADMIN
 }

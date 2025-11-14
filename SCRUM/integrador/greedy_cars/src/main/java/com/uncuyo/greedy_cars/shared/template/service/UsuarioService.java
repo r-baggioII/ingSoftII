@@ -1,5 +1,6 @@
 package com.uncuyo.greedy_cars.shared.template.service;
 
+import com.uncuyo.greedy_cars.config.JwtUtil;
 import com.uncuyo.greedy_cars.shared.template.dto.UsuarioDTO;
 import com.uncuyo.greedy_cars.shared.template.entity.Persona;
 import com.uncuyo.greedy_cars.shared.template.entity.Usuario;
@@ -13,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +28,9 @@ public class UsuarioService extends BaseService<Usuario, String> {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Autowired
     public UsuarioService(UsuarioRepository repository, PersonaRepository personaRepository, UsuarioMapper usuarioMapper) {
@@ -178,5 +183,19 @@ public class UsuarioService extends BaseService<Usuario, String> {
         
         // Asignar la persona gestionada
         usuario.setPersona(personaOpt.get());
+    }
+    
+    /**
+     * Genera un JWT interno del sistema para un usuario.
+     * Este JWT se usa para mantener la sesión en el cliente.
+     * 
+     * @param usuario Usuario autenticado
+     * @return JWT token
+     */
+    public String generateInternalJwt(Usuario usuario) {
+        return jwtUtil.generateToken(
+            usuario.getNombreUsuario(), 
+            Collections.singletonList(usuario.getRol().name())
+        );
     }
 }

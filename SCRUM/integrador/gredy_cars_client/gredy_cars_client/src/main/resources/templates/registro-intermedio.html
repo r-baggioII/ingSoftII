@@ -47,13 +47,20 @@
       <div class="inquiry-item offset-md-1 col-md-10">
         <h2 class="text-center my-5">Complete su <span class="text-primary">Información</span></h2>
         <p class="text-center mb-4">
-          Ya se autenticó con su cuenta social. Por favor complete los siguientes datos para finalizar su registro.
+          <strong>Email autenticado:</strong> <span class="text-primary" th:text="${email}">email@example.com</span>
+        </p>
+        <p class="text-center mb-4 text-muted">
+          Por favor complete los siguientes datos para finalizar su registro.
         </p>
 
         <!-- Mensajes de alerta -->
         <div id="alertContainer"></div>
 
         <form id="registroIntermedioForm" class="needs-validation" novalidate>
+          
+          <!-- Campos ocultos para Auth0 -->
+          <input type="hidden" id="externalId" th:value="${externalId}" />
+          <input type="hidden" id="email" th:value="${email}" />
           
           <!-- Sección: Datos Personales -->
           <div class="card mb-4">
@@ -206,81 +213,43 @@
               <h5 class="mb-0"><i class="bi bi-telephone"></i> Información de Contacto</h5>
             </div>
             <div class="card-body">
-              <div id="contactosContainer">
-                <!-- Contacto 1 (Email - requerido) -->
-                <div class="contacto-item border p-3 mb-3 rounded">
-                  <div class="row g-3">
-                    <div class="col-md-12">
-                      <h6 class="text-primary">Contacto Principal (Email) *</h6>
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label fw-medium">Tipo de Contacto</label>
-                      <select name="tipoContacto[]" class="form-select" required>
-                        <option value="PERSONAL" selected>Personal</option>
-                        <option value="LABORAL">Laboral</option>
-                      </select>
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label fw-medium">Correo Electrónico *</label>
-                      <input type="email" name="mail[]" class="form-control" 
-                             required maxlength="120"
-                             placeholder="correo@ejemplo.com">
-                      <div class="invalid-feedback">Ingrese un correo válido</div>
-                    </div>
+              <div class="contacto-item border p-3 mb-3 rounded">
+                <div class="row g-3">
+                  <div class="col-md-12">
+                    <h6 class="text-primary">Teléfono de Contacto *</h6>
                   </div>
-                </div>
-
-                <!-- Contacto 2 (Teléfono - requerido) -->
-                <div class="contacto-item border p-3 mb-3 rounded">
-                  <div class="row g-3">
-                    <div class="col-md-12">
-                      <h6 class="text-primary">Contacto Telefónico *</h6>
-                    </div>
-                    <div class="col-md-4">
-                      <label class="form-label fw-medium">Tipo de Contacto</label>
-                      <select name="tipoContacto[]" class="form-select" required>
-                        <option value="PERSONAL" selected>Personal</option>
-                        <option value="LABORAL">Laboral</option>
-                      </select>
-                    </div>
-                    <div class="col-md-4">
-                      <label class="form-label fw-medium">Tipo de Teléfono</label>
-                      <select name="tipoTelefono[]" class="form-select" required>
-                        <option value="CELULAR" selected>Celular</option>
-                        <option value="FIJO">Fijo</option>
-                        <option value="OFICINA">Oficina</option>
-                      </select>
-                    </div>
-                    <div class="col-md-4">
-                      <label class="form-label fw-medium">Teléfono *</label>
-                      <input type="tel" name="telefono[]" class="form-control" 
-                             required maxlength="20"
-                             placeholder="+54 261 1234567">
-                      <div class="invalid-feedback">El teléfono es obligatorio</div>
-                    </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-medium">Tipo de Teléfono</label>
+                    <select name="tipoTelefono" id="tipoTelefono" class="form-select" required>
+                      <option value="CELULAR" selected>Celular</option>
+                      <option value="FIJO">Fijo</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-medium">Teléfono *</label>
+                    <input type="tel" name="telefono" id="telefono" class="form-control" 
+                           required maxlength="20"
+                           placeholder="+54 261 1234567">
+                    <div class="invalid-feedback">El teléfono es obligatorio</div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Sección: Imagen (opcional) -->
+          <!-- Sección: Imagen de Perfil (opcional) -->
           <div class="card mb-4">
             <div class="card-header bg-primary text-white">
               <h5 class="mb-0"><i class="bi bi-image"></i> Foto de Perfil (Opcional)</h5>
             </div>
             <div class="card-body">
-              <div class="row g-3">
+              <div class="row">
                 <div class="col-md-12">
                   <label for="imagenFile" class="form-label fw-medium">Seleccionar Imagen</label>
-                  <input type="file" id="imagenFile" name="imagenFile" 
-                         class="form-control" accept="image/png, image/jpeg, image/jpg">
-                  <small class="text-muted">Formatos: JPG, JPEG, PNG. Tamaño máximo: 5MB</small>
-                </div>
-                <div class="col-md-12">
-                  <div id="imagenPreview" class="d-none">
-                    <img id="imagenPreviewImg" src="" alt="Preview" class="img-thumbnail" style="max-width: 200px;">
-                  </div>
+                  <input type="file" id="imagenFile" class="form-control" 
+                         accept="image/*">
+                  <small class="text-muted">Formatos permitidos: JPG, PNG, GIF. Tamaño máximo: 5MB</small>
+                  <div id="imagePreview" class="mt-3"></div>
                 </div>
               </div>
             </div>
@@ -289,27 +258,27 @@
           <!-- Términos y Condiciones -->
           <div class="card mb-4">
             <div class="card-body">
-              <div class="form-check mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="aceptaNewsletter" checked>
+                <label class="form-check-label" for="aceptaNewsletter">
+                  Deseo recibir promociones y novedades
+                </label>
+              </div>
+              <div class="form-check mt-2">
                 <input class="form-check-input" type="checkbox" id="aceptaTerminos" required>
                 <label class="form-check-label" for="aceptaTerminos">
-                  Acepto los <a href="#" class="text-primary">términos y condiciones</a> *
+                  Acepto los <a class="text-primary">términos y condiciones</a> *
                 </label>
                 <div class="invalid-feedback">Debe aceptar los términos y condiciones</div>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="aceptaNewsletter">
-                <label class="form-check-label" for="aceptaNewsletter">
-                  Deseo recibir promociones y ofertas por correo electrónico
-                </label>
               </div>
             </div>
           </div>
 
-          <!-- Botones -->
-          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-            <button type="submit" class="btn btn-primary btn-lg" id="btnCompletarRegistro">
-              <span class="spinner-border spinner-border-sm d-none" id="spinnerRegistro"></span>
-              Completar Registro
+          <!-- Botón de Envío -->
+          <div class="text-center">
+            <button type="submit" class="btn btn-primary btn-lg px-5" id="btnCompletarRegistro">
+              <span id="btnText">Completar Registro</span>
+              <span id="spinner" class="spinner-border spinner-border-sm ms-2 d-none"></span>
             </button>
           </div>
         </form>
@@ -318,78 +287,78 @@
   </div>
 </section>
 
-<script th:src="@{/js/jquery-1.11.0.min.js}"></script>
-<script th:src="@{/js/plugins.js}"></script>
-<script th:src="@{/js/script.js}"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+<!-- Footer -->
+<footer id="footer" class="bg-dark text-white padding-medium mt-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12 text-center">
+        <p>&copy; 2025 Greedy Cars. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 
 <script th:inline="javascript">
 /*<![CDATA[*/
-// Configuración base
-const REGISTRO_INTERMEDIO_URL = /*[[@{/api/registro-intermedio}]]*/ '/api/registro-intermedio';
-const HOME_URL = /*[[@{/}]]*/ '/';
 
-// Obtener el access token desde sessionStorage (lo guardó el callback)
-const accessToken = sessionStorage.getItem('auth0_access_token');
+// Configuración
+const BACKEND_URL = /*[[@{/api/auth0/registro-intermedio}]]*/ '/api/auth0/registro-intermedio';
 
-if (!accessToken) {
-    mostrarAlerta('danger', 'No se encontró token de autenticación. Redirigiendo...');
-    setTimeout(() => window.location.href = HOME_URL, 2000);
-}
-
-// Precargar datos del usuario de Auth0 si están disponibles
-const userProfile = JSON.parse(sessionStorage.getItem('auth0_user') || '{}');
-if (userProfile.email) {
-    document.querySelector('input[name="mail[]"]').value = userProfile.email;
-}
-if (userProfile.given_name) {
-    document.getElementById('nombre').value = userProfile.given_name;
-}
-if (userProfile.family_name) {
-    document.getElementById('apellido').value = userProfile.family_name;
-}
-
-// Previsualización de imagen
-document.getElementById('imagenFile').addEventListener('change', function(e) {
+// Preview de imagen
+document.getElementById('imagenFile')?.addEventListener('change', function(e) {
     const file = e.target.files[0];
+    const preview = document.getElementById('imagePreview');
+    
     if (file) {
+        if (file.size > 5 * 1024 * 1024) {
+            mostrarAlerta('danger', 'La imagen no puede superar los 5MB');
+            e.target.value = '';
+            preview.innerHTML = '';
+            return;
+        }
+        
         const reader = new FileReader();
-        reader.onload = function(event) {
-            document.getElementById('imagenPreviewImg').src = event.target.result;
-            document.getElementById('imagenPreview').classList.remove('d-none');
+        reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" class="img-thumbnail" style="max-width: 200px;">`;
         };
         reader.readAsDataURL(file);
+    } else {
+        preview.innerHTML = '';
     }
 });
 
-// Manejo del formulario
+// Manejar envío del formulario
 document.getElementById('registroIntermedioForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
+    const form = e.target;
+    
     // Validar formulario
-    if (!this.checkValidity()) {
-        e.stopPropagation();
-        this.classList.add('was-validated');
+    if (!form.checkValidity()) {
+        form.classList.add('was-validated');
         return;
     }
     
-    // Deshabilitar botón y mostrar spinner
     const btnCompletarRegistro = document.getElementById('btnCompletarRegistro');
-    const spinner = document.getElementById('spinnerRegistro');
+    const btnText = document.getElementById('btnText');
+    const spinner = document.getElementById('spinner');
+    
     btnCompletarRegistro.disabled = true;
     spinner.classList.remove('d-none');
+    btnText.textContent = 'Procesando...';
     
     try {
-        // Construir el objeto de registro
         const registroData = await construirObjetoRegistro();
         
-        // Enviar al servidor con el access token de Auth0
-        const response = await fetch(REGISTRO_INTERMEDIO_URL, {
+        // Enviar al backend
+        const response = await fetch(BACKEND_URL, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + accessToken
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(registroData)
         });
@@ -399,23 +368,21 @@ document.getElementById('registroIntermedioForm').addEventListener('submit', asy
         if (response.ok && result.success) {
             mostrarAlerta('success', result.message || 'Registro completado exitosamente. Redirigiendo...');
             
-            // Limpiar sessionStorage y redirigir al home
-            sessionStorage.removeItem('auth0_access_token');
-            sessionStorage.removeItem('auth0_user');
-            
             setTimeout(() => {
-                window.location.href = HOME_URL;
+                window.location.href = /*[[@{/cliente/dashboard}]]*/ '/cliente/dashboard';
             }, 2000);
         } else {
             mostrarAlerta('danger', result.message || 'Error al completar el registro');
             btnCompletarRegistro.disabled = false;
             spinner.classList.add('d-none');
+            btnText.textContent = 'Completar Registro';
         }
     } catch (error) {
         console.error('Error:', error);
         mostrarAlerta('danger', 'Error de conexión con el servidor');
         btnCompletarRegistro.disabled = false;
         spinner.classList.add('d-none');
+        btnText.textContent = 'Completar Registro';
     }
 });
 
@@ -426,29 +393,26 @@ async function construirObjetoRegistro() {
     
     // Construir contactos
     const contactos = [];
-    const tiposContacto = formData.getAll('tipoContacto[]');
-    const mails = formData.getAll('mail[]');
-    const telefonos = formData.getAll('telefono[]');
-    const tiposTelefono = formData.getAll('tipoTelefono[]');
     
-    // Contacto de email
-    if (mails[0]) {
-        contactos.push({
-            tipoContacto: tiposContacto[0] || 'PERSONAL',
-            mail: mails[0],
-            telefono: null,
-            tipoTelefono: null,
-            observacion: null
-        });
-    }
+    // Contacto de email (del usuario Auth0)
+    const email = document.getElementById('email').value;
+    contactos.push({
+        tipoContacto: 'PERSONAL',
+        mail: email,
+        telefono: null,
+        tipoTelefono: null,
+        observacion: null
+    });
     
     // Contacto de teléfono
-    if (telefonos[0]) {
+    const telefono = formData.get('telefono');
+    const tipoTelefono = formData.get('tipoTelefono');
+    if (telefono) {
         contactos.push({
-            tipoContacto: tiposContacto[1] || 'PERSONAL',
+            tipoContacto: 'PERSONAL',
             mail: null,
-            telefono: telefonos[0],
-            tipoTelefono: tiposTelefono[0] || 'CELULAR',
+            telefono: telefono,
+            tipoTelefono: tipoTelefono,
             observacion: null
         });
     }
@@ -461,12 +425,14 @@ async function construirObjetoRegistro() {
         imagenDTO = {
             nombre: imagenFile.name,
             mime: imagenFile.type,
-            contenidoBase64: base64.split(',')[1] // Remover el prefijo data:image/...;base64,
+            contenidoBase64: base64.split(',')[1]
         };
     }
     
-    // Construir objeto completo (sin usuario ni contraseña)
+    // Construir objeto completo
     return {
+        externalId: document.getElementById('externalId').value,
+        email: email,
         nombre: formData.get('nombre'),
         apellido: formData.get('apellido'),
         fechaNacimiento: formData.get('fechaNacimiento'),
@@ -516,7 +482,6 @@ function mostrarAlerta(tipo, mensaje) {
     alertContainer.innerHTML = '';
     alertContainer.appendChild(alert);
     
-    // Scroll hacia arriba para ver la alerta
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 /*]]>*/

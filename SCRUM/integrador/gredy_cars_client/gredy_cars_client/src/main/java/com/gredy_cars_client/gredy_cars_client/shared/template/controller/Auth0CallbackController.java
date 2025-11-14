@@ -1,4 +1,4 @@
-package com.gredy_cars_client.gredy_cars_client.shared.controller;
+package com.gredy_cars_client.gredy_cars_client.shared.template.controller;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -76,45 +76,15 @@ public class Auth0CallbackController {
             String email = (String) userInfo.get("email");
             Boolean emailVerified = (Boolean) userInfo.get("email_verified");
             
-            // 3. Verificar si el usuario existe en nuestro backend
-            String backendUrl = "http://161.153.217.110:18082/greedy_cars/api/auth0/post-login";
+            // 3. Redirigir directamente al dashboard (flujo simplificado, sin verificar backend)
+            // Guardar información en la sesión HTTP
+            session.setAttribute("auth0_access_token", accessToken);
+            session.setAttribute("auth0_user_email", email);
+            session.setAttribute("auth0_user_sub", sub);
+            session.setAttribute("auth0_email_verified", emailVerified);
             
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(accessToken);
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            
-            HttpEntity<Void> entity = new HttpEntity<>(headers);
-            
-            ResponseEntity<Map> backendResponse = restTemplate.exchange(
-                backendUrl,
-                HttpMethod.POST,
-                entity,
-                Map.class
-            );
-            
-            Map<String, Object> result = backendResponse.getBody();
-            String status = (String) result.get("status");
-            
-            // 4. Decidir a dónde redirigir según el status
-            if ("USER_EXISTS".equals(status)) {
-                // Usuario existe - crear sesión y redirigir al dashboard
-                session.setAttribute("auth0_access_token", accessToken);
-                session.setAttribute("auth0_user_email", email);
-                session.setAttribute("auth0_user_sub", sub);
-                return "redirect:/cliente/dashboard";
-            } else if ("REQUIRED_MORE_INFO".equals(status)) {
-                // Usuario nuevo - redirigir a registro intermedio
-                // Guardar información en la sesión HTTP (NO en la URL)
-                session.setAttribute("auth0_access_token", accessToken);
-                session.setAttribute("auth0_user_email", email);
-                session.setAttribute("auth0_user_sub", sub);
-                session.setAttribute("auth0_email_verified", emailVerified);
-                
-                return "redirect:/auth0/registro-intermedio";
-            } else {
-                model.addAttribute("error", "Estado desconocido del servidor");
-                return "redirect:/login?error=unknown_status";
-            }
+            System.out.println("Usuario autenticado con Auth0: " + email);
+            return "redirect:/dashboard";
             
         } catch (Exception e) {
             e.printStackTrace();

@@ -26,6 +26,13 @@ public class JwtAuthenticationFilter extends GenericFilter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
+        
+        // Ignorar rutas de Auth0 - estas usan OAuth2 Resource Server, no nuestro JWT
+        String requestURI = req.getRequestURI();
+        if (requestURI != null && requestURI.contains("/api/auth0/")) {
+            chain.doFilter(request, response);
+            return;
+        }
 
         String header = req.getHeader("Authorization");
         String token = null;

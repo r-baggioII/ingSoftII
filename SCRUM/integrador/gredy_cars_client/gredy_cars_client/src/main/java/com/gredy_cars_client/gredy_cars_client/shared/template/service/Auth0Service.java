@@ -1,7 +1,7 @@
-package com.gredy_cars_client.gredy_cars_client.shared.service;
+package com.gredy_cars_client.gredy_cars_client.shared.template.service;
 
-import com.gredy_cars_client.gredy_cars_client.shared.dto.PostLoginResponse;
-import com.gredy_cars_client.gredy_cars_client.shared.dto.RegistroIntermedioDTO;
+import com.gredy_cars_client.gredy_cars_client.shared.template.dto.PostLoginResponse;
+import com.gredy_cars_client.gredy_cars_client.shared.template.dto.RegistroIntermedioDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

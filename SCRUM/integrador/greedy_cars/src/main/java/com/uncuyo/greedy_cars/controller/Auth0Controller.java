@@ -109,6 +109,72 @@ public class Auth0Controller {
     }
     
     /**
+     * Login o creación automática de usuario con Auth0.
+     * Si el usuario existe, devuelve sus datos.
+     * Si no existe, lo crea automáticamente con rol CLIENTE.
+     * 
+     * @param authentication Spring Security Authentication con el JWT
+     * @return PostLoginResponse con datos del usuario y JWT interno
+     */
+    @PostMapping("/login-or-create")
+    public ResponseEntity<PostLoginResponse> loginOrCreate(Authentication authentication) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof Jwt)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        
+        // Extraer claims del token Auth0
+        String externalId = jwt.getSubject(); // "google-oauth2|123456789"
+        String email = jwt.getClaim("email");
+        Boolean emailVerified = jwt.getClaim("email_verified");
+        String provider = extractProvider(externalId);
+        
+        // Buscar usuario por externalId
+        Optional<Usuario> usuarioOpt = usuarioService.findByExternalId(externalId);
+        
+        Usuario usuario;
+        
+        if (usuarioOpt.isPresent()) {
+            // Usuario ya existe
+            usuario = usuarioOpt.get();
+        } else {
+            // Usuario no existe - crearlo automáticamente
+            try {
+                usuario = auth0RegistrationService.crearUsuarioBasicoAuth0(
+                    externalId, 
+                    email, 
+                    provider, 
+                    emailVerified != null ? emailVerified : false
+                );
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("Error al crear usuario: " + e.getMessage()));
+            }
+        }
+        
+        // Generar JWT interno del sistema
+        String internalJwt = usuarioService.generateInternalJwt(usuario);
+        
+        PostLoginResponse response = new PostLoginResponse();
+        response.setStatus("SUCCESS");
+        response.setEmail(usuario.getEmail());
+        response.setExternalId(usuario.getExternalId());
+        response.setToken(internalJwt); // JWT interno, no el de Auth0
+        response.setUsuarioId(usuario.getId());
+        response.setRol(usuario.getRol().name());
+        
+        if (usuario.getPersona() instanceof Cliente) {
+            Cliente cliente = (Cliente) usuario.getPersona();
+            response.setNombre(cliente.getNombre() != null ? cliente.getNombre() : email);
+            response.setApellido(cliente.getApellido());
+            response.setClienteId(cliente.getId());
+        }
+        
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
      * Completa el registro de un nuevo usuario autenticado con Auth0.
      * Crea el Cliente con todos los datos necesarios y asocia el externalId.
      * 

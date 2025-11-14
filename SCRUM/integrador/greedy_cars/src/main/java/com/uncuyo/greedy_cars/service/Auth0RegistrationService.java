@@ -349,6 +349,79 @@ public class Auth0RegistrationService {
     }
     
     /**
+     * Crea un usuario básico con autenticación Auth0.
+     * Se usa cuando el usuario se loguea por primera vez con Auth0.
+     * Usuario y contraseña: el email.
+     * Rol: CLIENTE por defecto.
+     * 
+     * @param externalId ID del usuario en Auth0 (sub claim)
+     * @param email Email del usuario
+     * @param provider Proveedor (google, facebook, etc.)
+     * @param emailVerified Si el email está verificado
+     * @return Usuario creado con Cliente básico asociado
+     */
+    @Transactional
+    public Usuario crearUsuarioBasicoAuth0(String externalId, String email, String provider, Boolean emailVerified) 
+            throws ErrorServiceException {
+        log.info("Creando usuario básico Auth0 - externalId: {}, email: {}", externalId, email);
+        
+        try {
+            // 1. Validar que no exista el externalId
+            if (usuarioRepository.findByExternalIdAndEliminadoIsFalse(externalId).isPresent()) {
+                throw new ErrorServiceException("Usuario ya existe con externalId: " + externalId);
+            }
+            
+            // 2. Validar que no exista el email
+            if (usuarioRepository.findByEmailAndEliminadoIsFalse(email).isPresent()) {
+                throw new ErrorServiceException("Email ya registrado: " + email);
+            }
+            
+            // 3. Crear Cliente básico (sin datos completos)
+            Cliente cliente = new Cliente();
+            cliente.setNombre(email.split("@")[0]); // Usar parte antes del @ como nombre temporal
+            cliente.setApellido(""); // Vacío por ahora
+            cliente.setNumeroDocumento("AUTH0-" + System.currentTimeMillis()); // Documento temporal único
+            cliente.setTipoDocumento(TipoDocumento.OTRO);
+            cliente.setFechaNacimiento(null); // Sin fecha de nacimiento
+            cliente.setRecibirPromociones(false);
+            cliente.setEliminado(false);
+            
+            cliente = clienteRepository.save(cliente);
+            log.info("Cliente básico creado con ID: {}", cliente.getId());
+            
+            // 4. Crear Usuario con Auth0
+            Usuario usuario = new Usuario();
+            usuario.setNombreUsuario(email); // Usuario = email
+            usuario.setClave(email); // Contraseña = email (nunca se usará, auth es vía Auth0)
+            usuario.setRol(Rol.CLIENTE); // Rol por defecto
+            usuario.setPersona(cliente);
+            usuario.setEmail(email);
+            usuario.setEmailVerified(emailVerified);
+            usuario.setExternalId(externalId);
+            usuario.setIsExternal(true);
+            usuario.setProvider(provider);
+            usuario.setEliminado(false);
+            
+            usuario = usuarioRepository.save(usuario);
+            log.info("Usuario Auth0 básico creado con ID: {}", usuario.getId());
+            
+            // 5. Asociar usuario al cliente
+            cliente.setUsuario(usuario);
+            clienteRepository.save(cliente);
+            
+            log.info("Usuario básico Auth0 completado: {}", email);
+            return usuario;
+            
+        } catch (ErrorServiceException e) {
+            log.error("Error creando usuario básico Auth0: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Error inesperado creando usuario básico Auth0", e);
+            throw new ErrorServiceException("Error al crear usuario: " + e.getMessage());
+        }
+    }
+    
+    /**
      * Extrae el proveedor del externalId de Auth0.
      * Ejemplos: "auth0|123" -> "auth0", "google-oauth2|123" -> "google"
      */

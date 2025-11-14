@@ -1,8 +1,9 @@
-package com.gredy_cars_client.gredy_cars_client.shared.controller;
+package com.gredy_cars_client.gredy_cars_client.shared.template.controller;
 
-import com.gredy_cars_client.gredy_cars_client.shared.dto.PostLoginResponse;
-import com.gredy_cars_client.gredy_cars_client.shared.dto.RegistroIntermedioDTO;
-import com.gredy_cars_client.gredy_cars_client.shared.service.Auth0Service;
+import com.gredy_cars_client.gredy_cars_client.shared.template.dto.PostLoginResponse;
+import com.gredy_cars_client.gredy_cars_client.shared.template.dto.RegistroIntermedioDTO;
+import com.gredy_cars_client.gredy_cars_client.shared.template.service.Auth0Service;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -61,21 +62,38 @@ public class Auth0Controller {
     
     /**
      * Endpoint para completar registro intermedio
-     * Recibe datos del cliente y el access token, los envía al backend
+     * Toma el access token de la sesión HTTP (guardado durante el callback)
      */
     @PostMapping("/registro-intermedio")
     public ResponseEntity<Map<String, Object>> registroIntermedio(
-            @RequestHeader("Authorization") String authorizationHeader,
-            @RequestBody RegistroIntermedioDTO registroDTO) {
+            @RequestBody RegistroIntermedioDTO registroDTO,
+            HttpSession session) {
         
         try {
-            String accessToken = authorizationHeader.replace("Bearer ", "");
+            // Obtener el access token de la sesión
+            String accessToken = (String) session.getAttribute("auth0_access_token");
             
-            log.info("POST /api/auth0/registro-intermedio - Procesando registro");
+            if (accessToken == null) {
+                log.error("No se encontró access token en la sesión");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of(
+                        "success", false,
+                        "message", "Sesión expirada. Por favor inicie sesión nuevamente."
+                    ));
+            }
+            
+            log.info("POST /api/auth0/registro-intermedio - Procesando registro para: {}", registroDTO.getEmail());
+            log.debug("Access token (primeros 50 chars): {}", accessToken.substring(0, Math.min(50, accessToken.length())));
             
             Map<String, Object> result = auth0Service.completarRegistroIntermedio(accessToken, registroDTO);
             
             if (Boolean.TRUE.equals(result.get("success"))) {
+                // Limpiar datos de Auth0 de la sesión ya que el registro se completó
+                session.removeAttribute("auth0_access_token");
+                session.removeAttribute("auth0_user_email");
+                session.removeAttribute("auth0_user_sub");
+                session.removeAttribute("auth0_email_verified");
+                
                 return ResponseEntity.ok(result);
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);

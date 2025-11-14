@@ -167,6 +167,23 @@ echo -e "${GREEN}Esperando a que los servicios inicien...${NC}"
 sleep 10
 
 echo ""
+echo -e "${YELLOW}================================================${NC}"
+echo -e "${YELLOW}   Verificando creación de usuarios...${NC}"
+echo -e "${YELLOW}================================================${NC}"
+echo ""
+echo -e "${YELLOW}Buscando mensajes sobre creación de usuario 'jefe' en los logs...${NC}"
+echo ""
+
+# Verificar logs del backend para el usuario jefe
+docker-compose logs greedy_cars | grep -E "(jefe|Usuario jefe|Persona jefe|Error al crear)" || \
+    echo -e "${RED}⚠️  NO SE ENCONTRARON LOGS SOBRE EL USUARIO JEFE${NC}"
+
+echo ""
+echo -e "${YELLOW}Logs completos de inicialización de usuarios:${NC}"
+docker-compose logs greedy_cars | grep -E "(✅|❌|ℹ️)" || \
+    echo -e "${RED}⚠️  NO SE ENCONTRARON MENSAJES DE INICIALIZACIÓN${NC}"
+
+echo ""
 echo -e "${GREEN}================================================${NC}"
 echo -e "${GREEN}   ✓ SISTEMA INICIADO CORRECTAMENTE${NC}"
 echo -e "${GREEN}================================================${NC}"

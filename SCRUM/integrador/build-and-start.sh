@@ -20,6 +20,14 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Puertos a abrir
 PORTS=(9000 8080 8081 3307)
 
+# Asegurar permisos de ejecución en Maven Wrappers
+echo -e "${GREEN}Verificando permisos de Maven Wrappers...${NC}"
+chmod +x "$SCRIPT_DIR/greedy_cars/mvnw" 2>/dev/null
+chmod +x "$SCRIPT_DIR/gredy_cars_client/gredy_cars_client/mvnw" 2>/dev/null
+chmod +x "$SCRIPT_DIR/greedy_institucional/mvnw" 2>/dev/null
+echo -e "${GREEN}✓ Permisos configurados${NC}"
+echo ""
+
 echo -e "${GREEN}================================================${NC}"
 echo -e "${GREEN}   Configurando Firewall (Puertos)...${NC}"
 echo -e "${GREEN}================================================${NC}"

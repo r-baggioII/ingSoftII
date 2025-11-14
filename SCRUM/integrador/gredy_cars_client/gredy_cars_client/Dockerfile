@@ -1,6 +1,6 @@
 # Dockerfile para gredy_cars_client
-# Imagen base: OpenJDK 17 slim
-FROM openjdk:17-slim
+# Imagen base: Eclipse Temurin 17 JRE (Alpine para menor tamaño)
+FROM eclipse-temurin:17-jre-alpine
 
 # Ruta del artefacto compilado (ARG para flexibilidad)
 ARG JAR_FILE=target/gredy_cars_client.war

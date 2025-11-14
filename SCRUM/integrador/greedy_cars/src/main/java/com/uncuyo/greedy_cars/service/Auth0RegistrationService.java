@@ -10,7 +10,6 @@ import com.uncuyo.greedy_cars.shared.template.exception.ErrorServiceException;
 import com.uncuyo.greedy_cars.shared.template.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +36,6 @@ public class Auth0RegistrationService {
     private final DireccionRepository direccionRepository;
     private final ContactoRepository contactoRepository;
     private final ImagenRepository imagenRepository;
-    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public Auth0RegistrationService(
@@ -50,8 +48,7 @@ public class Auth0RegistrationService {
             LocalidadRepository localidadRepository,
             DireccionRepository direccionRepository,
             ContactoRepository contactoRepository,
-            ImagenRepository imagenRepository,
-            PasswordEncoder passwordEncoder) {
+            ImagenRepository imagenRepository) {
         this.usuarioRepository = usuarioRepository;
         this.clienteRepository = clienteRepository;
         this.nacionalidadRepository = nacionalidadRepository;
@@ -62,7 +59,6 @@ public class Auth0RegistrationService {
         this.direccionRepository = direccionRepository;
         this.contactoRepository = contactoRepository;
         this.imagenRepository = imagenRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -350,79 +346,6 @@ public class Auth0RegistrationService {
         usuario.setEliminado(false);
         
         return usuario;
-    }
-    
-    /**
-     * Crea un usuario básico con autenticación Auth0.
-     * Se usa cuando el usuario se loguea por primera vez con Auth0.
-     * Usuario y contraseña: el email.
-     * Rol: CLIENTE por defecto.
-     * 
-     * @param externalId ID del usuario en Auth0 (sub claim)
-     * @param email Email del usuario
-     * @param provider Proveedor (google, facebook, etc.)
-     * @param emailVerified Si el email está verificado
-     * @return Usuario creado con Cliente básico asociado
-     */
-    @Transactional
-    public Usuario crearUsuarioBasicoAuth0(String externalId, String email, String provider, Boolean emailVerified) 
-            throws ErrorServiceException {
-        log.info("Creando usuario básico Auth0 - externalId: {}, email: {}", externalId, email);
-        
-        try {
-            // 1. Validar que no exista el externalId
-            if (usuarioRepository.findByExternalIdAndEliminadoIsFalse(externalId).isPresent()) {
-                throw new ErrorServiceException("Usuario ya existe con externalId: " + externalId);
-            }
-            
-            // 2. Validar que no exista el email
-            if (usuarioRepository.findByEmailAndEliminadoIsFalse(email).isPresent()) {
-                throw new ErrorServiceException("Email ya registrado: " + email);
-            }
-            
-            // 3. Crear Cliente básico (sin datos completos)
-            Cliente cliente = new Cliente();
-            cliente.setNombre(email.split("@")[0]); // Usar parte antes del @ como nombre temporal
-            cliente.setApellido("Pendiente"); // Temporal hasta que el usuario complete su perfil
-            cliente.setNumeroDocumento("AUTH0-" + System.currentTimeMillis()); // Documento temporal único
-            cliente.setTipoDocumento(TipoDocumento.OTRO);
-            cliente.setFechaNacimiento(java.time.LocalDate.of(2000, 1, 1)); // Fecha temporal por defecto
-            cliente.setRecibirPromociones(false);
-            cliente.setEliminado(false);
-            
-            cliente = clienteRepository.save(cliente);
-            log.info("Cliente básico creado con ID: {}", cliente.getId());
-            
-            // 4. Crear Usuario con Auth0
-            Usuario usuario = new Usuario();
-            usuario.setNombreUsuario(email); // Usuario = email
-            usuario.setClave(passwordEncoder.encode(email)); // Contraseña = email encriptada (puede usarse en login normal)
-            usuario.setRol(Rol.CLIENTE); // Rol por defecto
-            usuario.setPersona(cliente);
-            usuario.setEmail(email);
-            usuario.setEmailVerified(emailVerified);
-            usuario.setExternalId(externalId);
-            usuario.setIsExternal(true);
-            usuario.setProvider(provider);
-            usuario.setEliminado(false);
-            
-            usuario = usuarioRepository.save(usuario);
-            log.info("Usuario Auth0 básico creado con ID: {}", usuario.getId());
-            
-            // 5. Asociar usuario al cliente
-            cliente.setUsuario(usuario);
-            clienteRepository.save(cliente);
-            
-            log.info("Usuario básico Auth0 completado: {}", email);
-            return usuario;
-            
-        } catch (ErrorServiceException e) {
-            log.error("Error creando usuario básico Auth0: {}", e.getMessage());
-            throw e;
-        } catch (Exception e) {
-            log.error("Error inesperado creando usuario básico Auth0", e);
-            throw new ErrorServiceException("Error al crear usuario: " + e.getMessage());
-        }
     }
     
     /**

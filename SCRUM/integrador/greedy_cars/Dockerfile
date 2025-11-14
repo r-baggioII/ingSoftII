@@ -1,18 +1,17 @@
 # Dockerfile para greedy_cars
-# Imagen base: Eclipse Temurin 17 JRE (Alpine para menor tamaño)
-FROM eclipse-temurin:17-jre-alpine
+FROM openjdk:21-slim
 
-# Ruta del artefacto compilado (ARG para flexibilidad)
-ARG JAR_FILE=target/greedy_cars.war
+# Argumento para especificar el archivo WAR
+ARG WAR_FILE=target/greedy_cars.war
 
-# Directorio de trabajo dentro del contenedor
+# Directorio de trabajo
 WORKDIR /app
 
-# Copia el .jar/.war compilado desde la ruta indicada por ARG
-COPY ${JAR_FILE} app.war
+# Copiar el archivo WAR
+COPY ${WAR_FILE} app.war
 
-# Puerto expuesto por la aplicación Spring Boot
+# Exponer el puerto
 EXPOSE 9000
 
 # Comando de arranque
-ENTRYPOINT ["java","-jar","/app/app.war"]
+ENTRYPOINT ["java", "-jar", "/app/app.war"]

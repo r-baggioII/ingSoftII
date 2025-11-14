@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script para detener Greedy Cars - Backend, Frontend y Base de Datos (Docker)
+# Script para detener Greedy Cars - Backend y Frontend
 # Uso: ./stop-greedy-cars.sh
 
 echo "================================================"
@@ -14,54 +14,81 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-echo -e "${GREEN}Deteniendo contenedores Docker...${NC}"
-echo ""
+# Función para verificar si un puerto está en uso
+check_port() {
+    lsof -i :$1 > /dev/null 2>&1
+    return $?
+}
 
-# Detener Backend
-echo -e "${YELLOW}Deteniendo Backend (greedy-cars-backend)...${NC}"
-if docker ps -a --format '{{.Names}}' | grep -q "^greedy-cars-backend$"; then
-    docker stop greedy-cars-backend 2>/dev/null
-    docker rm greedy-cars-backend 2>/dev/null
-    echo -e "${GREEN}  ✓ Backend detenido y eliminado${NC}"
-else
-    echo -e "${GREEN}  ✓ Backend no está corriendo${NC}"
-fi
-
-echo ""
-
-# Detener Frontend
-echo -e "${YELLOW}Deteniendo Frontend (greedy-cars-frontend)...${NC}"
-if docker ps -a --format '{{.Names}}' | grep -q "^greedy-cars-frontend$"; then
-    docker stop greedy-cars-frontend 2>/dev/null
-    docker rm greedy-cars-frontend 2>/dev/null
-    echo -e "${GREEN}  ✓ Frontend detenido y eliminado${NC}"
-else
-    echo -e "${GREEN}  ✓ Frontend no está corriendo${NC}"
-fi
-
-echo ""
-
-# Preguntar si desea detener la base de datos
-echo -e "${YELLOW}¿Desea detener también la base de datos? (s/n):${NC}"
-read -p "> " respuesta
-
-if [[ "$respuesta" == "s" || "$respuesta" == "S" ]]; then
-    echo -e "${YELLOW}Deteniendo Base de Datos (greedy_cars_db)...${NC}"
-    if docker ps -a --format '{{.Names}}' | grep -q "^greedy_cars_db$"; then
-        docker stop greedy_cars_db 2>/dev/null
-        echo -e "${GREEN}  ✓ Base de datos detenida (datos preservados en volumen)${NC}"
-        echo -e "${YELLOW}  Para eliminar también los datos: docker rm greedy_cars_db && docker volume rm greedy_cars_db_data${NC}"
+# Función para detener procesos en un puerto
+kill_port() {
+    echo -e "${YELLOW}Deteniendo proceso en puerto $1...${NC}"
+    fuser -k $1/tcp 2>/dev/null
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}  ✓ Proceso en puerto $1 detenido${NC}"
     else
-        echo -e "${GREEN}  ✓ Base de datos no está corriendo${NC}"
+        echo -e "${YELLOW}  ⚠ No se encontró proceso en puerto $1${NC}"
     fi
+    sleep 1
+}
+
+echo -e "${GREEN}Verificando servicios en ejecución...${NC}"
+echo ""
+
+# Verificar y detener Backend (puerto 18081)
+if check_port 18081; then
+    echo -e "${YELLOW}Backend encontrado en puerto 18081${NC}"
+    kill_port 18081
 else
-    echo -e "${GREEN}  ✓ Base de datos sigue corriendo${NC}"
+    echo -e "${GREEN}Backend no está corriendo en puerto 18081${NC}"
 fi
 
 echo ""
-echo -e "${GREEN}================================================${NC}"
-echo -e "${GREEN}   ✓ SISTEMA DETENIDO CORRECTAMENTE${NC}"
-echo -e "${GREEN}================================================${NC}"
+
+# Verificar y detener Frontend (puerto 18082)
+if check_port 18082; then
+    echo -e "${YELLOW}Frontend encontrado en puerto 18082${NC}"
+    kill_port 18082
+else
+    echo -e "${GREEN}Frontend no está corriendo en puerto 18082${NC}"
+fi
+
 echo ""
-echo -e "Para ver todos los contenedores: ${YELLOW}docker ps -a${NC}"
+
+# Verificar que los puertos estén liberados
+sleep 2
+
+BACKEND_STOPPED=true
+FRONTEND_STOPPED=true
+
+if check_port 18081; then
+    echo -e "${RED}⚠ Advertencia: Todavía hay un proceso en puerto 18081${NC}"
+    BACKEND_STOPPED=false
+fi
+
+if check_port 18082; then
+    echo -e "${RED}⚠ Advertencia: Todavía hay un proceso en puerto 18082${NC}"
+    FRONTEND_STOPPED=false
+fi
+
 echo ""
+
+if $BACKEND_STOPPED && $FRONTEND_STOPPED; then
+    echo -e "${GREEN}================================================${NC}"
+    echo -e "${GREEN}   ✓ SISTEMA DETENIDO CORRECTAMENTE${NC}"
+    echo -e "${GREEN}================================================${NC}"
+    exit 0
+else
+    echo -e "${YELLOW}================================================${NC}"
+    echo -e "${YELLOW}   ⚠ ALGUNOS SERVICIOS NO SE DETUVIERON${NC}"
+    echo -e "${YELLOW}================================================${NC}"
+    echo ""
+    echo -e "${YELLOW}Puede intentar detenerlos manualmente:${NC}"
+    if ! $BACKEND_STOPPED; then
+        echo -e "  Backend:  sudo fuser -k 18081/tcp"
+    fi
+    if ! $FRONTEND_STOPPED; then
+        echo -e "  Frontend: sudo fuser -k 18082/tcp"
+    fi
+    exit 1
+fi

@@ -61,8 +61,60 @@
         </p>
       </div>
 
+      <!-- Search Form -->
       <div class="search-block p-3 p-md-4 p-lg-5" style="background-color: rgba(0, 0, 0, 0.7); border-radius: 8px; max-width: 1200px; margin: 0 auto;">
-        <div class="row text-white text-center" th:if="${catalogStats != null}">
+        <form class="row g-3">
+          <div class="col-12 col-md-6 col-lg-3">
+            <label for="vehicle" class="label-style text-capitalize form-label text-white mb-2">Tipo de vehículo</label>
+            <div class="input-group position-relative">
+              <select class="form-select form-control p-3" id="vehicle" aria-label="Default select example"
+                style="background-image: none; padding-left: 45px !important;">
+                <option value="" selected>Seleccionar Tipo de Vehículo</option>
+                <option th:each="vehicle : ${vehicleCards}"
+                  th:value="${vehicle.id}"
+                  th:text="${vehicle.displayName}">
+                  Vehículo
+                </option>
+              </select>
+              <span class="position-absolute top-50 start-0 translate-middle-y ps-3" style="z-index: 10; pointer-events: none;">
+                <iconify-icon class="search-icons text-secondary" icon="solar:bus-outline"></iconify-icon>
+              </span>
+            </div>
+          </div>
+          <div class="col-12 col-md-6 col-lg-3">
+            <label for="location" class="label-style text-capitalize form-label text-white mb-2">Ubicación de recogida</label>
+            <div class="input-group position-relative">
+              <input type="text" class="form-control p-3" placeholder="Aeropuerto o cualquier lugar" id="location" style="padding-left: 45px !important;">
+              <span class="position-absolute top-50 start-0 translate-middle-y ps-3" style="z-index: 10; pointer-events: none;">
+                <iconify-icon class="search-icons text-secondary" icon="solar:map-arrow-square-outline"></iconify-icon>
+              </span>
+            </div>
+          </div>
+          <div class="col-12 col-md-6 col-lg-3">
+            <label for="pick-up-date" class="label-style text-capitalize form-label text-white mb-2">Fecha de recogida</label>
+            <div class="position-relative">
+              <input type="text" class="form-control p-3" id="pick-up-date" placeholder="dd/mm/yyyy" style="padding-left: 45px !important;" readonly />
+              <span class="position-absolute top-50 start-0 translate-middle-y ps-3" style="z-index: 10; pointer-events: none;">
+                <iconify-icon class="search-icons text-secondary" icon="solar:calendar-broken"></iconify-icon>
+              </span>
+            </div>
+          </div>
+          <div class="col-12 col-md-6 col-lg-3">
+            <label for="return-date" class="label-style text-capitalize form-label text-white mb-2">Fecha de devolución</label>
+            <div class="position-relative">
+              <input type="text" class="form-control p-3" id="return-date" placeholder="dd/mm/yyyy" style="padding-left: 45px !important;" readonly />
+              <span class="position-absolute top-50 start-0 translate-middle-y ps-3" style="z-index: 10; pointer-events: none;">
+                <iconify-icon class="search-icons text-secondary" icon="solar:calendar-broken"></iconify-icon>
+              </span>
+            </div>
+          </div>
+        </form>
+
+        <div class="d-grid gap-2 mt-4">
+          <button class="btn btn-primary p-3 fw-bold fs-5" type="button">Encuentra tu auto</button>
+        </div>
+
+        <div class="row text-white text-center mt-4" th:if="${catalogStats != null}">
           <div class="col-12 col-md-4 mb-3 mb-md-0">
             <p class="display-5 fw-bold mb-1" th:text="${catalogStats.totalVehicles}">0</p>
             <p class="text-uppercase mb-0 small">Modelos publicados</p>

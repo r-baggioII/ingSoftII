@@ -51,22 +51,6 @@ public class SecurityConfig {
     @Value("${auth0.audience}")
     private String audience;
 
-    /**
-     * IMPORTANTE PARA IMPLEMENTAR AUTH0:
-     *
-     * - Las reglas de autorización definidas en authorizeHttpRequests(...) NO dependen
-     *   del proveedor de autenticación.
-     * - Mientras el Authentication tenga roles Spring (ROLE_JEFE, ROLE_ADMIN, ROLE_CLIENTE),
-     *   estas reglas siguen funcionando tanto para:
-     *      ✔ Nuestro JWT propio (JwtAuthenticationFilter)
-     *      ✔ Tokens de Auth0 via oauth2ResourceServer().jwt()
-     *
-     * - Si en el futuro se elimina el JWT propio, SOLO se debe adaptar cómo se mapean
-     *   los claims de Auth0 → GrantedAuthority, pero NO tocar estas reglas de acceso.
-     *
-     * - NO agregar .requestMatchers("/api/**").permitAll() al final porque rompe
-     *   toda la seguridad actual.
-     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -74,38 +58,27 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .httpBasic(Customizer.withDefaults())
             .authorizeHttpRequests(authorize -> authorize
-                // Registro público
+                // Endpoint público de registro de clientes
                 .requestMatchers("/api/registro/**").permitAll()
                 
-                // Auth0 endpoints - permitAll porque validaremos el JWT manualmente en el controlador
-                .requestMatchers("/api/auth0/**").permitAll()
-
-                // Mercado Pago callbacks y creación de preferencias
+                // Endpoints de Auth0 (protegidos con OAuth2 JWT)
+                .requestMatchers("/api/auth0/**").authenticated()
                 .requestMatchers(
                     "/api/pagos/mp/preferencia",
                     "/api/pagos/mp/success",
                     "/api/pagos/mp/failure",
                     "/api/pagos/mp/pending"
                 ).permitAll()
-
-                // Promociones: SOLO JEFE
-                .requestMatchers("/api/promociones/**").hasAnyRole("JEFE","ADMINISTRATIVO")
-
-                // Facturación & Alquileres: deben estar autenticados
-                .requestMatchers("/api/alquileres/**").authenticated()
-                .requestMatchers("/api/facturas/**").authenticated()
-
-                // Config correo (solo lo usa UI interna)
-                .requestMatchers("/api/correos/**").authenticated()
-                .requestMatchers("/api/configuracion-correo/**").authenticated()
-
-                // Endpoint para que el cliente consulte sus promociones vigentes
-                .requestMatchers("/api/promociones/vigentes/cliente/**").authenticated()
-
+                .requestMatchers(
+                    "/api/configuracion-correo/**",
+                    "/api/correos/**"
+                ).permitAll()
+                
                 // Recursos estáticos públicos
-                .requestMatchers("/css/**","/js/**","/images/**","/img/**","/webjars/**").permitAll()
-
-                // NO poner un .denyAll() global porque rompe módulos existentes.
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", "/webjars/**").permitAll()
+                
+                // Todo lo demás es público
+                .requestMatchers("/api/**").permitAll()
                 .anyRequest().permitAll()
             )
             .sessionManagement(session -> session

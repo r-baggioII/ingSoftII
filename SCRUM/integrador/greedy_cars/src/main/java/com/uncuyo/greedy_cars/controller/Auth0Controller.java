@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -113,21 +114,30 @@ public class Auth0Controller {
      * Si el usuario existe, devuelve sus datos.
      * Si no existe, lo crea automáticamente con rol CLIENTE.
      * 
+     * @param requestBody Body con email, externalId, emailVerified
      * @param authentication Spring Security Authentication con el JWT
      * @return PostLoginResponse con datos del usuario y JWT interno
      */
     @PostMapping("/login-or-create")
-    public ResponseEntity<PostLoginResponse> loginOrCreate(Authentication authentication) {
+    public ResponseEntity<PostLoginResponse> loginOrCreate(
+            @RequestBody Map<String, Object> requestBody,
+            Authentication authentication) {
+        
         if (authentication == null || !(authentication.getPrincipal() instanceof Jwt)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         
         Jwt jwt = (Jwt) authentication.getPrincipal();
         
-        // Extraer claims del token Auth0
-        String externalId = jwt.getSubject(); // "google-oauth2|123456789"
-        String email = jwt.getClaim("email");
-        Boolean emailVerified = jwt.getClaim("email_verified");
+        // Extraer datos del body (porque el JWT de Auth0 no incluye email en claims)
+        String externalId = (String) requestBody.get("externalId");
+        String email = (String) requestBody.get("email");
+        Boolean emailVerified = (Boolean) requestBody.get("emailVerified");
+        
+        if (externalId == null || email == null) {
+            externalId = jwt.getSubject(); // Fallback al JWT
+        }
+        
         String provider = extractProvider(externalId);
         
         // Buscar usuario por externalId
@@ -148,30 +158,39 @@ public class Auth0Controller {
                     emailVerified != null ? emailVerified : false
                 );
             } catch (Exception e) {
+                e.printStackTrace(); // Log completo del error
+                System.err.println("ERROR creando usuario Auth0: " + e.getClass().getName() + " - " + e.getMessage());
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("Error al crear usuario: " + e.getMessage()));
             }
         }
         
         // Generar JWT interno del sistema
-        String internalJwt = usuarioService.generateInternalJwt(usuario);
-        
-        PostLoginResponse response = new PostLoginResponse();
-        response.setStatus("SUCCESS");
-        response.setEmail(usuario.getEmail());
-        response.setExternalId(usuario.getExternalId());
-        response.setToken(internalJwt); // JWT interno, no el de Auth0
-        response.setUsuarioId(usuario.getId());
-        response.setRol(usuario.getRol().name());
-        
-        if (usuario.getPersona() instanceof Cliente) {
-            Cliente cliente = (Cliente) usuario.getPersona();
-            response.setNombre(cliente.getNombre() != null ? cliente.getNombre() : email);
-            response.setApellido(cliente.getApellido());
-            response.setClienteId(cliente.getId());
+        try {
+            String internalJwt = usuarioService.generateInternalJwt(usuario);
+            
+            PostLoginResponse response = new PostLoginResponse();
+            response.setStatus("SUCCESS");
+            response.setEmail(usuario.getEmail());
+            response.setExternalId(usuario.getExternalId());
+            response.setToken(internalJwt); // JWT interno, no el de Auth0
+            response.setUsuarioId(usuario.getId());
+            response.setRol(usuario.getRol().name());
+            
+            if (usuario.getPersona() instanceof Cliente) {
+                Cliente cliente = (Cliente) usuario.getPersona();
+                response.setNombre(cliente.getNombre() != null ? cliente.getNombre() : email);
+                response.setApellido(cliente.getApellido());
+                response.setClienteId(cliente.getId());
+            }
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("ERROR generando JWT o respuesta: " + e.getClass().getName() + " - " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(createErrorResponse("Error al generar JWT: " + e.getMessage()));
         }
-        
-        return ResponseEntity.ok(response);
     }
     
     /**

@@ -75,9 +75,13 @@ public class Auth0CallbackController {
             // Por simplicidad, vamos a llamar al endpoint /userinfo de Auth0
             Map<String, Object> userInfo = getUserInfo(accessToken);
             
+            System.out.println("DEBUG - UserInfo completo: " + userInfo);
+            
             String sub = (String) userInfo.get("sub"); // externalId
             String email = (String) userInfo.get("email");
             Boolean emailVerified = (Boolean) userInfo.get("email_verified");
+            
+            System.out.println("DEBUG - sub: " + sub + ", email: " + email + ", emailVerified: " + emailVerified);
             
             // 3. Llamar al backend para crear/obtener usuario y recibir JWT interno
             String backendUrl = "http://161.153.217.110:18082/greedy_cars/api/auth0/login-or-create";
@@ -86,7 +90,13 @@ public class Auth0CallbackController {
             headers.setBearerAuth(accessToken); // Token Auth0 para validar
             headers.setContentType(MediaType.APPLICATION_JSON);
             
-            HttpEntity<Void> entity = new HttpEntity<>(headers);
+            // Crear body con el email porque el JWT de Auth0 no lo incluye en los claims
+            Map<String, Object> requestBody = new java.util.HashMap<>();
+            requestBody.put("email", email);
+            requestBody.put("externalId", sub);
+            requestBody.put("emailVerified", emailVerified);
+            
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
             
             ResponseEntity<Map> backendResponse = restTemplate.exchange(
                 backendUrl,

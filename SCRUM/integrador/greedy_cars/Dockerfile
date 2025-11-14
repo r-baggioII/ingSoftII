@@ -1,17 +1,18 @@
 # Dockerfile para greedy_cars
-FROM openjdk:21-slim
+# Imagen base: OpenJDK 17 slim
+FROM openjdk:17-slim
 
-# Argumento para especificar el archivo WAR
-ARG WAR_FILE=target/greedy_cars.war
+# Ruta del artefacto compilado (ARG para flexibilidad)
+ARG JAR_FILE=target/greedy_cars.war
 
-# Directorio de trabajo
+# Directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Copiar el archivo WAR
-COPY ${WAR_FILE} app.war
+# Copia el .jar/.war compilado desde la ruta indicada por ARG
+COPY ${JAR_FILE} app.war
 
-# Exponer el puerto
+# Puerto expuesto por la aplicación Spring Boot
 EXPOSE 9000
 
 # Comando de arranque
-ENTRYPOINT ["java", "-jar", "/app/app.war"]
+ENTRYPOINT ["java","-jar","/app/app.war"]

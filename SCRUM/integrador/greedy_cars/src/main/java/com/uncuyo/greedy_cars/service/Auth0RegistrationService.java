@@ -10,6 +10,7 @@ import com.uncuyo.greedy_cars.shared.template.exception.ErrorServiceException;
 import com.uncuyo.greedy_cars.shared.template.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,7 @@ public class Auth0RegistrationService {
     private final DireccionRepository direccionRepository;
     private final ContactoRepository contactoRepository;
     private final ImagenRepository imagenRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public Auth0RegistrationService(
@@ -48,7 +50,8 @@ public class Auth0RegistrationService {
             LocalidadRepository localidadRepository,
             DireccionRepository direccionRepository,
             ContactoRepository contactoRepository,
-            ImagenRepository imagenRepository) {
+            ImagenRepository imagenRepository,
+            PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.clienteRepository = clienteRepository;
         this.nacionalidadRepository = nacionalidadRepository;
@@ -59,6 +62,7 @@ public class Auth0RegistrationService {
         this.direccionRepository = direccionRepository;
         this.contactoRepository = contactoRepository;
         this.imagenRepository = imagenRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -379,10 +383,10 @@ public class Auth0RegistrationService {
             // 3. Crear Cliente básico (sin datos completos)
             Cliente cliente = new Cliente();
             cliente.setNombre(email.split("@")[0]); // Usar parte antes del @ como nombre temporal
-            cliente.setApellido(""); // Vacío por ahora
+            cliente.setApellido("Pendiente"); // Temporal hasta que el usuario complete su perfil
             cliente.setNumeroDocumento("AUTH0-" + System.currentTimeMillis()); // Documento temporal único
             cliente.setTipoDocumento(TipoDocumento.OTRO);
-            cliente.setFechaNacimiento(null); // Sin fecha de nacimiento
+            cliente.setFechaNacimiento(java.time.LocalDate.of(2000, 1, 1)); // Fecha temporal por defecto
             cliente.setRecibirPromociones(false);
             cliente.setEliminado(false);
             
@@ -392,7 +396,7 @@ public class Auth0RegistrationService {
             // 4. Crear Usuario con Auth0
             Usuario usuario = new Usuario();
             usuario.setNombreUsuario(email); // Usuario = email
-            usuario.setClave(email); // Contraseña = email (nunca se usará, auth es vía Auth0)
+            usuario.setClave(passwordEncoder.encode(email)); // Contraseña = email encriptada (puede usarse en login normal)
             usuario.setRol(Rol.CLIENTE); // Rol por defecto
             usuario.setPersona(cliente);
             usuario.setEmail(email);

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script para detener Greedy Cars - Backend y Frontend (Docker)
+# Script para detener Greedy Cars - Backend, Frontend y Base de Datos (Docker)
 # Uso: ./stop-greedy-cars.sh
 
 echo "================================================"
@@ -37,6 +37,25 @@ if docker ps -a --format '{{.Names}}' | grep -q "^greedy-cars-frontend$"; then
     echo -e "${GREEN}  ✓ Frontend detenido y eliminado${NC}"
 else
     echo -e "${GREEN}  ✓ Frontend no está corriendo${NC}"
+fi
+
+echo ""
+
+# Preguntar si desea detener la base de datos
+echo -e "${YELLOW}¿Desea detener también la base de datos? (s/n):${NC}"
+read -p "> " respuesta
+
+if [[ "$respuesta" == "s" || "$respuesta" == "S" ]]; then
+    echo -e "${YELLOW}Deteniendo Base de Datos (greedy_cars_db)...${NC}"
+    if docker ps -a --format '{{.Names}}' | grep -q "^greedy_cars_db$"; then
+        docker stop greedy_cars_db 2>/dev/null
+        echo -e "${GREEN}  ✓ Base de datos detenida (datos preservados en volumen)${NC}"
+        echo -e "${YELLOW}  Para eliminar también los datos: docker rm greedy_cars_db && docker volume rm greedy_cars_db_data${NC}"
+    else
+        echo -e "${GREEN}  ✓ Base de datos no está corriendo${NC}"
+    fi
+else
+    echo -e "${GREEN}  ✓ Base de datos sigue corriendo${NC}"
 fi
 
 echo ""

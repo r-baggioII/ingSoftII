@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.util.Map;
 
@@ -47,6 +49,7 @@ public class Auth0CallbackController {
             @RequestParam(required = false) String error,
             @RequestParam(required = false) String error_description,
             HttpSession session,
+            HttpServletResponse response,
             Model model) {
         
         // Si hay un error de Auth0
@@ -76,15 +79,43 @@ public class Auth0CallbackController {
             String email = (String) userInfo.get("email");
             Boolean emailVerified = (Boolean) userInfo.get("email_verified");
             
-            // 3. Redirigir directamente al dashboard (flujo simplificado, sin verificar backend)
-            // Guardar información en la sesión HTTP
-            session.setAttribute("auth0_access_token", accessToken);
-            session.setAttribute("auth0_user_email", email);
-            session.setAttribute("auth0_user_sub", sub);
-            session.setAttribute("auth0_email_verified", emailVerified);
+            // 3. Llamar al backend para crear/obtener usuario y recibir JWT interno
+            String backendUrl = "http://161.153.217.110:18082/greedy_cars/api/auth0/login-or-create";
             
-            System.out.println("Usuario autenticado con Auth0: " + email);
-            return "redirect:/dashboard";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken); // Token Auth0 para validar
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+            
+            ResponseEntity<Map> backendResponse = restTemplate.exchange(
+                backendUrl,
+                HttpMethod.POST,
+                entity,
+                Map.class
+            );
+            
+            Map<String, Object> result = backendResponse.getBody();
+            
+            if (result != null && "SUCCESS".equals(result.get("status"))) {
+                String internalJwt = (String) result.get("token"); // JWT interno del sistema
+                String rol = (String) result.get("rol");
+                String usuarioId = (String) result.get("usuarioId");
+                String clienteId = (String) result.get("clienteId");
+                
+                // Guardar el JWT interno en una cookie (para AuthCheckInterceptor)
+                jakarta.servlet.http.Cookie jwtCookie = new jakarta.servlet.http.Cookie("jwt", internalJwt);
+                jwtCookie.setHttpOnly(true);
+                jwtCookie.setPath("/");
+                jwtCookie.setMaxAge(24 * 60 * 60); // 24 horas
+                ((HttpServletResponse) response).addCookie(jwtCookie);
+                
+                System.out.println("Usuario autenticado - Email: " + email + ", Rol: " + rol);
+                return "redirect:/dashboard";
+            } else {
+                model.addAttribute("error", "Error al autenticar con el backend");
+                return "redirect:/login?error=backend_auth_failed";
+            }
             
         } catch (Exception e) {
             e.printStackTrace();

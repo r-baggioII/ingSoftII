@@ -15,8 +15,9 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Directorios
-BACKEND_DIR="/srv/greedy/ingSoftII/SCRUM/integrador/greedy_cars"
-FRONTEND_DIR="/srv/greedy/ingSoftII/SCRUM/integrador/gredy_cars_client/gredy_cars_client"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BACKEND_DIR="$SCRIPT_DIR/greedy_cars"
+FRONTEND_DIR="$SCRIPT_DIR/gredy_cars_client/gredy_cars_client"
 
 # Función para verificar si un puerto está en uso
 check_port() {
